@@ -20,3 +20,8 @@ func ConvertProxyToString(proxy *sonic.Proxy) string {
 func GetRandomUserAgent() string {
 	return userAgents[rand.Intn(len(userAgents)-1)]
 }
+
+func ErrString(err error) *string{
+	e := err.Error()
+	return &e
+}
