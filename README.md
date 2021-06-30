@@ -5,4 +5,9 @@ Sonic is the core of the modules, it contains many methods that provide wrappers
 # How to initialise a new module
 - Create a new project with the module name
 - Create a `main.go` file
-- Paste in ``
+- Paste in 
+```
+  go mod init main && go get -u github.com/ProjectAthenaa/sonic-core && go run github.com/ProjectAthenaa/sonic-core init
+  ```
+- Excessive files will be deleted automatically
+
