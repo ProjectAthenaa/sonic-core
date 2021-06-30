@@ -26,13 +26,15 @@ var initCmd = &cli.Command{
 		log.Println("Finished generating files!")
 		log.Println("Initialising go module")
 
-
 		modInitCmd := exec.Command("go", "mod", "init", "main")
 		modInitCmd.Dir = "./src"
 		err := modInitCmd.Run()
 		if err != nil {
 			return err
 		}
+
+		os.Remove("./go.mod")
+		os.Remove("./go.main")
 
 		return nil
 	},
