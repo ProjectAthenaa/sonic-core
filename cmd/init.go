@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/otiai10/copy"
 	"github.com/urfave/cli"
+	"go/build"
 	"log"
+	"os"
 )
 
 var initCmd = &cli.Command{
@@ -11,7 +14,11 @@ var initCmd = &cli.Command{
 	Usage: "Generate a new module setup",
 	Action: func(ctx *cli.Context) error {
 		log.Println("Generating files")
-		if err := copy.Copy("github.com/ProjectAthenaa/template", ""); err != nil {
+		gopath := os.Getenv("GOPATH")
+		if gopath == "" {
+			gopath = build.Default.GOPATH
+		}
+		if err := copy.Copy(fmt.Sprintf("%s/src/github.com/ProjectAthenaa/sonic/template", gopath), ""); err != nil {
 			return err
 		}
 		log.Println("Finished generating files!")
