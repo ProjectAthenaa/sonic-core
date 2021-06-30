@@ -13,10 +13,6 @@ func Execute() {
 
 	app.Action = initCmd.Action
 
-	app.Commands = []cli.Command{
-		*initCmd,
-	}
-
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprint(os.Stderr, err.Error())
 		os.Exit(1)
