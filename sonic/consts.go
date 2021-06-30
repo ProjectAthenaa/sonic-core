@@ -2,7 +2,7 @@ package sonic
 
 import (
 	"errors"
-	module "github.com/ProjectAthenaa/sonic/protos"
+	module "github.com/ProjectAthenaa/sonic-core/protos"
 	"regexp"
 )
 
