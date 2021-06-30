@@ -1,5 +1,1 @@
 package antibots
-
-func main() {
-
-}
