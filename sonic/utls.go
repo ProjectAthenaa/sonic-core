@@ -3,6 +3,7 @@ package sonic
 import (
 	"fmt"
 	sonic "github.com/ProjectAthenaa/sonic-core/protos"
+	"math/rand"
 )
 
 func ConvertProxyToString(proxy *sonic.Proxy) string {
@@ -14,4 +15,8 @@ func ConvertProxyToString(proxy *sonic.Proxy) string {
 		pr = fmt.Sprintf("http://%s:%s", proxy.IP, proxy.Password)
 	}
 	return pr
+}
+
+func GetRandomUserAgent() string {
+	return userAgents[rand.Intn(len(userAgents)-1)]
 }
