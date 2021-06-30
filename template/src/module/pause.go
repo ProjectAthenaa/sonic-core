@@ -1,5 +1,5 @@
 package module
 
-func main() {
-	
+func (t Task) Pause() (paused bool, err error) {
+	panic("implement me")
 }

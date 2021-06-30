@@ -9,4 +9,3 @@ type Server struct {
 func (s Server) Task(server module.Module_TaskServer) error {
 	panic("implement me")
 }
-
