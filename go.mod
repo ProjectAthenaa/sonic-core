@@ -1,4 +1,4 @@
-module github.com/ProjectAthenaa/sonic
+module github.com/ProjectAthenaa/sonic-core
 
 go 1.16
 
