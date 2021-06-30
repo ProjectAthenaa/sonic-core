@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	sonic "github.com/ProjectAthenaa/sonic/protos"
+	sonic "github.com/ProjectAthenaa/sonic-core/protos"
 	"google.golang.org/grpc"
 	"log"
 	"main/module"
