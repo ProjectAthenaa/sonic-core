@@ -1,7 +1,7 @@
 package module
 
 import (
-	"github.com/ProjectAthenaa/sonic"
+	"github.com/ProjectAthenaa/sonic/sonic"
 )
 
 type Task struct {
