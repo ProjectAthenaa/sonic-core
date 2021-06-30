@@ -67,5 +67,5 @@ func getSonicCoreDir(gopath string) string {
 
 	sort.Strings(versions)
 	latestVersion := versions[0]
-	return fmt.Sprintf("%s\\pkg\\mod\\github.com\\!project!athenaa\\sonic-core@%s", gopath, latestVersion)
+	return fmt.Sprintf("%s\\pkg\\mod\\github.com\\!project!athenaa\\sonic-core@%s\\template", gopath, latestVersion)
 }
