@@ -10,6 +10,8 @@ import (
 	"os"
 )
 
+//MAKE SURE YOU REPLACE THE PORTS AND THE NAMES CORRECTLY IN THE DEPLOYMENT.YML FILE
+
 var port = "5000"
 
 func main() {

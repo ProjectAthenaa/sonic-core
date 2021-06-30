@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: modules
+  name: { moduleName }-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: { port }
+      name: grpc
+  selector:
+    app: { moduleName }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: modules
+  name: { moduleName }
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: { moduleName }
+  template:
+    metadata:
+      namespace: modules
+      labels:
+        app: { moduleName }
+    spec:
+      nodeSelector:
+        doks.digitalocean.com/node-pool: modules
+      containers:
+        - name: integration
+          image: registry.digitalocean.com/athenabot/{MODULE_NAME}-service:latest
+          ports:
+            - containerPort: { port }
+          env:
+            - name: REDIS_URL
+              value: rediss://default:n6luoc78ac44pgs0@test-redis-do-user-9223163-0.b.db.ondigitalocean.com:25061
+            - name: PG_URL
+              value: postgresql://doadmin:olwikzizq24jj9ni@test-pg-do-user-9223163-0.b.db.ondigitalocean.com:25060/defaultdb

@@ -34,12 +34,6 @@ var initCmd = &cli.Command{
 			return err
 		}
 
-		modTidyCmd := exec.Command("go", "mod", "tidy")
-		modTidyCmd.Dir = "./src"
-		err = modTidyCmd.Run()
-		if err != nil {
-			return err
-		}
 		return nil
 	},
 }
