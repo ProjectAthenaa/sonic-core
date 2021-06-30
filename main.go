@@ -1,4 +1,4 @@
-package sonic
+package main
 
 import "github.com/ProjectAthenaa/sonic/cmd"
 
