@@ -1,0 +1,86 @@
+syntax="proto3";
+
+option go_package="sonic/module";
+
+service Module{
+  rpc Task(stream Controller) returns (stream Status);
+}
+
+enum COMMAND{
+  STOP = 0;
+  START = 1;
+  PAUSE = 2;
+  CONTINUE = 3;
+}
+
+enum STATUS{
+  STARTING = 0;
+  MONITORING = 1;
+  PRODUCT_FOUND = 2;
+  ADDING_TO_CART = 3;
+  SOLVING_CAPTCHA = 4;
+  CHECKING_OUT = 5;
+  CHECKED_OUT = 6;
+  ERROR = 7;
+  ACTION_NEEDED = 8;
+  GENERATING_COOKIES = 9;
+  TASK_NOT_FOUND = 10;
+  WAITING_FOR_CHECKOUT = 11;
+  CHECKOUT_ERROR = 12;
+  CHECKOUT_FAILED = 13;
+  CHECKOUT_DUPLICATE = 14;
+  CHECKOUT_OOS = 15;
+  CHECKOUT_DECLINE = 16;
+  CHECKOUT_WAITING_FOR_3DS = 17;
+  CHECKOUT_3DS_ERROR = 18;
+}
+
+message Status{
+  STATUS Status = 1;
+  optional string Error = 2;
+  optional string Information = 3;
+}
+
+message Controller{
+  COMMAND Command = 1;
+  optional Data Data = 2;
+}
+
+message Data{
+  Profile Profile = 1;
+  Proxy Proxy = 2;
+  string MonitorChannel = 3;
+  TaskData TaskData = 4;
+}
+
+message TaskData{
+  optional string Color = 1;
+  optional string Size = 2;
+}
+
+message Profile{
+  string FullName = 1;
+  string Email = 2;
+  string PhoneNumber = 3;
+  string Address = 4;
+  optional string Address2 = 5;
+  string City = 6;
+  string PostCode = 7;
+  string Country = 8;
+  optional string State = 9;
+  Billing Billing = 10;
+}
+
+message Billing{
+  string Number = 1;
+  string ExpirationMonth = 2;
+  string ExpirationYear = 3;
+  string CVV = 4;
+}
+
+message Proxy{
+  optional string Username = 1;
+  optional string Password = 2;
+  string IP = 3;
+  string Port = 4;
+}
