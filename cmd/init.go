@@ -18,6 +18,7 @@ var initCmd = &cli.Command{
 		if gopath == "" {
 			gopath = build.Default.GOPATH
 		}
+		log.Println(fmt.Sprintf("%s/src/github.com/ProjectAthenaa/sonic/template", gopath))
 		if err := copy.Copy(fmt.Sprintf("%s/src/github.com/ProjectAthenaa/sonic/template", gopath), ""); err != nil {
 			return err
 		}
