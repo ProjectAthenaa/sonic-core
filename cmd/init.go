@@ -5,9 +5,14 @@ import (
 	"github.com/otiai10/copy"
 	"github.com/urfave/cli"
 	"go/build"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"strings"
 )
 
 var initCmd = &cli.Command{
@@ -20,7 +25,7 @@ var initCmd = &cli.Command{
 			gopath = build.Default.GOPATH
 		}
 
-		if err := copy.Copy(fmt.Sprintf("%s\\src\\github.com\\ProjectAthenaa\\sonic-core\\template", gopath), "./"); err != nil {
+		if err := copy.Copy(getSonicCoreDir(gopath), "./"); err != nil {
 			return err
 		}
 		log.Println("Finished generating files!")
@@ -33,9 +38,34 @@ var initCmd = &cli.Command{
 			return err
 		}
 
-		os.Remove("./go.mod")
-		os.Remove("./go.main")
+		_ = os.Remove("./go.mod")
+		_ = os.Remove("./go.main")
 
 		return nil
 	},
+}
+
+var matchFile = regexp.MustCompile(`sonic-core@(.*)\\(.*)`)
+
+func getSonicCoreDir(gopath string) string {
+	var files []string
+	filepath.Walk(fmt.Sprintf(`%s\pkg\mod\github.com\!project!athenaa`, gopath), func(path string, info fs.FileInfo, err error) error {
+		files = append(files, path)
+		return nil
+	})
+
+	var versions []string
+
+	for _, file := range files {
+		if strings.Contains(file, "sonic-core") {
+			matches := matchFile.FindStringSubmatch(file)
+			if len(matches) >= 1 {
+				versions = append(versions, strings.Split(matches[1], "\\")[0])
+			}
+		}
+	}
+
+	sort.Strings(versions)
+	latestVersion := versions[0]
+	return fmt.Sprintf("%s\\pkg\\mod\\github.com\\!project!athenaa\\sonic-core@%s", gopath, latestVersion)
 }
