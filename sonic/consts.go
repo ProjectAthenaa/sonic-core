@@ -42,7 +42,7 @@ func parseUserAgents() []string {
 
 	var uas map[string][]string
 
-	if err := json.Unmarshal([]byte(userAgentsString), &userAgents); err != nil {
+	if err := json.Unmarshal([]byte(userAgentsString), &uas); err != nil {
 		panic(err)
 	}
 
