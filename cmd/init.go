@@ -7,6 +7,7 @@ import (
 	"go/build"
 	"log"
 	"os"
+	"os/exec"
 )
 
 var initCmd = &cli.Command{
@@ -18,12 +19,30 @@ var initCmd = &cli.Command{
 		if gopath == "" {
 			gopath = build.Default.GOPATH
 		}
-		log.Println(fmt.Sprintf("%s/src/github.com/ProjectAthenaa/sonic/template", gopath))
 
 		if err := copy.Copy(fmt.Sprintf("%s\\src\\github.com\\ProjectAthenaa\\sonic\\template", gopath), "./"); err != nil {
 			return err
 		}
 		log.Println("Finished generating files!")
+		log.Println("Initialising go module")
+
+		cdCmd := exec.Command("cd", "./src")
+		err := cdCmd.Run()
+		if err != nil {
+			return err
+		}
+
+		modInitCmd := exec.Command("go", "mod init main")
+		err = modInitCmd.Run()
+		if err != nil {
+			return err
+		}
+
+		modTidyCmd := exec.Command("go", "mod tidy")
+		err = modTidyCmd.Run()
+		if err != nil {
+			return err
+		}
 		return nil
 	},
 }
