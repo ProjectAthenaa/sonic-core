@@ -39,7 +39,9 @@ var initCmd = &cli.Command{
 		}
 
 		_ = os.Remove("./go.mod")
-		_ = os.Remove("./go.main")
+		_ = os.Remove("./go.sum")
+		_ = os.Remove("./main.go")
+
 
 		return nil
 	},
