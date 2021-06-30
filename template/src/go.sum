@@ -3,6 +3,8 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/ProjectAthenaa/sonic v0.0.0-20210630113556-7164a4e880d3 h1:zcQD/QY/0y3ALmgecZUz8O84zBLcn98bF9W3VrK4+/Y=
 github.com/ProjectAthenaa/sonic v0.0.0-20210630113556-7164a4e880d3/go.mod h1:1Qa8rmZ/vWbnl0egcKXheI3XkedZHC2w/Esvx5/V92A=
+github.com/ProjectAthenaa/sonic-core v0.0.0-20210630113732-212692e36ed1 h1:nY37MFaU2zxftrsti5FSSuU40VhtGKg2h0XwPMAe10E=
+github.com/ProjectAthenaa/sonic-core v0.0.0-20210630113732-212692e36ed1/go.mod h1:qa9SntpMHB80ozvyIv9xOS5DGm6m60lp6Lzmw6Gm0ds=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cespare/xxhash/v2 v2.1.1 h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+qY=

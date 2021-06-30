@@ -6,6 +6,3 @@ type Server struct {
 	module.UnimplementedModuleServer
 }
 
-func (s Server) Task(server module.Module_TaskServer) error {
-	panic("implement me")
-}
