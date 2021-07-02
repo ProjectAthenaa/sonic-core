@@ -1,0 +1,72 @@
+syntax="proto3";
+
+package perimeterx;
+
+option go_package="main/perimeterx";
+
+service PerimeterX{
+  rpc PX2(PX2Request) returns (Payload);
+  rpc PX3(PXRequest) returns (Payload);
+}
+
+enum SITE{
+  WALMART = 0;
+  HIBBET = 1;
+  SSENSE = 2;
+  SNIPES = 3;
+  ONYGO = 4;
+  SOLEBOX = 5;
+}
+
+enum PXType{
+  PX3 = 0;
+  PX4 = 1;
+  EVENT = 2;
+  MOE = 3;
+  MME = 4;
+  RE = 5;
+  UAE = 6;
+  BRE = 7;
+  HCAPLOW = 8;
+  HCAPHIGH = 9;
+  RECAP = 10;
+  PX34 = 11;
+}
+
+message Payload{
+  string Value = 1;
+  string AppID = 2;
+  string Tag = 3;
+  string UUID = 4;
+  string FT = 5;
+  string SEQ = 6;
+  string EN = 7;
+  string PC = 8;
+  optional string CS = 9;
+  optional string SID = 10;
+  optional string VID = 11;
+  optional int32 RSC = 12;
+  optional string PXHD = 13;
+  string Ua = 14;
+}
+
+message PX2Request{
+  SITE Site = 1;
+  optional string UserAgent = 2;
+}
+
+message PXRequest{
+  SITE Site = 1;
+  PXType Type = 2;
+  string VarObject = 3;
+  string Version = 4;
+  string Tag = 5;
+  string UA = 6;
+  string Count = 7;
+  string UUID = 8;
+  optional string SID = 9;
+  string VID = 10;
+  string CS = 11;
+  optional string PXHD  = 12;
+  optional string RecaptchaToken = 13;
+}
