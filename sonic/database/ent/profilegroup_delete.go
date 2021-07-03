@@ -69,7 +69,7 @@ func (pgd *ProfileGroupDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: profilegroup.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profilegroup.FieldID,
 			},
 		},

@@ -9,13 +9,18 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/google/uuid"
 )
 
 // Task is the model entity for the Task schema.
 type Task struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// StartTime holds the value of the "StartTime" field.
 	StartTime time.Time `json:"StartTime,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -79,10 +84,10 @@ func (*Task) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case task.FieldID:
-			values[i] = new(sql.NullInt64)
-		case task.FieldStartTime:
+		case task.FieldCreatedAt, task.FieldUpdatedAt, task.FieldStartTime:
 			values[i] = new(sql.NullTime)
+		case task.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
 		}
@@ -99,11 +104,23 @@ func (t *Task) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case task.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				t.ID = *value
 			}
-			t.ID = int(value.Int64)
+		case task.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				t.CreatedAt = value.Time
+			}
+		case task.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				t.UpdatedAt = value.Time
+			}
 		case task.FieldStartTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field StartTime", values[i])
@@ -158,6 +175,10 @@ func (t *Task) String() string {
 	var builder strings.Builder
 	builder.WriteString("Task(")
 	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(t.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(t.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", StartTime=")
 	builder.WriteString(t.StartTime.Format(time.ANSIC))
 	builder.WriteByte(')')

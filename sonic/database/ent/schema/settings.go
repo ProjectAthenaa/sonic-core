@@ -25,8 +25,8 @@ func (Settings) Fields() []ent.Field {
 			UpdateDefault(time.Now),
 		field.String("SuccessWebhook"),
 		field.String("DeclineWebhook"),
-		field.Int("CheckoutDelay"),
-		field.Int("ATCDelay"),
+		field.Int32("CheckoutDelay"),
+		field.Int32("ATCDelay"),
 	}
 }
 

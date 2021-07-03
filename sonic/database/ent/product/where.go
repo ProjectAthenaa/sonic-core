@@ -3,36 +3,39 @@
 package product
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Product {
+func ID(id uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Product {
+func IDEQ(id uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Product {
+func IDNEQ(id uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Product {
+func IDIn(ids ...uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +52,7 @@ func IDIn(ids ...int) predicate.Product {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Product {
+func IDNotIn(ids ...uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,30 +69,44 @@ func IDNotIn(ids ...int) predicate.Product {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Product {
+func IDGT(id uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Product {
+func IDGTE(id uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Product {
+func IDLT(id uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Product {
+func IDLTE(id uuid.UUID) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
 	})
 }
 
@@ -129,7 +146,7 @@ func Link(v string) predicate.Product {
 }
 
 // Quantity applies equality check predicate on the "Quantity" field. It's identical to QuantityEQ.
-func Quantity(v int) predicate.Product {
+func Quantity(v int32) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldQuantity), v))
 	})
@@ -153,6 +170,158 @@ func Colors(v pq.StringArray) predicate.Product {
 func Metadata(v sonic.Map) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldMetadata), v))
+	})
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
 	})
 }
 
@@ -746,21 +915,21 @@ func LinkContainsFold(v string) predicate.Product {
 }
 
 // QuantityEQ applies the EQ predicate on the "Quantity" field.
-func QuantityEQ(v int) predicate.Product {
+func QuantityEQ(v int32) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldQuantity), v))
 	})
 }
 
 // QuantityNEQ applies the NEQ predicate on the "Quantity" field.
-func QuantityNEQ(v int) predicate.Product {
+func QuantityNEQ(v int32) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldQuantity), v))
 	})
 }
 
 // QuantityIn applies the In predicate on the "Quantity" field.
-func QuantityIn(vs ...int) predicate.Product {
+func QuantityIn(vs ...int32) predicate.Product {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -777,7 +946,7 @@ func QuantityIn(vs ...int) predicate.Product {
 }
 
 // QuantityNotIn applies the NotIn predicate on the "Quantity" field.
-func QuantityNotIn(vs ...int) predicate.Product {
+func QuantityNotIn(vs ...int32) predicate.Product {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -794,28 +963,28 @@ func QuantityNotIn(vs ...int) predicate.Product {
 }
 
 // QuantityGT applies the GT predicate on the "Quantity" field.
-func QuantityGT(v int) predicate.Product {
+func QuantityGT(v int32) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldQuantity), v))
 	})
 }
 
 // QuantityGTE applies the GTE predicate on the "Quantity" field.
-func QuantityGTE(v int) predicate.Product {
+func QuantityGTE(v int32) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldQuantity), v))
 	})
 }
 
 // QuantityLT applies the LT predicate on the "Quantity" field.
-func QuantityLT(v int) predicate.Product {
+func QuantityLT(v int32) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldQuantity), v))
 	})
 }
 
 // QuantityLTE applies the LTE predicate on the "Quantity" field.
-func QuantityLTE(v int) predicate.Product {
+func QuantityLTE(v int32) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldQuantity), v))
 	})

@@ -5,17 +5,23 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
+	"github.com/google/uuid"
 )
 
 // Profile is the model entity for the Profile schema.
 type Profile struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "Name" field.
 	Name string `json:"Name,omitempty"`
 	// Email holds the value of the "Email" field.
@@ -23,7 +29,7 @@ type Profile struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProfileQuery when eager-loading is set.
 	Edges                  ProfileEdges `json:"edges"`
-	profile_group_profiles *int
+	profile_group_profiles *uuid.UUID
 }
 
 // ProfileEdges holds the relations/edges for other nodes in the graph.
@@ -76,12 +82,14 @@ func (*Profile) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profile.FieldID:
-			values[i] = new(sql.NullInt64)
 		case profile.FieldName, profile.FieldEmail:
 			values[i] = new(sql.NullString)
+		case profile.FieldCreatedAt, profile.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case profile.FieldID:
+			values[i] = new(uuid.UUID)
 		case profile.ForeignKeys[0]: // profile_group_profiles
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Profile", columns[i])
 		}
@@ -98,11 +106,23 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case profile.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pr.ID = *value
 			}
-			pr.ID = int(value.Int64)
+		case profile.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				pr.CreatedAt = value.Time
+			}
+		case profile.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				pr.UpdatedAt = value.Time
+			}
 		case profile.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field Name", values[i])
@@ -116,11 +136,10 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 				pr.Email = value.String
 			}
 		case profile.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field profile_group_profiles", value)
-			} else if value.Valid {
-				pr.profile_group_profiles = new(int)
-				*pr.profile_group_profiles = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field profile_group_profiles", values[i])
+			} else if value != nil {
+				pr.profile_group_profiles = value
 			}
 		}
 	}
@@ -165,6 +184,10 @@ func (pr *Profile) String() string {
 	var builder strings.Builder
 	builder.WriteString("Profile(")
 	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(pr.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Name=")
 	builder.WriteString(pr.Name)
 	builder.WriteString(", Email=")

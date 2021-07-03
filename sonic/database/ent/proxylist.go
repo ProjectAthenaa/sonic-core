@@ -5,16 +5,22 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/google/uuid"
 )
 
 // ProxyList is the model entity for the ProxyList schema.
 type ProxyList struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "Name" field.
 	Name string `json:"Name,omitempty"`
 	// Type holds the value of the "Type" field.
@@ -69,10 +75,12 @@ func (*ProxyList) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case proxylist.FieldID:
-			values[i] = new(sql.NullInt64)
 		case proxylist.FieldName, proxylist.FieldType:
 			values[i] = new(sql.NullString)
+		case proxylist.FieldCreatedAt, proxylist.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case proxylist.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type ProxyList", columns[i])
 		}
@@ -89,11 +97,23 @@ func (pl *ProxyList) assignValues(columns []string, values []interface{}) error 
 	for i := range columns {
 		switch columns[i] {
 		case proxylist.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pl.ID = *value
 			}
-			pl.ID = int(value.Int64)
+		case proxylist.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				pl.CreatedAt = value.Time
+			}
+		case proxylist.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				pl.UpdatedAt = value.Time
+			}
 		case proxylist.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field Name", values[i])
@@ -149,6 +169,10 @@ func (pl *ProxyList) String() string {
 	var builder strings.Builder
 	builder.WriteString("ProxyList(")
 	builder.WriteString(fmt.Sprintf("id=%v", pl.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(pl.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(pl.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Name=")
 	builder.WriteString(pl.Name)
 	builder.WriteString(", Type=")

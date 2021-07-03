@@ -15,6 +15,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
+	"github.com/google/uuid"
 )
 
 // BillingQuery is the builder for querying Billing entities.
@@ -110,8 +111,8 @@ func (bq *BillingQuery) FirstX(ctx context.Context) *Billing {
 
 // FirstID returns the first Billing ID from the query.
 // Returns a *NotFoundError when no Billing ID was found.
-func (bq *BillingQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BillingQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = bq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -123,7 +124,7 @@ func (bq *BillingQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bq *BillingQuery) FirstIDX(ctx context.Context) int {
+func (bq *BillingQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := bq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -161,8 +162,8 @@ func (bq *BillingQuery) OnlyX(ctx context.Context) *Billing {
 // OnlyID is like Only, but returns the only Billing ID in the query.
 // Returns a *NotSingularError when exactly one Billing ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (bq *BillingQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BillingQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = bq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -178,7 +179,7 @@ func (bq *BillingQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bq *BillingQuery) OnlyIDX(ctx context.Context) int {
+func (bq *BillingQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := bq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -204,8 +205,8 @@ func (bq *BillingQuery) AllX(ctx context.Context) []*Billing {
 }
 
 // IDs executes the query and returns a list of Billing IDs.
-func (bq *BillingQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (bq *BillingQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := bq.Select(billing.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (bq *BillingQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bq *BillingQuery) IDsX(ctx context.Context) []int {
+func (bq *BillingQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := bq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -291,12 +292,12 @@ func (bq *BillingQuery) WithProfile(opts ...func(*ProfileQuery)) *BillingQuery {
 // Example:
 //
 //	var v []struct {
-//		CardholderName string `json:"CardholderName,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Billing.Query().
-//		GroupBy(billing.FieldCardholderName).
+//		GroupBy(billing.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +319,11 @@ func (bq *BillingQuery) GroupBy(field string, fields ...string) *BillingGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CardholderName string `json:"CardholderName,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Billing.Query().
-//		Select(billing.FieldCardholderName).
+//		Select(billing.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
 func (bq *BillingQuery) Select(field string, fields ...string) *BillingSelect {
@@ -376,15 +377,15 @@ func (bq *BillingQuery) sqlAll(ctx context.Context) ([]*Billing, error) {
 
 	if query := bq.withProfile; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Billing, len(nodes))
+		ids := make(map[uuid.UUID]*Billing, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.Profile = []*Profile{}
 		}
 		var (
-			edgeids []int
-			edges   = make(map[int][]*Billing)
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Billing)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -396,19 +397,19 @@ func (bq *BillingQuery) sqlAll(ctx context.Context) ([]*Billing, error) {
 				s.Where(sql.InValues(billing.ProfilePrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
+				eout, ok := out.(*uuid.UUID)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*sql.NullInt64)
+				ein, ok := in.(*uuid.UUID)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
+				outValue := *eout
+				inValue := *ein
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -461,7 +462,7 @@ func (bq *BillingQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   billing.Table,
 			Columns: billing.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: billing.FieldID,
 			},
 		},

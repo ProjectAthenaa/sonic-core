@@ -69,7 +69,7 @@ func (tgd *TaskGroupDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: taskgroup.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: taskgroup.FieldID,
 			},
 		},

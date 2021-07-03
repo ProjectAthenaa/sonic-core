@@ -10,13 +10,18 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
+	"github.com/google/uuid"
 )
 
 // Stripe is the model entity for the Stripe schema.
 type Stripe struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// CustomerID holds the value of the "CustomerID" field.
 	CustomerID string `json:"CustomerID,omitempty"`
 	// SubscriptionID holds the value of the "SubscriptionID" field.
@@ -26,7 +31,7 @@ type Stripe struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the StripeQuery when eager-loading is set.
 	Edges          StripeEdges `json:"edges"`
-	license_stripe *int
+	license_stripe *uuid.UUID
 }
 
 // StripeEdges holds the relations/edges for other nodes in the graph.
@@ -57,14 +62,14 @@ func (*Stripe) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case stripe.FieldID:
-			values[i] = new(sql.NullInt64)
 		case stripe.FieldCustomerID, stripe.FieldSubscriptionID:
 			values[i] = new(sql.NullString)
-		case stripe.FieldRenewalDate:
+		case stripe.FieldCreatedAt, stripe.FieldUpdatedAt, stripe.FieldRenewalDate:
 			values[i] = new(sql.NullTime)
+		case stripe.FieldID:
+			values[i] = new(uuid.UUID)
 		case stripe.ForeignKeys[0]: // license_stripe
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Stripe", columns[i])
 		}
@@ -81,11 +86,23 @@ func (s *Stripe) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case stripe.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				s.ID = *value
 			}
-			s.ID = int(value.Int64)
+		case stripe.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				s.CreatedAt = value.Time
+			}
+		case stripe.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				s.UpdatedAt = value.Time
+			}
 		case stripe.FieldCustomerID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field CustomerID", values[i])
@@ -105,11 +122,10 @@ func (s *Stripe) assignValues(columns []string, values []interface{}) error {
 				s.RenewalDate = value.Time
 			}
 		case stripe.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field license_stripe", value)
-			} else if value.Valid {
-				s.license_stripe = new(int)
-				*s.license_stripe = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field license_stripe", values[i])
+			} else if value != nil {
+				s.license_stripe = value
 			}
 		}
 	}
@@ -144,6 +160,10 @@ func (s *Stripe) String() string {
 	var builder strings.Builder
 	builder.WriteString("Stripe(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(s.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(s.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", CustomerID=")
 	builder.WriteString(s.CustomerID)
 	builder.WriteString(", SubscriptionID=")

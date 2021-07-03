@@ -15,6 +15,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
+	"github.com/google/uuid"
 )
 
 // AddressQuery is the builder for querying Address entities.
@@ -133,8 +134,8 @@ func (aq *AddressQuery) FirstX(ctx context.Context) *Address {
 
 // FirstID returns the first Address ID from the query.
 // Returns a *NotFoundError when no Address ID was found.
-func (aq *AddressQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *AddressQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -146,7 +147,7 @@ func (aq *AddressQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *AddressQuery) FirstIDX(ctx context.Context) int {
+func (aq *AddressQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -184,8 +185,8 @@ func (aq *AddressQuery) OnlyX(ctx context.Context) *Address {
 // OnlyID is like Only, but returns the only Address ID in the query.
 // Returns a *NotSingularError when exactly one Address ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *AddressQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *AddressQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -201,7 +202,7 @@ func (aq *AddressQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *AddressQuery) OnlyIDX(ctx context.Context) int {
+func (aq *AddressQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -227,8 +228,8 @@ func (aq *AddressQuery) AllX(ctx context.Context) []*Address {
 }
 
 // IDs executes the query and returns a list of Address IDs.
-func (aq *AddressQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (aq *AddressQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := aq.Select(address.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -236,7 +237,7 @@ func (aq *AddressQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *AddressQuery) IDsX(ctx context.Context) []int {
+func (aq *AddressQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -326,12 +327,12 @@ func (aq *AddressQuery) WithBillingAddress(opts ...func(*ShippingQuery)) *Addres
 // Example:
 //
 //	var v []struct {
-//		AddressLine string `json:"AddressLine,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Address.Query().
-//		GroupBy(address.FieldAddressLine).
+//		GroupBy(address.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -353,11 +354,11 @@ func (aq *AddressQuery) GroupBy(field string, fields ...string) *AddressGroupBy 
 // Example:
 //
 //	var v []struct {
-//		AddressLine string `json:"AddressLine,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Address.Query().
-//		Select(address.FieldAddressLine).
+//		Select(address.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
 func (aq *AddressQuery) Select(field string, fields ...string) *AddressSelect {
@@ -412,15 +413,15 @@ func (aq *AddressQuery) sqlAll(ctx context.Context) ([]*Address, error) {
 
 	if query := aq.withShippingAddress; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Address, len(nodes))
+		ids := make(map[uuid.UUID]*Address, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.ShippingAddress = []*Shipping{}
 		}
 		var (
-			edgeids []int
-			edges   = make(map[int][]*Address)
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Address)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -432,19 +433,19 @@ func (aq *AddressQuery) sqlAll(ctx context.Context) ([]*Address, error) {
 				s.Where(sql.InValues(address.ShippingAddressPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
+				eout, ok := out.(*uuid.UUID)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*sql.NullInt64)
+				ein, ok := in.(*uuid.UUID)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
+				outValue := *eout
+				inValue := *ein
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -477,15 +478,15 @@ func (aq *AddressQuery) sqlAll(ctx context.Context) ([]*Address, error) {
 
 	if query := aq.withBillingAddress; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Address, len(nodes))
+		ids := make(map[uuid.UUID]*Address, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.BillingAddress = []*Shipping{}
 		}
 		var (
-			edgeids []int
-			edges   = make(map[int][]*Address)
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Address)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -497,19 +498,19 @@ func (aq *AddressQuery) sqlAll(ctx context.Context) ([]*Address, error) {
 				s.Where(sql.InValues(address.BillingAddressPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
+				eout, ok := out.(*uuid.UUID)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*sql.NullInt64)
+				ein, ok := in.(*uuid.UUID)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
+				outValue := *eout
+				inValue := *ein
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -562,7 +563,7 @@ func (aq *AddressQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   address.Table,
 			Columns: address.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: address.FieldID,
 			},
 		},

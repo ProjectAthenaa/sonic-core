@@ -59,7 +59,7 @@ func (Product) Fields() []ent.Field {
 		field.Other("PositiveKeywords", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}).Optional(),
 		field.Other("NegativeKeywords", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}).Optional(),
 		field.String("Link").Optional(),
-		field.Int("Quantity"),
+		field.Int32("Quantity"),
 		field.Other("Sizes", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}),
 		field.Other("Colors", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}),
 		field.Enum("Site").Values(Sites...),

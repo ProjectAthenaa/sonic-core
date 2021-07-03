@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -13,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
+	"github.com/google/uuid"
 )
 
 // TaskGroupUpdate is the builder for updating TaskGroup entities.
@@ -28,6 +30,26 @@ func (tgu *TaskGroupUpdate) Where(ps ...predicate.TaskGroup) *TaskGroupUpdate {
 	return tgu
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (tgu *TaskGroupUpdate) SetCreatedAt(t time.Time) *TaskGroupUpdate {
+	tgu.mutation.SetCreatedAt(t)
+	return tgu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tgu *TaskGroupUpdate) SetNillableCreatedAt(t *time.Time) *TaskGroupUpdate {
+	if t != nil {
+		tgu.SetCreatedAt(*t)
+	}
+	return tgu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (tgu *TaskGroupUpdate) SetUpdatedAt(t time.Time) *TaskGroupUpdate {
+	tgu.mutation.SetUpdatedAt(t)
+	return tgu
+}
+
 // SetName sets the "Name" field.
 func (tgu *TaskGroupUpdate) SetName(s string) *TaskGroupUpdate {
 	tgu.mutation.SetName(s)
@@ -35,14 +57,14 @@ func (tgu *TaskGroupUpdate) SetName(s string) *TaskGroupUpdate {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (tgu *TaskGroupUpdate) AddAppIDs(ids ...int) *TaskGroupUpdate {
+func (tgu *TaskGroupUpdate) AddAppIDs(ids ...uuid.UUID) *TaskGroupUpdate {
 	tgu.mutation.AddAppIDs(ids...)
 	return tgu
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (tgu *TaskGroupUpdate) AddApp(a ...*App) *TaskGroupUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -50,14 +72,14 @@ func (tgu *TaskGroupUpdate) AddApp(a ...*App) *TaskGroupUpdate {
 }
 
 // AddTaskIDs adds the "Tasks" edge to the Task entity by IDs.
-func (tgu *TaskGroupUpdate) AddTaskIDs(ids ...int) *TaskGroupUpdate {
+func (tgu *TaskGroupUpdate) AddTaskIDs(ids ...uuid.UUID) *TaskGroupUpdate {
 	tgu.mutation.AddTaskIDs(ids...)
 	return tgu
 }
 
 // AddTasks adds the "Tasks" edges to the Task entity.
 func (tgu *TaskGroupUpdate) AddTasks(t ...*Task) *TaskGroupUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -76,14 +98,14 @@ func (tgu *TaskGroupUpdate) ClearApp() *TaskGroupUpdate {
 }
 
 // RemoveAppIDs removes the "App" edge to App entities by IDs.
-func (tgu *TaskGroupUpdate) RemoveAppIDs(ids ...int) *TaskGroupUpdate {
+func (tgu *TaskGroupUpdate) RemoveAppIDs(ids ...uuid.UUID) *TaskGroupUpdate {
 	tgu.mutation.RemoveAppIDs(ids...)
 	return tgu
 }
 
 // RemoveApp removes "App" edges to App entities.
 func (tgu *TaskGroupUpdate) RemoveApp(a ...*App) *TaskGroupUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -97,14 +119,14 @@ func (tgu *TaskGroupUpdate) ClearTasks() *TaskGroupUpdate {
 }
 
 // RemoveTaskIDs removes the "Tasks" edge to Task entities by IDs.
-func (tgu *TaskGroupUpdate) RemoveTaskIDs(ids ...int) *TaskGroupUpdate {
+func (tgu *TaskGroupUpdate) RemoveTaskIDs(ids ...uuid.UUID) *TaskGroupUpdate {
 	tgu.mutation.RemoveTaskIDs(ids...)
 	return tgu
 }
 
 // RemoveTasks removes "Tasks" edges to Task entities.
 func (tgu *TaskGroupUpdate) RemoveTasks(t ...*Task) *TaskGroupUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -117,6 +139,7 @@ func (tgu *TaskGroupUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	tgu.defaults()
 	if len(tgu.hooks) == 0 {
 		affected, err = tgu.sqlSave(ctx)
 	} else {
@@ -162,13 +185,21 @@ func (tgu *TaskGroupUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tgu *TaskGroupUpdate) defaults() {
+	if _, ok := tgu.mutation.UpdatedAt(); !ok {
+		v := taskgroup.UpdateDefaultUpdatedAt()
+		tgu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   taskgroup.Table,
 			Columns: taskgroup.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: taskgroup.FieldID,
 			},
 		},
@@ -179,6 +210,20 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tgu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: taskgroup.FieldCreatedAt,
+		})
+	}
+	if value, ok := tgu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: taskgroup.FieldUpdatedAt,
+		})
 	}
 	if value, ok := tgu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -196,7 +241,7 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -212,7 +257,7 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -231,7 +276,7 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -250,7 +295,7 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -266,7 +311,7 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -285,7 +330,7 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -314,6 +359,26 @@ type TaskGroupUpdateOne struct {
 	mutation *TaskGroupMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (tguo *TaskGroupUpdateOne) SetCreatedAt(t time.Time) *TaskGroupUpdateOne {
+	tguo.mutation.SetCreatedAt(t)
+	return tguo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tguo *TaskGroupUpdateOne) SetNillableCreatedAt(t *time.Time) *TaskGroupUpdateOne {
+	if t != nil {
+		tguo.SetCreatedAt(*t)
+	}
+	return tguo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (tguo *TaskGroupUpdateOne) SetUpdatedAt(t time.Time) *TaskGroupUpdateOne {
+	tguo.mutation.SetUpdatedAt(t)
+	return tguo
+}
+
 // SetName sets the "Name" field.
 func (tguo *TaskGroupUpdateOne) SetName(s string) *TaskGroupUpdateOne {
 	tguo.mutation.SetName(s)
@@ -321,14 +386,14 @@ func (tguo *TaskGroupUpdateOne) SetName(s string) *TaskGroupUpdateOne {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (tguo *TaskGroupUpdateOne) AddAppIDs(ids ...int) *TaskGroupUpdateOne {
+func (tguo *TaskGroupUpdateOne) AddAppIDs(ids ...uuid.UUID) *TaskGroupUpdateOne {
 	tguo.mutation.AddAppIDs(ids...)
 	return tguo
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (tguo *TaskGroupUpdateOne) AddApp(a ...*App) *TaskGroupUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -336,14 +401,14 @@ func (tguo *TaskGroupUpdateOne) AddApp(a ...*App) *TaskGroupUpdateOne {
 }
 
 // AddTaskIDs adds the "Tasks" edge to the Task entity by IDs.
-func (tguo *TaskGroupUpdateOne) AddTaskIDs(ids ...int) *TaskGroupUpdateOne {
+func (tguo *TaskGroupUpdateOne) AddTaskIDs(ids ...uuid.UUID) *TaskGroupUpdateOne {
 	tguo.mutation.AddTaskIDs(ids...)
 	return tguo
 }
 
 // AddTasks adds the "Tasks" edges to the Task entity.
 func (tguo *TaskGroupUpdateOne) AddTasks(t ...*Task) *TaskGroupUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -362,14 +427,14 @@ func (tguo *TaskGroupUpdateOne) ClearApp() *TaskGroupUpdateOne {
 }
 
 // RemoveAppIDs removes the "App" edge to App entities by IDs.
-func (tguo *TaskGroupUpdateOne) RemoveAppIDs(ids ...int) *TaskGroupUpdateOne {
+func (tguo *TaskGroupUpdateOne) RemoveAppIDs(ids ...uuid.UUID) *TaskGroupUpdateOne {
 	tguo.mutation.RemoveAppIDs(ids...)
 	return tguo
 }
 
 // RemoveApp removes "App" edges to App entities.
 func (tguo *TaskGroupUpdateOne) RemoveApp(a ...*App) *TaskGroupUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -383,14 +448,14 @@ func (tguo *TaskGroupUpdateOne) ClearTasks() *TaskGroupUpdateOne {
 }
 
 // RemoveTaskIDs removes the "Tasks" edge to Task entities by IDs.
-func (tguo *TaskGroupUpdateOne) RemoveTaskIDs(ids ...int) *TaskGroupUpdateOne {
+func (tguo *TaskGroupUpdateOne) RemoveTaskIDs(ids ...uuid.UUID) *TaskGroupUpdateOne {
 	tguo.mutation.RemoveTaskIDs(ids...)
 	return tguo
 }
 
 // RemoveTasks removes "Tasks" edges to Task entities.
 func (tguo *TaskGroupUpdateOne) RemoveTasks(t ...*Task) *TaskGroupUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -410,6 +475,7 @@ func (tguo *TaskGroupUpdateOne) Save(ctx context.Context) (*TaskGroup, error) {
 		err  error
 		node *TaskGroup
 	)
+	tguo.defaults()
 	if len(tguo.hooks) == 0 {
 		node, err = tguo.sqlSave(ctx)
 	} else {
@@ -455,13 +521,21 @@ func (tguo *TaskGroupUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tguo *TaskGroupUpdateOne) defaults() {
+	if _, ok := tguo.mutation.UpdatedAt(); !ok {
+		v := taskgroup.UpdateDefaultUpdatedAt()
+		tguo.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   taskgroup.Table,
 			Columns: taskgroup.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: taskgroup.FieldID,
 			},
 		},
@@ -490,6 +564,20 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 			}
 		}
 	}
+	if value, ok := tguo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: taskgroup.FieldCreatedAt,
+		})
+	}
+	if value, ok := tguo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: taskgroup.FieldUpdatedAt,
+		})
+	}
 	if value, ok := tguo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -506,7 +594,7 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -522,7 +610,7 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -541,7 +629,7 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -560,7 +648,7 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -576,7 +664,7 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -595,7 +683,7 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},

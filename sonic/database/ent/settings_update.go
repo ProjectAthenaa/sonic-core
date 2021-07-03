@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -13,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
+	"github.com/google/uuid"
 )
 
 // SettingsUpdate is the builder for updating Settings entities.
@@ -25,6 +27,26 @@ type SettingsUpdate struct {
 // Where adds a new predicate for the SettingsUpdate builder.
 func (su *SettingsUpdate) Where(ps ...predicate.Settings) *SettingsUpdate {
 	su.mutation.predicates = append(su.mutation.predicates, ps...)
+	return su
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (su *SettingsUpdate) SetCreatedAt(t time.Time) *SettingsUpdate {
+	su.mutation.SetCreatedAt(t)
+	return su
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (su *SettingsUpdate) SetNillableCreatedAt(t *time.Time) *SettingsUpdate {
+	if t != nil {
+		su.SetCreatedAt(*t)
+	}
+	return su
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (su *SettingsUpdate) SetUpdatedAt(t time.Time) *SettingsUpdate {
+	su.mutation.SetUpdatedAt(t)
 	return su
 }
 
@@ -41,33 +63,33 @@ func (su *SettingsUpdate) SetDeclineWebhook(s string) *SettingsUpdate {
 }
 
 // SetCheckoutDelay sets the "CheckoutDelay" field.
-func (su *SettingsUpdate) SetCheckoutDelay(i int) *SettingsUpdate {
+func (su *SettingsUpdate) SetCheckoutDelay(i int32) *SettingsUpdate {
 	su.mutation.ResetCheckoutDelay()
 	su.mutation.SetCheckoutDelay(i)
 	return su
 }
 
 // AddCheckoutDelay adds i to the "CheckoutDelay" field.
-func (su *SettingsUpdate) AddCheckoutDelay(i int) *SettingsUpdate {
+func (su *SettingsUpdate) AddCheckoutDelay(i int32) *SettingsUpdate {
 	su.mutation.AddCheckoutDelay(i)
 	return su
 }
 
 // SetATCDelay sets the "ATCDelay" field.
-func (su *SettingsUpdate) SetATCDelay(i int) *SettingsUpdate {
+func (su *SettingsUpdate) SetATCDelay(i int32) *SettingsUpdate {
 	su.mutation.ResetATCDelay()
 	su.mutation.SetATCDelay(i)
 	return su
 }
 
 // AddATCDelay adds i to the "ATCDelay" field.
-func (su *SettingsUpdate) AddATCDelay(i int) *SettingsUpdate {
+func (su *SettingsUpdate) AddATCDelay(i int32) *SettingsUpdate {
 	su.mutation.AddATCDelay(i)
 	return su
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
-func (su *SettingsUpdate) SetAppID(id int) *SettingsUpdate {
+func (su *SettingsUpdate) SetAppID(id uuid.UUID) *SettingsUpdate {
 	su.mutation.SetAppID(id)
 	return su
 }
@@ -94,6 +116,7 @@ func (su *SettingsUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	su.defaults()
 	if len(su.hooks) == 0 {
 		if err = su.check(); err != nil {
 			return 0, err
@@ -145,6 +168,14 @@ func (su *SettingsUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (su *SettingsUpdate) defaults() {
+	if _, ok := su.mutation.UpdatedAt(); !ok {
+		v := settings.UpdateDefaultUpdatedAt()
+		su.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (su *SettingsUpdate) check() error {
 	if _, ok := su.mutation.AppID(); su.mutation.AppCleared() && !ok {
@@ -159,7 +190,7 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   settings.Table,
 			Columns: settings.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: settings.FieldID,
 			},
 		},
@@ -170,6 +201,20 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := su.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: settings.FieldCreatedAt,
+		})
+	}
+	if value, ok := su.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: settings.FieldUpdatedAt,
+		})
 	}
 	if value, ok := su.mutation.SuccessWebhook(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -187,28 +232,28 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.CheckoutDelay(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldCheckoutDelay,
 		})
 	}
 	if value, ok := su.mutation.AddedCheckoutDelay(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldCheckoutDelay,
 		})
 	}
 	if value, ok := su.mutation.ATCDelay(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldATCDelay,
 		})
 	}
 	if value, ok := su.mutation.AddedATCDelay(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldATCDelay,
 		})
@@ -222,7 +267,7 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -238,7 +283,7 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -267,6 +312,26 @@ type SettingsUpdateOne struct {
 	mutation *SettingsMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (suo *SettingsUpdateOne) SetCreatedAt(t time.Time) *SettingsUpdateOne {
+	suo.mutation.SetCreatedAt(t)
+	return suo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (suo *SettingsUpdateOne) SetNillableCreatedAt(t *time.Time) *SettingsUpdateOne {
+	if t != nil {
+		suo.SetCreatedAt(*t)
+	}
+	return suo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (suo *SettingsUpdateOne) SetUpdatedAt(t time.Time) *SettingsUpdateOne {
+	suo.mutation.SetUpdatedAt(t)
+	return suo
+}
+
 // SetSuccessWebhook sets the "SuccessWebhook" field.
 func (suo *SettingsUpdateOne) SetSuccessWebhook(s string) *SettingsUpdateOne {
 	suo.mutation.SetSuccessWebhook(s)
@@ -280,33 +345,33 @@ func (suo *SettingsUpdateOne) SetDeclineWebhook(s string) *SettingsUpdateOne {
 }
 
 // SetCheckoutDelay sets the "CheckoutDelay" field.
-func (suo *SettingsUpdateOne) SetCheckoutDelay(i int) *SettingsUpdateOne {
+func (suo *SettingsUpdateOne) SetCheckoutDelay(i int32) *SettingsUpdateOne {
 	suo.mutation.ResetCheckoutDelay()
 	suo.mutation.SetCheckoutDelay(i)
 	return suo
 }
 
 // AddCheckoutDelay adds i to the "CheckoutDelay" field.
-func (suo *SettingsUpdateOne) AddCheckoutDelay(i int) *SettingsUpdateOne {
+func (suo *SettingsUpdateOne) AddCheckoutDelay(i int32) *SettingsUpdateOne {
 	suo.mutation.AddCheckoutDelay(i)
 	return suo
 }
 
 // SetATCDelay sets the "ATCDelay" field.
-func (suo *SettingsUpdateOne) SetATCDelay(i int) *SettingsUpdateOne {
+func (suo *SettingsUpdateOne) SetATCDelay(i int32) *SettingsUpdateOne {
 	suo.mutation.ResetATCDelay()
 	suo.mutation.SetATCDelay(i)
 	return suo
 }
 
 // AddATCDelay adds i to the "ATCDelay" field.
-func (suo *SettingsUpdateOne) AddATCDelay(i int) *SettingsUpdateOne {
+func (suo *SettingsUpdateOne) AddATCDelay(i int32) *SettingsUpdateOne {
 	suo.mutation.AddATCDelay(i)
 	return suo
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
-func (suo *SettingsUpdateOne) SetAppID(id int) *SettingsUpdateOne {
+func (suo *SettingsUpdateOne) SetAppID(id uuid.UUID) *SettingsUpdateOne {
 	suo.mutation.SetAppID(id)
 	return suo
 }
@@ -340,6 +405,7 @@ func (suo *SettingsUpdateOne) Save(ctx context.Context) (*Settings, error) {
 		err  error
 		node *Settings
 	)
+	suo.defaults()
 	if len(suo.hooks) == 0 {
 		if err = suo.check(); err != nil {
 			return nil, err
@@ -391,6 +457,14 @@ func (suo *SettingsUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (suo *SettingsUpdateOne) defaults() {
+	if _, ok := suo.mutation.UpdatedAt(); !ok {
+		v := settings.UpdateDefaultUpdatedAt()
+		suo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (suo *SettingsUpdateOne) check() error {
 	if _, ok := suo.mutation.AppID(); suo.mutation.AppCleared() && !ok {
@@ -405,7 +479,7 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			Table:   settings.Table,
 			Columns: settings.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: settings.FieldID,
 			},
 		},
@@ -434,6 +508,20 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			}
 		}
 	}
+	if value, ok := suo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: settings.FieldCreatedAt,
+		})
+	}
+	if value, ok := suo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: settings.FieldUpdatedAt,
+		})
+	}
 	if value, ok := suo.mutation.SuccessWebhook(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -450,28 +538,28 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 	}
 	if value, ok := suo.mutation.CheckoutDelay(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldCheckoutDelay,
 		})
 	}
 	if value, ok := suo.mutation.AddedCheckoutDelay(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldCheckoutDelay,
 		})
 	}
 	if value, ok := suo.mutation.ATCDelay(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldATCDelay,
 		})
 	}
 	if value, ok := suo.mutation.AddedATCDelay(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldATCDelay,
 		})
@@ -485,7 +573,7 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -501,7 +589,7 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},

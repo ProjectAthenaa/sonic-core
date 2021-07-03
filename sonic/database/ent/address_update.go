@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -12,6 +13,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
+	"github.com/google/uuid"
 )
 
 // AddressUpdate is the builder for updating Address entities.
@@ -24,6 +26,26 @@ type AddressUpdate struct {
 // Where adds a new predicate for the AddressUpdate builder.
 func (au *AddressUpdate) Where(ps ...predicate.Address) *AddressUpdate {
 	au.mutation.predicates = append(au.mutation.predicates, ps...)
+	return au
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (au *AddressUpdate) SetCreatedAt(t time.Time) *AddressUpdate {
+	au.mutation.SetCreatedAt(t)
+	return au
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (au *AddressUpdate) SetNillableCreatedAt(t *time.Time) *AddressUpdate {
+	if t != nil {
+		au.SetCreatedAt(*t)
+	}
+	return au
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (au *AddressUpdate) SetUpdatedAt(t time.Time) *AddressUpdate {
+	au.mutation.SetUpdatedAt(t)
 	return au
 }
 
@@ -78,14 +100,14 @@ func (au *AddressUpdate) SetZIP(s string) *AddressUpdate {
 }
 
 // AddShippingAddresIDs adds the "ShippingAddress" edge to the Shipping entity by IDs.
-func (au *AddressUpdate) AddShippingAddresIDs(ids ...int) *AddressUpdate {
+func (au *AddressUpdate) AddShippingAddresIDs(ids ...uuid.UUID) *AddressUpdate {
 	au.mutation.AddShippingAddresIDs(ids...)
 	return au
 }
 
 // AddShippingAddress adds the "ShippingAddress" edges to the Shipping entity.
 func (au *AddressUpdate) AddShippingAddress(s ...*Shipping) *AddressUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -93,14 +115,14 @@ func (au *AddressUpdate) AddShippingAddress(s ...*Shipping) *AddressUpdate {
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
-func (au *AddressUpdate) AddBillingAddresIDs(ids ...int) *AddressUpdate {
+func (au *AddressUpdate) AddBillingAddresIDs(ids ...uuid.UUID) *AddressUpdate {
 	au.mutation.AddBillingAddresIDs(ids...)
 	return au
 }
 
 // AddBillingAddress adds the "BillingAddress" edges to the Shipping entity.
 func (au *AddressUpdate) AddBillingAddress(s ...*Shipping) *AddressUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -119,14 +141,14 @@ func (au *AddressUpdate) ClearShippingAddress() *AddressUpdate {
 }
 
 // RemoveShippingAddresIDs removes the "ShippingAddress" edge to Shipping entities by IDs.
-func (au *AddressUpdate) RemoveShippingAddresIDs(ids ...int) *AddressUpdate {
+func (au *AddressUpdate) RemoveShippingAddresIDs(ids ...uuid.UUID) *AddressUpdate {
 	au.mutation.RemoveShippingAddresIDs(ids...)
 	return au
 }
 
 // RemoveShippingAddress removes "ShippingAddress" edges to Shipping entities.
 func (au *AddressUpdate) RemoveShippingAddress(s ...*Shipping) *AddressUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -140,14 +162,14 @@ func (au *AddressUpdate) ClearBillingAddress() *AddressUpdate {
 }
 
 // RemoveBillingAddresIDs removes the "BillingAddress" edge to Shipping entities by IDs.
-func (au *AddressUpdate) RemoveBillingAddresIDs(ids ...int) *AddressUpdate {
+func (au *AddressUpdate) RemoveBillingAddresIDs(ids ...uuid.UUID) *AddressUpdate {
 	au.mutation.RemoveBillingAddresIDs(ids...)
 	return au
 }
 
 // RemoveBillingAddress removes "BillingAddress" edges to Shipping entities.
 func (au *AddressUpdate) RemoveBillingAddress(s ...*Shipping) *AddressUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -160,6 +182,7 @@ func (au *AddressUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	au.defaults()
 	if len(au.hooks) == 0 {
 		affected, err = au.sqlSave(ctx)
 	} else {
@@ -205,13 +228,21 @@ func (au *AddressUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (au *AddressUpdate) defaults() {
+	if _, ok := au.mutation.UpdatedAt(); !ok {
+		v := address.UpdateDefaultUpdatedAt()
+		au.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   address.Table,
 			Columns: address.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: address.FieldID,
 			},
 		},
@@ -222,6 +253,20 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := au.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: address.FieldCreatedAt,
+		})
+	}
+	if value, ok := au.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: address.FieldUpdatedAt,
+		})
 	}
 	if value, ok := au.mutation.AddressLine(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -280,7 +325,7 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -296,7 +341,7 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -315,7 +360,7 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -334,7 +379,7 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -350,7 +395,7 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -369,7 +414,7 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -396,6 +441,26 @@ type AddressUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *AddressMutation
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (auo *AddressUpdateOne) SetCreatedAt(t time.Time) *AddressUpdateOne {
+	auo.mutation.SetCreatedAt(t)
+	return auo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (auo *AddressUpdateOne) SetNillableCreatedAt(t *time.Time) *AddressUpdateOne {
+	if t != nil {
+		auo.SetCreatedAt(*t)
+	}
+	return auo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (auo *AddressUpdateOne) SetUpdatedAt(t time.Time) *AddressUpdateOne {
+	auo.mutation.SetUpdatedAt(t)
+	return auo
 }
 
 // SetAddressLine sets the "AddressLine" field.
@@ -449,14 +514,14 @@ func (auo *AddressUpdateOne) SetZIP(s string) *AddressUpdateOne {
 }
 
 // AddShippingAddresIDs adds the "ShippingAddress" edge to the Shipping entity by IDs.
-func (auo *AddressUpdateOne) AddShippingAddresIDs(ids ...int) *AddressUpdateOne {
+func (auo *AddressUpdateOne) AddShippingAddresIDs(ids ...uuid.UUID) *AddressUpdateOne {
 	auo.mutation.AddShippingAddresIDs(ids...)
 	return auo
 }
 
 // AddShippingAddress adds the "ShippingAddress" edges to the Shipping entity.
 func (auo *AddressUpdateOne) AddShippingAddress(s ...*Shipping) *AddressUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -464,14 +529,14 @@ func (auo *AddressUpdateOne) AddShippingAddress(s ...*Shipping) *AddressUpdateOn
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
-func (auo *AddressUpdateOne) AddBillingAddresIDs(ids ...int) *AddressUpdateOne {
+func (auo *AddressUpdateOne) AddBillingAddresIDs(ids ...uuid.UUID) *AddressUpdateOne {
 	auo.mutation.AddBillingAddresIDs(ids...)
 	return auo
 }
 
 // AddBillingAddress adds the "BillingAddress" edges to the Shipping entity.
 func (auo *AddressUpdateOne) AddBillingAddress(s ...*Shipping) *AddressUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -490,14 +555,14 @@ func (auo *AddressUpdateOne) ClearShippingAddress() *AddressUpdateOne {
 }
 
 // RemoveShippingAddresIDs removes the "ShippingAddress" edge to Shipping entities by IDs.
-func (auo *AddressUpdateOne) RemoveShippingAddresIDs(ids ...int) *AddressUpdateOne {
+func (auo *AddressUpdateOne) RemoveShippingAddresIDs(ids ...uuid.UUID) *AddressUpdateOne {
 	auo.mutation.RemoveShippingAddresIDs(ids...)
 	return auo
 }
 
 // RemoveShippingAddress removes "ShippingAddress" edges to Shipping entities.
 func (auo *AddressUpdateOne) RemoveShippingAddress(s ...*Shipping) *AddressUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -511,14 +576,14 @@ func (auo *AddressUpdateOne) ClearBillingAddress() *AddressUpdateOne {
 }
 
 // RemoveBillingAddresIDs removes the "BillingAddress" edge to Shipping entities by IDs.
-func (auo *AddressUpdateOne) RemoveBillingAddresIDs(ids ...int) *AddressUpdateOne {
+func (auo *AddressUpdateOne) RemoveBillingAddresIDs(ids ...uuid.UUID) *AddressUpdateOne {
 	auo.mutation.RemoveBillingAddresIDs(ids...)
 	return auo
 }
 
 // RemoveBillingAddress removes "BillingAddress" edges to Shipping entities.
 func (auo *AddressUpdateOne) RemoveBillingAddress(s ...*Shipping) *AddressUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -538,6 +603,7 @@ func (auo *AddressUpdateOne) Save(ctx context.Context) (*Address, error) {
 		err  error
 		node *Address
 	)
+	auo.defaults()
 	if len(auo.hooks) == 0 {
 		node, err = auo.sqlSave(ctx)
 	} else {
@@ -583,13 +649,21 @@ func (auo *AddressUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (auo *AddressUpdateOne) defaults() {
+	if _, ok := auo.mutation.UpdatedAt(); !ok {
+		v := address.UpdateDefaultUpdatedAt()
+		auo.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   address.Table,
 			Columns: address.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: address.FieldID,
 			},
 		},
@@ -617,6 +691,20 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := auo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: address.FieldCreatedAt,
+		})
+	}
+	if value, ok := auo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: address.FieldUpdatedAt,
+		})
 	}
 	if value, ok := auo.mutation.AddressLine(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -675,7 +763,7 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -691,7 +779,7 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -710,7 +798,7 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -729,7 +817,7 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -745,7 +833,7 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -764,7 +852,7 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},

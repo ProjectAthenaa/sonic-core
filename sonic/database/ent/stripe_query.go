@@ -14,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
+	"github.com/google/uuid"
 )
 
 // StripeQuery is the builder for querying Stripe entities.
@@ -110,8 +111,8 @@ func (sq *StripeQuery) FirstX(ctx context.Context) *Stripe {
 
 // FirstID returns the first Stripe ID from the query.
 // Returns a *NotFoundError when no Stripe ID was found.
-func (sq *StripeQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (sq *StripeQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -123,7 +124,7 @@ func (sq *StripeQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *StripeQuery) FirstIDX(ctx context.Context) int {
+func (sq *StripeQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -161,8 +162,8 @@ func (sq *StripeQuery) OnlyX(ctx context.Context) *Stripe {
 // OnlyID is like Only, but returns the only Stripe ID in the query.
 // Returns a *NotSingularError when exactly one Stripe ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *StripeQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (sq *StripeQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -178,7 +179,7 @@ func (sq *StripeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *StripeQuery) OnlyIDX(ctx context.Context) int {
+func (sq *StripeQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -204,8 +205,8 @@ func (sq *StripeQuery) AllX(ctx context.Context) []*Stripe {
 }
 
 // IDs executes the query and returns a list of Stripe IDs.
-func (sq *StripeQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (sq *StripeQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := sq.Select(stripe.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (sq *StripeQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *StripeQuery) IDsX(ctx context.Context) []int {
+func (sq *StripeQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := sq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -291,12 +292,12 @@ func (sq *StripeQuery) WithLicense(opts ...func(*LicenseQuery)) *StripeQuery {
 // Example:
 //
 //	var v []struct {
-//		CustomerID string `json:"CustomerID,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Stripe.Query().
-//		GroupBy(stripe.FieldCustomerID).
+//		GroupBy(stripe.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +319,11 @@ func (sq *StripeQuery) GroupBy(field string, fields ...string) *StripeGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CustomerID string `json:"CustomerID,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Stripe.Query().
-//		Select(stripe.FieldCustomerID).
+//		Select(stripe.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
 func (sq *StripeQuery) Select(field string, fields ...string) *StripeSelect {
@@ -382,8 +383,8 @@ func (sq *StripeQuery) sqlAll(ctx context.Context) ([]*Stripe, error) {
 	}
 
 	if query := sq.withLicense; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Stripe)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Stripe)
 		for i := range nodes {
 			if nodes[i].license_stripe == nil {
 				continue
@@ -432,7 +433,7 @@ func (sq *StripeQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   stripe.Table,
 			Columns: stripe.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: stripe.FieldID,
 			},
 		},

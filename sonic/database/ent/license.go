@@ -5,17 +5,23 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
+	"github.com/google/uuid"
 )
 
 // License is the model entity for the License schema.
 type License struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Key holds the value of the "Key" field.
 	Key string `json:"Key,omitempty"`
 	// HardwareID holds the value of the "HardwareID" field.
@@ -27,7 +33,7 @@ type License struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LicenseQuery when eager-loading is set.
 	Edges        LicenseEdges `json:"edges"`
-	user_license *int
+	user_license *uuid.UUID
 }
 
 // LicenseEdges holds the relations/edges for other nodes in the graph.
@@ -69,12 +75,14 @@ func (*License) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case license.FieldID:
-			values[i] = new(sql.NullInt64)
 		case license.FieldKey, license.FieldHardwareID, license.FieldMobileHardwareID, license.FieldType:
 			values[i] = new(sql.NullString)
+		case license.FieldCreatedAt, license.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case license.FieldID:
+			values[i] = new(uuid.UUID)
 		case license.ForeignKeys[0]: // user_license
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type License", columns[i])
 		}
@@ -91,11 +99,23 @@ func (l *License) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case license.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				l.ID = *value
 			}
-			l.ID = int(value.Int64)
+		case license.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				l.CreatedAt = value.Time
+			}
+		case license.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				l.UpdatedAt = value.Time
+			}
 		case license.FieldKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field Key", values[i])
@@ -121,11 +141,10 @@ func (l *License) assignValues(columns []string, values []interface{}) error {
 				l.Type = license.Type(value.String)
 			}
 		case license.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_license", value)
-			} else if value.Valid {
-				l.user_license = new(int)
-				*l.user_license = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field user_license", values[i])
+			} else if value != nil {
+				l.user_license = value
 			}
 		}
 	}
@@ -165,6 +184,10 @@ func (l *License) String() string {
 	var builder strings.Builder
 	builder.WriteString("License(")
 	builder.WriteString(fmt.Sprintf("id=%v", l.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(l.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(l.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Key=")
 	builder.WriteString(l.Key)
 	builder.WriteString(", HardwareID=")

@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -12,6 +13,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/google/uuid"
 )
 
 // ProxyUpdate is the builder for updating Proxy entities.
@@ -24,6 +26,26 @@ type ProxyUpdate struct {
 // Where adds a new predicate for the ProxyUpdate builder.
 func (pu *ProxyUpdate) Where(ps ...predicate.Proxy) *ProxyUpdate {
 	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
+	return pu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pu *ProxyUpdate) SetCreatedAt(t time.Time) *ProxyUpdate {
+	pu.mutation.SetCreatedAt(t)
+	return pu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pu *ProxyUpdate) SetNillableCreatedAt(t *time.Time) *ProxyUpdate {
+	if t != nil {
+		pu.SetCreatedAt(*t)
+	}
+	return pu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pu *ProxyUpdate) SetUpdatedAt(t time.Time) *ProxyUpdate {
+	pu.mutation.SetUpdatedAt(t)
 	return pu
 }
 
@@ -80,13 +102,13 @@ func (pu *ProxyUpdate) SetPort(s string) *ProxyUpdate {
 }
 
 // SetProxyListID sets the "ProxyList" edge to the ProxyList entity by ID.
-func (pu *ProxyUpdate) SetProxyListID(id int) *ProxyUpdate {
+func (pu *ProxyUpdate) SetProxyListID(id uuid.UUID) *ProxyUpdate {
 	pu.mutation.SetProxyListID(id)
 	return pu
 }
 
 // SetNillableProxyListID sets the "ProxyList" edge to the ProxyList entity by ID if the given value is not nil.
-func (pu *ProxyUpdate) SetNillableProxyListID(id *int) *ProxyUpdate {
+func (pu *ProxyUpdate) SetNillableProxyListID(id *uuid.UUID) *ProxyUpdate {
 	if id != nil {
 		pu = pu.SetProxyListID(*id)
 	}
@@ -115,6 +137,7 @@ func (pu *ProxyUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	pu.defaults()
 	if len(pu.hooks) == 0 {
 		affected, err = pu.sqlSave(ctx)
 	} else {
@@ -160,13 +183,21 @@ func (pu *ProxyUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pu *ProxyUpdate) defaults() {
+	if _, ok := pu.mutation.UpdatedAt(); !ok {
+		v := proxy.UpdateDefaultUpdatedAt()
+		pu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (pu *ProxyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   proxy.Table,
 			Columns: proxy.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: proxy.FieldID,
 			},
 		},
@@ -177,6 +208,20 @@ func (pu *ProxyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxy.FieldCreatedAt,
+		})
+	}
+	if value, ok := pu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxy.FieldUpdatedAt,
+		})
 	}
 	if value, ok := pu.mutation.Username(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -227,7 +272,7 @@ func (pu *ProxyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -243,7 +288,7 @@ func (pu *ProxyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -270,6 +315,26 @@ type ProxyUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProxyMutation
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (puo *ProxyUpdateOne) SetCreatedAt(t time.Time) *ProxyUpdateOne {
+	puo.mutation.SetCreatedAt(t)
+	return puo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (puo *ProxyUpdateOne) SetNillableCreatedAt(t *time.Time) *ProxyUpdateOne {
+	if t != nil {
+		puo.SetCreatedAt(*t)
+	}
+	return puo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (puo *ProxyUpdateOne) SetUpdatedAt(t time.Time) *ProxyUpdateOne {
+	puo.mutation.SetUpdatedAt(t)
+	return puo
 }
 
 // SetUsername sets the "Username" field.
@@ -325,13 +390,13 @@ func (puo *ProxyUpdateOne) SetPort(s string) *ProxyUpdateOne {
 }
 
 // SetProxyListID sets the "ProxyList" edge to the ProxyList entity by ID.
-func (puo *ProxyUpdateOne) SetProxyListID(id int) *ProxyUpdateOne {
+func (puo *ProxyUpdateOne) SetProxyListID(id uuid.UUID) *ProxyUpdateOne {
 	puo.mutation.SetProxyListID(id)
 	return puo
 }
 
 // SetNillableProxyListID sets the "ProxyList" edge to the ProxyList entity by ID if the given value is not nil.
-func (puo *ProxyUpdateOne) SetNillableProxyListID(id *int) *ProxyUpdateOne {
+func (puo *ProxyUpdateOne) SetNillableProxyListID(id *uuid.UUID) *ProxyUpdateOne {
 	if id != nil {
 		puo = puo.SetProxyListID(*id)
 	}
@@ -367,6 +432,7 @@ func (puo *ProxyUpdateOne) Save(ctx context.Context) (*Proxy, error) {
 		err  error
 		node *Proxy
 	)
+	puo.defaults()
 	if len(puo.hooks) == 0 {
 		node, err = puo.sqlSave(ctx)
 	} else {
@@ -412,13 +478,21 @@ func (puo *ProxyUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (puo *ProxyUpdateOne) defaults() {
+	if _, ok := puo.mutation.UpdatedAt(); !ok {
+		v := proxy.UpdateDefaultUpdatedAt()
+		puo.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (puo *ProxyUpdateOne) sqlSave(ctx context.Context) (_node *Proxy, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   proxy.Table,
 			Columns: proxy.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: proxy.FieldID,
 			},
 		},
@@ -446,6 +520,20 @@ func (puo *ProxyUpdateOne) sqlSave(ctx context.Context) (_node *Proxy, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxy.FieldCreatedAt,
+		})
+	}
+	if value, ok := puo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxy.FieldUpdatedAt,
+		})
 	}
 	if value, ok := puo.mutation.Username(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -496,7 +584,7 @@ func (puo *ProxyUpdateOne) sqlSave(ctx context.Context) (_node *Proxy, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -512,7 +600,7 @@ func (puo *ProxyUpdateOne) sqlSave(ctx context.Context) (_node *Proxy, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},

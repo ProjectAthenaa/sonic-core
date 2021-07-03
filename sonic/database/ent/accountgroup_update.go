@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -13,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // AccountGroupUpdate is the builder for updating AccountGroup entities.
@@ -25,6 +27,26 @@ type AccountGroupUpdate struct {
 // Where adds a new predicate for the AccountGroupUpdate builder.
 func (agu *AccountGroupUpdate) Where(ps ...predicate.AccountGroup) *AccountGroupUpdate {
 	agu.mutation.predicates = append(agu.mutation.predicates, ps...)
+	return agu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (agu *AccountGroupUpdate) SetCreatedAt(t time.Time) *AccountGroupUpdate {
+	agu.mutation.SetCreatedAt(t)
+	return agu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (agu *AccountGroupUpdate) SetNillableCreatedAt(t *time.Time) *AccountGroupUpdate {
+	if t != nil {
+		agu.SetCreatedAt(*t)
+	}
+	return agu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (agu *AccountGroupUpdate) SetUpdatedAt(t time.Time) *AccountGroupUpdate {
+	agu.mutation.SetUpdatedAt(t)
 	return agu
 }
 
@@ -47,13 +69,13 @@ func (agu *AccountGroupUpdate) SetAccounts(s sonic.Map) *AccountGroupUpdate {
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
-func (agu *AccountGroupUpdate) SetAppID(id int) *AccountGroupUpdate {
+func (agu *AccountGroupUpdate) SetAppID(id uuid.UUID) *AccountGroupUpdate {
 	agu.mutation.SetAppID(id)
 	return agu
 }
 
 // SetNillableAppID sets the "App" edge to the App entity by ID if the given value is not nil.
-func (agu *AccountGroupUpdate) SetNillableAppID(id *int) *AccountGroupUpdate {
+func (agu *AccountGroupUpdate) SetNillableAppID(id *uuid.UUID) *AccountGroupUpdate {
 	if id != nil {
 		agu = agu.SetAppID(*id)
 	}
@@ -82,6 +104,7 @@ func (agu *AccountGroupUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	agu.defaults()
 	if len(agu.hooks) == 0 {
 		if err = agu.check(); err != nil {
 			return 0, err
@@ -133,6 +156,14 @@ func (agu *AccountGroupUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (agu *AccountGroupUpdate) defaults() {
+	if _, ok := agu.mutation.UpdatedAt(); !ok {
+		v := accountgroup.UpdateDefaultUpdatedAt()
+		agu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (agu *AccountGroupUpdate) check() error {
 	if v, ok := agu.mutation.Site(); ok {
@@ -149,7 +180,7 @@ func (agu *AccountGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   accountgroup.Table,
 			Columns: accountgroup.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: accountgroup.FieldID,
 			},
 		},
@@ -160,6 +191,20 @@ func (agu *AccountGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := agu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: accountgroup.FieldCreatedAt,
+		})
+	}
+	if value, ok := agu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: accountgroup.FieldUpdatedAt,
+		})
 	}
 	if value, ok := agu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -191,7 +236,7 @@ func (agu *AccountGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -207,7 +252,7 @@ func (agu *AccountGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -236,6 +281,26 @@ type AccountGroupUpdateOne struct {
 	mutation *AccountGroupMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (aguo *AccountGroupUpdateOne) SetCreatedAt(t time.Time) *AccountGroupUpdateOne {
+	aguo.mutation.SetCreatedAt(t)
+	return aguo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (aguo *AccountGroupUpdateOne) SetNillableCreatedAt(t *time.Time) *AccountGroupUpdateOne {
+	if t != nil {
+		aguo.SetCreatedAt(*t)
+	}
+	return aguo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (aguo *AccountGroupUpdateOne) SetUpdatedAt(t time.Time) *AccountGroupUpdateOne {
+	aguo.mutation.SetUpdatedAt(t)
+	return aguo
+}
+
 // SetName sets the "Name" field.
 func (aguo *AccountGroupUpdateOne) SetName(s string) *AccountGroupUpdateOne {
 	aguo.mutation.SetName(s)
@@ -255,13 +320,13 @@ func (aguo *AccountGroupUpdateOne) SetAccounts(s sonic.Map) *AccountGroupUpdateO
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
-func (aguo *AccountGroupUpdateOne) SetAppID(id int) *AccountGroupUpdateOne {
+func (aguo *AccountGroupUpdateOne) SetAppID(id uuid.UUID) *AccountGroupUpdateOne {
 	aguo.mutation.SetAppID(id)
 	return aguo
 }
 
 // SetNillableAppID sets the "App" edge to the App entity by ID if the given value is not nil.
-func (aguo *AccountGroupUpdateOne) SetNillableAppID(id *int) *AccountGroupUpdateOne {
+func (aguo *AccountGroupUpdateOne) SetNillableAppID(id *uuid.UUID) *AccountGroupUpdateOne {
 	if id != nil {
 		aguo = aguo.SetAppID(*id)
 	}
@@ -297,6 +362,7 @@ func (aguo *AccountGroupUpdateOne) Save(ctx context.Context) (*AccountGroup, err
 		err  error
 		node *AccountGroup
 	)
+	aguo.defaults()
 	if len(aguo.hooks) == 0 {
 		if err = aguo.check(); err != nil {
 			return nil, err
@@ -348,6 +414,14 @@ func (aguo *AccountGroupUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (aguo *AccountGroupUpdateOne) defaults() {
+	if _, ok := aguo.mutation.UpdatedAt(); !ok {
+		v := accountgroup.UpdateDefaultUpdatedAt()
+		aguo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (aguo *AccountGroupUpdateOne) check() error {
 	if v, ok := aguo.mutation.Site(); ok {
@@ -364,7 +438,7 @@ func (aguo *AccountGroupUpdateOne) sqlSave(ctx context.Context) (_node *AccountG
 			Table:   accountgroup.Table,
 			Columns: accountgroup.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: accountgroup.FieldID,
 			},
 		},
@@ -392,6 +466,20 @@ func (aguo *AccountGroupUpdateOne) sqlSave(ctx context.Context) (_node *AccountG
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := aguo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: accountgroup.FieldCreatedAt,
+		})
+	}
+	if value, ok := aguo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: accountgroup.FieldUpdatedAt,
+		})
 	}
 	if value, ok := aguo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -423,7 +511,7 @@ func (aguo *AccountGroupUpdateOne) sqlSave(ctx context.Context) (_node *AccountG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -439,7 +527,7 @@ func (aguo *AccountGroupUpdateOne) sqlSave(ctx context.Context) (_node *AccountG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},

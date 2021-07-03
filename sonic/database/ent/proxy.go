@@ -5,17 +5,23 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/google/uuid"
 )
 
 // Proxy is the model entity for the Proxy schema.
 type Proxy struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Username holds the value of the "Username" field.
 	Username string `json:"Username,omitempty"`
 	// Password holds the value of the "Password" field.
@@ -27,7 +33,7 @@ type Proxy struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProxyQuery when eager-loading is set.
 	Edges              ProxyEdges `json:"edges"`
-	proxy_list_proxies *int
+	proxy_list_proxies *uuid.UUID
 }
 
 // ProxyEdges holds the relations/edges for other nodes in the graph.
@@ -58,12 +64,14 @@ func (*Proxy) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case proxy.FieldID:
-			values[i] = new(sql.NullInt64)
 		case proxy.FieldUsername, proxy.FieldPassword, proxy.FieldIP, proxy.FieldPort:
 			values[i] = new(sql.NullString)
+		case proxy.FieldCreatedAt, proxy.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case proxy.FieldID:
+			values[i] = new(uuid.UUID)
 		case proxy.ForeignKeys[0]: // proxy_list_proxies
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Proxy", columns[i])
 		}
@@ -80,11 +88,23 @@ func (pr *Proxy) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case proxy.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pr.ID = *value
 			}
-			pr.ID = int(value.Int64)
+		case proxy.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				pr.CreatedAt = value.Time
+			}
+		case proxy.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				pr.UpdatedAt = value.Time
+			}
 		case proxy.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field Username", values[i])
@@ -110,11 +130,10 @@ func (pr *Proxy) assignValues(columns []string, values []interface{}) error {
 				pr.Port = value.String
 			}
 		case proxy.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field proxy_list_proxies", value)
-			} else if value.Valid {
-				pr.proxy_list_proxies = new(int)
-				*pr.proxy_list_proxies = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field proxy_list_proxies", values[i])
+			} else if value != nil {
+				pr.proxy_list_proxies = value
 			}
 		}
 	}
@@ -149,6 +168,10 @@ func (pr *Proxy) String() string {
 	var builder strings.Builder
 	builder.WriteString("Proxy(")
 	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(pr.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Username=")
 	builder.WriteString(pr.Username)
 	builder.WriteString(", Password=")

@@ -5,17 +5,23 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
+	"github.com/google/uuid"
 )
 
 // Shipping is the model entity for the Shipping schema.
 type Shipping struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// FirstName holds the value of the "FirstName" field.
 	FirstName string `json:"FirstName,omitempty"`
 	// LastName holds the value of the "LastName" field.
@@ -27,7 +33,7 @@ type Shipping struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ShippingQuery when eager-loading is set.
 	Edges            ShippingEdges `json:"edges"`
-	profile_shipping *int
+	profile_shipping *uuid.UUID
 }
 
 // ShippingEdges holds the relations/edges for other nodes in the graph.
@@ -82,12 +88,14 @@ func (*Shipping) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case shipping.FieldBillingIsShipping:
 			values[i] = new(sql.NullBool)
-		case shipping.FieldID:
-			values[i] = new(sql.NullInt64)
 		case shipping.FieldFirstName, shipping.FieldLastName, shipping.FieldPhoneNumber:
 			values[i] = new(sql.NullString)
+		case shipping.FieldCreatedAt, shipping.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case shipping.FieldID:
+			values[i] = new(uuid.UUID)
 		case shipping.ForeignKeys[0]: // profile_shipping
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Shipping", columns[i])
 		}
@@ -104,11 +112,23 @@ func (s *Shipping) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case shipping.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				s.ID = *value
 			}
-			s.ID = int(value.Int64)
+		case shipping.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				s.CreatedAt = value.Time
+			}
+		case shipping.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				s.UpdatedAt = value.Time
+			}
 		case shipping.FieldFirstName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field FirstName", values[i])
@@ -134,11 +154,10 @@ func (s *Shipping) assignValues(columns []string, values []interface{}) error {
 				s.BillingIsShipping = value.Bool
 			}
 		case shipping.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field profile_shipping", value)
-			} else if value.Valid {
-				s.profile_shipping = new(int)
-				*s.profile_shipping = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field profile_shipping", values[i])
+			} else if value != nil {
+				s.profile_shipping = value
 			}
 		}
 	}
@@ -183,6 +202,10 @@ func (s *Shipping) String() string {
 	var builder strings.Builder
 	builder.WriteString("Shipping(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(s.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(s.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", FirstName=")
 	builder.WriteString(s.FirstName)
 	builder.WriteString(", LastName=")

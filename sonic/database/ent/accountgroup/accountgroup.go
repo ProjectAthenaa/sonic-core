@@ -4,6 +4,9 @@ package accountgroup
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -11,6 +14,10 @@ const (
 	Label = "account_group"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldSite holds the string denoting the site field in the database.
@@ -33,6 +40,8 @@ const (
 // Columns holds all SQL columns for accountgroup fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 	FieldName,
 	FieldSite,
 	FieldAccounts,
@@ -58,6 +67,17 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)
 
 // Site defines the type for the "Site" enum field.
 type Site string

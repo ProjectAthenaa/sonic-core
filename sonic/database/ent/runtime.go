@@ -2,8 +2,304 @@
 
 package ent
 
+import (
+	"time"
+
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/schema"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
+	"github.com/google/uuid"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	accountgroupFields := schema.AccountGroup{}.Fields()
+	_ = accountgroupFields
+	// accountgroupDescCreatedAt is the schema descriptor for created_at field.
+	accountgroupDescCreatedAt := accountgroupFields[1].Descriptor()
+	// accountgroup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	accountgroup.DefaultCreatedAt = accountgroupDescCreatedAt.Default.(func() time.Time)
+	// accountgroupDescUpdatedAt is the schema descriptor for updated_at field.
+	accountgroupDescUpdatedAt := accountgroupFields[2].Descriptor()
+	// accountgroup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	accountgroup.DefaultUpdatedAt = accountgroupDescUpdatedAt.Default.(func() time.Time)
+	// accountgroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	accountgroup.UpdateDefaultUpdatedAt = accountgroupDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// accountgroupDescID is the schema descriptor for id field.
+	accountgroupDescID := accountgroupFields[0].Descriptor()
+	// accountgroup.DefaultID holds the default value on creation for the id field.
+	accountgroup.DefaultID = accountgroupDescID.Default.(func() uuid.UUID)
+	addressFields := schema.Address{}.Fields()
+	_ = addressFields
+	// addressDescCreatedAt is the schema descriptor for created_at field.
+	addressDescCreatedAt := addressFields[1].Descriptor()
+	// address.DefaultCreatedAt holds the default value on creation for the created_at field.
+	address.DefaultCreatedAt = addressDescCreatedAt.Default.(func() time.Time)
+	// addressDescUpdatedAt is the schema descriptor for updated_at field.
+	addressDescUpdatedAt := addressFields[2].Descriptor()
+	// address.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	address.DefaultUpdatedAt = addressDescUpdatedAt.Default.(func() time.Time)
+	// address.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	address.UpdateDefaultUpdatedAt = addressDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// addressDescID is the schema descriptor for id field.
+	addressDescID := addressFields[0].Descriptor()
+	// address.DefaultID holds the default value on creation for the id field.
+	address.DefaultID = addressDescID.Default.(func() uuid.UUID)
+	appFields := schema.App{}.Fields()
+	_ = appFields
+	// appDescCreatedAt is the schema descriptor for created_at field.
+	appDescCreatedAt := appFields[1].Descriptor()
+	// app.DefaultCreatedAt holds the default value on creation for the created_at field.
+	app.DefaultCreatedAt = appDescCreatedAt.Default.(func() time.Time)
+	// appDescUpdatedAt is the schema descriptor for updated_at field.
+	appDescUpdatedAt := appFields[2].Descriptor()
+	// app.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	app.DefaultUpdatedAt = appDescUpdatedAt.Default.(func() time.Time)
+	// app.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	app.UpdateDefaultUpdatedAt = appDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// appDescID is the schema descriptor for id field.
+	appDescID := appFields[0].Descriptor()
+	// app.DefaultID holds the default value on creation for the id field.
+	app.DefaultID = appDescID.Default.(func() uuid.UUID)
+	billingFields := schema.Billing{}.Fields()
+	_ = billingFields
+	// billingDescCreatedAt is the schema descriptor for created_at field.
+	billingDescCreatedAt := billingFields[1].Descriptor()
+	// billing.DefaultCreatedAt holds the default value on creation for the created_at field.
+	billing.DefaultCreatedAt = billingDescCreatedAt.Default.(func() time.Time)
+	// billingDescUpdatedAt is the schema descriptor for updated_at field.
+	billingDescUpdatedAt := billingFields[2].Descriptor()
+	// billing.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	billing.DefaultUpdatedAt = billingDescUpdatedAt.Default.(func() time.Time)
+	// billing.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	billing.UpdateDefaultUpdatedAt = billingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// billingDescID is the schema descriptor for id field.
+	billingDescID := billingFields[0].Descriptor()
+	// billing.DefaultID holds the default value on creation for the id field.
+	billing.DefaultID = billingDescID.Default.(func() uuid.UUID)
+	licenseFields := schema.License{}.Fields()
+	_ = licenseFields
+	// licenseDescCreatedAt is the schema descriptor for created_at field.
+	licenseDescCreatedAt := licenseFields[1].Descriptor()
+	// license.DefaultCreatedAt holds the default value on creation for the created_at field.
+	license.DefaultCreatedAt = licenseDescCreatedAt.Default.(func() time.Time)
+	// licenseDescUpdatedAt is the schema descriptor for updated_at field.
+	licenseDescUpdatedAt := licenseFields[2].Descriptor()
+	// license.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	license.DefaultUpdatedAt = licenseDescUpdatedAt.Default.(func() time.Time)
+	// license.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	license.UpdateDefaultUpdatedAt = licenseDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// licenseDescID is the schema descriptor for id field.
+	licenseDescID := licenseFields[0].Descriptor()
+	// license.DefaultID holds the default value on creation for the id field.
+	license.DefaultID = licenseDescID.Default.(func() uuid.UUID)
+	productFields := schema.Product{}.Fields()
+	_ = productFields
+	// productDescCreatedAt is the schema descriptor for created_at field.
+	productDescCreatedAt := productFields[1].Descriptor()
+	// product.DefaultCreatedAt holds the default value on creation for the created_at field.
+	product.DefaultCreatedAt = productDescCreatedAt.Default.(func() time.Time)
+	// productDescUpdatedAt is the schema descriptor for updated_at field.
+	productDescUpdatedAt := productFields[2].Descriptor()
+	// product.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
+	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	product.UpdateDefaultUpdatedAt = productDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// productDescID is the schema descriptor for id field.
+	productDescID := productFields[0].Descriptor()
+	// product.DefaultID holds the default value on creation for the id field.
+	product.DefaultID = productDescID.Default.(func() uuid.UUID)
+	profileFields := schema.Profile{}.Fields()
+	_ = profileFields
+	// profileDescCreatedAt is the schema descriptor for created_at field.
+	profileDescCreatedAt := profileFields[1].Descriptor()
+	// profile.DefaultCreatedAt holds the default value on creation for the created_at field.
+	profile.DefaultCreatedAt = profileDescCreatedAt.Default.(func() time.Time)
+	// profileDescUpdatedAt is the schema descriptor for updated_at field.
+	profileDescUpdatedAt := profileFields[2].Descriptor()
+	// profile.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	profile.DefaultUpdatedAt = profileDescUpdatedAt.Default.(func() time.Time)
+	// profile.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	profile.UpdateDefaultUpdatedAt = profileDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// profileDescID is the schema descriptor for id field.
+	profileDescID := profileFields[0].Descriptor()
+	// profile.DefaultID holds the default value on creation for the id field.
+	profile.DefaultID = profileDescID.Default.(func() uuid.UUID)
+	profilegroupFields := schema.ProfileGroup{}.Fields()
+	_ = profilegroupFields
+	// profilegroupDescCreatedAt is the schema descriptor for created_at field.
+	profilegroupDescCreatedAt := profilegroupFields[1].Descriptor()
+	// profilegroup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	profilegroup.DefaultCreatedAt = profilegroupDescCreatedAt.Default.(func() time.Time)
+	// profilegroupDescUpdatedAt is the schema descriptor for updated_at field.
+	profilegroupDescUpdatedAt := profilegroupFields[2].Descriptor()
+	// profilegroup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	profilegroup.DefaultUpdatedAt = profilegroupDescUpdatedAt.Default.(func() time.Time)
+	// profilegroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	profilegroup.UpdateDefaultUpdatedAt = profilegroupDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// profilegroupDescID is the schema descriptor for id field.
+	profilegroupDescID := profilegroupFields[0].Descriptor()
+	// profilegroup.DefaultID holds the default value on creation for the id field.
+	profilegroup.DefaultID = profilegroupDescID.Default.(func() uuid.UUID)
+	proxyFields := schema.Proxy{}.Fields()
+	_ = proxyFields
+	// proxyDescCreatedAt is the schema descriptor for created_at field.
+	proxyDescCreatedAt := proxyFields[1].Descriptor()
+	// proxy.DefaultCreatedAt holds the default value on creation for the created_at field.
+	proxy.DefaultCreatedAt = proxyDescCreatedAt.Default.(func() time.Time)
+	// proxyDescUpdatedAt is the schema descriptor for updated_at field.
+	proxyDescUpdatedAt := proxyFields[2].Descriptor()
+	// proxy.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	proxy.DefaultUpdatedAt = proxyDescUpdatedAt.Default.(func() time.Time)
+	// proxy.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	proxy.UpdateDefaultUpdatedAt = proxyDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// proxyDescID is the schema descriptor for id field.
+	proxyDescID := proxyFields[0].Descriptor()
+	// proxy.DefaultID holds the default value on creation for the id field.
+	proxy.DefaultID = proxyDescID.Default.(func() uuid.UUID)
+	proxylistFields := schema.ProxyList{}.Fields()
+	_ = proxylistFields
+	// proxylistDescCreatedAt is the schema descriptor for created_at field.
+	proxylistDescCreatedAt := proxylistFields[1].Descriptor()
+	// proxylist.DefaultCreatedAt holds the default value on creation for the created_at field.
+	proxylist.DefaultCreatedAt = proxylistDescCreatedAt.Default.(func() time.Time)
+	// proxylistDescUpdatedAt is the schema descriptor for updated_at field.
+	proxylistDescUpdatedAt := proxylistFields[2].Descriptor()
+	// proxylist.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	proxylist.DefaultUpdatedAt = proxylistDescUpdatedAt.Default.(func() time.Time)
+	// proxylist.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	proxylist.UpdateDefaultUpdatedAt = proxylistDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// proxylistDescID is the schema descriptor for id field.
+	proxylistDescID := proxylistFields[0].Descriptor()
+	// proxylist.DefaultID holds the default value on creation for the id field.
+	proxylist.DefaultID = proxylistDescID.Default.(func() uuid.UUID)
+	settingsFields := schema.Settings{}.Fields()
+	_ = settingsFields
+	// settingsDescCreatedAt is the schema descriptor for created_at field.
+	settingsDescCreatedAt := settingsFields[1].Descriptor()
+	// settings.DefaultCreatedAt holds the default value on creation for the created_at field.
+	settings.DefaultCreatedAt = settingsDescCreatedAt.Default.(func() time.Time)
+	// settingsDescUpdatedAt is the schema descriptor for updated_at field.
+	settingsDescUpdatedAt := settingsFields[2].Descriptor()
+	// settings.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	settings.DefaultUpdatedAt = settingsDescUpdatedAt.Default.(func() time.Time)
+	// settings.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	settings.UpdateDefaultUpdatedAt = settingsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// settingsDescID is the schema descriptor for id field.
+	settingsDescID := settingsFields[0].Descriptor()
+	// settings.DefaultID holds the default value on creation for the id field.
+	settings.DefaultID = settingsDescID.Default.(func() uuid.UUID)
+	shippingFields := schema.Shipping{}.Fields()
+	_ = shippingFields
+	// shippingDescCreatedAt is the schema descriptor for created_at field.
+	shippingDescCreatedAt := shippingFields[1].Descriptor()
+	// shipping.DefaultCreatedAt holds the default value on creation for the created_at field.
+	shipping.DefaultCreatedAt = shippingDescCreatedAt.Default.(func() time.Time)
+	// shippingDescUpdatedAt is the schema descriptor for updated_at field.
+	shippingDescUpdatedAt := shippingFields[2].Descriptor()
+	// shipping.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	shipping.DefaultUpdatedAt = shippingDescUpdatedAt.Default.(func() time.Time)
+	// shipping.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	shipping.UpdateDefaultUpdatedAt = shippingDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// shippingDescID is the schema descriptor for id field.
+	shippingDescID := shippingFields[0].Descriptor()
+	// shipping.DefaultID holds the default value on creation for the id field.
+	shipping.DefaultID = shippingDescID.Default.(func() uuid.UUID)
+	statisticFields := schema.Statistic{}.Fields()
+	_ = statisticFields
+	// statisticDescCreatedAt is the schema descriptor for created_at field.
+	statisticDescCreatedAt := statisticFields[1].Descriptor()
+	// statistic.DefaultCreatedAt holds the default value on creation for the created_at field.
+	statistic.DefaultCreatedAt = statisticDescCreatedAt.Default.(func() time.Time)
+	// statisticDescUpdatedAt is the schema descriptor for updated_at field.
+	statisticDescUpdatedAt := statisticFields[2].Descriptor()
+	// statistic.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	statistic.DefaultUpdatedAt = statisticDescUpdatedAt.Default.(func() time.Time)
+	// statistic.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	statistic.UpdateDefaultUpdatedAt = statisticDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// statisticDescID is the schema descriptor for id field.
+	statisticDescID := statisticFields[0].Descriptor()
+	// statistic.DefaultID holds the default value on creation for the id field.
+	statistic.DefaultID = statisticDescID.Default.(func() uuid.UUID)
+	stripeFields := schema.Stripe{}.Fields()
+	_ = stripeFields
+	// stripeDescCreatedAt is the schema descriptor for created_at field.
+	stripeDescCreatedAt := stripeFields[1].Descriptor()
+	// stripe.DefaultCreatedAt holds the default value on creation for the created_at field.
+	stripe.DefaultCreatedAt = stripeDescCreatedAt.Default.(func() time.Time)
+	// stripeDescUpdatedAt is the schema descriptor for updated_at field.
+	stripeDescUpdatedAt := stripeFields[2].Descriptor()
+	// stripe.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	stripe.DefaultUpdatedAt = stripeDescUpdatedAt.Default.(func() time.Time)
+	// stripe.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	stripe.UpdateDefaultUpdatedAt = stripeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// stripeDescID is the schema descriptor for id field.
+	stripeDescID := stripeFields[0].Descriptor()
+	// stripe.DefaultID holds the default value on creation for the id field.
+	stripe.DefaultID = stripeDescID.Default.(func() uuid.UUID)
+	taskFields := schema.Task{}.Fields()
+	_ = taskFields
+	// taskDescCreatedAt is the schema descriptor for created_at field.
+	taskDescCreatedAt := taskFields[1].Descriptor()
+	// task.DefaultCreatedAt holds the default value on creation for the created_at field.
+	task.DefaultCreatedAt = taskDescCreatedAt.Default.(func() time.Time)
+	// taskDescUpdatedAt is the schema descriptor for updated_at field.
+	taskDescUpdatedAt := taskFields[2].Descriptor()
+	// task.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	task.DefaultUpdatedAt = taskDescUpdatedAt.Default.(func() time.Time)
+	// task.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	task.UpdateDefaultUpdatedAt = taskDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// taskDescID is the schema descriptor for id field.
+	taskDescID := taskFields[0].Descriptor()
+	// task.DefaultID holds the default value on creation for the id field.
+	task.DefaultID = taskDescID.Default.(func() uuid.UUID)
+	taskgroupFields := schema.TaskGroup{}.Fields()
+	_ = taskgroupFields
+	// taskgroupDescCreatedAt is the schema descriptor for created_at field.
+	taskgroupDescCreatedAt := taskgroupFields[1].Descriptor()
+	// taskgroup.DefaultCreatedAt holds the default value on creation for the created_at field.
+	taskgroup.DefaultCreatedAt = taskgroupDescCreatedAt.Default.(func() time.Time)
+	// taskgroupDescUpdatedAt is the schema descriptor for updated_at field.
+	taskgroupDescUpdatedAt := taskgroupFields[2].Descriptor()
+	// taskgroup.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	taskgroup.DefaultUpdatedAt = taskgroupDescUpdatedAt.Default.(func() time.Time)
+	// taskgroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	taskgroup.UpdateDefaultUpdatedAt = taskgroupDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// taskgroupDescID is the schema descriptor for id field.
+	taskgroupDescID := taskgroupFields[0].Descriptor()
+	// taskgroup.DefaultID holds the default value on creation for the id field.
+	taskgroup.DefaultID = taskgroupDescID.Default.(func() uuid.UUID)
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userFields[1].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userFields[2].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescID is the schema descriptor for id field.
+	userDescID := userFields[0].Descriptor()
+	// user.DefaultID holds the default value on creation for the id field.
+	user.DefaultID = userDescID.Default.(func() uuid.UUID)
 }

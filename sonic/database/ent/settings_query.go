@@ -14,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
+	"github.com/google/uuid"
 )
 
 // SettingsQuery is the builder for querying Settings entities.
@@ -110,8 +111,8 @@ func (sq *SettingsQuery) FirstX(ctx context.Context) *Settings {
 
 // FirstID returns the first Settings ID from the query.
 // Returns a *NotFoundError when no Settings ID was found.
-func (sq *SettingsQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (sq *SettingsQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -123,7 +124,7 @@ func (sq *SettingsQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *SettingsQuery) FirstIDX(ctx context.Context) int {
+func (sq *SettingsQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -161,8 +162,8 @@ func (sq *SettingsQuery) OnlyX(ctx context.Context) *Settings {
 // OnlyID is like Only, but returns the only Settings ID in the query.
 // Returns a *NotSingularError when exactly one Settings ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *SettingsQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (sq *SettingsQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -178,7 +179,7 @@ func (sq *SettingsQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *SettingsQuery) OnlyIDX(ctx context.Context) int {
+func (sq *SettingsQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -204,8 +205,8 @@ func (sq *SettingsQuery) AllX(ctx context.Context) []*Settings {
 }
 
 // IDs executes the query and returns a list of Settings IDs.
-func (sq *SettingsQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (sq *SettingsQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := sq.Select(settings.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (sq *SettingsQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SettingsQuery) IDsX(ctx context.Context) []int {
+func (sq *SettingsQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := sq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -291,12 +292,12 @@ func (sq *SettingsQuery) WithApp(opts ...func(*AppQuery)) *SettingsQuery {
 // Example:
 //
 //	var v []struct {
-//		SuccessWebhook string `json:"SuccessWebhook,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Settings.Query().
-//		GroupBy(settings.FieldSuccessWebhook).
+//		GroupBy(settings.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,11 +319,11 @@ func (sq *SettingsQuery) GroupBy(field string, fields ...string) *SettingsGroupB
 // Example:
 //
 //	var v []struct {
-//		SuccessWebhook string `json:"SuccessWebhook,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Settings.Query().
-//		Select(settings.FieldSuccessWebhook).
+//		Select(settings.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
 func (sq *SettingsQuery) Select(field string, fields ...string) *SettingsSelect {
@@ -382,8 +383,8 @@ func (sq *SettingsQuery) sqlAll(ctx context.Context) ([]*Settings, error) {
 	}
 
 	if query := sq.withApp; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Settings)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Settings)
 		for i := range nodes {
 			if nodes[i].app_settings == nil {
 				continue
@@ -432,7 +433,7 @@ func (sq *SettingsQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   settings.Table,
 			Columns: settings.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: settings.FieldID,
 			},
 		},

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -13,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
+	"github.com/google/uuid"
 )
 
 // ProfileCreate is the builder for creating a Profile entity.
@@ -20,6 +22,34 @@ type ProfileCreate struct {
 	config
 	mutation *ProfileMutation
 	hooks    []Hook
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pc *ProfileCreate) SetCreatedAt(t time.Time) *ProfileCreate {
+	pc.mutation.SetCreatedAt(t)
+	return pc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableCreatedAt(t *time.Time) *ProfileCreate {
+	if t != nil {
+		pc.SetCreatedAt(*t)
+	}
+	return pc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pc *ProfileCreate) SetUpdatedAt(t time.Time) *ProfileCreate {
+	pc.mutation.SetUpdatedAt(t)
+	return pc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pc *ProfileCreate) SetNillableUpdatedAt(t *time.Time) *ProfileCreate {
+	if t != nil {
+		pc.SetUpdatedAt(*t)
+	}
+	return pc
 }
 
 // SetName sets the "Name" field.
@@ -34,8 +64,14 @@ func (pc *ProfileCreate) SetEmail(s string) *ProfileCreate {
 	return pc
 }
 
+// SetID sets the "id" field.
+func (pc *ProfileCreate) SetID(u uuid.UUID) *ProfileCreate {
+	pc.mutation.SetID(u)
+	return pc
+}
+
 // SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID.
-func (pc *ProfileCreate) SetProfileGroupID(id int) *ProfileCreate {
+func (pc *ProfileCreate) SetProfileGroupID(id uuid.UUID) *ProfileCreate {
 	pc.mutation.SetProfileGroupID(id)
 	return pc
 }
@@ -46,14 +82,14 @@ func (pc *ProfileCreate) SetProfileGroup(p *ProfileGroup) *ProfileCreate {
 }
 
 // AddShippingIDs adds the "Shipping" edge to the Shipping entity by IDs.
-func (pc *ProfileCreate) AddShippingIDs(ids ...int) *ProfileCreate {
+func (pc *ProfileCreate) AddShippingIDs(ids ...uuid.UUID) *ProfileCreate {
 	pc.mutation.AddShippingIDs(ids...)
 	return pc
 }
 
 // AddShipping adds the "Shipping" edges to the Shipping entity.
 func (pc *ProfileCreate) AddShipping(s ...*Shipping) *ProfileCreate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -61,14 +97,14 @@ func (pc *ProfileCreate) AddShipping(s ...*Shipping) *ProfileCreate {
 }
 
 // AddBillingIDs adds the "Billing" edge to the Billing entity by IDs.
-func (pc *ProfileCreate) AddBillingIDs(ids ...int) *ProfileCreate {
+func (pc *ProfileCreate) AddBillingIDs(ids ...uuid.UUID) *ProfileCreate {
 	pc.mutation.AddBillingIDs(ids...)
 	return pc
 }
 
 // AddBilling adds the "Billing" edges to the Billing entity.
 func (pc *ProfileCreate) AddBilling(b ...*Billing) *ProfileCreate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -86,6 +122,7 @@ func (pc *ProfileCreate) Save(ctx context.Context) (*Profile, error) {
 		err  error
 		node *Profile
 	)
+	pc.defaults()
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -124,8 +161,30 @@ func (pc *ProfileCreate) SaveX(ctx context.Context) *Profile {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (pc *ProfileCreate) defaults() {
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		v := profile.DefaultCreatedAt()
+		pc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		v := profile.DefaultUpdatedAt()
+		pc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := pc.mutation.ID(); !ok {
+		v := profile.DefaultID()
+		pc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProfileCreate) check() error {
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+	}
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "Name", err: errors.New("ent: missing required field \"Name\"")}
 	}
@@ -146,8 +205,6 @@ func (pc *ProfileCreate) sqlSave(ctx context.Context) (*Profile, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -157,11 +214,31 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: profile.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profile.FieldID,
 			},
 		}
 	)
+	if id, ok := pc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := pc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
+	if value, ok := pc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -187,7 +264,7 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -207,7 +284,7 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -226,7 +303,7 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: billing.FieldID,
 				},
 			},
@@ -253,6 +330,7 @@ func (pcb *ProfileCreateBulk) Save(ctx context.Context) ([]*Profile, error) {
 	for i := range pcb.builders {
 		func(i int, root context.Context) {
 			builder := pcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProfileMutation)
 				if !ok {
@@ -278,8 +356,6 @@ func (pcb *ProfileCreateBulk) Save(ctx context.Context) ([]*Profile, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

@@ -3,34 +3,37 @@
 package settings
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Settings {
+func ID(id uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Settings {
+func IDEQ(id uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Settings {
+func IDNEQ(id uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Settings {
+func IDIn(ids ...uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -47,7 +50,7 @@ func IDIn(ids ...int) predicate.Settings {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Settings {
+func IDNotIn(ids ...uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -64,30 +67,44 @@ func IDNotIn(ids ...int) predicate.Settings {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Settings {
+func IDGT(id uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Settings {
+func IDGTE(id uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Settings {
+func IDLT(id uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Settings {
+func IDLTE(id uuid.UUID) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
 	})
 }
 
@@ -106,16 +123,168 @@ func DeclineWebhook(v string) predicate.Settings {
 }
 
 // CheckoutDelay applies equality check predicate on the "CheckoutDelay" field. It's identical to CheckoutDelayEQ.
-func CheckoutDelay(v int) predicate.Settings {
+func CheckoutDelay(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCheckoutDelay), v))
 	})
 }
 
 // ATCDelay applies equality check predicate on the "ATCDelay" field. It's identical to ATCDelayEQ.
-func ATCDelay(v int) predicate.Settings {
+func ATCDelay(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldATCDelay), v))
+	})
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Settings {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Settings(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Settings {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Settings(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Settings {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Settings(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Settings {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Settings(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
+	})
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdatedAt), v))
+	})
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
 	})
 }
 
@@ -342,21 +511,21 @@ func DeclineWebhookContainsFold(v string) predicate.Settings {
 }
 
 // CheckoutDelayEQ applies the EQ predicate on the "CheckoutDelay" field.
-func CheckoutDelayEQ(v int) predicate.Settings {
+func CheckoutDelayEQ(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCheckoutDelay), v))
 	})
 }
 
 // CheckoutDelayNEQ applies the NEQ predicate on the "CheckoutDelay" field.
-func CheckoutDelayNEQ(v int) predicate.Settings {
+func CheckoutDelayNEQ(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldCheckoutDelay), v))
 	})
 }
 
 // CheckoutDelayIn applies the In predicate on the "CheckoutDelay" field.
-func CheckoutDelayIn(vs ...int) predicate.Settings {
+func CheckoutDelayIn(vs ...int32) predicate.Settings {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -373,7 +542,7 @@ func CheckoutDelayIn(vs ...int) predicate.Settings {
 }
 
 // CheckoutDelayNotIn applies the NotIn predicate on the "CheckoutDelay" field.
-func CheckoutDelayNotIn(vs ...int) predicate.Settings {
+func CheckoutDelayNotIn(vs ...int32) predicate.Settings {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -390,49 +559,49 @@ func CheckoutDelayNotIn(vs ...int) predicate.Settings {
 }
 
 // CheckoutDelayGT applies the GT predicate on the "CheckoutDelay" field.
-func CheckoutDelayGT(v int) predicate.Settings {
+func CheckoutDelayGT(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldCheckoutDelay), v))
 	})
 }
 
 // CheckoutDelayGTE applies the GTE predicate on the "CheckoutDelay" field.
-func CheckoutDelayGTE(v int) predicate.Settings {
+func CheckoutDelayGTE(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldCheckoutDelay), v))
 	})
 }
 
 // CheckoutDelayLT applies the LT predicate on the "CheckoutDelay" field.
-func CheckoutDelayLT(v int) predicate.Settings {
+func CheckoutDelayLT(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldCheckoutDelay), v))
 	})
 }
 
 // CheckoutDelayLTE applies the LTE predicate on the "CheckoutDelay" field.
-func CheckoutDelayLTE(v int) predicate.Settings {
+func CheckoutDelayLTE(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCheckoutDelay), v))
 	})
 }
 
 // ATCDelayEQ applies the EQ predicate on the "ATCDelay" field.
-func ATCDelayEQ(v int) predicate.Settings {
+func ATCDelayEQ(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldATCDelay), v))
 	})
 }
 
 // ATCDelayNEQ applies the NEQ predicate on the "ATCDelay" field.
-func ATCDelayNEQ(v int) predicate.Settings {
+func ATCDelayNEQ(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldATCDelay), v))
 	})
 }
 
 // ATCDelayIn applies the In predicate on the "ATCDelay" field.
-func ATCDelayIn(vs ...int) predicate.Settings {
+func ATCDelayIn(vs ...int32) predicate.Settings {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -449,7 +618,7 @@ func ATCDelayIn(vs ...int) predicate.Settings {
 }
 
 // ATCDelayNotIn applies the NotIn predicate on the "ATCDelay" field.
-func ATCDelayNotIn(vs ...int) predicate.Settings {
+func ATCDelayNotIn(vs ...int32) predicate.Settings {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -466,28 +635,28 @@ func ATCDelayNotIn(vs ...int) predicate.Settings {
 }
 
 // ATCDelayGT applies the GT predicate on the "ATCDelay" field.
-func ATCDelayGT(v int) predicate.Settings {
+func ATCDelayGT(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldATCDelay), v))
 	})
 }
 
 // ATCDelayGTE applies the GTE predicate on the "ATCDelay" field.
-func ATCDelayGTE(v int) predicate.Settings {
+func ATCDelayGTE(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldATCDelay), v))
 	})
 }
 
 // ATCDelayLT applies the LT predicate on the "ATCDelay" field.
-func ATCDelayLT(v int) predicate.Settings {
+func ATCDelayLT(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldATCDelay), v))
 	})
 }
 
 // ATCDelayLTE applies the LTE predicate on the "ATCDelay" field.
-func ATCDelayLTE(v int) predicate.Settings {
+func ATCDelayLTE(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldATCDelay), v))
 	})

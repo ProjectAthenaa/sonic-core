@@ -16,6 +16,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/google/uuid"
 )
 
 // ProductQuery is the builder for querying Product entities.
@@ -134,8 +135,8 @@ func (pq *ProductQuery) FirstX(ctx context.Context) *Product {
 
 // FirstID returns the first Product ID from the query.
 // Returns a *NotFoundError when no Product ID was found.
-func (pq *ProductQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProductQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -147,7 +148,7 @@ func (pq *ProductQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *ProductQuery) FirstIDX(ctx context.Context) int {
+func (pq *ProductQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -185,8 +186,8 @@ func (pq *ProductQuery) OnlyX(ctx context.Context) *Product {
 // OnlyID is like Only, but returns the only Product ID in the query.
 // Returns a *NotSingularError when exactly one Product ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *ProductQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProductQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -202,7 +203,7 @@ func (pq *ProductQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *ProductQuery) OnlyIDX(ctx context.Context) int {
+func (pq *ProductQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -228,8 +229,8 @@ func (pq *ProductQuery) AllX(ctx context.Context) []*Product {
 }
 
 // IDs executes the query and returns a list of Product IDs.
-func (pq *ProductQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (pq *ProductQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := pq.Select(product.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -237,7 +238,7 @@ func (pq *ProductQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *ProductQuery) IDsX(ctx context.Context) []int {
+func (pq *ProductQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -327,12 +328,12 @@ func (pq *ProductQuery) WithStatistic(opts ...func(*StatisticQuery)) *ProductQue
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"Name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Product.Query().
-//		GroupBy(product.FieldName).
+//		GroupBy(product.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -354,11 +355,11 @@ func (pq *ProductQuery) GroupBy(field string, fields ...string) *ProductGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"Name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Product.Query().
-//		Select(product.FieldName).
+//		Select(product.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
 func (pq *ProductQuery) Select(field string, fields ...string) *ProductSelect {
@@ -413,15 +414,15 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 
 	if query := pq.withTask; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Product, len(nodes))
+		ids := make(map[uuid.UUID]*Product, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.Task = []*Task{}
 		}
 		var (
-			edgeids []int
-			edges   = make(map[int][]*Product)
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Product)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -433,19 +434,19 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 				s.Where(sql.InValues(product.TaskPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
+				eout, ok := out.(*uuid.UUID)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*sql.NullInt64)
+				ein, ok := in.(*uuid.UUID)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
+				outValue := *eout
+				inValue := *ein
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -478,15 +479,15 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 
 	if query := pq.withStatistic; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Product, len(nodes))
+		ids := make(map[uuid.UUID]*Product, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.Statistic = []*Statistic{}
 		}
 		var (
-			edgeids []int
-			edges   = make(map[int][]*Product)
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Product)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -498,19 +499,19 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 				s.Where(sql.InValues(product.StatisticPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
+				eout, ok := out.(*uuid.UUID)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*sql.NullInt64)
+				ein, ok := in.(*uuid.UUID)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
+				outValue := *eout
+				inValue := *ein
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -563,7 +564,7 @@ func (pq *ProductQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   product.Table,
 			Columns: product.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: product.FieldID,
 			},
 		},

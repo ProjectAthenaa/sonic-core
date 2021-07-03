@@ -6,11 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
+	"github.com/google/uuid"
 )
 
 // BillingCreate is the builder for creating a Billing entity.
@@ -18,6 +20,34 @@ type BillingCreate struct {
 	config
 	mutation *BillingMutation
 	hooks    []Hook
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (bc *BillingCreate) SetCreatedAt(t time.Time) *BillingCreate {
+	bc.mutation.SetCreatedAt(t)
+	return bc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (bc *BillingCreate) SetNillableCreatedAt(t *time.Time) *BillingCreate {
+	if t != nil {
+		bc.SetCreatedAt(*t)
+	}
+	return bc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (bc *BillingCreate) SetUpdatedAt(t time.Time) *BillingCreate {
+	bc.mutation.SetUpdatedAt(t)
+	return bc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (bc *BillingCreate) SetNillableUpdatedAt(t *time.Time) *BillingCreate {
+	if t != nil {
+		bc.SetUpdatedAt(*t)
+	}
+	return bc
 }
 
 // SetCardholderName sets the "CardholderName" field.
@@ -50,15 +80,21 @@ func (bc *BillingCreate) SetCVV(s string) *BillingCreate {
 	return bc
 }
 
+// SetID sets the "id" field.
+func (bc *BillingCreate) SetID(u uuid.UUID) *BillingCreate {
+	bc.mutation.SetID(u)
+	return bc
+}
+
 // AddProfileIDs adds the "Profile" edge to the Profile entity by IDs.
-func (bc *BillingCreate) AddProfileIDs(ids ...int) *BillingCreate {
+func (bc *BillingCreate) AddProfileIDs(ids ...uuid.UUID) *BillingCreate {
 	bc.mutation.AddProfileIDs(ids...)
 	return bc
 }
 
 // AddProfile adds the "Profile" edges to the Profile entity.
 func (bc *BillingCreate) AddProfile(p ...*Profile) *BillingCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -76,6 +112,7 @@ func (bc *BillingCreate) Save(ctx context.Context) (*Billing, error) {
 		err  error
 		node *Billing
 	)
+	bc.defaults()
 	if len(bc.hooks) == 0 {
 		if err = bc.check(); err != nil {
 			return nil, err
@@ -114,8 +151,30 @@ func (bc *BillingCreate) SaveX(ctx context.Context) *Billing {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (bc *BillingCreate) defaults() {
+	if _, ok := bc.mutation.CreatedAt(); !ok {
+		v := billing.DefaultCreatedAt()
+		bc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := bc.mutation.UpdatedAt(); !ok {
+		v := billing.DefaultUpdatedAt()
+		bc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := bc.mutation.ID(); !ok {
+		v := billing.DefaultID()
+		bc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (bc *BillingCreate) check() error {
+	if _, ok := bc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := bc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+	}
 	if _, ok := bc.mutation.CardholderName(); !ok {
 		return &ValidationError{Name: "CardholderName", err: errors.New("ent: missing required field \"CardholderName\"")}
 	}
@@ -145,8 +204,6 @@ func (bc *BillingCreate) sqlSave(ctx context.Context) (*Billing, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -156,11 +213,31 @@ func (bc *BillingCreate) createSpec() (*Billing, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: billing.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: billing.FieldID,
 			},
 		}
 	)
+	if id, ok := bc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := bc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: billing.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
+	if value, ok := bc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: billing.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
 	if value, ok := bc.mutation.CardholderName(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -210,7 +287,7 @@ func (bc *BillingCreate) createSpec() (*Billing, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profile.FieldID,
 				},
 			},
@@ -237,6 +314,7 @@ func (bcb *BillingCreateBulk) Save(ctx context.Context) ([]*Billing, error) {
 	for i := range bcb.builders {
 		func(i int, root context.Context) {
 			builder := bcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BillingMutation)
 				if !ok {
@@ -262,8 +340,6 @@ func (bcb *BillingCreateBulk) Save(ctx context.Context) ([]*Billing, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

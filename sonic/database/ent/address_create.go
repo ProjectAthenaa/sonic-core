@@ -6,11 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
+	"github.com/google/uuid"
 )
 
 // AddressCreate is the builder for creating a Address entity.
@@ -18,6 +20,34 @@ type AddressCreate struct {
 	config
 	mutation *AddressMutation
 	hooks    []Hook
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (ac *AddressCreate) SetCreatedAt(t time.Time) *AddressCreate {
+	ac.mutation.SetCreatedAt(t)
+	return ac
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ac *AddressCreate) SetNillableCreatedAt(t *time.Time) *AddressCreate {
+	if t != nil {
+		ac.SetCreatedAt(*t)
+	}
+	return ac
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (ac *AddressCreate) SetUpdatedAt(t time.Time) *AddressCreate {
+	ac.mutation.SetUpdatedAt(t)
+	return ac
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ac *AddressCreate) SetNillableUpdatedAt(t *time.Time) *AddressCreate {
+	if t != nil {
+		ac.SetUpdatedAt(*t)
+	}
+	return ac
 }
 
 // SetAddressLine sets the "AddressLine" field.
@@ -64,15 +94,21 @@ func (ac *AddressCreate) SetZIP(s string) *AddressCreate {
 	return ac
 }
 
+// SetID sets the "id" field.
+func (ac *AddressCreate) SetID(u uuid.UUID) *AddressCreate {
+	ac.mutation.SetID(u)
+	return ac
+}
+
 // AddShippingAddresIDs adds the "ShippingAddress" edge to the Shipping entity by IDs.
-func (ac *AddressCreate) AddShippingAddresIDs(ids ...int) *AddressCreate {
+func (ac *AddressCreate) AddShippingAddresIDs(ids ...uuid.UUID) *AddressCreate {
 	ac.mutation.AddShippingAddresIDs(ids...)
 	return ac
 }
 
 // AddShippingAddress adds the "ShippingAddress" edges to the Shipping entity.
 func (ac *AddressCreate) AddShippingAddress(s ...*Shipping) *AddressCreate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -80,14 +116,14 @@ func (ac *AddressCreate) AddShippingAddress(s ...*Shipping) *AddressCreate {
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
-func (ac *AddressCreate) AddBillingAddresIDs(ids ...int) *AddressCreate {
+func (ac *AddressCreate) AddBillingAddresIDs(ids ...uuid.UUID) *AddressCreate {
 	ac.mutation.AddBillingAddresIDs(ids...)
 	return ac
 }
 
 // AddBillingAddress adds the "BillingAddress" edges to the Shipping entity.
 func (ac *AddressCreate) AddBillingAddress(s ...*Shipping) *AddressCreate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -105,6 +141,7 @@ func (ac *AddressCreate) Save(ctx context.Context) (*Address, error) {
 		err  error
 		node *Address
 	)
+	ac.defaults()
 	if len(ac.hooks) == 0 {
 		if err = ac.check(); err != nil {
 			return nil, err
@@ -143,8 +180,30 @@ func (ac *AddressCreate) SaveX(ctx context.Context) *Address {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (ac *AddressCreate) defaults() {
+	if _, ok := ac.mutation.CreatedAt(); !ok {
+		v := address.DefaultCreatedAt()
+		ac.mutation.SetCreatedAt(v)
+	}
+	if _, ok := ac.mutation.UpdatedAt(); !ok {
+		v := address.DefaultUpdatedAt()
+		ac.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := ac.mutation.ID(); !ok {
+		v := address.DefaultID()
+		ac.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ac *AddressCreate) check() error {
+	if _, ok := ac.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := ac.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+	}
 	if _, ok := ac.mutation.AddressLine(); !ok {
 		return &ValidationError{Name: "AddressLine", err: errors.New("ent: missing required field \"AddressLine\"")}
 	}
@@ -174,8 +233,6 @@ func (ac *AddressCreate) sqlSave(ctx context.Context) (*Address, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -185,11 +242,31 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: address.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: address.FieldID,
 			},
 		}
 	)
+	if id, ok := ac.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := ac.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: address.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
+	if value, ok := ac.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: address.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
 	if value, ok := ac.mutation.AddressLine(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -247,7 +324,7 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -266,7 +343,7 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -293,6 +370,7 @@ func (acb *AddressCreateBulk) Save(ctx context.Context) ([]*Address, error) {
 	for i := range acb.builders {
 		func(i int, root context.Context) {
 			builder := acb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AddressMutation)
 				if !ok {
@@ -318,8 +396,6 @@ func (acb *AddressCreateBulk) Save(ctx context.Context) ([]*Address, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

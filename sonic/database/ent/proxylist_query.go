@@ -17,6 +17,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/google/uuid"
 )
 
 // ProxyListQuery is the builder for querying ProxyList entities.
@@ -158,8 +159,8 @@ func (plq *ProxyListQuery) FirstX(ctx context.Context) *ProxyList {
 
 // FirstID returns the first ProxyList ID from the query.
 // Returns a *NotFoundError when no ProxyList ID was found.
-func (plq *ProxyListQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (plq *ProxyListQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = plq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -171,7 +172,7 @@ func (plq *ProxyListQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (plq *ProxyListQuery) FirstIDX(ctx context.Context) int {
+func (plq *ProxyListQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := plq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -209,8 +210,8 @@ func (plq *ProxyListQuery) OnlyX(ctx context.Context) *ProxyList {
 // OnlyID is like Only, but returns the only ProxyList ID in the query.
 // Returns a *NotSingularError when exactly one ProxyList ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (plq *ProxyListQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (plq *ProxyListQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = plq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -226,7 +227,7 @@ func (plq *ProxyListQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (plq *ProxyListQuery) OnlyIDX(ctx context.Context) int {
+func (plq *ProxyListQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := plq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -252,8 +253,8 @@ func (plq *ProxyListQuery) AllX(ctx context.Context) []*ProxyList {
 }
 
 // IDs executes the query and returns a list of ProxyList IDs.
-func (plq *ProxyListQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (plq *ProxyListQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := plq.Select(proxylist.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -261,7 +262,7 @@ func (plq *ProxyListQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (plq *ProxyListQuery) IDsX(ctx context.Context) []int {
+func (plq *ProxyListQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := plq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -363,12 +364,12 @@ func (plq *ProxyListQuery) WithTask(opts ...func(*TaskQuery)) *ProxyListQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"Name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.ProxyList.Query().
-//		GroupBy(proxylist.FieldName).
+//		GroupBy(proxylist.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -390,11 +391,11 @@ func (plq *ProxyListQuery) GroupBy(field string, fields ...string) *ProxyListGro
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"Name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.ProxyList.Query().
-//		Select(proxylist.FieldName).
+//		Select(proxylist.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
 func (plq *ProxyListQuery) Select(field string, fields ...string) *ProxyListSelect {
@@ -450,15 +451,15 @@ func (plq *ProxyListQuery) sqlAll(ctx context.Context) ([]*ProxyList, error) {
 
 	if query := plq.withApp; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*ProxyList, len(nodes))
+		ids := make(map[uuid.UUID]*ProxyList, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.App = []*App{}
 		}
 		var (
-			edgeids []int
-			edges   = make(map[int][]*ProxyList)
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*ProxyList)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -470,19 +471,19 @@ func (plq *ProxyListQuery) sqlAll(ctx context.Context) ([]*ProxyList, error) {
 				s.Where(sql.InValues(proxylist.AppPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
+				eout, ok := out.(*uuid.UUID)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*sql.NullInt64)
+				ein, ok := in.(*uuid.UUID)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
+				outValue := *eout
+				inValue := *ein
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -515,7 +516,7 @@ func (plq *ProxyListQuery) sqlAll(ctx context.Context) ([]*ProxyList, error) {
 
 	if query := plq.withProxies; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*ProxyList)
+		nodeids := make(map[uuid.UUID]*ProxyList)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
@@ -544,15 +545,15 @@ func (plq *ProxyListQuery) sqlAll(ctx context.Context) ([]*ProxyList, error) {
 
 	if query := plq.withTask; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*ProxyList, len(nodes))
+		ids := make(map[uuid.UUID]*ProxyList, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.Task = []*Task{}
 		}
 		var (
-			edgeids []int
-			edges   = make(map[int][]*ProxyList)
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*ProxyList)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -564,19 +565,19 @@ func (plq *ProxyListQuery) sqlAll(ctx context.Context) ([]*ProxyList, error) {
 				s.Where(sql.InValues(proxylist.TaskPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
+				eout, ok := out.(*uuid.UUID)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*sql.NullInt64)
+				ein, ok := in.(*uuid.UUID)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
+				outValue := *eout
+				inValue := *ein
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -629,7 +630,7 @@ func (plq *ProxyListQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   proxylist.Table,
 			Columns: proxylist.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: proxylist.FieldID,
 			},
 		},

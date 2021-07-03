@@ -5,16 +5,22 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
+	"github.com/google/uuid"
 )
 
 // Address is the model entity for the Address schema.
 type Address struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// AddressLine holds the value of the "AddressLine" field.
 	AddressLine string `json:"AddressLine,omitempty"`
 	// AddressLine2 holds the value of the "AddressLine2" field.
@@ -66,10 +72,12 @@ func (*Address) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case address.FieldID:
-			values[i] = new(sql.NullInt64)
 		case address.FieldAddressLine, address.FieldAddressLine2, address.FieldCountry, address.FieldState, address.FieldCity, address.FieldZIP:
 			values[i] = new(sql.NullString)
+		case address.FieldCreatedAt, address.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case address.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Address", columns[i])
 		}
@@ -86,11 +94,23 @@ func (a *Address) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case address.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				a.ID = *value
 			}
-			a.ID = int(value.Int64)
+		case address.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				a.CreatedAt = value.Time
+			}
+		case address.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				a.UpdatedAt = value.Time
+			}
 		case address.FieldAddressLine:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field AddressLine", values[i])
@@ -165,6 +185,10 @@ func (a *Address) String() string {
 	var builder strings.Builder
 	builder.WriteString("Address(")
 	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", AddressLine=")
 	builder.WriteString(a.AddressLine)
 	builder.WriteString(", AddressLine2=")

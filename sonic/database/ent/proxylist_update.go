@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -14,6 +15,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/google/uuid"
 )
 
 // ProxyListUpdate is the builder for updating ProxyList entities.
@@ -26,6 +28,26 @@ type ProxyListUpdate struct {
 // Where adds a new predicate for the ProxyListUpdate builder.
 func (plu *ProxyListUpdate) Where(ps ...predicate.ProxyList) *ProxyListUpdate {
 	plu.mutation.predicates = append(plu.mutation.predicates, ps...)
+	return plu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (plu *ProxyListUpdate) SetCreatedAt(t time.Time) *ProxyListUpdate {
+	plu.mutation.SetCreatedAt(t)
+	return plu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (plu *ProxyListUpdate) SetNillableCreatedAt(t *time.Time) *ProxyListUpdate {
+	if t != nil {
+		plu.SetCreatedAt(*t)
+	}
+	return plu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (plu *ProxyListUpdate) SetUpdatedAt(t time.Time) *ProxyListUpdate {
+	plu.mutation.SetUpdatedAt(t)
 	return plu
 }
 
@@ -42,14 +64,14 @@ func (plu *ProxyListUpdate) SetType(pr proxylist.Type) *ProxyListUpdate {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (plu *ProxyListUpdate) AddAppIDs(ids ...int) *ProxyListUpdate {
+func (plu *ProxyListUpdate) AddAppIDs(ids ...uuid.UUID) *ProxyListUpdate {
 	plu.mutation.AddAppIDs(ids...)
 	return plu
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (plu *ProxyListUpdate) AddApp(a ...*App) *ProxyListUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -57,14 +79,14 @@ func (plu *ProxyListUpdate) AddApp(a ...*App) *ProxyListUpdate {
 }
 
 // AddProxyIDs adds the "Proxies" edge to the Proxy entity by IDs.
-func (plu *ProxyListUpdate) AddProxyIDs(ids ...int) *ProxyListUpdate {
+func (plu *ProxyListUpdate) AddProxyIDs(ids ...uuid.UUID) *ProxyListUpdate {
 	plu.mutation.AddProxyIDs(ids...)
 	return plu
 }
 
 // AddProxies adds the "Proxies" edges to the Proxy entity.
 func (plu *ProxyListUpdate) AddProxies(p ...*Proxy) *ProxyListUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -72,14 +94,14 @@ func (plu *ProxyListUpdate) AddProxies(p ...*Proxy) *ProxyListUpdate {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (plu *ProxyListUpdate) AddTaskIDs(ids ...int) *ProxyListUpdate {
+func (plu *ProxyListUpdate) AddTaskIDs(ids ...uuid.UUID) *ProxyListUpdate {
 	plu.mutation.AddTaskIDs(ids...)
 	return plu
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (plu *ProxyListUpdate) AddTask(t ...*Task) *ProxyListUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -98,14 +120,14 @@ func (plu *ProxyListUpdate) ClearApp() *ProxyListUpdate {
 }
 
 // RemoveAppIDs removes the "App" edge to App entities by IDs.
-func (plu *ProxyListUpdate) RemoveAppIDs(ids ...int) *ProxyListUpdate {
+func (plu *ProxyListUpdate) RemoveAppIDs(ids ...uuid.UUID) *ProxyListUpdate {
 	plu.mutation.RemoveAppIDs(ids...)
 	return plu
 }
 
 // RemoveApp removes "App" edges to App entities.
 func (plu *ProxyListUpdate) RemoveApp(a ...*App) *ProxyListUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -119,14 +141,14 @@ func (plu *ProxyListUpdate) ClearProxies() *ProxyListUpdate {
 }
 
 // RemoveProxyIDs removes the "Proxies" edge to Proxy entities by IDs.
-func (plu *ProxyListUpdate) RemoveProxyIDs(ids ...int) *ProxyListUpdate {
+func (plu *ProxyListUpdate) RemoveProxyIDs(ids ...uuid.UUID) *ProxyListUpdate {
 	plu.mutation.RemoveProxyIDs(ids...)
 	return plu
 }
 
 // RemoveProxies removes "Proxies" edges to Proxy entities.
 func (plu *ProxyListUpdate) RemoveProxies(p ...*Proxy) *ProxyListUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -140,14 +162,14 @@ func (plu *ProxyListUpdate) ClearTask() *ProxyListUpdate {
 }
 
 // RemoveTaskIDs removes the "Task" edge to Task entities by IDs.
-func (plu *ProxyListUpdate) RemoveTaskIDs(ids ...int) *ProxyListUpdate {
+func (plu *ProxyListUpdate) RemoveTaskIDs(ids ...uuid.UUID) *ProxyListUpdate {
 	plu.mutation.RemoveTaskIDs(ids...)
 	return plu
 }
 
 // RemoveTask removes "Task" edges to Task entities.
 func (plu *ProxyListUpdate) RemoveTask(t ...*Task) *ProxyListUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -160,6 +182,7 @@ func (plu *ProxyListUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	plu.defaults()
 	if len(plu.hooks) == 0 {
 		if err = plu.check(); err != nil {
 			return 0, err
@@ -211,6 +234,14 @@ func (plu *ProxyListUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (plu *ProxyListUpdate) defaults() {
+	if _, ok := plu.mutation.UpdatedAt(); !ok {
+		v := proxylist.UpdateDefaultUpdatedAt()
+		plu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (plu *ProxyListUpdate) check() error {
 	if v, ok := plu.mutation.GetType(); ok {
@@ -227,7 +258,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   proxylist.Table,
 			Columns: proxylist.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: proxylist.FieldID,
 			},
 		},
@@ -238,6 +269,20 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := plu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxylist.FieldCreatedAt,
+		})
+	}
+	if value, ok := plu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxylist.FieldUpdatedAt,
+		})
 	}
 	if value, ok := plu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -262,7 +307,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -278,7 +323,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -297,7 +342,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -316,7 +361,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxy.FieldID,
 				},
 			},
@@ -332,7 +377,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxy.FieldID,
 				},
 			},
@@ -351,7 +396,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxy.FieldID,
 				},
 			},
@@ -370,7 +415,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -386,7 +431,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -405,7 +450,7 @@ func (plu *ProxyListUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -434,6 +479,26 @@ type ProxyListUpdateOne struct {
 	mutation *ProxyListMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (pluo *ProxyListUpdateOne) SetCreatedAt(t time.Time) *ProxyListUpdateOne {
+	pluo.mutation.SetCreatedAt(t)
+	return pluo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pluo *ProxyListUpdateOne) SetNillableCreatedAt(t *time.Time) *ProxyListUpdateOne {
+	if t != nil {
+		pluo.SetCreatedAt(*t)
+	}
+	return pluo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pluo *ProxyListUpdateOne) SetUpdatedAt(t time.Time) *ProxyListUpdateOne {
+	pluo.mutation.SetUpdatedAt(t)
+	return pluo
+}
+
 // SetName sets the "Name" field.
 func (pluo *ProxyListUpdateOne) SetName(s string) *ProxyListUpdateOne {
 	pluo.mutation.SetName(s)
@@ -447,14 +512,14 @@ func (pluo *ProxyListUpdateOne) SetType(pr proxylist.Type) *ProxyListUpdateOne {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (pluo *ProxyListUpdateOne) AddAppIDs(ids ...int) *ProxyListUpdateOne {
+func (pluo *ProxyListUpdateOne) AddAppIDs(ids ...uuid.UUID) *ProxyListUpdateOne {
 	pluo.mutation.AddAppIDs(ids...)
 	return pluo
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (pluo *ProxyListUpdateOne) AddApp(a ...*App) *ProxyListUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -462,14 +527,14 @@ func (pluo *ProxyListUpdateOne) AddApp(a ...*App) *ProxyListUpdateOne {
 }
 
 // AddProxyIDs adds the "Proxies" edge to the Proxy entity by IDs.
-func (pluo *ProxyListUpdateOne) AddProxyIDs(ids ...int) *ProxyListUpdateOne {
+func (pluo *ProxyListUpdateOne) AddProxyIDs(ids ...uuid.UUID) *ProxyListUpdateOne {
 	pluo.mutation.AddProxyIDs(ids...)
 	return pluo
 }
 
 // AddProxies adds the "Proxies" edges to the Proxy entity.
 func (pluo *ProxyListUpdateOne) AddProxies(p ...*Proxy) *ProxyListUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -477,14 +542,14 @@ func (pluo *ProxyListUpdateOne) AddProxies(p ...*Proxy) *ProxyListUpdateOne {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (pluo *ProxyListUpdateOne) AddTaskIDs(ids ...int) *ProxyListUpdateOne {
+func (pluo *ProxyListUpdateOne) AddTaskIDs(ids ...uuid.UUID) *ProxyListUpdateOne {
 	pluo.mutation.AddTaskIDs(ids...)
 	return pluo
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (pluo *ProxyListUpdateOne) AddTask(t ...*Task) *ProxyListUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -503,14 +568,14 @@ func (pluo *ProxyListUpdateOne) ClearApp() *ProxyListUpdateOne {
 }
 
 // RemoveAppIDs removes the "App" edge to App entities by IDs.
-func (pluo *ProxyListUpdateOne) RemoveAppIDs(ids ...int) *ProxyListUpdateOne {
+func (pluo *ProxyListUpdateOne) RemoveAppIDs(ids ...uuid.UUID) *ProxyListUpdateOne {
 	pluo.mutation.RemoveAppIDs(ids...)
 	return pluo
 }
 
 // RemoveApp removes "App" edges to App entities.
 func (pluo *ProxyListUpdateOne) RemoveApp(a ...*App) *ProxyListUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -524,14 +589,14 @@ func (pluo *ProxyListUpdateOne) ClearProxies() *ProxyListUpdateOne {
 }
 
 // RemoveProxyIDs removes the "Proxies" edge to Proxy entities by IDs.
-func (pluo *ProxyListUpdateOne) RemoveProxyIDs(ids ...int) *ProxyListUpdateOne {
+func (pluo *ProxyListUpdateOne) RemoveProxyIDs(ids ...uuid.UUID) *ProxyListUpdateOne {
 	pluo.mutation.RemoveProxyIDs(ids...)
 	return pluo
 }
 
 // RemoveProxies removes "Proxies" edges to Proxy entities.
 func (pluo *ProxyListUpdateOne) RemoveProxies(p ...*Proxy) *ProxyListUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -545,14 +610,14 @@ func (pluo *ProxyListUpdateOne) ClearTask() *ProxyListUpdateOne {
 }
 
 // RemoveTaskIDs removes the "Task" edge to Task entities by IDs.
-func (pluo *ProxyListUpdateOne) RemoveTaskIDs(ids ...int) *ProxyListUpdateOne {
+func (pluo *ProxyListUpdateOne) RemoveTaskIDs(ids ...uuid.UUID) *ProxyListUpdateOne {
 	pluo.mutation.RemoveTaskIDs(ids...)
 	return pluo
 }
 
 // RemoveTask removes "Task" edges to Task entities.
 func (pluo *ProxyListUpdateOne) RemoveTask(t ...*Task) *ProxyListUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -572,6 +637,7 @@ func (pluo *ProxyListUpdateOne) Save(ctx context.Context) (*ProxyList, error) {
 		err  error
 		node *ProxyList
 	)
+	pluo.defaults()
 	if len(pluo.hooks) == 0 {
 		if err = pluo.check(); err != nil {
 			return nil, err
@@ -623,6 +689,14 @@ func (pluo *ProxyListUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pluo *ProxyListUpdateOne) defaults() {
+	if _, ok := pluo.mutation.UpdatedAt(); !ok {
+		v := proxylist.UpdateDefaultUpdatedAt()
+		pluo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pluo *ProxyListUpdateOne) check() error {
 	if v, ok := pluo.mutation.GetType(); ok {
@@ -639,7 +713,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Table:   proxylist.Table,
 			Columns: proxylist.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: proxylist.FieldID,
 			},
 		},
@@ -668,6 +742,20 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			}
 		}
 	}
+	if value, ok := pluo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxylist.FieldCreatedAt,
+		})
+	}
+	if value, ok := pluo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxylist.FieldUpdatedAt,
+		})
+	}
 	if value, ok := pluo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -691,7 +779,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -707,7 +795,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -726,7 +814,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -745,7 +833,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxy.FieldID,
 				},
 			},
@@ -761,7 +849,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxy.FieldID,
 				},
 			},
@@ -780,7 +868,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxy.FieldID,
 				},
 			},
@@ -799,7 +887,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -815,7 +903,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -834,7 +922,7 @@ func (pluo *ProxyListUpdateOne) sqlSave(ctx context.Context) (_node *ProxyList, 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},

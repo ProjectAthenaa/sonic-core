@@ -5,23 +5,29 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
+	"github.com/google/uuid"
 )
 
 // App is the model entity for the App schema.
 type App struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// FirstLogin holds the value of the "first_login" field.
 	FirstLogin bool `json:"first_login,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AppQuery when eager-loading is set.
 	Edges    AppEdges `json:"edges"`
-	user_app *int
+	user_app *uuid.UUID
 }
 
 // AppEdges holds the relations/edges for other nodes in the graph.
@@ -109,10 +115,12 @@ func (*App) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case app.FieldFirstLogin:
 			values[i] = new(sql.NullBool)
+		case app.FieldCreatedAt, app.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		case app.FieldID:
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		case app.ForeignKeys[0]: // user_app
-			values[i] = new(sql.NullInt64)
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type App", columns[i])
 		}
@@ -129,11 +137,23 @@ func (a *App) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case app.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				a.ID = *value
 			}
-			a.ID = int(value.Int64)
+		case app.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				a.CreatedAt = value.Time
+			}
+		case app.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				a.UpdatedAt = value.Time
+			}
 		case app.FieldFirstLogin:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field first_login", values[i])
@@ -141,11 +161,10 @@ func (a *App) assignValues(columns []string, values []interface{}) error {
 				a.FirstLogin = value.Bool
 			}
 		case app.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_app", value)
-			} else if value.Valid {
-				a.user_app = new(int)
-				*a.user_app = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field user_app", values[i])
+			} else if value != nil {
+				a.user_app = value
 			}
 		}
 	}
@@ -205,6 +224,10 @@ func (a *App) String() string {
 	var builder strings.Builder
 	builder.WriteString("App(")
 	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", first_login=")
 	builder.WriteString(fmt.Sprintf("%v", a.FirstLogin))
 	builder.WriteByte(')')

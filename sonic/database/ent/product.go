@@ -5,10 +5,12 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -16,7 +18,11 @@ import (
 type Product struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "Name" field.
 	Name string `json:"Name,omitempty"`
 	// Image holds the value of the "Image" field.
@@ -30,7 +36,7 @@ type Product struct {
 	// Link holds the value of the "Link" field.
 	Link string `json:"Link,omitempty"`
 	// Quantity holds the value of the "Quantity" field.
-	Quantity int `json:"Quantity,omitempty"`
+	Quantity int32 `json:"Quantity,omitempty"`
 	// Sizes holds the value of the "Sizes" field.
 	Sizes pq.StringArray `json:"Sizes,omitempty"`
 	// Colors holds the value of the "Colors" field.
@@ -82,10 +88,14 @@ func (*Product) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(pq.StringArray)
 		case product.FieldMetadata:
 			values[i] = new(sonic.Map)
-		case product.FieldID, product.FieldQuantity:
+		case product.FieldQuantity:
 			values[i] = new(sql.NullInt64)
 		case product.FieldName, product.FieldImage, product.FieldLookupType, product.FieldLink, product.FieldSite:
 			values[i] = new(sql.NullString)
+		case product.FieldCreatedAt, product.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case product.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Product", columns[i])
 		}
@@ -102,11 +112,23 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case product.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				pr.ID = *value
 			}
-			pr.ID = int(value.Int64)
+		case product.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				pr.CreatedAt = value.Time
+			}
+		case product.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				pr.UpdatedAt = value.Time
+			}
 		case product.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field Name", values[i])
@@ -147,7 +169,7 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field Quantity", values[i])
 			} else if value.Valid {
-				pr.Quantity = int(value.Int64)
+				pr.Quantity = int32(value.Int64)
 			}
 		case product.FieldSizes:
 			if value, ok := values[i].(*pq.StringArray); !ok {
@@ -211,6 +233,10 @@ func (pr *Product) String() string {
 	var builder strings.Builder
 	builder.WriteString("Product(")
 	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(pr.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Name=")
 	builder.WriteString(pr.Name)
 	builder.WriteString(", Image=")

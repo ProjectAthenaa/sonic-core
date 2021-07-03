@@ -69,7 +69,7 @@ func (pld *ProxyListDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: proxylist.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: proxylist.FieldID,
 			},
 		},

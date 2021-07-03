@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -14,6 +15,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -27,6 +29,26 @@ type ProductUpdate struct {
 // Where adds a new predicate for the ProductUpdate builder.
 func (pu *ProductUpdate) Where(ps ...predicate.Product) *ProductUpdate {
 	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
+	return pu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pu *ProductUpdate) SetCreatedAt(t time.Time) *ProductUpdate {
+	pu.mutation.SetCreatedAt(t)
+	return pu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pu *ProductUpdate) SetNillableCreatedAt(t *time.Time) *ProductUpdate {
+	if t != nil {
+		pu.SetCreatedAt(*t)
+	}
+	return pu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pu *ProductUpdate) SetUpdatedAt(t time.Time) *ProductUpdate {
+	pu.mutation.SetUpdatedAt(t)
 	return pu
 }
 
@@ -107,14 +129,14 @@ func (pu *ProductUpdate) ClearLink() *ProductUpdate {
 }
 
 // SetQuantity sets the "Quantity" field.
-func (pu *ProductUpdate) SetQuantity(i int) *ProductUpdate {
+func (pu *ProductUpdate) SetQuantity(i int32) *ProductUpdate {
 	pu.mutation.ResetQuantity()
 	pu.mutation.SetQuantity(i)
 	return pu
 }
 
 // AddQuantity adds i to the "Quantity" field.
-func (pu *ProductUpdate) AddQuantity(i int) *ProductUpdate {
+func (pu *ProductUpdate) AddQuantity(i int32) *ProductUpdate {
 	pu.mutation.AddQuantity(i)
 	return pu
 }
@@ -144,14 +166,14 @@ func (pu *ProductUpdate) SetMetadata(s sonic.Map) *ProductUpdate {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (pu *ProductUpdate) AddTaskIDs(ids ...int) *ProductUpdate {
+func (pu *ProductUpdate) AddTaskIDs(ids ...uuid.UUID) *ProductUpdate {
 	pu.mutation.AddTaskIDs(ids...)
 	return pu
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (pu *ProductUpdate) AddTask(t ...*Task) *ProductUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -159,14 +181,14 @@ func (pu *ProductUpdate) AddTask(t ...*Task) *ProductUpdate {
 }
 
 // AddStatisticIDs adds the "Statistic" edge to the Statistic entity by IDs.
-func (pu *ProductUpdate) AddStatisticIDs(ids ...int) *ProductUpdate {
+func (pu *ProductUpdate) AddStatisticIDs(ids ...uuid.UUID) *ProductUpdate {
 	pu.mutation.AddStatisticIDs(ids...)
 	return pu
 }
 
 // AddStatistic adds the "Statistic" edges to the Statistic entity.
 func (pu *ProductUpdate) AddStatistic(s ...*Statistic) *ProductUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -185,14 +207,14 @@ func (pu *ProductUpdate) ClearTask() *ProductUpdate {
 }
 
 // RemoveTaskIDs removes the "Task" edge to Task entities by IDs.
-func (pu *ProductUpdate) RemoveTaskIDs(ids ...int) *ProductUpdate {
+func (pu *ProductUpdate) RemoveTaskIDs(ids ...uuid.UUID) *ProductUpdate {
 	pu.mutation.RemoveTaskIDs(ids...)
 	return pu
 }
 
 // RemoveTask removes "Task" edges to Task entities.
 func (pu *ProductUpdate) RemoveTask(t ...*Task) *ProductUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -206,14 +228,14 @@ func (pu *ProductUpdate) ClearStatistic() *ProductUpdate {
 }
 
 // RemoveStatisticIDs removes the "Statistic" edge to Statistic entities by IDs.
-func (pu *ProductUpdate) RemoveStatisticIDs(ids ...int) *ProductUpdate {
+func (pu *ProductUpdate) RemoveStatisticIDs(ids ...uuid.UUID) *ProductUpdate {
 	pu.mutation.RemoveStatisticIDs(ids...)
 	return pu
 }
 
 // RemoveStatistic removes "Statistic" edges to Statistic entities.
 func (pu *ProductUpdate) RemoveStatistic(s ...*Statistic) *ProductUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -226,6 +248,7 @@ func (pu *ProductUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	pu.defaults()
 	if len(pu.hooks) == 0 {
 		if err = pu.check(); err != nil {
 			return 0, err
@@ -277,6 +300,14 @@ func (pu *ProductUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pu *ProductUpdate) defaults() {
+	if _, ok := pu.mutation.UpdatedAt(); !ok {
+		v := product.UpdateDefaultUpdatedAt()
+		pu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pu *ProductUpdate) check() error {
 	if v, ok := pu.mutation.LookupType(); ok {
@@ -298,7 +329,7 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   product.Table,
 			Columns: product.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: product.FieldID,
 			},
 		},
@@ -309,6 +340,20 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: product.FieldCreatedAt,
+		})
+	}
+	if value, ok := pu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: product.FieldUpdatedAt,
+		})
 	}
 	if value, ok := pu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -378,14 +423,14 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.Quantity(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: product.FieldQuantity,
 		})
 	}
 	if value, ok := pu.mutation.AddedQuantity(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: product.FieldQuantity,
 		})
@@ -427,7 +472,7 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -443,7 +488,7 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -462,7 +507,7 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -481,7 +526,7 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: statistic.FieldID,
 				},
 			},
@@ -497,7 +542,7 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: statistic.FieldID,
 				},
 			},
@@ -516,7 +561,7 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: statistic.FieldID,
 				},
 			},
@@ -543,6 +588,26 @@ type ProductUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProductMutation
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (puo *ProductUpdateOne) SetCreatedAt(t time.Time) *ProductUpdateOne {
+	puo.mutation.SetCreatedAt(t)
+	return puo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (puo *ProductUpdateOne) SetNillableCreatedAt(t *time.Time) *ProductUpdateOne {
+	if t != nil {
+		puo.SetCreatedAt(*t)
+	}
+	return puo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (puo *ProductUpdateOne) SetUpdatedAt(t time.Time) *ProductUpdateOne {
+	puo.mutation.SetUpdatedAt(t)
+	return puo
 }
 
 // SetName sets the "Name" field.
@@ -622,14 +687,14 @@ func (puo *ProductUpdateOne) ClearLink() *ProductUpdateOne {
 }
 
 // SetQuantity sets the "Quantity" field.
-func (puo *ProductUpdateOne) SetQuantity(i int) *ProductUpdateOne {
+func (puo *ProductUpdateOne) SetQuantity(i int32) *ProductUpdateOne {
 	puo.mutation.ResetQuantity()
 	puo.mutation.SetQuantity(i)
 	return puo
 }
 
 // AddQuantity adds i to the "Quantity" field.
-func (puo *ProductUpdateOne) AddQuantity(i int) *ProductUpdateOne {
+func (puo *ProductUpdateOne) AddQuantity(i int32) *ProductUpdateOne {
 	puo.mutation.AddQuantity(i)
 	return puo
 }
@@ -659,14 +724,14 @@ func (puo *ProductUpdateOne) SetMetadata(s sonic.Map) *ProductUpdateOne {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (puo *ProductUpdateOne) AddTaskIDs(ids ...int) *ProductUpdateOne {
+func (puo *ProductUpdateOne) AddTaskIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	puo.mutation.AddTaskIDs(ids...)
 	return puo
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (puo *ProductUpdateOne) AddTask(t ...*Task) *ProductUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -674,14 +739,14 @@ func (puo *ProductUpdateOne) AddTask(t ...*Task) *ProductUpdateOne {
 }
 
 // AddStatisticIDs adds the "Statistic" edge to the Statistic entity by IDs.
-func (puo *ProductUpdateOne) AddStatisticIDs(ids ...int) *ProductUpdateOne {
+func (puo *ProductUpdateOne) AddStatisticIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	puo.mutation.AddStatisticIDs(ids...)
 	return puo
 }
 
 // AddStatistic adds the "Statistic" edges to the Statistic entity.
 func (puo *ProductUpdateOne) AddStatistic(s ...*Statistic) *ProductUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -700,14 +765,14 @@ func (puo *ProductUpdateOne) ClearTask() *ProductUpdateOne {
 }
 
 // RemoveTaskIDs removes the "Task" edge to Task entities by IDs.
-func (puo *ProductUpdateOne) RemoveTaskIDs(ids ...int) *ProductUpdateOne {
+func (puo *ProductUpdateOne) RemoveTaskIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	puo.mutation.RemoveTaskIDs(ids...)
 	return puo
 }
 
 // RemoveTask removes "Task" edges to Task entities.
 func (puo *ProductUpdateOne) RemoveTask(t ...*Task) *ProductUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -721,14 +786,14 @@ func (puo *ProductUpdateOne) ClearStatistic() *ProductUpdateOne {
 }
 
 // RemoveStatisticIDs removes the "Statistic" edge to Statistic entities by IDs.
-func (puo *ProductUpdateOne) RemoveStatisticIDs(ids ...int) *ProductUpdateOne {
+func (puo *ProductUpdateOne) RemoveStatisticIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	puo.mutation.RemoveStatisticIDs(ids...)
 	return puo
 }
 
 // RemoveStatistic removes "Statistic" edges to Statistic entities.
 func (puo *ProductUpdateOne) RemoveStatistic(s ...*Statistic) *ProductUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -748,6 +813,7 @@ func (puo *ProductUpdateOne) Save(ctx context.Context) (*Product, error) {
 		err  error
 		node *Product
 	)
+	puo.defaults()
 	if len(puo.hooks) == 0 {
 		if err = puo.check(); err != nil {
 			return nil, err
@@ -799,6 +865,14 @@ func (puo *ProductUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (puo *ProductUpdateOne) defaults() {
+	if _, ok := puo.mutation.UpdatedAt(); !ok {
+		v := product.UpdateDefaultUpdatedAt()
+		puo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (puo *ProductUpdateOne) check() error {
 	if v, ok := puo.mutation.LookupType(); ok {
@@ -820,7 +894,7 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Table:   product.Table,
 			Columns: product.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: product.FieldID,
 			},
 		},
@@ -848,6 +922,20 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: product.FieldCreatedAt,
+		})
+	}
+	if value, ok := puo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: product.FieldUpdatedAt,
+		})
 	}
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -917,14 +1005,14 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 	}
 	if value, ok := puo.mutation.Quantity(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: product.FieldQuantity,
 		})
 	}
 	if value, ok := puo.mutation.AddedQuantity(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeInt32,
 			Value:  value,
 			Column: product.FieldQuantity,
 		})
@@ -966,7 +1054,7 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -982,7 +1070,7 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -1001,7 +1089,7 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -1020,7 +1108,7 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: statistic.FieldID,
 				},
 			},
@@ -1036,7 +1124,7 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: statistic.FieldID,
 				},
 			},
@@ -1055,7 +1143,7 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: statistic.FieldID,
 				},
 			},

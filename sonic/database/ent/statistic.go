@@ -5,16 +5,22 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
+	"github.com/google/uuid"
 )
 
 // Statistic is the model entity for the Statistic schema.
 type Statistic struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Type holds the value of the "Type" field.
 	Type statistic.Type `json:"Type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -56,10 +62,12 @@ func (*Statistic) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case statistic.FieldID:
-			values[i] = new(sql.NullInt64)
 		case statistic.FieldType:
 			values[i] = new(sql.NullString)
+		case statistic.FieldCreatedAt, statistic.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
+		case statistic.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Statistic", columns[i])
 		}
@@ -76,11 +84,23 @@ func (s *Statistic) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case statistic.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				s.ID = *value
 			}
-			s.ID = int(value.Int64)
+		case statistic.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				s.CreatedAt = value.Time
+			}
+		case statistic.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				s.UpdatedAt = value.Time
+			}
 		case statistic.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field Type", values[i])
@@ -125,6 +145,10 @@ func (s *Statistic) String() string {
 	var builder strings.Builder
 	builder.WriteString("Statistic(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(s.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(s.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Type=")
 	builder.WriteString(fmt.Sprintf("%v", s.Type))
 	builder.WriteByte(')')

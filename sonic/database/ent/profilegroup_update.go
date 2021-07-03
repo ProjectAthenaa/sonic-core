@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -14,6 +15,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/google/uuid"
 )
 
 // ProfileGroupUpdate is the builder for updating ProfileGroup entities.
@@ -29,6 +31,26 @@ func (pgu *ProfileGroupUpdate) Where(ps ...predicate.ProfileGroup) *ProfileGroup
 	return pgu
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (pgu *ProfileGroupUpdate) SetCreatedAt(t time.Time) *ProfileGroupUpdate {
+	pgu.mutation.SetCreatedAt(t)
+	return pgu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pgu *ProfileGroupUpdate) SetNillableCreatedAt(t *time.Time) *ProfileGroupUpdate {
+	if t != nil {
+		pgu.SetCreatedAt(*t)
+	}
+	return pgu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pgu *ProfileGroupUpdate) SetUpdatedAt(t time.Time) *ProfileGroupUpdate {
+	pgu.mutation.SetUpdatedAt(t)
+	return pgu
+}
+
 // SetName sets the "Name" field.
 func (pgu *ProfileGroupUpdate) SetName(s string) *ProfileGroupUpdate {
 	pgu.mutation.SetName(s)
@@ -36,14 +58,14 @@ func (pgu *ProfileGroupUpdate) SetName(s string) *ProfileGroupUpdate {
 }
 
 // AddProfileIDs adds the "Profiles" edge to the Profile entity by IDs.
-func (pgu *ProfileGroupUpdate) AddProfileIDs(ids ...int) *ProfileGroupUpdate {
+func (pgu *ProfileGroupUpdate) AddProfileIDs(ids ...uuid.UUID) *ProfileGroupUpdate {
 	pgu.mutation.AddProfileIDs(ids...)
 	return pgu
 }
 
 // AddProfiles adds the "Profiles" edges to the Profile entity.
 func (pgu *ProfileGroupUpdate) AddProfiles(p ...*Profile) *ProfileGroupUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -51,14 +73,14 @@ func (pgu *ProfileGroupUpdate) AddProfiles(p ...*Profile) *ProfileGroupUpdate {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (pgu *ProfileGroupUpdate) AddAppIDs(ids ...int) *ProfileGroupUpdate {
+func (pgu *ProfileGroupUpdate) AddAppIDs(ids ...uuid.UUID) *ProfileGroupUpdate {
 	pgu.mutation.AddAppIDs(ids...)
 	return pgu
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (pgu *ProfileGroupUpdate) AddApp(a ...*App) *ProfileGroupUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -66,14 +88,14 @@ func (pgu *ProfileGroupUpdate) AddApp(a ...*App) *ProfileGroupUpdate {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (pgu *ProfileGroupUpdate) AddTaskIDs(ids ...int) *ProfileGroupUpdate {
+func (pgu *ProfileGroupUpdate) AddTaskIDs(ids ...uuid.UUID) *ProfileGroupUpdate {
 	pgu.mutation.AddTaskIDs(ids...)
 	return pgu
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (pgu *ProfileGroupUpdate) AddTask(t ...*Task) *ProfileGroupUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -92,14 +114,14 @@ func (pgu *ProfileGroupUpdate) ClearProfiles() *ProfileGroupUpdate {
 }
 
 // RemoveProfileIDs removes the "Profiles" edge to Profile entities by IDs.
-func (pgu *ProfileGroupUpdate) RemoveProfileIDs(ids ...int) *ProfileGroupUpdate {
+func (pgu *ProfileGroupUpdate) RemoveProfileIDs(ids ...uuid.UUID) *ProfileGroupUpdate {
 	pgu.mutation.RemoveProfileIDs(ids...)
 	return pgu
 }
 
 // RemoveProfiles removes "Profiles" edges to Profile entities.
 func (pgu *ProfileGroupUpdate) RemoveProfiles(p ...*Profile) *ProfileGroupUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -113,14 +135,14 @@ func (pgu *ProfileGroupUpdate) ClearApp() *ProfileGroupUpdate {
 }
 
 // RemoveAppIDs removes the "App" edge to App entities by IDs.
-func (pgu *ProfileGroupUpdate) RemoveAppIDs(ids ...int) *ProfileGroupUpdate {
+func (pgu *ProfileGroupUpdate) RemoveAppIDs(ids ...uuid.UUID) *ProfileGroupUpdate {
 	pgu.mutation.RemoveAppIDs(ids...)
 	return pgu
 }
 
 // RemoveApp removes "App" edges to App entities.
 func (pgu *ProfileGroupUpdate) RemoveApp(a ...*App) *ProfileGroupUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -134,14 +156,14 @@ func (pgu *ProfileGroupUpdate) ClearTask() *ProfileGroupUpdate {
 }
 
 // RemoveTaskIDs removes the "Task" edge to Task entities by IDs.
-func (pgu *ProfileGroupUpdate) RemoveTaskIDs(ids ...int) *ProfileGroupUpdate {
+func (pgu *ProfileGroupUpdate) RemoveTaskIDs(ids ...uuid.UUID) *ProfileGroupUpdate {
 	pgu.mutation.RemoveTaskIDs(ids...)
 	return pgu
 }
 
 // RemoveTask removes "Task" edges to Task entities.
 func (pgu *ProfileGroupUpdate) RemoveTask(t ...*Task) *ProfileGroupUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -154,6 +176,7 @@ func (pgu *ProfileGroupUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	pgu.defaults()
 	if len(pgu.hooks) == 0 {
 		affected, err = pgu.sqlSave(ctx)
 	} else {
@@ -199,13 +222,21 @@ func (pgu *ProfileGroupUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pgu *ProfileGroupUpdate) defaults() {
+	if _, ok := pgu.mutation.UpdatedAt(); !ok {
+		v := profilegroup.UpdateDefaultUpdatedAt()
+		pgu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   profilegroup.Table,
 			Columns: profilegroup.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profilegroup.FieldID,
 			},
 		},
@@ -216,6 +247,20 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pgu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profilegroup.FieldCreatedAt,
+		})
+	}
+	if value, ok := pgu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profilegroup.FieldUpdatedAt,
+		})
 	}
 	if value, ok := pgu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -233,7 +278,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profile.FieldID,
 				},
 			},
@@ -249,7 +294,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profile.FieldID,
 				},
 			},
@@ -268,7 +313,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profile.FieldID,
 				},
 			},
@@ -287,7 +332,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -303,7 +348,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -322,7 +367,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -341,7 +386,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -357,7 +402,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -376,7 +421,7 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -405,6 +450,26 @@ type ProfileGroupUpdateOne struct {
 	mutation *ProfileGroupMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (pguo *ProfileGroupUpdateOne) SetCreatedAt(t time.Time) *ProfileGroupUpdateOne {
+	pguo.mutation.SetCreatedAt(t)
+	return pguo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pguo *ProfileGroupUpdateOne) SetNillableCreatedAt(t *time.Time) *ProfileGroupUpdateOne {
+	if t != nil {
+		pguo.SetCreatedAt(*t)
+	}
+	return pguo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pguo *ProfileGroupUpdateOne) SetUpdatedAt(t time.Time) *ProfileGroupUpdateOne {
+	pguo.mutation.SetUpdatedAt(t)
+	return pguo
+}
+
 // SetName sets the "Name" field.
 func (pguo *ProfileGroupUpdateOne) SetName(s string) *ProfileGroupUpdateOne {
 	pguo.mutation.SetName(s)
@@ -412,14 +477,14 @@ func (pguo *ProfileGroupUpdateOne) SetName(s string) *ProfileGroupUpdateOne {
 }
 
 // AddProfileIDs adds the "Profiles" edge to the Profile entity by IDs.
-func (pguo *ProfileGroupUpdateOne) AddProfileIDs(ids ...int) *ProfileGroupUpdateOne {
+func (pguo *ProfileGroupUpdateOne) AddProfileIDs(ids ...uuid.UUID) *ProfileGroupUpdateOne {
 	pguo.mutation.AddProfileIDs(ids...)
 	return pguo
 }
 
 // AddProfiles adds the "Profiles" edges to the Profile entity.
 func (pguo *ProfileGroupUpdateOne) AddProfiles(p ...*Profile) *ProfileGroupUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -427,14 +492,14 @@ func (pguo *ProfileGroupUpdateOne) AddProfiles(p ...*Profile) *ProfileGroupUpdat
 }
 
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (pguo *ProfileGroupUpdateOne) AddAppIDs(ids ...int) *ProfileGroupUpdateOne {
+func (pguo *ProfileGroupUpdateOne) AddAppIDs(ids ...uuid.UUID) *ProfileGroupUpdateOne {
 	pguo.mutation.AddAppIDs(ids...)
 	return pguo
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (pguo *ProfileGroupUpdateOne) AddApp(a ...*App) *ProfileGroupUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -442,14 +507,14 @@ func (pguo *ProfileGroupUpdateOne) AddApp(a ...*App) *ProfileGroupUpdateOne {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (pguo *ProfileGroupUpdateOne) AddTaskIDs(ids ...int) *ProfileGroupUpdateOne {
+func (pguo *ProfileGroupUpdateOne) AddTaskIDs(ids ...uuid.UUID) *ProfileGroupUpdateOne {
 	pguo.mutation.AddTaskIDs(ids...)
 	return pguo
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (pguo *ProfileGroupUpdateOne) AddTask(t ...*Task) *ProfileGroupUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -468,14 +533,14 @@ func (pguo *ProfileGroupUpdateOne) ClearProfiles() *ProfileGroupUpdateOne {
 }
 
 // RemoveProfileIDs removes the "Profiles" edge to Profile entities by IDs.
-func (pguo *ProfileGroupUpdateOne) RemoveProfileIDs(ids ...int) *ProfileGroupUpdateOne {
+func (pguo *ProfileGroupUpdateOne) RemoveProfileIDs(ids ...uuid.UUID) *ProfileGroupUpdateOne {
 	pguo.mutation.RemoveProfileIDs(ids...)
 	return pguo
 }
 
 // RemoveProfiles removes "Profiles" edges to Profile entities.
 func (pguo *ProfileGroupUpdateOne) RemoveProfiles(p ...*Profile) *ProfileGroupUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -489,14 +554,14 @@ func (pguo *ProfileGroupUpdateOne) ClearApp() *ProfileGroupUpdateOne {
 }
 
 // RemoveAppIDs removes the "App" edge to App entities by IDs.
-func (pguo *ProfileGroupUpdateOne) RemoveAppIDs(ids ...int) *ProfileGroupUpdateOne {
+func (pguo *ProfileGroupUpdateOne) RemoveAppIDs(ids ...uuid.UUID) *ProfileGroupUpdateOne {
 	pguo.mutation.RemoveAppIDs(ids...)
 	return pguo
 }
 
 // RemoveApp removes "App" edges to App entities.
 func (pguo *ProfileGroupUpdateOne) RemoveApp(a ...*App) *ProfileGroupUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -510,14 +575,14 @@ func (pguo *ProfileGroupUpdateOne) ClearTask() *ProfileGroupUpdateOne {
 }
 
 // RemoveTaskIDs removes the "Task" edge to Task entities by IDs.
-func (pguo *ProfileGroupUpdateOne) RemoveTaskIDs(ids ...int) *ProfileGroupUpdateOne {
+func (pguo *ProfileGroupUpdateOne) RemoveTaskIDs(ids ...uuid.UUID) *ProfileGroupUpdateOne {
 	pguo.mutation.RemoveTaskIDs(ids...)
 	return pguo
 }
 
 // RemoveTask removes "Task" edges to Task entities.
 func (pguo *ProfileGroupUpdateOne) RemoveTask(t ...*Task) *ProfileGroupUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -537,6 +602,7 @@ func (pguo *ProfileGroupUpdateOne) Save(ctx context.Context) (*ProfileGroup, err
 		err  error
 		node *ProfileGroup
 	)
+	pguo.defaults()
 	if len(pguo.hooks) == 0 {
 		node, err = pguo.sqlSave(ctx)
 	} else {
@@ -582,13 +648,21 @@ func (pguo *ProfileGroupUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pguo *ProfileGroupUpdateOne) defaults() {
+	if _, ok := pguo.mutation.UpdatedAt(); !ok {
+		v := profilegroup.UpdateDefaultUpdatedAt()
+		pguo.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileGroup, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   profilegroup.Table,
 			Columns: profilegroup.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profilegroup.FieldID,
 			},
 		},
@@ -617,6 +691,20 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			}
 		}
 	}
+	if value, ok := pguo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profilegroup.FieldCreatedAt,
+		})
+	}
+	if value, ok := pguo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profilegroup.FieldUpdatedAt,
+		})
+	}
 	if value, ok := pguo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -633,7 +721,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profile.FieldID,
 				},
 			},
@@ -649,7 +737,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profile.FieldID,
 				},
 			},
@@ -668,7 +756,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profile.FieldID,
 				},
 			},
@@ -687,7 +775,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -703,7 +791,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -722,7 +810,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -741,7 +829,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -757,7 +845,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -776,7 +864,7 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},

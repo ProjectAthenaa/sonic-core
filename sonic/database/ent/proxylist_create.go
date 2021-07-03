@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -13,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/google/uuid"
 )
 
 // ProxyListCreate is the builder for creating a ProxyList entity.
@@ -20,6 +22,34 @@ type ProxyListCreate struct {
 	config
 	mutation *ProxyListMutation
 	hooks    []Hook
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (plc *ProxyListCreate) SetCreatedAt(t time.Time) *ProxyListCreate {
+	plc.mutation.SetCreatedAt(t)
+	return plc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (plc *ProxyListCreate) SetNillableCreatedAt(t *time.Time) *ProxyListCreate {
+	if t != nil {
+		plc.SetCreatedAt(*t)
+	}
+	return plc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (plc *ProxyListCreate) SetUpdatedAt(t time.Time) *ProxyListCreate {
+	plc.mutation.SetUpdatedAt(t)
+	return plc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (plc *ProxyListCreate) SetNillableUpdatedAt(t *time.Time) *ProxyListCreate {
+	if t != nil {
+		plc.SetUpdatedAt(*t)
+	}
+	return plc
 }
 
 // SetName sets the "Name" field.
@@ -34,15 +64,21 @@ func (plc *ProxyListCreate) SetType(pr proxylist.Type) *ProxyListCreate {
 	return plc
 }
 
+// SetID sets the "id" field.
+func (plc *ProxyListCreate) SetID(u uuid.UUID) *ProxyListCreate {
+	plc.mutation.SetID(u)
+	return plc
+}
+
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (plc *ProxyListCreate) AddAppIDs(ids ...int) *ProxyListCreate {
+func (plc *ProxyListCreate) AddAppIDs(ids ...uuid.UUID) *ProxyListCreate {
 	plc.mutation.AddAppIDs(ids...)
 	return plc
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (plc *ProxyListCreate) AddApp(a ...*App) *ProxyListCreate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -50,14 +86,14 @@ func (plc *ProxyListCreate) AddApp(a ...*App) *ProxyListCreate {
 }
 
 // AddProxyIDs adds the "Proxies" edge to the Proxy entity by IDs.
-func (plc *ProxyListCreate) AddProxyIDs(ids ...int) *ProxyListCreate {
+func (plc *ProxyListCreate) AddProxyIDs(ids ...uuid.UUID) *ProxyListCreate {
 	plc.mutation.AddProxyIDs(ids...)
 	return plc
 }
 
 // AddProxies adds the "Proxies" edges to the Proxy entity.
 func (plc *ProxyListCreate) AddProxies(p ...*Proxy) *ProxyListCreate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -65,14 +101,14 @@ func (plc *ProxyListCreate) AddProxies(p ...*Proxy) *ProxyListCreate {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (plc *ProxyListCreate) AddTaskIDs(ids ...int) *ProxyListCreate {
+func (plc *ProxyListCreate) AddTaskIDs(ids ...uuid.UUID) *ProxyListCreate {
 	plc.mutation.AddTaskIDs(ids...)
 	return plc
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (plc *ProxyListCreate) AddTask(t ...*Task) *ProxyListCreate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -90,6 +126,7 @@ func (plc *ProxyListCreate) Save(ctx context.Context) (*ProxyList, error) {
 		err  error
 		node *ProxyList
 	)
+	plc.defaults()
 	if len(plc.hooks) == 0 {
 		if err = plc.check(); err != nil {
 			return nil, err
@@ -128,8 +165,30 @@ func (plc *ProxyListCreate) SaveX(ctx context.Context) *ProxyList {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (plc *ProxyListCreate) defaults() {
+	if _, ok := plc.mutation.CreatedAt(); !ok {
+		v := proxylist.DefaultCreatedAt()
+		plc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := plc.mutation.UpdatedAt(); !ok {
+		v := proxylist.DefaultUpdatedAt()
+		plc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := plc.mutation.ID(); !ok {
+		v := proxylist.DefaultID()
+		plc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (plc *ProxyListCreate) check() error {
+	if _, ok := plc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := plc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+	}
 	if _, ok := plc.mutation.Name(); !ok {
 		return &ValidationError{Name: "Name", err: errors.New("ent: missing required field \"Name\"")}
 	}
@@ -152,8 +211,6 @@ func (plc *ProxyListCreate) sqlSave(ctx context.Context) (*ProxyList, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -163,11 +220,31 @@ func (plc *ProxyListCreate) createSpec() (*ProxyList, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: proxylist.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: proxylist.FieldID,
 			},
 		}
 	)
+	if id, ok := plc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := plc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxylist.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
+	if value, ok := plc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: proxylist.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
 	if value, ok := plc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -193,7 +270,7 @@ func (plc *ProxyListCreate) createSpec() (*ProxyList, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: app.FieldID,
 				},
 			},
@@ -212,7 +289,7 @@ func (plc *ProxyListCreate) createSpec() (*ProxyList, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxy.FieldID,
 				},
 			},
@@ -231,7 +308,7 @@ func (plc *ProxyListCreate) createSpec() (*ProxyList, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: task.FieldID,
 				},
 			},
@@ -258,6 +335,7 @@ func (plcb *ProxyListCreateBulk) Save(ctx context.Context) ([]*ProxyList, error)
 	for i := range plcb.builders {
 		func(i int, root context.Context) {
 			builder := plcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProxyListMutation)
 				if !ok {
@@ -283,8 +361,6 @@ func (plcb *ProxyListCreateBulk) Save(ctx context.Context) ([]*ProxyList, error)
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

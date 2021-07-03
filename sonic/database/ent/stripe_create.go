@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
+	"github.com/google/uuid"
 )
 
 // StripeCreate is the builder for creating a Stripe entity.
@@ -19,6 +20,34 @@ type StripeCreate struct {
 	config
 	mutation *StripeMutation
 	hooks    []Hook
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (sc *StripeCreate) SetCreatedAt(t time.Time) *StripeCreate {
+	sc.mutation.SetCreatedAt(t)
+	return sc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (sc *StripeCreate) SetNillableCreatedAt(t *time.Time) *StripeCreate {
+	if t != nil {
+		sc.SetCreatedAt(*t)
+	}
+	return sc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (sc *StripeCreate) SetUpdatedAt(t time.Time) *StripeCreate {
+	sc.mutation.SetUpdatedAt(t)
+	return sc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (sc *StripeCreate) SetNillableUpdatedAt(t *time.Time) *StripeCreate {
+	if t != nil {
+		sc.SetUpdatedAt(*t)
+	}
+	return sc
 }
 
 // SetCustomerID sets the "CustomerID" field.
@@ -55,14 +84,20 @@ func (sc *StripeCreate) SetNillableRenewalDate(t *time.Time) *StripeCreate {
 	return sc
 }
 
+// SetID sets the "id" field.
+func (sc *StripeCreate) SetID(u uuid.UUID) *StripeCreate {
+	sc.mutation.SetID(u)
+	return sc
+}
+
 // SetLicenseID sets the "License" edge to the License entity by ID.
-func (sc *StripeCreate) SetLicenseID(id int) *StripeCreate {
+func (sc *StripeCreate) SetLicenseID(id uuid.UUID) *StripeCreate {
 	sc.mutation.SetLicenseID(id)
 	return sc
 }
 
 // SetNillableLicenseID sets the "License" edge to the License entity by ID if the given value is not nil.
-func (sc *StripeCreate) SetNillableLicenseID(id *int) *StripeCreate {
+func (sc *StripeCreate) SetNillableLicenseID(id *uuid.UUID) *StripeCreate {
 	if id != nil {
 		sc = sc.SetLicenseID(*id)
 	}
@@ -85,6 +120,7 @@ func (sc *StripeCreate) Save(ctx context.Context) (*Stripe, error) {
 		err  error
 		node *Stripe
 	)
+	sc.defaults()
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err
@@ -123,8 +159,30 @@ func (sc *StripeCreate) SaveX(ctx context.Context) *Stripe {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (sc *StripeCreate) defaults() {
+	if _, ok := sc.mutation.CreatedAt(); !ok {
+		v := stripe.DefaultCreatedAt()
+		sc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := sc.mutation.UpdatedAt(); !ok {
+		v := stripe.DefaultUpdatedAt()
+		sc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := sc.mutation.ID(); !ok {
+		v := stripe.DefaultID()
+		sc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (sc *StripeCreate) check() error {
+	if _, ok := sc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := sc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+	}
 	if _, ok := sc.mutation.CustomerID(); !ok {
 		return &ValidationError{Name: "CustomerID", err: errors.New("ent: missing required field \"CustomerID\"")}
 	}
@@ -139,8 +197,6 @@ func (sc *StripeCreate) sqlSave(ctx context.Context) (*Stripe, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -150,11 +206,31 @@ func (sc *StripeCreate) createSpec() (*Stripe, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: stripe.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: stripe.FieldID,
 			},
 		}
 	)
+	if id, ok := sc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := sc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: stripe.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
+	if value, ok := sc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: stripe.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
+	}
 	if value, ok := sc.mutation.CustomerID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -188,7 +264,7 @@ func (sc *StripeCreate) createSpec() (*Stripe, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: license.FieldID,
 				},
 			},
@@ -216,6 +292,7 @@ func (scb *StripeCreateBulk) Save(ctx context.Context) ([]*Stripe, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*StripeMutation)
 				if !ok {
@@ -241,8 +318,6 @@ func (scb *StripeCreateBulk) Save(ctx context.Context) ([]*Stripe, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

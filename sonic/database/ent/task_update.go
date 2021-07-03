@@ -16,6 +16,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
+	"github.com/google/uuid"
 )
 
 // TaskUpdate is the builder for updating Task entities.
@@ -28,6 +29,26 @@ type TaskUpdate struct {
 // Where adds a new predicate for the TaskUpdate builder.
 func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 	tu.mutation.predicates = append(tu.mutation.predicates, ps...)
+	return tu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (tu *TaskUpdate) SetCreatedAt(t time.Time) *TaskUpdate {
+	tu.mutation.SetCreatedAt(t)
+	return tu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tu *TaskUpdate) SetNillableCreatedAt(t *time.Time) *TaskUpdate {
+	if t != nil {
+		tu.SetCreatedAt(*t)
+	}
+	return tu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (tu *TaskUpdate) SetUpdatedAt(t time.Time) *TaskUpdate {
+	tu.mutation.SetUpdatedAt(t)
 	return tu
 }
 
@@ -52,14 +73,14 @@ func (tu *TaskUpdate) ClearStartTime() *TaskUpdate {
 }
 
 // AddProductIDs adds the "Product" edge to the Product entity by IDs.
-func (tu *TaskUpdate) AddProductIDs(ids ...int) *TaskUpdate {
+func (tu *TaskUpdate) AddProductIDs(ids ...uuid.UUID) *TaskUpdate {
 	tu.mutation.AddProductIDs(ids...)
 	return tu
 }
 
 // AddProduct adds the "Product" edges to the Product entity.
 func (tu *TaskUpdate) AddProduct(p ...*Product) *TaskUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -67,14 +88,14 @@ func (tu *TaskUpdate) AddProduct(p ...*Product) *TaskUpdate {
 }
 
 // AddProxyListIDs adds the "ProxyList" edge to the ProxyList entity by IDs.
-func (tu *TaskUpdate) AddProxyListIDs(ids ...int) *TaskUpdate {
+func (tu *TaskUpdate) AddProxyListIDs(ids ...uuid.UUID) *TaskUpdate {
 	tu.mutation.AddProxyListIDs(ids...)
 	return tu
 }
 
 // AddProxyList adds the "ProxyList" edges to the ProxyList entity.
 func (tu *TaskUpdate) AddProxyList(p ...*ProxyList) *TaskUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -82,14 +103,14 @@ func (tu *TaskUpdate) AddProxyList(p ...*ProxyList) *TaskUpdate {
 }
 
 // AddProfileGroupIDs adds the "ProfileGroup" edge to the ProfileGroup entity by IDs.
-func (tu *TaskUpdate) AddProfileGroupIDs(ids ...int) *TaskUpdate {
+func (tu *TaskUpdate) AddProfileGroupIDs(ids ...uuid.UUID) *TaskUpdate {
 	tu.mutation.AddProfileGroupIDs(ids...)
 	return tu
 }
 
 // AddProfileGroup adds the "ProfileGroup" edges to the ProfileGroup entity.
 func (tu *TaskUpdate) AddProfileGroup(p ...*ProfileGroup) *TaskUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -97,14 +118,14 @@ func (tu *TaskUpdate) AddProfileGroup(p ...*ProfileGroup) *TaskUpdate {
 }
 
 // AddTaskGroupIDs adds the "TaskGroup" edge to the TaskGroup entity by IDs.
-func (tu *TaskUpdate) AddTaskGroupIDs(ids ...int) *TaskUpdate {
+func (tu *TaskUpdate) AddTaskGroupIDs(ids ...uuid.UUID) *TaskUpdate {
 	tu.mutation.AddTaskGroupIDs(ids...)
 	return tu
 }
 
 // AddTaskGroup adds the "TaskGroup" edges to the TaskGroup entity.
 func (tu *TaskUpdate) AddTaskGroup(t ...*TaskGroup) *TaskUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -123,14 +144,14 @@ func (tu *TaskUpdate) ClearProduct() *TaskUpdate {
 }
 
 // RemoveProductIDs removes the "Product" edge to Product entities by IDs.
-func (tu *TaskUpdate) RemoveProductIDs(ids ...int) *TaskUpdate {
+func (tu *TaskUpdate) RemoveProductIDs(ids ...uuid.UUID) *TaskUpdate {
 	tu.mutation.RemoveProductIDs(ids...)
 	return tu
 }
 
 // RemoveProduct removes "Product" edges to Product entities.
 func (tu *TaskUpdate) RemoveProduct(p ...*Product) *TaskUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -144,14 +165,14 @@ func (tu *TaskUpdate) ClearProxyList() *TaskUpdate {
 }
 
 // RemoveProxyListIDs removes the "ProxyList" edge to ProxyList entities by IDs.
-func (tu *TaskUpdate) RemoveProxyListIDs(ids ...int) *TaskUpdate {
+func (tu *TaskUpdate) RemoveProxyListIDs(ids ...uuid.UUID) *TaskUpdate {
 	tu.mutation.RemoveProxyListIDs(ids...)
 	return tu
 }
 
 // RemoveProxyList removes "ProxyList" edges to ProxyList entities.
 func (tu *TaskUpdate) RemoveProxyList(p ...*ProxyList) *TaskUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -165,14 +186,14 @@ func (tu *TaskUpdate) ClearProfileGroup() *TaskUpdate {
 }
 
 // RemoveProfileGroupIDs removes the "ProfileGroup" edge to ProfileGroup entities by IDs.
-func (tu *TaskUpdate) RemoveProfileGroupIDs(ids ...int) *TaskUpdate {
+func (tu *TaskUpdate) RemoveProfileGroupIDs(ids ...uuid.UUID) *TaskUpdate {
 	tu.mutation.RemoveProfileGroupIDs(ids...)
 	return tu
 }
 
 // RemoveProfileGroup removes "ProfileGroup" edges to ProfileGroup entities.
 func (tu *TaskUpdate) RemoveProfileGroup(p ...*ProfileGroup) *TaskUpdate {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -186,14 +207,14 @@ func (tu *TaskUpdate) ClearTaskGroup() *TaskUpdate {
 }
 
 // RemoveTaskGroupIDs removes the "TaskGroup" edge to TaskGroup entities by IDs.
-func (tu *TaskUpdate) RemoveTaskGroupIDs(ids ...int) *TaskUpdate {
+func (tu *TaskUpdate) RemoveTaskGroupIDs(ids ...uuid.UUID) *TaskUpdate {
 	tu.mutation.RemoveTaskGroupIDs(ids...)
 	return tu
 }
 
 // RemoveTaskGroup removes "TaskGroup" edges to TaskGroup entities.
 func (tu *TaskUpdate) RemoveTaskGroup(t ...*TaskGroup) *TaskUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -206,6 +227,7 @@ func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	tu.defaults()
 	if len(tu.hooks) == 0 {
 		affected, err = tu.sqlSave(ctx)
 	} else {
@@ -251,13 +273,21 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tu *TaskUpdate) defaults() {
+	if _, ok := tu.mutation.UpdatedAt(); !ok {
+		v := task.UpdateDefaultUpdatedAt()
+		tu.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   task.Table,
 			Columns: task.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: task.FieldID,
 			},
 		},
@@ -268,6 +298,20 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: task.FieldCreatedAt,
+		})
+	}
+	if value, ok := tu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: task.FieldUpdatedAt,
+		})
 	}
 	if value, ok := tu.mutation.StartTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -291,7 +335,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: product.FieldID,
 				},
 			},
@@ -307,7 +351,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: product.FieldID,
 				},
 			},
@@ -326,7 +370,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: product.FieldID,
 				},
 			},
@@ -345,7 +389,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -361,7 +405,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -380,7 +424,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -399,7 +443,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -415,7 +459,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -434,7 +478,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -453,7 +497,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -469,7 +513,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -488,7 +532,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -517,6 +561,26 @@ type TaskUpdateOne struct {
 	mutation *TaskMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (tuo *TaskUpdateOne) SetCreatedAt(t time.Time) *TaskUpdateOne {
+	tuo.mutation.SetCreatedAt(t)
+	return tuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableCreatedAt(t *time.Time) *TaskUpdateOne {
+	if t != nil {
+		tuo.SetCreatedAt(*t)
+	}
+	return tuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (tuo *TaskUpdateOne) SetUpdatedAt(t time.Time) *TaskUpdateOne {
+	tuo.mutation.SetUpdatedAt(t)
+	return tuo
+}
+
 // SetStartTime sets the "StartTime" field.
 func (tuo *TaskUpdateOne) SetStartTime(t time.Time) *TaskUpdateOne {
 	tuo.mutation.SetStartTime(t)
@@ -538,14 +602,14 @@ func (tuo *TaskUpdateOne) ClearStartTime() *TaskUpdateOne {
 }
 
 // AddProductIDs adds the "Product" edge to the Product entity by IDs.
-func (tuo *TaskUpdateOne) AddProductIDs(ids ...int) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) AddProductIDs(ids ...uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.AddProductIDs(ids...)
 	return tuo
 }
 
 // AddProduct adds the "Product" edges to the Product entity.
 func (tuo *TaskUpdateOne) AddProduct(p ...*Product) *TaskUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -553,14 +617,14 @@ func (tuo *TaskUpdateOne) AddProduct(p ...*Product) *TaskUpdateOne {
 }
 
 // AddProxyListIDs adds the "ProxyList" edge to the ProxyList entity by IDs.
-func (tuo *TaskUpdateOne) AddProxyListIDs(ids ...int) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) AddProxyListIDs(ids ...uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.AddProxyListIDs(ids...)
 	return tuo
 }
 
 // AddProxyList adds the "ProxyList" edges to the ProxyList entity.
 func (tuo *TaskUpdateOne) AddProxyList(p ...*ProxyList) *TaskUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -568,14 +632,14 @@ func (tuo *TaskUpdateOne) AddProxyList(p ...*ProxyList) *TaskUpdateOne {
 }
 
 // AddProfileGroupIDs adds the "ProfileGroup" edge to the ProfileGroup entity by IDs.
-func (tuo *TaskUpdateOne) AddProfileGroupIDs(ids ...int) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) AddProfileGroupIDs(ids ...uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.AddProfileGroupIDs(ids...)
 	return tuo
 }
 
 // AddProfileGroup adds the "ProfileGroup" edges to the ProfileGroup entity.
 func (tuo *TaskUpdateOne) AddProfileGroup(p ...*ProfileGroup) *TaskUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -583,14 +647,14 @@ func (tuo *TaskUpdateOne) AddProfileGroup(p ...*ProfileGroup) *TaskUpdateOne {
 }
 
 // AddTaskGroupIDs adds the "TaskGroup" edge to the TaskGroup entity by IDs.
-func (tuo *TaskUpdateOne) AddTaskGroupIDs(ids ...int) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) AddTaskGroupIDs(ids ...uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.AddTaskGroupIDs(ids...)
 	return tuo
 }
 
 // AddTaskGroup adds the "TaskGroup" edges to the TaskGroup entity.
 func (tuo *TaskUpdateOne) AddTaskGroup(t ...*TaskGroup) *TaskUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -609,14 +673,14 @@ func (tuo *TaskUpdateOne) ClearProduct() *TaskUpdateOne {
 }
 
 // RemoveProductIDs removes the "Product" edge to Product entities by IDs.
-func (tuo *TaskUpdateOne) RemoveProductIDs(ids ...int) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) RemoveProductIDs(ids ...uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.RemoveProductIDs(ids...)
 	return tuo
 }
 
 // RemoveProduct removes "Product" edges to Product entities.
 func (tuo *TaskUpdateOne) RemoveProduct(p ...*Product) *TaskUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -630,14 +694,14 @@ func (tuo *TaskUpdateOne) ClearProxyList() *TaskUpdateOne {
 }
 
 // RemoveProxyListIDs removes the "ProxyList" edge to ProxyList entities by IDs.
-func (tuo *TaskUpdateOne) RemoveProxyListIDs(ids ...int) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) RemoveProxyListIDs(ids ...uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.RemoveProxyListIDs(ids...)
 	return tuo
 }
 
 // RemoveProxyList removes "ProxyList" edges to ProxyList entities.
 func (tuo *TaskUpdateOne) RemoveProxyList(p ...*ProxyList) *TaskUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -651,14 +715,14 @@ func (tuo *TaskUpdateOne) ClearProfileGroup() *TaskUpdateOne {
 }
 
 // RemoveProfileGroupIDs removes the "ProfileGroup" edge to ProfileGroup entities by IDs.
-func (tuo *TaskUpdateOne) RemoveProfileGroupIDs(ids ...int) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) RemoveProfileGroupIDs(ids ...uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.RemoveProfileGroupIDs(ids...)
 	return tuo
 }
 
 // RemoveProfileGroup removes "ProfileGroup" edges to ProfileGroup entities.
 func (tuo *TaskUpdateOne) RemoveProfileGroup(p ...*ProfileGroup) *TaskUpdateOne {
-	ids := make([]int, len(p))
+	ids := make([]uuid.UUID, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -672,14 +736,14 @@ func (tuo *TaskUpdateOne) ClearTaskGroup() *TaskUpdateOne {
 }
 
 // RemoveTaskGroupIDs removes the "TaskGroup" edge to TaskGroup entities by IDs.
-func (tuo *TaskUpdateOne) RemoveTaskGroupIDs(ids ...int) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) RemoveTaskGroupIDs(ids ...uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.RemoveTaskGroupIDs(ids...)
 	return tuo
 }
 
 // RemoveTaskGroup removes "TaskGroup" edges to TaskGroup entities.
 func (tuo *TaskUpdateOne) RemoveTaskGroup(t ...*TaskGroup) *TaskUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -699,6 +763,7 @@ func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 		err  error
 		node *Task
 	)
+	tuo.defaults()
 	if len(tuo.hooks) == 0 {
 		node, err = tuo.sqlSave(ctx)
 	} else {
@@ -744,13 +809,21 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tuo *TaskUpdateOne) defaults() {
+	if _, ok := tuo.mutation.UpdatedAt(); !ok {
+		v := task.UpdateDefaultUpdatedAt()
+		tuo.mutation.SetUpdatedAt(v)
+	}
+}
+
 func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   task.Table,
 			Columns: task.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: task.FieldID,
 			},
 		},
@@ -779,6 +852,20 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			}
 		}
 	}
+	if value, ok := tuo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: task.FieldCreatedAt,
+		})
+	}
+	if value, ok := tuo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: task.FieldUpdatedAt,
+		})
+	}
 	if value, ok := tuo.mutation.StartTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -801,7 +888,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: product.FieldID,
 				},
 			},
@@ -817,7 +904,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: product.FieldID,
 				},
 			},
@@ -836,7 +923,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: product.FieldID,
 				},
 			},
@@ -855,7 +942,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -871,7 +958,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -890,7 +977,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -909,7 +996,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -925,7 +1012,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -944,7 +1031,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -963,7 +1050,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -979,7 +1066,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -998,7 +1085,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: taskgroup.FieldID,
 				},
 			},

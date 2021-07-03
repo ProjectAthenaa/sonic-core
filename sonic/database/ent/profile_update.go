@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -15,6 +16,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
+	"github.com/google/uuid"
 )
 
 // ProfileUpdate is the builder for updating Profile entities.
@@ -27,6 +29,26 @@ type ProfileUpdate struct {
 // Where adds a new predicate for the ProfileUpdate builder.
 func (pu *ProfileUpdate) Where(ps ...predicate.Profile) *ProfileUpdate {
 	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
+	return pu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pu *ProfileUpdate) SetCreatedAt(t time.Time) *ProfileUpdate {
+	pu.mutation.SetCreatedAt(t)
+	return pu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pu *ProfileUpdate) SetNillableCreatedAt(t *time.Time) *ProfileUpdate {
+	if t != nil {
+		pu.SetCreatedAt(*t)
+	}
+	return pu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pu *ProfileUpdate) SetUpdatedAt(t time.Time) *ProfileUpdate {
+	pu.mutation.SetUpdatedAt(t)
 	return pu
 }
 
@@ -43,7 +65,7 @@ func (pu *ProfileUpdate) SetEmail(s string) *ProfileUpdate {
 }
 
 // SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID.
-func (pu *ProfileUpdate) SetProfileGroupID(id int) *ProfileUpdate {
+func (pu *ProfileUpdate) SetProfileGroupID(id uuid.UUID) *ProfileUpdate {
 	pu.mutation.SetProfileGroupID(id)
 	return pu
 }
@@ -54,14 +76,14 @@ func (pu *ProfileUpdate) SetProfileGroup(p *ProfileGroup) *ProfileUpdate {
 }
 
 // AddShippingIDs adds the "Shipping" edge to the Shipping entity by IDs.
-func (pu *ProfileUpdate) AddShippingIDs(ids ...int) *ProfileUpdate {
+func (pu *ProfileUpdate) AddShippingIDs(ids ...uuid.UUID) *ProfileUpdate {
 	pu.mutation.AddShippingIDs(ids...)
 	return pu
 }
 
 // AddShipping adds the "Shipping" edges to the Shipping entity.
 func (pu *ProfileUpdate) AddShipping(s ...*Shipping) *ProfileUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -69,14 +91,14 @@ func (pu *ProfileUpdate) AddShipping(s ...*Shipping) *ProfileUpdate {
 }
 
 // AddBillingIDs adds the "Billing" edge to the Billing entity by IDs.
-func (pu *ProfileUpdate) AddBillingIDs(ids ...int) *ProfileUpdate {
+func (pu *ProfileUpdate) AddBillingIDs(ids ...uuid.UUID) *ProfileUpdate {
 	pu.mutation.AddBillingIDs(ids...)
 	return pu
 }
 
 // AddBilling adds the "Billing" edges to the Billing entity.
 func (pu *ProfileUpdate) AddBilling(b ...*Billing) *ProfileUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -101,14 +123,14 @@ func (pu *ProfileUpdate) ClearShipping() *ProfileUpdate {
 }
 
 // RemoveShippingIDs removes the "Shipping" edge to Shipping entities by IDs.
-func (pu *ProfileUpdate) RemoveShippingIDs(ids ...int) *ProfileUpdate {
+func (pu *ProfileUpdate) RemoveShippingIDs(ids ...uuid.UUID) *ProfileUpdate {
 	pu.mutation.RemoveShippingIDs(ids...)
 	return pu
 }
 
 // RemoveShipping removes "Shipping" edges to Shipping entities.
 func (pu *ProfileUpdate) RemoveShipping(s ...*Shipping) *ProfileUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -122,14 +144,14 @@ func (pu *ProfileUpdate) ClearBilling() *ProfileUpdate {
 }
 
 // RemoveBillingIDs removes the "Billing" edge to Billing entities by IDs.
-func (pu *ProfileUpdate) RemoveBillingIDs(ids ...int) *ProfileUpdate {
+func (pu *ProfileUpdate) RemoveBillingIDs(ids ...uuid.UUID) *ProfileUpdate {
 	pu.mutation.RemoveBillingIDs(ids...)
 	return pu
 }
 
 // RemoveBilling removes "Billing" edges to Billing entities.
 func (pu *ProfileUpdate) RemoveBilling(b ...*Billing) *ProfileUpdate {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -142,6 +164,7 @@ func (pu *ProfileUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	pu.defaults()
 	if len(pu.hooks) == 0 {
 		if err = pu.check(); err != nil {
 			return 0, err
@@ -193,6 +216,14 @@ func (pu *ProfileUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pu *ProfileUpdate) defaults() {
+	if _, ok := pu.mutation.UpdatedAt(); !ok {
+		v := profile.UpdateDefaultUpdatedAt()
+		pu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pu *ProfileUpdate) check() error {
 	if _, ok := pu.mutation.ProfileGroupID(); pu.mutation.ProfileGroupCleared() && !ok {
@@ -207,7 +238,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   profile.Table,
 			Columns: profile.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profile.FieldID,
 			},
 		},
@@ -218,6 +249,20 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldCreatedAt,
+		})
+	}
+	if value, ok := pu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldUpdatedAt,
+		})
 	}
 	if value, ok := pu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -242,7 +287,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -258,7 +303,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -277,7 +322,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -293,7 +338,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -312,7 +357,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -331,7 +376,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: billing.FieldID,
 				},
 			},
@@ -347,7 +392,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: billing.FieldID,
 				},
 			},
@@ -366,7 +411,7 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: billing.FieldID,
 				},
 			},
@@ -395,6 +440,26 @@ type ProfileUpdateOne struct {
 	mutation *ProfileMutation
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (puo *ProfileUpdateOne) SetCreatedAt(t time.Time) *ProfileUpdateOne {
+	puo.mutation.SetCreatedAt(t)
+	return puo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (puo *ProfileUpdateOne) SetNillableCreatedAt(t *time.Time) *ProfileUpdateOne {
+	if t != nil {
+		puo.SetCreatedAt(*t)
+	}
+	return puo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (puo *ProfileUpdateOne) SetUpdatedAt(t time.Time) *ProfileUpdateOne {
+	puo.mutation.SetUpdatedAt(t)
+	return puo
+}
+
 // SetName sets the "Name" field.
 func (puo *ProfileUpdateOne) SetName(s string) *ProfileUpdateOne {
 	puo.mutation.SetName(s)
@@ -408,7 +473,7 @@ func (puo *ProfileUpdateOne) SetEmail(s string) *ProfileUpdateOne {
 }
 
 // SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID.
-func (puo *ProfileUpdateOne) SetProfileGroupID(id int) *ProfileUpdateOne {
+func (puo *ProfileUpdateOne) SetProfileGroupID(id uuid.UUID) *ProfileUpdateOne {
 	puo.mutation.SetProfileGroupID(id)
 	return puo
 }
@@ -419,14 +484,14 @@ func (puo *ProfileUpdateOne) SetProfileGroup(p *ProfileGroup) *ProfileUpdateOne 
 }
 
 // AddShippingIDs adds the "Shipping" edge to the Shipping entity by IDs.
-func (puo *ProfileUpdateOne) AddShippingIDs(ids ...int) *ProfileUpdateOne {
+func (puo *ProfileUpdateOne) AddShippingIDs(ids ...uuid.UUID) *ProfileUpdateOne {
 	puo.mutation.AddShippingIDs(ids...)
 	return puo
 }
 
 // AddShipping adds the "Shipping" edges to the Shipping entity.
 func (puo *ProfileUpdateOne) AddShipping(s ...*Shipping) *ProfileUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -434,14 +499,14 @@ func (puo *ProfileUpdateOne) AddShipping(s ...*Shipping) *ProfileUpdateOne {
 }
 
 // AddBillingIDs adds the "Billing" edge to the Billing entity by IDs.
-func (puo *ProfileUpdateOne) AddBillingIDs(ids ...int) *ProfileUpdateOne {
+func (puo *ProfileUpdateOne) AddBillingIDs(ids ...uuid.UUID) *ProfileUpdateOne {
 	puo.mutation.AddBillingIDs(ids...)
 	return puo
 }
 
 // AddBilling adds the "Billing" edges to the Billing entity.
 func (puo *ProfileUpdateOne) AddBilling(b ...*Billing) *ProfileUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -466,14 +531,14 @@ func (puo *ProfileUpdateOne) ClearShipping() *ProfileUpdateOne {
 }
 
 // RemoveShippingIDs removes the "Shipping" edge to Shipping entities by IDs.
-func (puo *ProfileUpdateOne) RemoveShippingIDs(ids ...int) *ProfileUpdateOne {
+func (puo *ProfileUpdateOne) RemoveShippingIDs(ids ...uuid.UUID) *ProfileUpdateOne {
 	puo.mutation.RemoveShippingIDs(ids...)
 	return puo
 }
 
 // RemoveShipping removes "Shipping" edges to Shipping entities.
 func (puo *ProfileUpdateOne) RemoveShipping(s ...*Shipping) *ProfileUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -487,14 +552,14 @@ func (puo *ProfileUpdateOne) ClearBilling() *ProfileUpdateOne {
 }
 
 // RemoveBillingIDs removes the "Billing" edge to Billing entities by IDs.
-func (puo *ProfileUpdateOne) RemoveBillingIDs(ids ...int) *ProfileUpdateOne {
+func (puo *ProfileUpdateOne) RemoveBillingIDs(ids ...uuid.UUID) *ProfileUpdateOne {
 	puo.mutation.RemoveBillingIDs(ids...)
 	return puo
 }
 
 // RemoveBilling removes "Billing" edges to Billing entities.
 func (puo *ProfileUpdateOne) RemoveBilling(b ...*Billing) *ProfileUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
@@ -514,6 +579,7 @@ func (puo *ProfileUpdateOne) Save(ctx context.Context) (*Profile, error) {
 		err  error
 		node *Profile
 	)
+	puo.defaults()
 	if len(puo.hooks) == 0 {
 		if err = puo.check(); err != nil {
 			return nil, err
@@ -565,6 +631,14 @@ func (puo *ProfileUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (puo *ProfileUpdateOne) defaults() {
+	if _, ok := puo.mutation.UpdatedAt(); !ok {
+		v := profile.UpdateDefaultUpdatedAt()
+		puo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (puo *ProfileUpdateOne) check() error {
 	if _, ok := puo.mutation.ProfileGroupID(); puo.mutation.ProfileGroupCleared() && !ok {
@@ -579,7 +653,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Table:   profile.Table,
 			Columns: profile.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: profile.FieldID,
 			},
 		},
@@ -608,6 +682,20 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			}
 		}
 	}
+	if value, ok := puo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldCreatedAt,
+		})
+	}
+	if value, ok := puo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: profile.FieldUpdatedAt,
+		})
+	}
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -631,7 +719,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -647,7 +735,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -666,7 +754,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -682,7 +770,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -701,7 +789,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: shipping.FieldID,
 				},
 			},
@@ -720,7 +808,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: billing.FieldID,
 				},
 			},
@@ -736,7 +824,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: billing.FieldID,
 				},
 			},
@@ -755,7 +843,7 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: billing.FieldID,
 				},
 			},
