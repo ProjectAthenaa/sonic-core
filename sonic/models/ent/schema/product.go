@@ -6,7 +6,9 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"time"
 )
 
 var Sites = []string{
@@ -42,6 +44,13 @@ type Product struct {
 // Fields of the Product.
 func (Product) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New),
+		field.Time("created_at").
+			Default(time.Now),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
 		field.String("Name"),
 		field.String("Image").
 			Optional(),

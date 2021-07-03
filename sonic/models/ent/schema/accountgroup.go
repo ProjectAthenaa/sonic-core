@@ -6,6 +6,8 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
+	"github.com/google/uuid"
+	"time"
 )
 
 // AccountGroup holds the schema definition for the AccountGroup entity.
@@ -16,6 +18,13 @@ type AccountGroup struct {
 // Fields of the AccountGroup.
 func (AccountGroup) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New),
+		field.Time("created_at").
+			Default(time.Now),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now),
 		field.String("Name"),
 		field.Enum("Site").Values(Sites...),
 		field.Other("Accounts", sonic.Map{}).SchemaType(map[string]string{
