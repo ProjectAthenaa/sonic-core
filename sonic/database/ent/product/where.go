@@ -10,7 +10,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 // ID filters vertices based on their ID field.
@@ -124,20 +123,6 @@ func Image(v string) predicate.Product {
 	})
 }
 
-// PositiveKeywords applies equality check predicate on the "PositiveKeywords" field. It's identical to PositiveKeywordsEQ.
-func PositiveKeywords(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPositiveKeywords), v))
-	})
-}
-
-// NegativeKeywords applies equality check predicate on the "NegativeKeywords" field. It's identical to NegativeKeywordsEQ.
-func NegativeKeywords(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNegativeKeywords), v))
-	})
-}
-
 // Link applies equality check predicate on the "Link" field. It's identical to LinkEQ.
 func Link(v string) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
@@ -149,20 +134,6 @@ func Link(v string) predicate.Product {
 func Quantity(v int32) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldQuantity), v))
-	})
-}
-
-// Sizes applies equality check predicate on the "Sizes" field. It's identical to SizesEQ.
-func Sizes(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSizes), v))
-	})
-}
-
-// Colors applies equality check predicate on the "Colors" field. It's identical to ColorsEQ.
-func Colors(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldColors), v))
 	})
 }
 
@@ -609,82 +580,6 @@ func LookupTypeNotIn(vs ...LookupType) predicate.Product {
 	})
 }
 
-// PositiveKeywordsEQ applies the EQ predicate on the "PositiveKeywords" field.
-func PositiveKeywordsEQ(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPositiveKeywords), v))
-	})
-}
-
-// PositiveKeywordsNEQ applies the NEQ predicate on the "PositiveKeywords" field.
-func PositiveKeywordsNEQ(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPositiveKeywords), v))
-	})
-}
-
-// PositiveKeywordsIn applies the In predicate on the "PositiveKeywords" field.
-func PositiveKeywordsIn(vs ...pq.StringArray) predicate.Product {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Product(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldPositiveKeywords), v...))
-	})
-}
-
-// PositiveKeywordsNotIn applies the NotIn predicate on the "PositiveKeywords" field.
-func PositiveKeywordsNotIn(vs ...pq.StringArray) predicate.Product {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Product(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldPositiveKeywords), v...))
-	})
-}
-
-// PositiveKeywordsGT applies the GT predicate on the "PositiveKeywords" field.
-func PositiveKeywordsGT(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPositiveKeywords), v))
-	})
-}
-
-// PositiveKeywordsGTE applies the GTE predicate on the "PositiveKeywords" field.
-func PositiveKeywordsGTE(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPositiveKeywords), v))
-	})
-}
-
-// PositiveKeywordsLT applies the LT predicate on the "PositiveKeywords" field.
-func PositiveKeywordsLT(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPositiveKeywords), v))
-	})
-}
-
-// PositiveKeywordsLTE applies the LTE predicate on the "PositiveKeywords" field.
-func PositiveKeywordsLTE(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPositiveKeywords), v))
-	})
-}
-
 // PositiveKeywordsIsNil applies the IsNil predicate on the "PositiveKeywords" field.
 func PositiveKeywordsIsNil() predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
@@ -696,82 +591,6 @@ func PositiveKeywordsIsNil() predicate.Product {
 func PositiveKeywordsNotNil() predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldPositiveKeywords)))
-	})
-}
-
-// NegativeKeywordsEQ applies the EQ predicate on the "NegativeKeywords" field.
-func NegativeKeywordsEQ(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNegativeKeywords), v))
-	})
-}
-
-// NegativeKeywordsNEQ applies the NEQ predicate on the "NegativeKeywords" field.
-func NegativeKeywordsNEQ(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldNegativeKeywords), v))
-	})
-}
-
-// NegativeKeywordsIn applies the In predicate on the "NegativeKeywords" field.
-func NegativeKeywordsIn(vs ...pq.StringArray) predicate.Product {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Product(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldNegativeKeywords), v...))
-	})
-}
-
-// NegativeKeywordsNotIn applies the NotIn predicate on the "NegativeKeywords" field.
-func NegativeKeywordsNotIn(vs ...pq.StringArray) predicate.Product {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Product(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldNegativeKeywords), v...))
-	})
-}
-
-// NegativeKeywordsGT applies the GT predicate on the "NegativeKeywords" field.
-func NegativeKeywordsGT(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldNegativeKeywords), v))
-	})
-}
-
-// NegativeKeywordsGTE applies the GTE predicate on the "NegativeKeywords" field.
-func NegativeKeywordsGTE(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldNegativeKeywords), v))
-	})
-}
-
-// NegativeKeywordsLT applies the LT predicate on the "NegativeKeywords" field.
-func NegativeKeywordsLT(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldNegativeKeywords), v))
-	})
-}
-
-// NegativeKeywordsLTE applies the LTE predicate on the "NegativeKeywords" field.
-func NegativeKeywordsLTE(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldNegativeKeywords), v))
 	})
 }
 
@@ -990,155 +809,31 @@ func QuantityLTE(v int32) predicate.Product {
 	})
 }
 
-// SizesEQ applies the EQ predicate on the "Sizes" field.
-func SizesEQ(v pq.StringArray) predicate.Product {
+// SizesIsNil applies the IsNil predicate on the "Sizes" field.
+func SizesIsNil() predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSizes), v))
+		s.Where(sql.IsNull(s.C(FieldSizes)))
 	})
 }
 
-// SizesNEQ applies the NEQ predicate on the "Sizes" field.
-func SizesNEQ(v pq.StringArray) predicate.Product {
+// SizesNotNil applies the NotNil predicate on the "Sizes" field.
+func SizesNotNil() predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSizes), v))
+		s.Where(sql.NotNull(s.C(FieldSizes)))
 	})
 }
 
-// SizesIn applies the In predicate on the "Sizes" field.
-func SizesIn(vs ...pq.StringArray) predicate.Product {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
+// ColorsIsNil applies the IsNil predicate on the "Colors" field.
+func ColorsIsNil() predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldSizes), v...))
+		s.Where(sql.IsNull(s.C(FieldColors)))
 	})
 }
 
-// SizesNotIn applies the NotIn predicate on the "Sizes" field.
-func SizesNotIn(vs ...pq.StringArray) predicate.Product {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
+// ColorsNotNil applies the NotNil predicate on the "Colors" field.
+func ColorsNotNil() predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldSizes), v...))
-	})
-}
-
-// SizesGT applies the GT predicate on the "Sizes" field.
-func SizesGT(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSizes), v))
-	})
-}
-
-// SizesGTE applies the GTE predicate on the "Sizes" field.
-func SizesGTE(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSizes), v))
-	})
-}
-
-// SizesLT applies the LT predicate on the "Sizes" field.
-func SizesLT(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSizes), v))
-	})
-}
-
-// SizesLTE applies the LTE predicate on the "Sizes" field.
-func SizesLTE(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSizes), v))
-	})
-}
-
-// ColorsEQ applies the EQ predicate on the "Colors" field.
-func ColorsEQ(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldColors), v))
-	})
-}
-
-// ColorsNEQ applies the NEQ predicate on the "Colors" field.
-func ColorsNEQ(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldColors), v))
-	})
-}
-
-// ColorsIn applies the In predicate on the "Colors" field.
-func ColorsIn(vs ...pq.StringArray) predicate.Product {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Product(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldColors), v...))
-	})
-}
-
-// ColorsNotIn applies the NotIn predicate on the "Colors" field.
-func ColorsNotIn(vs ...pq.StringArray) predicate.Product {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Product(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldColors), v...))
-	})
-}
-
-// ColorsGT applies the GT predicate on the "Colors" field.
-func ColorsGT(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldColors), v))
-	})
-}
-
-// ColorsGTE applies the GTE predicate on the "Colors" field.
-func ColorsGTE(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldColors), v))
-	})
-}
-
-// ColorsLT applies the LT predicate on the "Colors" field.
-func ColorsLT(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldColors), v))
-	})
-}
-
-// ColorsLTE applies the LTE predicate on the "Colors" field.
-func ColorsLTE(v pq.StringArray) predicate.Product {
-	return predicate.Product(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldColors), v))
+		s.Where(sql.NotNull(s.C(FieldColors)))
 	})
 }
 

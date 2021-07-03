@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 // Product is the model entity for the Product schema.
@@ -30,17 +30,17 @@ type Product struct {
 	// LookupType holds the value of the "LookupType" field.
 	LookupType product.LookupType `json:"LookupType,omitempty"`
 	// PositiveKeywords holds the value of the "PositiveKeywords" field.
-	PositiveKeywords pq.StringArray `json:"PositiveKeywords,omitempty"`
+	PositiveKeywords []string `json:"PositiveKeywords,omitempty"`
 	// NegativeKeywords holds the value of the "NegativeKeywords" field.
-	NegativeKeywords pq.StringArray `json:"NegativeKeywords,omitempty"`
+	NegativeKeywords []string `json:"NegativeKeywords,omitempty"`
 	// Link holds the value of the "Link" field.
 	Link string `json:"Link,omitempty"`
 	// Quantity holds the value of the "Quantity" field.
 	Quantity int32 `json:"Quantity,omitempty"`
 	// Sizes holds the value of the "Sizes" field.
-	Sizes pq.StringArray `json:"Sizes,omitempty"`
+	Sizes []string `json:"Sizes,omitempty"`
 	// Colors holds the value of the "Colors" field.
-	Colors pq.StringArray `json:"Colors,omitempty"`
+	Colors []string `json:"Colors,omitempty"`
 	// Site holds the value of the "Site" field.
 	Site product.Site `json:"Site,omitempty"`
 	// Metadata holds the value of the "Metadata" field.
@@ -85,7 +85,7 @@ func (*Product) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case product.FieldPositiveKeywords, product.FieldNegativeKeywords, product.FieldSizes, product.FieldColors:
-			values[i] = new(pq.StringArray)
+			values[i] = new([]byte)
 		case product.FieldMetadata:
 			values[i] = new(sonic.Map)
 		case product.FieldQuantity:
@@ -148,16 +148,22 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				pr.LookupType = product.LookupType(value.String)
 			}
 		case product.FieldPositiveKeywords:
-			if value, ok := values[i].(*pq.StringArray); !ok {
+
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field PositiveKeywords", values[i])
-			} else if value != nil {
-				pr.PositiveKeywords = *value
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &pr.PositiveKeywords); err != nil {
+					return fmt.Errorf("unmarshal field PositiveKeywords: %w", err)
+				}
 			}
 		case product.FieldNegativeKeywords:
-			if value, ok := values[i].(*pq.StringArray); !ok {
+
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field NegativeKeywords", values[i])
-			} else if value != nil {
-				pr.NegativeKeywords = *value
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &pr.NegativeKeywords); err != nil {
+					return fmt.Errorf("unmarshal field NegativeKeywords: %w", err)
+				}
 			}
 		case product.FieldLink:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -172,16 +178,22 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				pr.Quantity = int32(value.Int64)
 			}
 		case product.FieldSizes:
-			if value, ok := values[i].(*pq.StringArray); !ok {
+
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field Sizes", values[i])
-			} else if value != nil {
-				pr.Sizes = *value
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &pr.Sizes); err != nil {
+					return fmt.Errorf("unmarshal field Sizes: %w", err)
+				}
 			}
 		case product.FieldColors:
-			if value, ok := values[i].(*pq.StringArray); !ok {
+
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field Colors", values[i])
-			} else if value != nil {
-				pr.Colors = *value
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &pr.Colors); err != nil {
+					return fmt.Errorf("unmarshal field Colors: %w", err)
+				}
 			}
 		case product.FieldSite:
 			if value, ok := values[i].(*sql.NullString); !ok {

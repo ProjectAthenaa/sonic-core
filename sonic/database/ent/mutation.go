@@ -28,7 +28,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 
 	"entgo.io/ent"
 )
@@ -3861,13 +3860,13 @@ type ProductMutation struct {
 	_Name             *string
 	_Image            *string
 	_LookupType       *product.LookupType
-	_PositiveKeywords *pq.StringArray
-	_NegativeKeywords *pq.StringArray
+	_PositiveKeywords *[]string
+	_NegativeKeywords *[]string
 	_Link             *string
 	_Quantity         *int32
 	add_Quantity      *int32
-	_Sizes            *pq.StringArray
-	_Colors           *pq.StringArray
+	_Sizes            *[]string
+	_Colors           *[]string
 	_Site             *product.Site
 	_Metadata         *sonic.Map
 	clearedFields     map[string]struct{}
@@ -4161,12 +4160,12 @@ func (m *ProductMutation) ResetLookupType() {
 }
 
 // SetPositiveKeywords sets the "PositiveKeywords" field.
-func (m *ProductMutation) SetPositiveKeywords(pa pq.StringArray) {
-	m._PositiveKeywords = &pa
+func (m *ProductMutation) SetPositiveKeywords(s []string) {
+	m._PositiveKeywords = &s
 }
 
 // PositiveKeywords returns the value of the "PositiveKeywords" field in the mutation.
-func (m *ProductMutation) PositiveKeywords() (r pq.StringArray, exists bool) {
+func (m *ProductMutation) PositiveKeywords() (r []string, exists bool) {
 	v := m._PositiveKeywords
 	if v == nil {
 		return
@@ -4177,7 +4176,7 @@ func (m *ProductMutation) PositiveKeywords() (r pq.StringArray, exists bool) {
 // OldPositiveKeywords returns the old "PositiveKeywords" field's value of the Product entity.
 // If the Product object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldPositiveKeywords(ctx context.Context) (v pq.StringArray, err error) {
+func (m *ProductMutation) OldPositiveKeywords(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldPositiveKeywords is only allowed on UpdateOne operations")
 	}
@@ -4210,12 +4209,12 @@ func (m *ProductMutation) ResetPositiveKeywords() {
 }
 
 // SetNegativeKeywords sets the "NegativeKeywords" field.
-func (m *ProductMutation) SetNegativeKeywords(pa pq.StringArray) {
-	m._NegativeKeywords = &pa
+func (m *ProductMutation) SetNegativeKeywords(s []string) {
+	m._NegativeKeywords = &s
 }
 
 // NegativeKeywords returns the value of the "NegativeKeywords" field in the mutation.
-func (m *ProductMutation) NegativeKeywords() (r pq.StringArray, exists bool) {
+func (m *ProductMutation) NegativeKeywords() (r []string, exists bool) {
 	v := m._NegativeKeywords
 	if v == nil {
 		return
@@ -4226,7 +4225,7 @@ func (m *ProductMutation) NegativeKeywords() (r pq.StringArray, exists bool) {
 // OldNegativeKeywords returns the old "NegativeKeywords" field's value of the Product entity.
 // If the Product object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldNegativeKeywords(ctx context.Context) (v pq.StringArray, err error) {
+func (m *ProductMutation) OldNegativeKeywords(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldNegativeKeywords is only allowed on UpdateOne operations")
 	}
@@ -4364,12 +4363,12 @@ func (m *ProductMutation) ResetQuantity() {
 }
 
 // SetSizes sets the "Sizes" field.
-func (m *ProductMutation) SetSizes(pa pq.StringArray) {
-	m._Sizes = &pa
+func (m *ProductMutation) SetSizes(s []string) {
+	m._Sizes = &s
 }
 
 // Sizes returns the value of the "Sizes" field in the mutation.
-func (m *ProductMutation) Sizes() (r pq.StringArray, exists bool) {
+func (m *ProductMutation) Sizes() (r []string, exists bool) {
 	v := m._Sizes
 	if v == nil {
 		return
@@ -4380,7 +4379,7 @@ func (m *ProductMutation) Sizes() (r pq.StringArray, exists bool) {
 // OldSizes returns the old "Sizes" field's value of the Product entity.
 // If the Product object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldSizes(ctx context.Context) (v pq.StringArray, err error) {
+func (m *ProductMutation) OldSizes(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldSizes is only allowed on UpdateOne operations")
 	}
@@ -4394,18 +4393,31 @@ func (m *ProductMutation) OldSizes(ctx context.Context) (v pq.StringArray, err e
 	return oldValue.Sizes, nil
 }
 
+// ClearSizes clears the value of the "Sizes" field.
+func (m *ProductMutation) ClearSizes() {
+	m._Sizes = nil
+	m.clearedFields[product.FieldSizes] = struct{}{}
+}
+
+// SizesCleared returns if the "Sizes" field was cleared in this mutation.
+func (m *ProductMutation) SizesCleared() bool {
+	_, ok := m.clearedFields[product.FieldSizes]
+	return ok
+}
+
 // ResetSizes resets all changes to the "Sizes" field.
 func (m *ProductMutation) ResetSizes() {
 	m._Sizes = nil
+	delete(m.clearedFields, product.FieldSizes)
 }
 
 // SetColors sets the "Colors" field.
-func (m *ProductMutation) SetColors(pa pq.StringArray) {
-	m._Colors = &pa
+func (m *ProductMutation) SetColors(s []string) {
+	m._Colors = &s
 }
 
 // Colors returns the value of the "Colors" field in the mutation.
-func (m *ProductMutation) Colors() (r pq.StringArray, exists bool) {
+func (m *ProductMutation) Colors() (r []string, exists bool) {
 	v := m._Colors
 	if v == nil {
 		return
@@ -4416,7 +4428,7 @@ func (m *ProductMutation) Colors() (r pq.StringArray, exists bool) {
 // OldColors returns the old "Colors" field's value of the Product entity.
 // If the Product object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldColors(ctx context.Context) (v pq.StringArray, err error) {
+func (m *ProductMutation) OldColors(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldColors is only allowed on UpdateOne operations")
 	}
@@ -4430,9 +4442,22 @@ func (m *ProductMutation) OldColors(ctx context.Context) (v pq.StringArray, err 
 	return oldValue.Colors, nil
 }
 
+// ClearColors clears the value of the "Colors" field.
+func (m *ProductMutation) ClearColors() {
+	m._Colors = nil
+	m.clearedFields[product.FieldColors] = struct{}{}
+}
+
+// ColorsCleared returns if the "Colors" field was cleared in this mutation.
+func (m *ProductMutation) ColorsCleared() bool {
+	_, ok := m.clearedFields[product.FieldColors]
+	return ok
+}
+
 // ResetColors resets all changes to the "Colors" field.
 func (m *ProductMutation) ResetColors() {
 	m._Colors = nil
+	delete(m.clearedFields, product.FieldColors)
 }
 
 // SetSite sets the "Site" field.
@@ -4781,14 +4806,14 @@ func (m *ProductMutation) SetField(name string, value ent.Value) error {
 		m.SetLookupType(v)
 		return nil
 	case product.FieldPositiveKeywords:
-		v, ok := value.(pq.StringArray)
+		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPositiveKeywords(v)
 		return nil
 	case product.FieldNegativeKeywords:
-		v, ok := value.(pq.StringArray)
+		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -4809,14 +4834,14 @@ func (m *ProductMutation) SetField(name string, value ent.Value) error {
 		m.SetQuantity(v)
 		return nil
 	case product.FieldSizes:
-		v, ok := value.(pq.StringArray)
+		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSizes(v)
 		return nil
 	case product.FieldColors:
-		v, ok := value.(pq.StringArray)
+		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -4893,6 +4918,12 @@ func (m *ProductMutation) ClearedFields() []string {
 	if m.FieldCleared(product.FieldLink) {
 		fields = append(fields, product.FieldLink)
 	}
+	if m.FieldCleared(product.FieldSizes) {
+		fields = append(fields, product.FieldSizes)
+	}
+	if m.FieldCleared(product.FieldColors) {
+		fields = append(fields, product.FieldColors)
+	}
 	return fields
 }
 
@@ -4918,6 +4949,12 @@ func (m *ProductMutation) ClearField(name string) error {
 		return nil
 	case product.FieldLink:
 		m.ClearLink()
+		return nil
+	case product.FieldSizes:
+		m.ClearSizes()
+		return nil
+	case product.FieldColors:
+		m.ClearColors()
 		return nil
 	}
 	return fmt.Errorf("unknown Product nullable field %s", name)

@@ -15,7 +15,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 // ProductCreate is the builder for creating a Product entity.
@@ -80,14 +79,14 @@ func (pc *ProductCreate) SetLookupType(pt product.LookupType) *ProductCreate {
 }
 
 // SetPositiveKeywords sets the "PositiveKeywords" field.
-func (pc *ProductCreate) SetPositiveKeywords(pa pq.StringArray) *ProductCreate {
-	pc.mutation.SetPositiveKeywords(pa)
+func (pc *ProductCreate) SetPositiveKeywords(s []string) *ProductCreate {
+	pc.mutation.SetPositiveKeywords(s)
 	return pc
 }
 
 // SetNegativeKeywords sets the "NegativeKeywords" field.
-func (pc *ProductCreate) SetNegativeKeywords(pa pq.StringArray) *ProductCreate {
-	pc.mutation.SetNegativeKeywords(pa)
+func (pc *ProductCreate) SetNegativeKeywords(s []string) *ProductCreate {
+	pc.mutation.SetNegativeKeywords(s)
 	return pc
 }
 
@@ -112,14 +111,14 @@ func (pc *ProductCreate) SetQuantity(i int32) *ProductCreate {
 }
 
 // SetSizes sets the "Sizes" field.
-func (pc *ProductCreate) SetSizes(pa pq.StringArray) *ProductCreate {
-	pc.mutation.SetSizes(pa)
+func (pc *ProductCreate) SetSizes(s []string) *ProductCreate {
+	pc.mutation.SetSizes(s)
 	return pc
 }
 
 // SetColors sets the "Colors" field.
-func (pc *ProductCreate) SetColors(pa pq.StringArray) *ProductCreate {
-	pc.mutation.SetColors(pa)
+func (pc *ProductCreate) SetColors(s []string) *ProductCreate {
+	pc.mutation.SetColors(s)
 	return pc
 }
 
@@ -259,12 +258,6 @@ func (pc *ProductCreate) check() error {
 	if _, ok := pc.mutation.Quantity(); !ok {
 		return &ValidationError{Name: "Quantity", err: errors.New("ent: missing required field \"Quantity\"")}
 	}
-	if _, ok := pc.mutation.Sizes(); !ok {
-		return &ValidationError{Name: "Sizes", err: errors.New("ent: missing required field \"Sizes\"")}
-	}
-	if _, ok := pc.mutation.Colors(); !ok {
-		return &ValidationError{Name: "Colors", err: errors.New("ent: missing required field \"Colors\"")}
-	}
 	if _, ok := pc.mutation.Site(); !ok {
 		return &ValidationError{Name: "Site", err: errors.New("ent: missing required field \"Site\"")}
 	}
@@ -350,7 +343,7 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := pc.mutation.PositiveKeywords(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: product.FieldPositiveKeywords,
 		})
@@ -358,7 +351,7 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := pc.mutation.NegativeKeywords(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: product.FieldNegativeKeywords,
 		})
@@ -382,7 +375,7 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := pc.mutation.Sizes(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: product.FieldSizes,
 		})
@@ -390,7 +383,7 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := pc.mutation.Colors(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: product.FieldColors,
 		})

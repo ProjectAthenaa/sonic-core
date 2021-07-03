@@ -16,7 +16,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 // ProductUpdate is the builder for updating Product entities.
@@ -85,8 +84,8 @@ func (pu *ProductUpdate) SetLookupType(pt product.LookupType) *ProductUpdate {
 }
 
 // SetPositiveKeywords sets the "PositiveKeywords" field.
-func (pu *ProductUpdate) SetPositiveKeywords(pa pq.StringArray) *ProductUpdate {
-	pu.mutation.SetPositiveKeywords(pa)
+func (pu *ProductUpdate) SetPositiveKeywords(s []string) *ProductUpdate {
+	pu.mutation.SetPositiveKeywords(s)
 	return pu
 }
 
@@ -97,8 +96,8 @@ func (pu *ProductUpdate) ClearPositiveKeywords() *ProductUpdate {
 }
 
 // SetNegativeKeywords sets the "NegativeKeywords" field.
-func (pu *ProductUpdate) SetNegativeKeywords(pa pq.StringArray) *ProductUpdate {
-	pu.mutation.SetNegativeKeywords(pa)
+func (pu *ProductUpdate) SetNegativeKeywords(s []string) *ProductUpdate {
+	pu.mutation.SetNegativeKeywords(s)
 	return pu
 }
 
@@ -142,14 +141,26 @@ func (pu *ProductUpdate) AddQuantity(i int32) *ProductUpdate {
 }
 
 // SetSizes sets the "Sizes" field.
-func (pu *ProductUpdate) SetSizes(pa pq.StringArray) *ProductUpdate {
-	pu.mutation.SetSizes(pa)
+func (pu *ProductUpdate) SetSizes(s []string) *ProductUpdate {
+	pu.mutation.SetSizes(s)
+	return pu
+}
+
+// ClearSizes clears the value of the "Sizes" field.
+func (pu *ProductUpdate) ClearSizes() *ProductUpdate {
+	pu.mutation.ClearSizes()
 	return pu
 }
 
 // SetColors sets the "Colors" field.
-func (pu *ProductUpdate) SetColors(pa pq.StringArray) *ProductUpdate {
-	pu.mutation.SetColors(pa)
+func (pu *ProductUpdate) SetColors(s []string) *ProductUpdate {
+	pu.mutation.SetColors(s)
+	return pu
+}
+
+// ClearColors clears the value of the "Colors" field.
+func (pu *ProductUpdate) ClearColors() *ProductUpdate {
+	pu.mutation.ClearColors()
 	return pu
 }
 
@@ -384,27 +395,27 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.PositiveKeywords(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: product.FieldPositiveKeywords,
 		})
 	}
 	if pu.mutation.PositiveKeywordsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Column: product.FieldPositiveKeywords,
 		})
 	}
 	if value, ok := pu.mutation.NegativeKeywords(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: product.FieldNegativeKeywords,
 		})
 	}
 	if pu.mutation.NegativeKeywordsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Column: product.FieldNegativeKeywords,
 		})
 	}
@@ -437,15 +448,27 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.Sizes(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
+			Column: product.FieldSizes,
+		})
+	}
+	if pu.mutation.SizesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
 			Column: product.FieldSizes,
 		})
 	}
 	if value, ok := pu.mutation.Colors(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
+			Column: product.FieldColors,
+		})
+	}
+	if pu.mutation.ColorsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
 			Column: product.FieldColors,
 		})
 	}
@@ -643,8 +666,8 @@ func (puo *ProductUpdateOne) SetLookupType(pt product.LookupType) *ProductUpdate
 }
 
 // SetPositiveKeywords sets the "PositiveKeywords" field.
-func (puo *ProductUpdateOne) SetPositiveKeywords(pa pq.StringArray) *ProductUpdateOne {
-	puo.mutation.SetPositiveKeywords(pa)
+func (puo *ProductUpdateOne) SetPositiveKeywords(s []string) *ProductUpdateOne {
+	puo.mutation.SetPositiveKeywords(s)
 	return puo
 }
 
@@ -655,8 +678,8 @@ func (puo *ProductUpdateOne) ClearPositiveKeywords() *ProductUpdateOne {
 }
 
 // SetNegativeKeywords sets the "NegativeKeywords" field.
-func (puo *ProductUpdateOne) SetNegativeKeywords(pa pq.StringArray) *ProductUpdateOne {
-	puo.mutation.SetNegativeKeywords(pa)
+func (puo *ProductUpdateOne) SetNegativeKeywords(s []string) *ProductUpdateOne {
+	puo.mutation.SetNegativeKeywords(s)
 	return puo
 }
 
@@ -700,14 +723,26 @@ func (puo *ProductUpdateOne) AddQuantity(i int32) *ProductUpdateOne {
 }
 
 // SetSizes sets the "Sizes" field.
-func (puo *ProductUpdateOne) SetSizes(pa pq.StringArray) *ProductUpdateOne {
-	puo.mutation.SetSizes(pa)
+func (puo *ProductUpdateOne) SetSizes(s []string) *ProductUpdateOne {
+	puo.mutation.SetSizes(s)
+	return puo
+}
+
+// ClearSizes clears the value of the "Sizes" field.
+func (puo *ProductUpdateOne) ClearSizes() *ProductUpdateOne {
+	puo.mutation.ClearSizes()
 	return puo
 }
 
 // SetColors sets the "Colors" field.
-func (puo *ProductUpdateOne) SetColors(pa pq.StringArray) *ProductUpdateOne {
-	puo.mutation.SetColors(pa)
+func (puo *ProductUpdateOne) SetColors(s []string) *ProductUpdateOne {
+	puo.mutation.SetColors(s)
+	return puo
+}
+
+// ClearColors clears the value of the "Colors" field.
+func (puo *ProductUpdateOne) ClearColors() *ProductUpdateOne {
+	puo.mutation.ClearColors()
 	return puo
 }
 
@@ -966,27 +1001,27 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 	}
 	if value, ok := puo.mutation.PositiveKeywords(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: product.FieldPositiveKeywords,
 		})
 	}
 	if puo.mutation.PositiveKeywordsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Column: product.FieldPositiveKeywords,
 		})
 	}
 	if value, ok := puo.mutation.NegativeKeywords(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
 			Column: product.FieldNegativeKeywords,
 		})
 	}
 	if puo.mutation.NegativeKeywordsCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Column: product.FieldNegativeKeywords,
 		})
 	}
@@ -1019,15 +1054,27 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 	}
 	if value, ok := puo.mutation.Sizes(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
+			Column: product.FieldSizes,
+		})
+	}
+	if puo.mutation.SizesCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
 			Column: product.FieldSizes,
 		})
 	}
 	if value, ok := puo.mutation.Colors(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
+			Type:   field.TypeJSON,
 			Value:  value,
+			Column: product.FieldColors,
+		})
+	}
+	if puo.mutation.ColorsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
 			Column: product.FieldColors,
 		})
 	}

@@ -7,7 +7,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 	"time"
 )
 
@@ -56,12 +55,12 @@ func (Product) Fields() []ent.Field {
 			Optional(),
 		field.Enum("LookupType").
 			Values("Keywords", "Link"),
-		field.Other("PositiveKeywords", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}).Optional(),
-		field.Other("NegativeKeywords", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}).Optional(),
+		field.Strings("PositiveKeywords").Optional(),
+		field.Strings("NegativeKeywords").Optional(),
 		field.String("Link").Optional(),
 		field.Int32("Quantity"),
-		field.Other("Sizes", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}),
-		field.Other("Colors", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}),
+		field.Strings("Sizes").Optional(),
+		field.Strings("Colors").Optional(),
 		field.Enum("Site").Values(Sites...),
 		field.Other("Metadata", sonic.Map{}).SchemaType(map[string]string{dialect.Postgres: "bytea"}),
 	}
