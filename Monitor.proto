@@ -24,4 +24,5 @@ message Task{
     string Link = 3;
   }
   map<string, string> Metadata = 4;
+  string RedisChannelName = 5;
 }
