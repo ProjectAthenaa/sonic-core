@@ -25,7 +25,7 @@ func (ProxyList) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("App", App.Type).
 			Ref("ProxyLists"),
-		edge.To("Proxy", Proxy.Type),
+		edge.To("Proxies", Proxy.Type),
 		edge.From("Task", Task.Type).
 			Ref("ProxyList"),
 	}

@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
@@ -17,7 +18,9 @@ func (AccountGroup) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("Name"),
 		field.Enum("Site").Values(Sites...),
-		field.Other("Accounts", sonic.Map{}),
+		field.Other("Accounts", sonic.Map{}).SchemaType(map[string]string{
+			dialect.Postgres: "bytea",
+		}),
 	}
 }
 

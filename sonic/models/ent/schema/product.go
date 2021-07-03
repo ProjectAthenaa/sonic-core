@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
@@ -10,19 +11,19 @@ import (
 
 var Sites = []string{
 	"FinishLine",
-	"JD Sports",
+	"JD_Sports",
 	"YeezySupply",
 	"Supreme",
-	"Eastbay US",
-	"Champs US",
-	"Footaction US",
-	"Footlocker US",
+	"Eastbay_US",
+	"Champs_US",
+	"Footaction_US",
+	"Footlocker_US",
 	"Bestbuy",
-	"Pokemon Center",
-	"Panini US",
+	"Pokemon_Center",
+	"Panini_US",
 	"Topss",
 	"Nordstorm",
-	"End.",
+	"End",
 	"Target",
 	"Amazon",
 	"Solebox",
@@ -46,14 +47,14 @@ func (Product) Fields() []ent.Field {
 			Optional(),
 		field.Enum("LookupType").
 			Values("Keywords", "Link"),
-		field.Other("PositiveKeywords", pq.StringArray{}).Optional(),
-		field.Other("NegativeKeywords", pq.StringArray{}).Optional(),
+		field.Other("PositiveKeywords", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}).Optional(),
+		field.Other("NegativeKeywords", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}).Optional(),
 		field.String("Link").Optional(),
 		field.Int("Quantity"),
-		field.Other("Sizes", pq.StringArray{}),
-		field.Other("Colors", pq.StringArray{}),
+		field.Other("Sizes", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}),
+		field.Other("Colors", pq.StringArray{}).SchemaType(map[string]string{dialect.Postgres: "text[]"}),
 		field.Enum("Site").Values(Sites...),
-		field.Other("Metadata", sonic.Map{}),
+		field.Other("Metadata", sonic.Map{}).SchemaType(map[string]string{dialect.Postgres: "bytea"}),
 	}
 }
 

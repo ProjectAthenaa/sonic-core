@@ -21,8 +21,8 @@ func (Statistic) Fields() []ent.Field {
 // Edges of the Statistic.
 func (Statistic) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).
-			Ref("statistics"),
+		edge.From("User", User.Type).
+			Ref("Statistics"),
 		edge.To("Product", Product.Type),
 	}
 }

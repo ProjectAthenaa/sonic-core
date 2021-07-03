@@ -27,10 +27,10 @@ func (Address) Fields() []ent.Field {
 // Edges of the Address.
 func (Address) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("Shipping", Shipping.Type).
+		edge.From("ShippingAddress", Shipping.Type).
 			Ref("ShippingAddress").
 			Required(),
-		edge.From("Shipping", Shipping.Type).
+		edge.From("BillingAddress", Shipping.Type).
 			Ref("BillingAddress"),
 	}
 }

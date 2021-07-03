@@ -23,7 +23,7 @@ func (Profile) Fields() []ent.Field {
 func (Profile) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("ProfileGroup", ProfileGroup.Type).
-			Ref("Profile").
+			Ref("Profiles").
 			Unique().
 			Required(),
 		edge.To("Shipping", Shipping.Type),
