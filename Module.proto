@@ -55,9 +55,10 @@ message Data{
 }
 
 message TaskData{
-  bool Random = 1;
-  repeated string Color = 2;
-  repeated string Size = 3;
+  bool RandomSize = 1;
+  bool RandomColor = 2;
+  repeated string Color = 3;
+  repeated string Size = 4;
 }
 
 message SizeColor{
