@@ -55,9 +55,16 @@ message Data{
 }
 
 message TaskData{
-  optional string Color = 1;
-  optional string Size = 2;
+  bool Random = 1;
+  repeated string Color = 2;
+  repeated string Size = 3;
 }
+
+message SizeColor{
+  repeated string Color = 1;
+  repeated string Size = 2;
+}
+
 
 message Profile{
   string FullName = 1;
