@@ -68,17 +68,27 @@ message SizeColor{
 
 
 message Profile{
-  string FirstName = 1;
-  string LastName = 2;
-  string Email = 3;
-  string PhoneNumber = 4;
-  string Address = 5;
-  optional string Address2 = 6;
-  string City = 7;
-  string PostCode = 8;
-  string Country = 9;
-  optional string State = 10;
-  Billing Billing = 11;
+  string Email = 1;
+  Shipping Shipping = 2;
+  Billing Billing = 3;
+}
+
+message Shipping{
+  string FirstName = 2;
+  string LastName = 4;
+  string PhoneNumber = 5;
+  Address ShippingAddress = 6;
+  optional Address BillingAddress = 7;
+  bool BillingIsShipping = 8;
+}
+
+message Address{
+  string AddressLine = 2;
+  optional string AddressLine2 = 3;
+  string Country = 4;
+  string State = 5;
+  string City = 6;
+  string ZIP = 7;
 }
 
 message Billing{
