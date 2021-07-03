@@ -68,16 +68,17 @@ message SizeColor{
 
 
 message Profile{
-  string FullName = 1;
-  string Email = 2;
-  string PhoneNumber = 3;
-  string Address = 4;
-  optional string Address2 = 5;
-  string City = 6;
-  string PostCode = 7;
-  string Country = 8;
-  optional string State = 9;
-  Billing Billing = 10;
+  string FirstName = 1;
+  string LastName = 2;
+  string Email = 3;
+  string PhoneNumber = 4;
+  string Address = 5;
+  optional string Address2 = 6;
+  string City = 7;
+  string PostCode = 8;
+  string Country = 9;
+  optional string State = 10;
+  Billing Billing = 11;
 }
 
 message Billing{
