@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // UserDelete is the builder for deleting a User entity.
@@ -69,7 +69,7 @@ func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},

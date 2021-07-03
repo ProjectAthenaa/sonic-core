@@ -5,22 +5,16 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
 )
 
 // ProfileGroup is the model entity for the ProfileGroup schema.
 type ProfileGroup struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID uuid.UUID `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Name holds the value of the "Name" field.
 	Name string `json:"Name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -73,12 +67,10 @@ func (*ProfileGroup) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case profilegroup.FieldID:
+			values[i] = new(sql.NullInt64)
 		case profilegroup.FieldName:
 			values[i] = new(sql.NullString)
-		case profilegroup.FieldCreatedAt, profilegroup.FieldUpdatedAt:
-			values[i] = new(sql.NullTime)
-		case profilegroup.FieldID:
-			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type ProfileGroup", columns[i])
 		}
@@ -95,23 +87,11 @@ func (pg *ProfileGroup) assignValues(columns []string, values []interface{}) err
 	for i := range columns {
 		switch columns[i] {
 		case profilegroup.FieldID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				pg.ID = *value
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-		case profilegroup.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				pg.CreatedAt = value.Time
-			}
-		case profilegroup.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				pg.UpdatedAt = value.Time
-			}
+			pg.ID = int(value.Int64)
 		case profilegroup.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field Name", values[i])
@@ -161,10 +141,6 @@ func (pg *ProfileGroup) String() string {
 	var builder strings.Builder
 	builder.WriteString("ProfileGroup(")
 	builder.WriteString(fmt.Sprintf("id=%v", pg.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(pg.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(pg.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Name=")
 	builder.WriteString(pg.Name)
 	builder.WriteByte(')')

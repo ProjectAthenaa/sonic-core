@@ -5,17 +5,15 @@ package ent
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -31,26 +29,6 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetCreatedAt(t)
-	return uu
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
-	if t != nil {
-		uu.SetCreatedAt(*t)
-	}
-	return uu
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetUpdatedAt(t)
-	return uu
-}
-
 // SetDisabled sets the "Disabled" field.
 func (uu *UserUpdate) SetDisabled(b bool) *UserUpdate {
 	uu.mutation.SetDisabled(b)
@@ -58,13 +36,13 @@ func (uu *UserUpdate) SetDisabled(b bool) *UserUpdate {
 }
 
 // SetLicenseID sets the "License" edge to the License entity by ID.
-func (uu *UserUpdate) SetLicenseID(id uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetLicenseID(id int) *UserUpdate {
 	uu.mutation.SetLicenseID(id)
 	return uu
 }
 
 // SetNillableLicenseID sets the "License" edge to the License entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableLicenseID(id *uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetNillableLicenseID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetLicenseID(*id)
 	}
@@ -77,14 +55,14 @@ func (uu *UserUpdate) SetLicense(l *License) *UserUpdate {
 }
 
 // AddStatisticIDs adds the "Statistics" edge to the Statistic entity by IDs.
-func (uu *UserUpdate) AddStatisticIDs(ids ...uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) AddStatisticIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddStatisticIDs(ids...)
 	return uu
 }
 
 // AddStatistics adds the "Statistics" edges to the Statistic entity.
 func (uu *UserUpdate) AddStatistics(s ...*Statistic) *UserUpdate {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -92,13 +70,13 @@ func (uu *UserUpdate) AddStatistics(s ...*Statistic) *UserUpdate {
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
-func (uu *UserUpdate) SetAppID(id uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetAppID(id int) *UserUpdate {
 	uu.mutation.SetAppID(id)
 	return uu
 }
 
 // SetNillableAppID sets the "App" edge to the App entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableAppID(id *uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) SetNillableAppID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetAppID(*id)
 	}
@@ -128,14 +106,14 @@ func (uu *UserUpdate) ClearStatistics() *UserUpdate {
 }
 
 // RemoveStatisticIDs removes the "Statistics" edge to Statistic entities by IDs.
-func (uu *UserUpdate) RemoveStatisticIDs(ids ...uuid.UUID) *UserUpdate {
+func (uu *UserUpdate) RemoveStatisticIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveStatisticIDs(ids...)
 	return uu
 }
 
 // RemoveStatistics removes "Statistics" edges to Statistic entities.
 func (uu *UserUpdate) RemoveStatistics(s ...*Statistic) *UserUpdate {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -154,7 +132,6 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	uu.defaults()
 	if len(uu.hooks) == 0 {
 		affected, err = uu.sqlSave(ctx)
 	} else {
@@ -200,21 +177,13 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (uu *UserUpdate) defaults() {
-	if _, ok := uu.mutation.UpdatedAt(); !ok {
-		v := user.UpdateDefaultUpdatedAt()
-		uu.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -225,20 +194,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := uu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldCreatedAt,
-		})
-	}
-	if value, ok := uu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdatedAt,
-		})
 	}
 	if value, ok := uu.mutation.Disabled(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -256,7 +211,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: license.FieldID,
 				},
 			},
@@ -272,7 +227,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: license.FieldID,
 				},
 			},
@@ -291,7 +246,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: statistic.FieldID,
 				},
 			},
@@ -307,7 +262,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: statistic.FieldID,
 				},
 			},
@@ -326,7 +281,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: statistic.FieldID,
 				},
 			},
@@ -345,7 +300,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -361,7 +316,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -390,26 +345,6 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetCreatedAt(t)
-	return uuo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
-	if t != nil {
-		uuo.SetCreatedAt(*t)
-	}
-	return uuo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetUpdatedAt(t)
-	return uuo
-}
-
 // SetDisabled sets the "Disabled" field.
 func (uuo *UserUpdateOne) SetDisabled(b bool) *UserUpdateOne {
 	uuo.mutation.SetDisabled(b)
@@ -417,13 +352,13 @@ func (uuo *UserUpdateOne) SetDisabled(b bool) *UserUpdateOne {
 }
 
 // SetLicenseID sets the "License" edge to the License entity by ID.
-func (uuo *UserUpdateOne) SetLicenseID(id uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetLicenseID(id int) *UserUpdateOne {
 	uuo.mutation.SetLicenseID(id)
 	return uuo
 }
 
 // SetNillableLicenseID sets the "License" edge to the License entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableLicenseID(id *uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableLicenseID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetLicenseID(*id)
 	}
@@ -436,14 +371,14 @@ func (uuo *UserUpdateOne) SetLicense(l *License) *UserUpdateOne {
 }
 
 // AddStatisticIDs adds the "Statistics" edge to the Statistic entity by IDs.
-func (uuo *UserUpdateOne) AddStatisticIDs(ids ...uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddStatisticIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddStatisticIDs(ids...)
 	return uuo
 }
 
 // AddStatistics adds the "Statistics" edges to the Statistic entity.
 func (uuo *UserUpdateOne) AddStatistics(s ...*Statistic) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -451,13 +386,13 @@ func (uuo *UserUpdateOne) AddStatistics(s ...*Statistic) *UserUpdateOne {
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
-func (uuo *UserUpdateOne) SetAppID(id uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetAppID(id int) *UserUpdateOne {
 	uuo.mutation.SetAppID(id)
 	return uuo
 }
 
 // SetNillableAppID sets the "App" edge to the App entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAppID(id *uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetNillableAppID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetAppID(*id)
 	}
@@ -487,14 +422,14 @@ func (uuo *UserUpdateOne) ClearStatistics() *UserUpdateOne {
 }
 
 // RemoveStatisticIDs removes the "Statistics" edge to Statistic entities by IDs.
-func (uuo *UserUpdateOne) RemoveStatisticIDs(ids ...uuid.UUID) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveStatisticIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveStatisticIDs(ids...)
 	return uuo
 }
 
 // RemoveStatistics removes "Statistics" edges to Statistic entities.
 func (uuo *UserUpdateOne) RemoveStatistics(s ...*Statistic) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -520,7 +455,6 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
-	uuo.defaults()
 	if len(uuo.hooks) == 0 {
 		node, err = uuo.sqlSave(ctx)
 	} else {
@@ -566,21 +500,13 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (uuo *UserUpdateOne) defaults() {
-	if _, ok := uuo.mutation.UpdatedAt(); !ok {
-		v := user.UpdateDefaultUpdatedAt()
-		uuo.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: user.FieldID,
 			},
 		},
@@ -609,20 +535,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if value, ok := uuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldCreatedAt,
-		})
-	}
-	if value, ok := uuo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: user.FieldUpdatedAt,
-		})
-	}
 	if value, ok := uuo.mutation.Disabled(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -639,7 +551,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: license.FieldID,
 				},
 			},
@@ -655,7 +567,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: license.FieldID,
 				},
 			},
@@ -674,7 +586,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: statistic.FieldID,
 				},
 			},
@@ -690,7 +602,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: statistic.FieldID,
 				},
 			},
@@ -709,7 +621,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: statistic.FieldID,
 				},
 			},
@@ -728,7 +640,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -744,7 +656,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},

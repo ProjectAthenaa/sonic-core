@@ -5,22 +5,16 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/billing"
 )
 
 // Billing is the model entity for the Billing schema.
 type Billing struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID uuid.UUID `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	ID int `json:"id,omitempty"`
 	// CardholderName holds the value of the "CardholderName" field.
 	CardholderName string `json:"CardholderName,omitempty"`
 	// CardNumber holds the value of the "CardNumber" field.
@@ -59,12 +53,10 @@ func (*Billing) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case billing.FieldID:
+			values[i] = new(sql.NullInt64)
 		case billing.FieldCardholderName, billing.FieldCardNumber, billing.FieldExpiryMonth, billing.FieldExpiryYear, billing.FieldCVV:
 			values[i] = new(sql.NullString)
-		case billing.FieldCreatedAt, billing.FieldUpdatedAt:
-			values[i] = new(sql.NullTime)
-		case billing.FieldID:
-			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Billing", columns[i])
 		}
@@ -81,23 +73,11 @@ func (b *Billing) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case billing.FieldID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				b.ID = *value
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-		case billing.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				b.CreatedAt = value.Time
-			}
-		case billing.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				b.UpdatedAt = value.Time
-			}
+			b.ID = int(value.Int64)
 		case billing.FieldCardholderName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field CardholderName", values[i])
@@ -161,10 +141,6 @@ func (b *Billing) String() string {
 	var builder strings.Builder
 	builder.WriteString("Billing(")
 	builder.WriteString(fmt.Sprintf("id=%v", b.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(b.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(b.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", CardholderName=")
 	builder.WriteString(b.CardholderName)
 	builder.WriteString(", CardNumber=")

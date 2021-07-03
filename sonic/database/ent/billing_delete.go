@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/billing"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
 )
 
 // BillingDelete is the builder for deleting a Billing entity.
@@ -69,7 +69,7 @@ func (bd *BillingDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: billing.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: billing.FieldID,
 			},
 		},

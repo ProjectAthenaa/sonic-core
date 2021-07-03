@@ -11,10 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
 )
 
 // AccountGroupQuery is the builder for querying AccountGroup entities.
@@ -111,8 +110,8 @@ func (agq *AccountGroupQuery) FirstX(ctx context.Context) *AccountGroup {
 
 // FirstID returns the first AccountGroup ID from the query.
 // Returns a *NotFoundError when no AccountGroup ID was found.
-func (agq *AccountGroupQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (agq *AccountGroupQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = agq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -124,7 +123,7 @@ func (agq *AccountGroupQuery) FirstID(ctx context.Context) (id uuid.UUID, err er
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (agq *AccountGroupQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (agq *AccountGroupQuery) FirstIDX(ctx context.Context) int {
 	id, err := agq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -162,8 +161,8 @@ func (agq *AccountGroupQuery) OnlyX(ctx context.Context) *AccountGroup {
 // OnlyID is like Only, but returns the only AccountGroup ID in the query.
 // Returns a *NotSingularError when exactly one AccountGroup ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (agq *AccountGroupQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (agq *AccountGroupQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = agq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -179,7 +178,7 @@ func (agq *AccountGroupQuery) OnlyID(ctx context.Context) (id uuid.UUID, err err
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (agq *AccountGroupQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (agq *AccountGroupQuery) OnlyIDX(ctx context.Context) int {
 	id, err := agq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,8 +204,8 @@ func (agq *AccountGroupQuery) AllX(ctx context.Context) []*AccountGroup {
 }
 
 // IDs executes the query and returns a list of AccountGroup IDs.
-func (agq *AccountGroupQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (agq *AccountGroupQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := agq.Select(accountgroup.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -214,7 +213,7 @@ func (agq *AccountGroupQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (agq *AccountGroupQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (agq *AccountGroupQuery) IDsX(ctx context.Context) []int {
 	ids, err := agq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -292,12 +291,12 @@ func (agq *AccountGroupQuery) WithApp(opts ...func(*AppQuery)) *AccountGroupQuer
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Name string `json:"Name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.AccountGroup.Query().
-//		GroupBy(accountgroup.FieldCreatedAt).
+//		GroupBy(accountgroup.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -319,11 +318,11 @@ func (agq *AccountGroupQuery) GroupBy(field string, fields ...string) *AccountGr
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Name string `json:"Name,omitempty"`
 //	}
 //
 //	client.AccountGroup.Query().
-//		Select(accountgroup.FieldCreatedAt).
+//		Select(accountgroup.FieldName).
 //		Scan(ctx, &v)
 //
 func (agq *AccountGroupQuery) Select(field string, fields ...string) *AccountGroupSelect {
@@ -383,8 +382,8 @@ func (agq *AccountGroupQuery) sqlAll(ctx context.Context) ([]*AccountGroup, erro
 	}
 
 	if query := agq.withApp; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*AccountGroup)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*AccountGroup)
 		for i := range nodes {
 			if nodes[i].app_account_groups == nil {
 				continue
@@ -433,7 +432,7 @@ func (agq *AccountGroupQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   accountgroup.Table,
 			Columns: accountgroup.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: accountgroup.FieldID,
 			},
 		},

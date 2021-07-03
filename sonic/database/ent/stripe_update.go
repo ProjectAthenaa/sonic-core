@@ -10,10 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/stripe"
 )
 
 // StripeUpdate is the builder for updating Stripe entities.
@@ -26,26 +25,6 @@ type StripeUpdate struct {
 // Where adds a new predicate for the StripeUpdate builder.
 func (su *StripeUpdate) Where(ps ...predicate.Stripe) *StripeUpdate {
 	su.mutation.predicates = append(su.mutation.predicates, ps...)
-	return su
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (su *StripeUpdate) SetCreatedAt(t time.Time) *StripeUpdate {
-	su.mutation.SetCreatedAt(t)
-	return su
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (su *StripeUpdate) SetNillableCreatedAt(t *time.Time) *StripeUpdate {
-	if t != nil {
-		su.SetCreatedAt(*t)
-	}
-	return su
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (su *StripeUpdate) SetUpdatedAt(t time.Time) *StripeUpdate {
-	su.mutation.SetUpdatedAt(t)
 	return su
 }
 
@@ -96,13 +75,13 @@ func (su *StripeUpdate) ClearRenewalDate() *StripeUpdate {
 }
 
 // SetLicenseID sets the "License" edge to the License entity by ID.
-func (su *StripeUpdate) SetLicenseID(id uuid.UUID) *StripeUpdate {
+func (su *StripeUpdate) SetLicenseID(id int) *StripeUpdate {
 	su.mutation.SetLicenseID(id)
 	return su
 }
 
 // SetNillableLicenseID sets the "License" edge to the License entity by ID if the given value is not nil.
-func (su *StripeUpdate) SetNillableLicenseID(id *uuid.UUID) *StripeUpdate {
+func (su *StripeUpdate) SetNillableLicenseID(id *int) *StripeUpdate {
 	if id != nil {
 		su = su.SetLicenseID(*id)
 	}
@@ -131,7 +110,6 @@ func (su *StripeUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	su.defaults()
 	if len(su.hooks) == 0 {
 		affected, err = su.sqlSave(ctx)
 	} else {
@@ -177,21 +155,13 @@ func (su *StripeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (su *StripeUpdate) defaults() {
-	if _, ok := su.mutation.UpdatedAt(); !ok {
-		v := stripe.UpdateDefaultUpdatedAt()
-		su.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (su *StripeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   stripe.Table,
 			Columns: stripe.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: stripe.FieldID,
 			},
 		},
@@ -202,20 +172,6 @@ func (su *StripeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := su.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: stripe.FieldCreatedAt,
-		})
-	}
-	if value, ok := su.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: stripe.FieldUpdatedAt,
-		})
 	}
 	if value, ok := su.mutation.CustomerID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -259,7 +215,7 @@ func (su *StripeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: license.FieldID,
 				},
 			},
@@ -275,7 +231,7 @@ func (su *StripeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: license.FieldID,
 				},
 			},
@@ -302,26 +258,6 @@ type StripeUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *StripeMutation
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (suo *StripeUpdateOne) SetCreatedAt(t time.Time) *StripeUpdateOne {
-	suo.mutation.SetCreatedAt(t)
-	return suo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (suo *StripeUpdateOne) SetNillableCreatedAt(t *time.Time) *StripeUpdateOne {
-	if t != nil {
-		suo.SetCreatedAt(*t)
-	}
-	return suo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (suo *StripeUpdateOne) SetUpdatedAt(t time.Time) *StripeUpdateOne {
-	suo.mutation.SetUpdatedAt(t)
-	return suo
 }
 
 // SetCustomerID sets the "CustomerID" field.
@@ -371,13 +307,13 @@ func (suo *StripeUpdateOne) ClearRenewalDate() *StripeUpdateOne {
 }
 
 // SetLicenseID sets the "License" edge to the License entity by ID.
-func (suo *StripeUpdateOne) SetLicenseID(id uuid.UUID) *StripeUpdateOne {
+func (suo *StripeUpdateOne) SetLicenseID(id int) *StripeUpdateOne {
 	suo.mutation.SetLicenseID(id)
 	return suo
 }
 
 // SetNillableLicenseID sets the "License" edge to the License entity by ID if the given value is not nil.
-func (suo *StripeUpdateOne) SetNillableLicenseID(id *uuid.UUID) *StripeUpdateOne {
+func (suo *StripeUpdateOne) SetNillableLicenseID(id *int) *StripeUpdateOne {
 	if id != nil {
 		suo = suo.SetLicenseID(*id)
 	}
@@ -413,7 +349,6 @@ func (suo *StripeUpdateOne) Save(ctx context.Context) (*Stripe, error) {
 		err  error
 		node *Stripe
 	)
-	suo.defaults()
 	if len(suo.hooks) == 0 {
 		node, err = suo.sqlSave(ctx)
 	} else {
@@ -459,21 +394,13 @@ func (suo *StripeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (suo *StripeUpdateOne) defaults() {
-	if _, ok := suo.mutation.UpdatedAt(); !ok {
-		v := stripe.UpdateDefaultUpdatedAt()
-		suo.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (suo *StripeUpdateOne) sqlSave(ctx context.Context) (_node *Stripe, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   stripe.Table,
 			Columns: stripe.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: stripe.FieldID,
 			},
 		},
@@ -501,20 +428,6 @@ func (suo *StripeUpdateOne) sqlSave(ctx context.Context) (_node *Stripe, err err
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := suo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: stripe.FieldCreatedAt,
-		})
-	}
-	if value, ok := suo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: stripe.FieldUpdatedAt,
-		})
 	}
 	if value, ok := suo.mutation.CustomerID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -558,7 +471,7 @@ func (suo *StripeUpdateOne) sqlSave(ctx context.Context) (_node *Stripe, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: license.FieldID,
 				},
 			},
@@ -574,7 +487,7 @@ func (suo *StripeUpdateOne) sqlSave(ctx context.Context) (_node *Stripe, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: license.FieldID,
 				},
 			},

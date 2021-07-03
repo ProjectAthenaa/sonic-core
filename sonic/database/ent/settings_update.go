@@ -6,15 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/settings"
 )
 
 // SettingsUpdate is the builder for updating Settings entities.
@@ -27,26 +25,6 @@ type SettingsUpdate struct {
 // Where adds a new predicate for the SettingsUpdate builder.
 func (su *SettingsUpdate) Where(ps ...predicate.Settings) *SettingsUpdate {
 	su.mutation.predicates = append(su.mutation.predicates, ps...)
-	return su
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (su *SettingsUpdate) SetCreatedAt(t time.Time) *SettingsUpdate {
-	su.mutation.SetCreatedAt(t)
-	return su
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (su *SettingsUpdate) SetNillableCreatedAt(t *time.Time) *SettingsUpdate {
-	if t != nil {
-		su.SetCreatedAt(*t)
-	}
-	return su
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (su *SettingsUpdate) SetUpdatedAt(t time.Time) *SettingsUpdate {
-	su.mutation.SetUpdatedAt(t)
 	return su
 }
 
@@ -89,7 +67,7 @@ func (su *SettingsUpdate) AddATCDelay(i int) *SettingsUpdate {
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
-func (su *SettingsUpdate) SetAppID(id uuid.UUID) *SettingsUpdate {
+func (su *SettingsUpdate) SetAppID(id int) *SettingsUpdate {
 	su.mutation.SetAppID(id)
 	return su
 }
@@ -116,7 +94,6 @@ func (su *SettingsUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	su.defaults()
 	if len(su.hooks) == 0 {
 		if err = su.check(); err != nil {
 			return 0, err
@@ -168,14 +145,6 @@ func (su *SettingsUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (su *SettingsUpdate) defaults() {
-	if _, ok := su.mutation.UpdatedAt(); !ok {
-		v := settings.UpdateDefaultUpdatedAt()
-		su.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (su *SettingsUpdate) check() error {
 	if _, ok := su.mutation.AppID(); su.mutation.AppCleared() && !ok {
@@ -190,7 +159,7 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   settings.Table,
 			Columns: settings.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: settings.FieldID,
 			},
 		},
@@ -201,20 +170,6 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := su.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: settings.FieldCreatedAt,
-		})
-	}
-	if value, ok := su.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: settings.FieldUpdatedAt,
-		})
 	}
 	if value, ok := su.mutation.SuccessWebhook(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -267,7 +222,7 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -283,7 +238,7 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -310,26 +265,6 @@ type SettingsUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *SettingsMutation
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (suo *SettingsUpdateOne) SetCreatedAt(t time.Time) *SettingsUpdateOne {
-	suo.mutation.SetCreatedAt(t)
-	return suo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (suo *SettingsUpdateOne) SetNillableCreatedAt(t *time.Time) *SettingsUpdateOne {
-	if t != nil {
-		suo.SetCreatedAt(*t)
-	}
-	return suo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (suo *SettingsUpdateOne) SetUpdatedAt(t time.Time) *SettingsUpdateOne {
-	suo.mutation.SetUpdatedAt(t)
-	return suo
 }
 
 // SetSuccessWebhook sets the "SuccessWebhook" field.
@@ -371,7 +306,7 @@ func (suo *SettingsUpdateOne) AddATCDelay(i int) *SettingsUpdateOne {
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
-func (suo *SettingsUpdateOne) SetAppID(id uuid.UUID) *SettingsUpdateOne {
+func (suo *SettingsUpdateOne) SetAppID(id int) *SettingsUpdateOne {
 	suo.mutation.SetAppID(id)
 	return suo
 }
@@ -405,7 +340,6 @@ func (suo *SettingsUpdateOne) Save(ctx context.Context) (*Settings, error) {
 		err  error
 		node *Settings
 	)
-	suo.defaults()
 	if len(suo.hooks) == 0 {
 		if err = suo.check(); err != nil {
 			return nil, err
@@ -457,14 +391,6 @@ func (suo *SettingsUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (suo *SettingsUpdateOne) defaults() {
-	if _, ok := suo.mutation.UpdatedAt(); !ok {
-		v := settings.UpdateDefaultUpdatedAt()
-		suo.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (suo *SettingsUpdateOne) check() error {
 	if _, ok := suo.mutation.AppID(); suo.mutation.AppCleared() && !ok {
@@ -479,7 +405,7 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			Table:   settings.Table,
 			Columns: settings.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: settings.FieldID,
 			},
 		},
@@ -507,20 +433,6 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := suo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: settings.FieldCreatedAt,
-		})
-	}
-	if value, ok := suo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: settings.FieldUpdatedAt,
-		})
 	}
 	if value, ok := suo.mutation.SuccessWebhook(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -573,7 +485,7 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -589,7 +501,7 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},

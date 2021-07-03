@@ -6,14 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
 )
 
 // AccountGroupCreate is the builder for creating a AccountGroup entity.
@@ -21,34 +19,6 @@ type AccountGroupCreate struct {
 	config
 	mutation *AccountGroupMutation
 	hooks    []Hook
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (agc *AccountGroupCreate) SetCreatedAt(t time.Time) *AccountGroupCreate {
-	agc.mutation.SetCreatedAt(t)
-	return agc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (agc *AccountGroupCreate) SetNillableCreatedAt(t *time.Time) *AccountGroupCreate {
-	if t != nil {
-		agc.SetCreatedAt(*t)
-	}
-	return agc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (agc *AccountGroupCreate) SetUpdatedAt(t time.Time) *AccountGroupCreate {
-	agc.mutation.SetUpdatedAt(t)
-	return agc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (agc *AccountGroupCreate) SetNillableUpdatedAt(t *time.Time) *AccountGroupCreate {
-	if t != nil {
-		agc.SetUpdatedAt(*t)
-	}
-	return agc
 }
 
 // SetName sets the "Name" field.
@@ -69,20 +39,14 @@ func (agc *AccountGroupCreate) SetAccounts(s sonic.Map) *AccountGroupCreate {
 	return agc
 }
 
-// SetID sets the "id" field.
-func (agc *AccountGroupCreate) SetID(u uuid.UUID) *AccountGroupCreate {
-	agc.mutation.SetID(u)
-	return agc
-}
-
 // SetAppID sets the "App" edge to the App entity by ID.
-func (agc *AccountGroupCreate) SetAppID(id uuid.UUID) *AccountGroupCreate {
+func (agc *AccountGroupCreate) SetAppID(id int) *AccountGroupCreate {
 	agc.mutation.SetAppID(id)
 	return agc
 }
 
 // SetNillableAppID sets the "App" edge to the App entity by ID if the given value is not nil.
-func (agc *AccountGroupCreate) SetNillableAppID(id *uuid.UUID) *AccountGroupCreate {
+func (agc *AccountGroupCreate) SetNillableAppID(id *int) *AccountGroupCreate {
 	if id != nil {
 		agc = agc.SetAppID(*id)
 	}
@@ -105,7 +69,6 @@ func (agc *AccountGroupCreate) Save(ctx context.Context) (*AccountGroup, error) 
 		err  error
 		node *AccountGroup
 	)
-	agc.defaults()
 	if len(agc.hooks) == 0 {
 		if err = agc.check(); err != nil {
 			return nil, err
@@ -144,30 +107,8 @@ func (agc *AccountGroupCreate) SaveX(ctx context.Context) *AccountGroup {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (agc *AccountGroupCreate) defaults() {
-	if _, ok := agc.mutation.CreatedAt(); !ok {
-		v := accountgroup.DefaultCreatedAt()
-		agc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := agc.mutation.UpdatedAt(); !ok {
-		v := accountgroup.DefaultUpdatedAt()
-		agc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := agc.mutation.ID(); !ok {
-		v := accountgroup.DefaultID()
-		agc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (agc *AccountGroupCreate) check() error {
-	if _, ok := agc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := agc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := agc.mutation.Name(); !ok {
 		return &ValidationError{Name: "Name", err: errors.New("ent: missing required field \"Name\"")}
 	}
@@ -193,6 +134,8 @@ func (agc *AccountGroupCreate) sqlSave(ctx context.Context) (*AccountGroup, erro
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -202,31 +145,11 @@ func (agc *AccountGroupCreate) createSpec() (*AccountGroup, *sqlgraph.CreateSpec
 		_spec = &sqlgraph.CreateSpec{
 			Table: accountgroup.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: accountgroup.FieldID,
 			},
 		}
 	)
-	if id, ok := agc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := agc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: accountgroup.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := agc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: accountgroup.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := agc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -260,7 +183,7 @@ func (agc *AccountGroupCreate) createSpec() (*AccountGroup, *sqlgraph.CreateSpec
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -288,7 +211,6 @@ func (agcb *AccountGroupCreateBulk) Save(ctx context.Context) ([]*AccountGroup, 
 	for i := range agcb.builders {
 		func(i int, root context.Context) {
 			builder := agcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AccountGroupMutation)
 				if !ok {
@@ -314,6 +236,8 @@ func (agcb *AccountGroupCreateBulk) Save(ctx context.Context) ([]*AccountGroup, 
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

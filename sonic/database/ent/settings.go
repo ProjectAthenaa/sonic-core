@@ -5,23 +5,17 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/settings"
 )
 
 // Settings is the model entity for the Settings schema.
 type Settings struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID uuid.UUID `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	ID int `json:"id,omitempty"`
 	// SuccessWebhook holds the value of the "SuccessWebhook" field.
 	SuccessWebhook string `json:"SuccessWebhook,omitempty"`
 	// DeclineWebhook holds the value of the "DeclineWebhook" field.
@@ -33,7 +27,7 @@ type Settings struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SettingsQuery when eager-loading is set.
 	Edges        SettingsEdges `json:"edges"`
-	app_settings *uuid.UUID
+	app_settings *int
 }
 
 // SettingsEdges holds the relations/edges for other nodes in the graph.
@@ -64,16 +58,12 @@ func (*Settings) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case settings.FieldCheckoutDelay, settings.FieldATCDelay:
+		case settings.FieldID, settings.FieldCheckoutDelay, settings.FieldATCDelay:
 			values[i] = new(sql.NullInt64)
 		case settings.FieldSuccessWebhook, settings.FieldDeclineWebhook:
 			values[i] = new(sql.NullString)
-		case settings.FieldCreatedAt, settings.FieldUpdatedAt:
-			values[i] = new(sql.NullTime)
-		case settings.FieldID:
-			values[i] = new(uuid.UUID)
 		case settings.ForeignKeys[0]: // app_settings
-			values[i] = new(uuid.UUID)
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Settings", columns[i])
 		}
@@ -90,23 +80,11 @@ func (s *Settings) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case settings.FieldID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				s.ID = *value
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-		case settings.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				s.CreatedAt = value.Time
-			}
-		case settings.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				s.UpdatedAt = value.Time
-			}
+			s.ID = int(value.Int64)
 		case settings.FieldSuccessWebhook:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field SuccessWebhook", values[i])
@@ -132,10 +110,11 @@ func (s *Settings) assignValues(columns []string, values []interface{}) error {
 				s.ATCDelay = int(value.Int64)
 			}
 		case settings.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field app_settings", values[i])
-			} else if value != nil {
-				s.app_settings = value
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field app_settings", value)
+			} else if value.Valid {
+				s.app_settings = new(int)
+				*s.app_settings = int(value.Int64)
 			}
 		}
 	}
@@ -170,10 +149,6 @@ func (s *Settings) String() string {
 	var builder strings.Builder
 	builder.WriteString("Settings(")
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(s.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(s.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", SuccessWebhook=")
 	builder.WriteString(s.SuccessWebhook)
 	builder.WriteString(", DeclineWebhook=")

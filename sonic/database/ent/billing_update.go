@@ -5,15 +5,13 @@ package ent
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/billing"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profile"
 )
 
 // BillingUpdate is the builder for updating Billing entities.
@@ -26,26 +24,6 @@ type BillingUpdate struct {
 // Where adds a new predicate for the BillingUpdate builder.
 func (bu *BillingUpdate) Where(ps ...predicate.Billing) *BillingUpdate {
 	bu.mutation.predicates = append(bu.mutation.predicates, ps...)
-	return bu
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (bu *BillingUpdate) SetCreatedAt(t time.Time) *BillingUpdate {
-	bu.mutation.SetCreatedAt(t)
-	return bu
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (bu *BillingUpdate) SetNillableCreatedAt(t *time.Time) *BillingUpdate {
-	if t != nil {
-		bu.SetCreatedAt(*t)
-	}
-	return bu
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (bu *BillingUpdate) SetUpdatedAt(t time.Time) *BillingUpdate {
-	bu.mutation.SetUpdatedAt(t)
 	return bu
 }
 
@@ -80,14 +58,14 @@ func (bu *BillingUpdate) SetCVV(s string) *BillingUpdate {
 }
 
 // AddProfileIDs adds the "Profile" edge to the Profile entity by IDs.
-func (bu *BillingUpdate) AddProfileIDs(ids ...uuid.UUID) *BillingUpdate {
+func (bu *BillingUpdate) AddProfileIDs(ids ...int) *BillingUpdate {
 	bu.mutation.AddProfileIDs(ids...)
 	return bu
 }
 
 // AddProfile adds the "Profile" edges to the Profile entity.
 func (bu *BillingUpdate) AddProfile(p ...*Profile) *BillingUpdate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -106,14 +84,14 @@ func (bu *BillingUpdate) ClearProfile() *BillingUpdate {
 }
 
 // RemoveProfileIDs removes the "Profile" edge to Profile entities by IDs.
-func (bu *BillingUpdate) RemoveProfileIDs(ids ...uuid.UUID) *BillingUpdate {
+func (bu *BillingUpdate) RemoveProfileIDs(ids ...int) *BillingUpdate {
 	bu.mutation.RemoveProfileIDs(ids...)
 	return bu
 }
 
 // RemoveProfile removes "Profile" edges to Profile entities.
 func (bu *BillingUpdate) RemoveProfile(p ...*Profile) *BillingUpdate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -126,7 +104,6 @@ func (bu *BillingUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	bu.defaults()
 	if len(bu.hooks) == 0 {
 		affected, err = bu.sqlSave(ctx)
 	} else {
@@ -172,21 +149,13 @@ func (bu *BillingUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (bu *BillingUpdate) defaults() {
-	if _, ok := bu.mutation.UpdatedAt(); !ok {
-		v := billing.UpdateDefaultUpdatedAt()
-		bu.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (bu *BillingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   billing.Table,
 			Columns: billing.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: billing.FieldID,
 			},
 		},
@@ -197,20 +166,6 @@ func (bu *BillingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := bu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: billing.FieldCreatedAt,
-		})
-	}
-	if value, ok := bu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: billing.FieldUpdatedAt,
-		})
 	}
 	if value, ok := bu.mutation.CardholderName(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -256,7 +211,7 @@ func (bu *BillingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profile.FieldID,
 				},
 			},
@@ -272,7 +227,7 @@ func (bu *BillingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profile.FieldID,
 				},
 			},
@@ -291,7 +246,7 @@ func (bu *BillingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profile.FieldID,
 				},
 			},
@@ -318,26 +273,6 @@ type BillingUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *BillingMutation
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (buo *BillingUpdateOne) SetCreatedAt(t time.Time) *BillingUpdateOne {
-	buo.mutation.SetCreatedAt(t)
-	return buo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (buo *BillingUpdateOne) SetNillableCreatedAt(t *time.Time) *BillingUpdateOne {
-	if t != nil {
-		buo.SetCreatedAt(*t)
-	}
-	return buo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (buo *BillingUpdateOne) SetUpdatedAt(t time.Time) *BillingUpdateOne {
-	buo.mutation.SetUpdatedAt(t)
-	return buo
 }
 
 // SetCardholderName sets the "CardholderName" field.
@@ -371,14 +306,14 @@ func (buo *BillingUpdateOne) SetCVV(s string) *BillingUpdateOne {
 }
 
 // AddProfileIDs adds the "Profile" edge to the Profile entity by IDs.
-func (buo *BillingUpdateOne) AddProfileIDs(ids ...uuid.UUID) *BillingUpdateOne {
+func (buo *BillingUpdateOne) AddProfileIDs(ids ...int) *BillingUpdateOne {
 	buo.mutation.AddProfileIDs(ids...)
 	return buo
 }
 
 // AddProfile adds the "Profile" edges to the Profile entity.
 func (buo *BillingUpdateOne) AddProfile(p ...*Profile) *BillingUpdateOne {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -397,14 +332,14 @@ func (buo *BillingUpdateOne) ClearProfile() *BillingUpdateOne {
 }
 
 // RemoveProfileIDs removes the "Profile" edge to Profile entities by IDs.
-func (buo *BillingUpdateOne) RemoveProfileIDs(ids ...uuid.UUID) *BillingUpdateOne {
+func (buo *BillingUpdateOne) RemoveProfileIDs(ids ...int) *BillingUpdateOne {
 	buo.mutation.RemoveProfileIDs(ids...)
 	return buo
 }
 
 // RemoveProfile removes "Profile" edges to Profile entities.
 func (buo *BillingUpdateOne) RemoveProfile(p ...*Profile) *BillingUpdateOne {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -424,7 +359,6 @@ func (buo *BillingUpdateOne) Save(ctx context.Context) (*Billing, error) {
 		err  error
 		node *Billing
 	)
-	buo.defaults()
 	if len(buo.hooks) == 0 {
 		node, err = buo.sqlSave(ctx)
 	} else {
@@ -470,21 +404,13 @@ func (buo *BillingUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (buo *BillingUpdateOne) defaults() {
-	if _, ok := buo.mutation.UpdatedAt(); !ok {
-		v := billing.UpdateDefaultUpdatedAt()
-		buo.mutation.SetUpdatedAt(v)
-	}
-}
-
 func (buo *BillingUpdateOne) sqlSave(ctx context.Context) (_node *Billing, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   billing.Table,
 			Columns: billing.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: billing.FieldID,
 			},
 		},
@@ -512,20 +438,6 @@ func (buo *BillingUpdateOne) sqlSave(ctx context.Context) (_node *Billing, err e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := buo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: billing.FieldCreatedAt,
-		})
-	}
-	if value, ok := buo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: billing.FieldUpdatedAt,
-		})
 	}
 	if value, ok := buo.mutation.CardholderName(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -571,7 +483,7 @@ func (buo *BillingUpdateOne) sqlSave(ctx context.Context) (_node *Billing, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profile.FieldID,
 				},
 			},
@@ -587,7 +499,7 @@ func (buo *BillingUpdateOne) sqlSave(ctx context.Context) (_node *Billing, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profile.FieldID,
 				},
 			},
@@ -606,7 +518,7 @@ func (buo *BillingUpdateOne) sqlSave(ctx context.Context) (_node *Billing, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profile.FieldID,
 				},
 			},

@@ -10,13 +10,11 @@ import (
 var (
 	// AccountGroupsColumns holds the columns for the "account_groups" table.
 	AccountGroupsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet"}},
 		{Name: "accounts", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "bytea"}},
-		{Name: "app_account_groups", Type: field.TypeUUID, Nullable: true},
+		{Name: "app_account_groups", Type: field.TypeInt, Nullable: true},
 	}
 	// AccountGroupsTable holds the schema information for the "account_groups" table.
 	AccountGroupsTable = &schema.Table{
@@ -26,7 +24,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "account_groups_apps_AccountGroups",
-				Columns:    []*schema.Column{AccountGroupsColumns[6]},
+				Columns:    []*schema.Column{AccountGroupsColumns[4]},
 				RefColumns: []*schema.Column{AppsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -34,9 +32,7 @@ var (
 	}
 	// AddressesColumns holds the columns for the "addresses" table.
 	AddressesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "address_line", Type: field.TypeString},
 		{Name: "address_line2", Type: field.TypeString, Nullable: true},
 		{Name: "country", Type: field.TypeString},
@@ -53,11 +49,9 @@ var (
 	}
 	// AppsColumns holds the columns for the "apps" table.
 	AppsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "first_login", Type: field.TypeBool},
-		{Name: "user_app", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "user_app", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// AppsTable holds the schema information for the "apps" table.
 	AppsTable = &schema.Table{
@@ -67,7 +61,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "apps_users_App",
-				Columns:    []*schema.Column{AppsColumns[4]},
+				Columns:    []*schema.Column{AppsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -75,9 +69,7 @@ var (
 	}
 	// BillingsColumns holds the columns for the "billings" table.
 	BillingsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "cardholder_name", Type: field.TypeString},
 		{Name: "card_number", Type: field.TypeString},
 		{Name: "expiry_month", Type: field.TypeString},
@@ -93,14 +85,12 @@ var (
 	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "key", Type: field.TypeString},
 		{Name: "hardware_id", Type: field.TypeString, Nullable: true},
 		{Name: "mobile_hardware_id", Type: field.TypeString, Nullable: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"Lifetime", "Renewal", "Beta", "Weekly", "FNF"}},
-		{Name: "user_license", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "user_license", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// LicensesTable holds the schema information for the "licenses" table.
 	LicensesTable = &schema.Table{
@@ -110,7 +100,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "licenses_users_License",
-				Columns:    []*schema.Column{LicensesColumns[7]},
+				Columns:    []*schema.Column{LicensesColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -118,9 +108,7 @@ var (
 	}
 	// ProductsColumns holds the columns for the "products" table.
 	ProductsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "image", Type: field.TypeString, Nullable: true},
 		{Name: "lookup_type", Type: field.TypeEnum, Enums: []string{"Keywords", "Link"}},
@@ -142,12 +130,10 @@ var (
 	}
 	// ProfilesColumns holds the columns for the "profiles" table.
 	ProfilesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "email", Type: field.TypeString},
-		{Name: "profile_group_profiles", Type: field.TypeUUID, Nullable: true},
+		{Name: "profile_group_profiles", Type: field.TypeInt, Nullable: true},
 	}
 	// ProfilesTable holds the schema information for the "profiles" table.
 	ProfilesTable = &schema.Table{
@@ -157,7 +143,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "profiles_profile_groups_Profiles",
-				Columns:    []*schema.Column{ProfilesColumns[5]},
+				Columns:    []*schema.Column{ProfilesColumns[3]},
 				RefColumns: []*schema.Column{ProfileGroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -165,9 +151,7 @@ var (
 	}
 	// ProfileGroupsColumns holds the columns for the "profile_groups" table.
 	ProfileGroupsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 	}
 	// ProfileGroupsTable holds the schema information for the "profile_groups" table.
@@ -179,14 +163,12 @@ var (
 	}
 	// ProxiesColumns holds the columns for the "proxies" table.
 	ProxiesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "username", Type: field.TypeString, Nullable: true},
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "ip", Type: field.TypeString},
 		{Name: "port", Type: field.TypeString},
-		{Name: "proxy_list_proxies", Type: field.TypeUUID, Nullable: true},
+		{Name: "proxy_list_proxies", Type: field.TypeInt, Nullable: true},
 	}
 	// ProxiesTable holds the schema information for the "proxies" table.
 	ProxiesTable = &schema.Table{
@@ -196,7 +178,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "proxies_proxy_lists_Proxies",
-				Columns:    []*schema.Column{ProxiesColumns[7]},
+				Columns:    []*schema.Column{ProxiesColumns[5]},
 				RefColumns: []*schema.Column{ProxyListsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -204,9 +186,7 @@ var (
 	}
 	// ProxyListsColumns holds the columns for the "proxy_lists" table.
 	ProxyListsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"Residential", "Datacenter", "ISP"}},
 	}
@@ -219,14 +199,12 @@ var (
 	}
 	// SettingsColumns holds the columns for the "settings" table.
 	SettingsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "success_webhook", Type: field.TypeString},
 		{Name: "decline_webhook", Type: field.TypeString},
 		{Name: "checkout_delay", Type: field.TypeInt},
 		{Name: "atc_delay", Type: field.TypeInt},
-		{Name: "app_settings", Type: field.TypeUUID, Nullable: true},
+		{Name: "app_settings", Type: field.TypeInt, Nullable: true},
 	}
 	// SettingsTable holds the schema information for the "settings" table.
 	SettingsTable = &schema.Table{
@@ -236,7 +214,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "settings_apps_Settings",
-				Columns:    []*schema.Column{SettingsColumns[7]},
+				Columns:    []*schema.Column{SettingsColumns[5]},
 				RefColumns: []*schema.Column{AppsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -244,14 +222,12 @@ var (
 	}
 	// ShippingsColumns holds the columns for the "shippings" table.
 	ShippingsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "phone_number", Type: field.TypeString},
 		{Name: "billing_is_shipping", Type: field.TypeBool},
-		{Name: "profile_shipping", Type: field.TypeUUID, Nullable: true},
+		{Name: "profile_shipping", Type: field.TypeInt, Nullable: true},
 	}
 	// ShippingsTable holds the schema information for the "shippings" table.
 	ShippingsTable = &schema.Table{
@@ -261,7 +237,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "shippings_profiles_Shipping",
-				Columns:    []*schema.Column{ShippingsColumns[7]},
+				Columns:    []*schema.Column{ShippingsColumns[5]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -269,9 +245,7 @@ var (
 	}
 	// StatisticsColumns holds the columns for the "statistics" table.
 	StatisticsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"Checkout", "Decline"}},
 	}
 	// StatisticsTable holds the schema information for the "statistics" table.
@@ -283,13 +257,11 @@ var (
 	}
 	// StripesColumns holds the columns for the "stripes" table.
 	StripesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "customer_id", Type: field.TypeString},
 		{Name: "subscription_id", Type: field.TypeString, Nullable: true},
 		{Name: "renewal_date", Type: field.TypeTime, Nullable: true},
-		{Name: "license_stripe", Type: field.TypeUUID, Nullable: true},
+		{Name: "license_stripe", Type: field.TypeInt, Nullable: true},
 	}
 	// StripesTable holds the schema information for the "stripes" table.
 	StripesTable = &schema.Table{
@@ -299,7 +271,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "stripes_licenses_Stripe",
-				Columns:    []*schema.Column{StripesColumns[6]},
+				Columns:    []*schema.Column{StripesColumns[4]},
 				RefColumns: []*schema.Column{LicensesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -307,9 +279,7 @@ var (
 	}
 	// TasksColumns holds the columns for the "tasks" table.
 	TasksColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "start_time", Type: field.TypeTime, Nullable: true},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
@@ -321,9 +291,7 @@ var (
 	}
 	// TaskGroupsColumns holds the columns for the "task_groups" table.
 	TaskGroupsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 	}
 	// TaskGroupsTable holds the schema information for the "task_groups" table.
@@ -335,9 +303,7 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "disabled", Type: field.TypeBool},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -349,8 +315,8 @@ var (
 	}
 	// AppProxyListsColumns holds the columns for the "app_ProxyLists" table.
 	AppProxyListsColumns = []*schema.Column{
-		{Name: "app_id", Type: field.TypeUUID},
-		{Name: "proxy_list_id", Type: field.TypeUUID},
+		{Name: "app_id", Type: field.TypeInt},
+		{Name: "proxy_list_id", Type: field.TypeInt},
 	}
 	// AppProxyListsTable holds the schema information for the "app_ProxyLists" table.
 	AppProxyListsTable = &schema.Table{
@@ -374,8 +340,8 @@ var (
 	}
 	// AppProfileGroupsColumns holds the columns for the "app_ProfileGroups" table.
 	AppProfileGroupsColumns = []*schema.Column{
-		{Name: "app_id", Type: field.TypeUUID},
-		{Name: "profile_group_id", Type: field.TypeUUID},
+		{Name: "app_id", Type: field.TypeInt},
+		{Name: "profile_group_id", Type: field.TypeInt},
 	}
 	// AppProfileGroupsTable holds the schema information for the "app_ProfileGroups" table.
 	AppProfileGroupsTable = &schema.Table{
@@ -399,8 +365,8 @@ var (
 	}
 	// AppTaskGroupsColumns holds the columns for the "app_TaskGroups" table.
 	AppTaskGroupsColumns = []*schema.Column{
-		{Name: "app_id", Type: field.TypeUUID},
-		{Name: "task_group_id", Type: field.TypeUUID},
+		{Name: "app_id", Type: field.TypeInt},
+		{Name: "task_group_id", Type: field.TypeInt},
 	}
 	// AppTaskGroupsTable holds the schema information for the "app_TaskGroups" table.
 	AppTaskGroupsTable = &schema.Table{
@@ -424,8 +390,8 @@ var (
 	}
 	// ProfileBillingColumns holds the columns for the "profile_Billing" table.
 	ProfileBillingColumns = []*schema.Column{
-		{Name: "profile_id", Type: field.TypeUUID},
-		{Name: "billing_id", Type: field.TypeUUID},
+		{Name: "profile_id", Type: field.TypeInt},
+		{Name: "billing_id", Type: field.TypeInt},
 	}
 	// ProfileBillingTable holds the schema information for the "profile_Billing" table.
 	ProfileBillingTable = &schema.Table{
@@ -449,8 +415,8 @@ var (
 	}
 	// ShippingShippingAddressColumns holds the columns for the "shipping_ShippingAddress" table.
 	ShippingShippingAddressColumns = []*schema.Column{
-		{Name: "shipping_id", Type: field.TypeUUID},
-		{Name: "address_id", Type: field.TypeUUID},
+		{Name: "shipping_id", Type: field.TypeInt},
+		{Name: "address_id", Type: field.TypeInt},
 	}
 	// ShippingShippingAddressTable holds the schema information for the "shipping_ShippingAddress" table.
 	ShippingShippingAddressTable = &schema.Table{
@@ -474,8 +440,8 @@ var (
 	}
 	// ShippingBillingAddressColumns holds the columns for the "shipping_BillingAddress" table.
 	ShippingBillingAddressColumns = []*schema.Column{
-		{Name: "shipping_id", Type: field.TypeUUID},
-		{Name: "address_id", Type: field.TypeUUID},
+		{Name: "shipping_id", Type: field.TypeInt},
+		{Name: "address_id", Type: field.TypeInt},
 	}
 	// ShippingBillingAddressTable holds the schema information for the "shipping_BillingAddress" table.
 	ShippingBillingAddressTable = &schema.Table{
@@ -499,8 +465,8 @@ var (
 	}
 	// StatisticProductColumns holds the columns for the "statistic_Product" table.
 	StatisticProductColumns = []*schema.Column{
-		{Name: "statistic_id", Type: field.TypeUUID},
-		{Name: "product_id", Type: field.TypeUUID},
+		{Name: "statistic_id", Type: field.TypeInt},
+		{Name: "product_id", Type: field.TypeInt},
 	}
 	// StatisticProductTable holds the schema information for the "statistic_Product" table.
 	StatisticProductTable = &schema.Table{
@@ -524,8 +490,8 @@ var (
 	}
 	// TaskProductColumns holds the columns for the "task_Product" table.
 	TaskProductColumns = []*schema.Column{
-		{Name: "task_id", Type: field.TypeUUID},
-		{Name: "product_id", Type: field.TypeUUID},
+		{Name: "task_id", Type: field.TypeInt},
+		{Name: "product_id", Type: field.TypeInt},
 	}
 	// TaskProductTable holds the schema information for the "task_Product" table.
 	TaskProductTable = &schema.Table{
@@ -549,8 +515,8 @@ var (
 	}
 	// TaskProxyListColumns holds the columns for the "task_ProxyList" table.
 	TaskProxyListColumns = []*schema.Column{
-		{Name: "task_id", Type: field.TypeUUID},
-		{Name: "proxy_list_id", Type: field.TypeUUID},
+		{Name: "task_id", Type: field.TypeInt},
+		{Name: "proxy_list_id", Type: field.TypeInt},
 	}
 	// TaskProxyListTable holds the schema information for the "task_ProxyList" table.
 	TaskProxyListTable = &schema.Table{
@@ -574,8 +540,8 @@ var (
 	}
 	// TaskProfileGroupColumns holds the columns for the "task_ProfileGroup" table.
 	TaskProfileGroupColumns = []*schema.Column{
-		{Name: "task_id", Type: field.TypeUUID},
-		{Name: "profile_group_id", Type: field.TypeUUID},
+		{Name: "task_id", Type: field.TypeInt},
+		{Name: "profile_group_id", Type: field.TypeInt},
 	}
 	// TaskProfileGroupTable holds the schema information for the "task_ProfileGroup" table.
 	TaskProfileGroupTable = &schema.Table{
@@ -599,8 +565,8 @@ var (
 	}
 	// TaskGroupTasksColumns holds the columns for the "task_group_Tasks" table.
 	TaskGroupTasksColumns = []*schema.Column{
-		{Name: "task_group_id", Type: field.TypeUUID},
-		{Name: "task_id", Type: field.TypeUUID},
+		{Name: "task_group_id", Type: field.TypeInt},
+		{Name: "task_id", Type: field.TypeInt},
 	}
 	// TaskGroupTasksTable holds the schema information for the "task_group_Tasks" table.
 	TaskGroupTasksTable = &schema.Table{
@@ -624,8 +590,8 @@ var (
 	}
 	// UserStatisticsColumns holds the columns for the "user_Statistics" table.
 	UserStatisticsColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeUUID},
-		{Name: "statistic_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "statistic_id", Type: field.TypeInt},
 	}
 	// UserStatisticsTable holds the schema information for the "user_Statistics" table.
 	UserStatisticsTable = &schema.Table{

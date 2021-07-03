@@ -6,14 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/stripe"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // LicenseCreate is the builder for creating a License entity.
@@ -21,34 +19,6 @@ type LicenseCreate struct {
 	config
 	mutation *LicenseMutation
 	hooks    []Hook
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (lc *LicenseCreate) SetCreatedAt(t time.Time) *LicenseCreate {
-	lc.mutation.SetCreatedAt(t)
-	return lc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (lc *LicenseCreate) SetNillableCreatedAt(t *time.Time) *LicenseCreate {
-	if t != nil {
-		lc.SetCreatedAt(*t)
-	}
-	return lc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (lc *LicenseCreate) SetUpdatedAt(t time.Time) *LicenseCreate {
-	lc.mutation.SetUpdatedAt(t)
-	return lc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (lc *LicenseCreate) SetNillableUpdatedAt(t *time.Time) *LicenseCreate {
-	if t != nil {
-		lc.SetUpdatedAt(*t)
-	}
-	return lc
 }
 
 // SetKey sets the "Key" field.
@@ -91,14 +61,8 @@ func (lc *LicenseCreate) SetType(l license.Type) *LicenseCreate {
 	return lc
 }
 
-// SetID sets the "id" field.
-func (lc *LicenseCreate) SetID(u uuid.UUID) *LicenseCreate {
-	lc.mutation.SetID(u)
-	return lc
-}
-
 // SetUserID sets the "User" edge to the User entity by ID.
-func (lc *LicenseCreate) SetUserID(id uuid.UUID) *LicenseCreate {
+func (lc *LicenseCreate) SetUserID(id int) *LicenseCreate {
 	lc.mutation.SetUserID(id)
 	return lc
 }
@@ -109,14 +73,14 @@ func (lc *LicenseCreate) SetUser(u *User) *LicenseCreate {
 }
 
 // AddStripeIDs adds the "Stripe" edge to the Stripe entity by IDs.
-func (lc *LicenseCreate) AddStripeIDs(ids ...uuid.UUID) *LicenseCreate {
+func (lc *LicenseCreate) AddStripeIDs(ids ...int) *LicenseCreate {
 	lc.mutation.AddStripeIDs(ids...)
 	return lc
 }
 
 // AddStripe adds the "Stripe" edges to the Stripe entity.
 func (lc *LicenseCreate) AddStripe(s ...*Stripe) *LicenseCreate {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -134,7 +98,6 @@ func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
 		err  error
 		node *License
 	)
-	lc.defaults()
 	if len(lc.hooks) == 0 {
 		if err = lc.check(); err != nil {
 			return nil, err
@@ -173,30 +136,8 @@ func (lc *LicenseCreate) SaveX(ctx context.Context) *License {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (lc *LicenseCreate) defaults() {
-	if _, ok := lc.mutation.CreatedAt(); !ok {
-		v := license.DefaultCreatedAt()
-		lc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := lc.mutation.UpdatedAt(); !ok {
-		v := license.DefaultUpdatedAt()
-		lc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := lc.mutation.ID(); !ok {
-		v := license.DefaultID()
-		lc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (lc *LicenseCreate) check() error {
-	if _, ok := lc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := lc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := lc.mutation.Key(); !ok {
 		return &ValidationError{Name: "Key", err: errors.New("ent: missing required field \"Key\"")}
 	}
@@ -222,6 +163,8 @@ func (lc *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -231,31 +174,11 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: license.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: license.FieldID,
 			},
 		}
 	)
-	if id, ok := lc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := lc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: license.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := lc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: license.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := lc.mutation.Key(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -297,7 +220,7 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -317,7 +240,7 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: stripe.FieldID,
 				},
 			},
@@ -344,7 +267,6 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 	for i := range lcb.builders {
 		func(i int, root context.Context) {
 			builder := lcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LicenseMutation)
 				if !ok {
@@ -370,6 +292,8 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

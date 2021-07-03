@@ -6,15 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profile"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/task"
 )
 
 // ProfileGroupCreate is the builder for creating a ProfileGroup entity.
@@ -24,55 +22,21 @@ type ProfileGroupCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (pgc *ProfileGroupCreate) SetCreatedAt(t time.Time) *ProfileGroupCreate {
-	pgc.mutation.SetCreatedAt(t)
-	return pgc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (pgc *ProfileGroupCreate) SetNillableCreatedAt(t *time.Time) *ProfileGroupCreate {
-	if t != nil {
-		pgc.SetCreatedAt(*t)
-	}
-	return pgc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (pgc *ProfileGroupCreate) SetUpdatedAt(t time.Time) *ProfileGroupCreate {
-	pgc.mutation.SetUpdatedAt(t)
-	return pgc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (pgc *ProfileGroupCreate) SetNillableUpdatedAt(t *time.Time) *ProfileGroupCreate {
-	if t != nil {
-		pgc.SetUpdatedAt(*t)
-	}
-	return pgc
-}
-
 // SetName sets the "Name" field.
 func (pgc *ProfileGroupCreate) SetName(s string) *ProfileGroupCreate {
 	pgc.mutation.SetName(s)
 	return pgc
 }
 
-// SetID sets the "id" field.
-func (pgc *ProfileGroupCreate) SetID(u uuid.UUID) *ProfileGroupCreate {
-	pgc.mutation.SetID(u)
-	return pgc
-}
-
 // AddProfileIDs adds the "Profiles" edge to the Profile entity by IDs.
-func (pgc *ProfileGroupCreate) AddProfileIDs(ids ...uuid.UUID) *ProfileGroupCreate {
+func (pgc *ProfileGroupCreate) AddProfileIDs(ids ...int) *ProfileGroupCreate {
 	pgc.mutation.AddProfileIDs(ids...)
 	return pgc
 }
 
 // AddProfiles adds the "Profiles" edges to the Profile entity.
 func (pgc *ProfileGroupCreate) AddProfiles(p ...*Profile) *ProfileGroupCreate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -80,14 +44,14 @@ func (pgc *ProfileGroupCreate) AddProfiles(p ...*Profile) *ProfileGroupCreate {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (pgc *ProfileGroupCreate) AddAppIDs(ids ...uuid.UUID) *ProfileGroupCreate {
+func (pgc *ProfileGroupCreate) AddAppIDs(ids ...int) *ProfileGroupCreate {
 	pgc.mutation.AddAppIDs(ids...)
 	return pgc
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (pgc *ProfileGroupCreate) AddApp(a ...*App) *ProfileGroupCreate {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -95,14 +59,14 @@ func (pgc *ProfileGroupCreate) AddApp(a ...*App) *ProfileGroupCreate {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (pgc *ProfileGroupCreate) AddTaskIDs(ids ...uuid.UUID) *ProfileGroupCreate {
+func (pgc *ProfileGroupCreate) AddTaskIDs(ids ...int) *ProfileGroupCreate {
 	pgc.mutation.AddTaskIDs(ids...)
 	return pgc
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (pgc *ProfileGroupCreate) AddTask(t ...*Task) *ProfileGroupCreate {
-	ids := make([]uuid.UUID, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -120,7 +84,6 @@ func (pgc *ProfileGroupCreate) Save(ctx context.Context) (*ProfileGroup, error) 
 		err  error
 		node *ProfileGroup
 	)
-	pgc.defaults()
 	if len(pgc.hooks) == 0 {
 		if err = pgc.check(); err != nil {
 			return nil, err
@@ -159,30 +122,8 @@ func (pgc *ProfileGroupCreate) SaveX(ctx context.Context) *ProfileGroup {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (pgc *ProfileGroupCreate) defaults() {
-	if _, ok := pgc.mutation.CreatedAt(); !ok {
-		v := profilegroup.DefaultCreatedAt()
-		pgc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := pgc.mutation.UpdatedAt(); !ok {
-		v := profilegroup.DefaultUpdatedAt()
-		pgc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := pgc.mutation.ID(); !ok {
-		v := profilegroup.DefaultID()
-		pgc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (pgc *ProfileGroupCreate) check() error {
-	if _, ok := pgc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := pgc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := pgc.mutation.Name(); !ok {
 		return &ValidationError{Name: "Name", err: errors.New("ent: missing required field \"Name\"")}
 	}
@@ -200,6 +141,8 @@ func (pgc *ProfileGroupCreate) sqlSave(ctx context.Context) (*ProfileGroup, erro
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -209,31 +152,11 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 		_spec = &sqlgraph.CreateSpec{
 			Table: profilegroup.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: profilegroup.FieldID,
 			},
 		}
 	)
-	if id, ok := pgc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := pgc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: profilegroup.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := pgc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: profilegroup.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := pgc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -251,7 +174,7 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profile.FieldID,
 				},
 			},
@@ -270,7 +193,7 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -289,7 +212,7 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: task.FieldID,
 				},
 			},
@@ -316,7 +239,6 @@ func (pgcb *ProfileGroupCreateBulk) Save(ctx context.Context) ([]*ProfileGroup, 
 	for i := range pgcb.builders {
 		func(i int, root context.Context) {
 			builder := pgcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProfileGroupMutation)
 				if !ok {
@@ -342,6 +264,8 @@ func (pgcb *ProfileGroupCreateBulk) Save(ctx context.Context) ([]*ProfileGroup, 
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

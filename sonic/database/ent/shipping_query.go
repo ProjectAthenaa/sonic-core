@@ -12,11 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/address"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profile"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/shipping"
 )
 
 // ShippingQuery is the builder for querying Shipping entities.
@@ -159,8 +158,8 @@ func (sq *ShippingQuery) FirstX(ctx context.Context) *Shipping {
 
 // FirstID returns the first Shipping ID from the query.
 // Returns a *NotFoundError when no Shipping ID was found.
-func (sq *ShippingQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (sq *ShippingQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -172,7 +171,7 @@ func (sq *ShippingQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) 
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *ShippingQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (sq *ShippingQuery) FirstIDX(ctx context.Context) int {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -210,8 +209,8 @@ func (sq *ShippingQuery) OnlyX(ctx context.Context) *Shipping {
 // OnlyID is like Only, but returns the only Shipping ID in the query.
 // Returns a *NotSingularError when exactly one Shipping ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *ShippingQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (sq *ShippingQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -227,7 +226,7 @@ func (sq *ShippingQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *ShippingQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (sq *ShippingQuery) OnlyIDX(ctx context.Context) int {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -253,8 +252,8 @@ func (sq *ShippingQuery) AllX(ctx context.Context) []*Shipping {
 }
 
 // IDs executes the query and returns a list of Shipping IDs.
-func (sq *ShippingQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (sq *ShippingQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := sq.Select(shipping.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -262,7 +261,7 @@ func (sq *ShippingQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *ShippingQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (sq *ShippingQuery) IDsX(ctx context.Context) []int {
 	ids, err := sq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -364,12 +363,12 @@ func (sq *ShippingQuery) WithBillingAddress(opts ...func(*AddressQuery)) *Shippi
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		FirstName string `json:"FirstName,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Shipping.Query().
-//		GroupBy(shipping.FieldCreatedAt).
+//		GroupBy(shipping.FieldFirstName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -391,11 +390,11 @@ func (sq *ShippingQuery) GroupBy(field string, fields ...string) *ShippingGroupB
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		FirstName string `json:"FirstName,omitempty"`
 //	}
 //
 //	client.Shipping.Query().
-//		Select(shipping.FieldCreatedAt).
+//		Select(shipping.FieldFirstName).
 //		Scan(ctx, &v)
 //
 func (sq *ShippingQuery) Select(field string, fields ...string) *ShippingSelect {
@@ -457,8 +456,8 @@ func (sq *ShippingQuery) sqlAll(ctx context.Context) ([]*Shipping, error) {
 	}
 
 	if query := sq.withProfile; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*Shipping)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Shipping)
 		for i := range nodes {
 			if nodes[i].profile_shipping == nil {
 				continue
@@ -487,15 +486,15 @@ func (sq *ShippingQuery) sqlAll(ctx context.Context) ([]*Shipping, error) {
 
 	if query := sq.withShippingAddress; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*Shipping, len(nodes))
+		ids := make(map[int]*Shipping, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.ShippingAddress = []*Address{}
 		}
 		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*Shipping)
+			edgeids []int
+			edges   = make(map[int][]*Shipping)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -507,19 +506,19 @@ func (sq *ShippingQuery) sqlAll(ctx context.Context) ([]*Shipping, error) {
 				s.Where(sql.InValues(shipping.ShippingAddressPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
+				eout, ok := out.(*sql.NullInt64)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*uuid.UUID)
+				ein, ok := in.(*sql.NullInt64)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := *eout
-				inValue := *ein
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -552,15 +551,15 @@ func (sq *ShippingQuery) sqlAll(ctx context.Context) ([]*Shipping, error) {
 
 	if query := sq.withBillingAddress; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*Shipping, len(nodes))
+		ids := make(map[int]*Shipping, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.BillingAddress = []*Address{}
 		}
 		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*Shipping)
+			edgeids []int
+			edges   = make(map[int][]*Shipping)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -572,19 +571,19 @@ func (sq *ShippingQuery) sqlAll(ctx context.Context) ([]*Shipping, error) {
 				s.Where(sql.InValues(shipping.BillingAddressPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
+				eout, ok := out.(*sql.NullInt64)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*uuid.UUID)
+				ein, ok := in.(*sql.NullInt64)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := *eout
-				inValue := *ein
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -637,7 +636,7 @@ func (sq *ShippingQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   shipping.Table,
 			Columns: shipping.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: shipping.FieldID,
 			},
 		},

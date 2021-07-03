@@ -9,25 +9,24 @@ import (
 	"time"
 
 	"github.com/ProjectAthenaa/sonic-core/sonic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/address"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/billing"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profile"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxy"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/settings"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/shipping"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/stripe"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/task"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/taskgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 	"github.com/lib/pq"
 
 	"entgo.io/ent"
@@ -66,14 +65,12 @@ type AccountGroupMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	updated_at    *time.Time
+	id            *int
 	_Name         *string
 	_Site         *accountgroup.Site
 	_Accounts     *sonic.Map
 	clearedFields map[string]struct{}
-	_App          *uuid.UUID
+	_App          *int
 	cleared_App   bool
 	done          bool
 	oldValue      func(context.Context) (*AccountGroup, error)
@@ -100,7 +97,7 @@ func newAccountGroupMutation(c config, op Op, opts ...accountgroupOption) *Accou
 }
 
 // withAccountGroupID sets the ID field of the mutation.
-func withAccountGroupID(id uuid.UUID) accountgroupOption {
+func withAccountGroupID(id int) accountgroupOption {
 	return func(m *AccountGroupMutation) {
 		var (
 			err   error
@@ -150,91 +147,13 @@ func (m AccountGroupMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of AccountGroup entities.
-func (m *AccountGroupMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *AccountGroupMutation) ID() (id uuid.UUID, exists bool) {
+func (m *AccountGroupMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *AccountGroupMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *AccountGroupMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the AccountGroup entity.
-// If the AccountGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AccountGroupMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *AccountGroupMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *AccountGroupMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *AccountGroupMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the AccountGroup entity.
-// If the AccountGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AccountGroupMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *AccountGroupMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetName sets the "Name" field.
@@ -346,7 +265,7 @@ func (m *AccountGroupMutation) ResetAccounts() {
 }
 
 // SetAppID sets the "App" edge to the App entity by id.
-func (m *AccountGroupMutation) SetAppID(id uuid.UUID) {
+func (m *AccountGroupMutation) SetAppID(id int) {
 	m._App = &id
 }
 
@@ -361,7 +280,7 @@ func (m *AccountGroupMutation) AppCleared() bool {
 }
 
 // AppID returns the "App" edge ID in the mutation.
-func (m *AccountGroupMutation) AppID() (id uuid.UUID, exists bool) {
+func (m *AccountGroupMutation) AppID() (id int, exists bool) {
 	if m._App != nil {
 		return *m._App, true
 	}
@@ -371,7 +290,7 @@ func (m *AccountGroupMutation) AppID() (id uuid.UUID, exists bool) {
 // AppIDs returns the "App" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AppID instead. It exists only for internal usage by the builders.
-func (m *AccountGroupMutation) AppIDs() (ids []uuid.UUID) {
+func (m *AccountGroupMutation) AppIDs() (ids []int) {
 	if id := m._App; id != nil {
 		ids = append(ids, *id)
 	}
@@ -398,13 +317,7 @@ func (m *AccountGroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AccountGroupMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.created_at != nil {
-		fields = append(fields, accountgroup.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, accountgroup.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 3)
 	if m._Name != nil {
 		fields = append(fields, accountgroup.FieldName)
 	}
@@ -422,10 +335,6 @@ func (m *AccountGroupMutation) Fields() []string {
 // schema.
 func (m *AccountGroupMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case accountgroup.FieldCreatedAt:
-		return m.CreatedAt()
-	case accountgroup.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case accountgroup.FieldName:
 		return m.Name()
 	case accountgroup.FieldSite:
@@ -441,10 +350,6 @@ func (m *AccountGroupMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *AccountGroupMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case accountgroup.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case accountgroup.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case accountgroup.FieldName:
 		return m.OldName(ctx)
 	case accountgroup.FieldSite:
@@ -460,20 +365,6 @@ func (m *AccountGroupMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *AccountGroupMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case accountgroup.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case accountgroup.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case accountgroup.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -544,12 +435,6 @@ func (m *AccountGroupMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *AccountGroupMutation) ResetField(name string) error {
 	switch name {
-	case accountgroup.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case accountgroup.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case accountgroup.FieldName:
 		m.ResetName()
 		return nil
@@ -644,9 +529,7 @@ type AddressMutation struct {
 	config
 	op                      Op
 	typ                     string
-	id                      *uuid.UUID
-	created_at              *time.Time
-	updated_at              *time.Time
+	id                      *int
 	_AddressLine            *string
 	_AddressLine2           *string
 	_Country                *string
@@ -654,11 +537,11 @@ type AddressMutation struct {
 	_City                   *string
 	_ZIP                    *string
 	clearedFields           map[string]struct{}
-	_ShippingAddress        map[uuid.UUID]struct{}
-	removed_ShippingAddress map[uuid.UUID]struct{}
+	_ShippingAddress        map[int]struct{}
+	removed_ShippingAddress map[int]struct{}
 	cleared_ShippingAddress bool
-	_BillingAddress         map[uuid.UUID]struct{}
-	removed_BillingAddress  map[uuid.UUID]struct{}
+	_BillingAddress         map[int]struct{}
+	removed_BillingAddress  map[int]struct{}
 	cleared_BillingAddress  bool
 	done                    bool
 	oldValue                func(context.Context) (*Address, error)
@@ -685,7 +568,7 @@ func newAddressMutation(c config, op Op, opts ...addressOption) *AddressMutation
 }
 
 // withAddressID sets the ID field of the mutation.
-func withAddressID(id uuid.UUID) addressOption {
+func withAddressID(id int) addressOption {
 	return func(m *AddressMutation) {
 		var (
 			err   error
@@ -735,91 +618,13 @@ func (m AddressMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Address entities.
-func (m *AddressMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *AddressMutation) ID() (id uuid.UUID, exists bool) {
+func (m *AddressMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *AddressMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *AddressMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Address entity.
-// If the Address object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AddressMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *AddressMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *AddressMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *AddressMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Address entity.
-// If the Address object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AddressMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *AddressMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetAddressLine sets the "AddressLine" field.
@@ -1052,9 +857,9 @@ func (m *AddressMutation) ResetZIP() {
 }
 
 // AddShippingAddresIDs adds the "ShippingAddress" edge to the Shipping entity by ids.
-func (m *AddressMutation) AddShippingAddresIDs(ids ...uuid.UUID) {
+func (m *AddressMutation) AddShippingAddresIDs(ids ...int) {
 	if m._ShippingAddress == nil {
-		m._ShippingAddress = make(map[uuid.UUID]struct{})
+		m._ShippingAddress = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._ShippingAddress[ids[i]] = struct{}{}
@@ -1072,9 +877,9 @@ func (m *AddressMutation) ShippingAddressCleared() bool {
 }
 
 // RemoveShippingAddresIDs removes the "ShippingAddress" edge to the Shipping entity by IDs.
-func (m *AddressMutation) RemoveShippingAddresIDs(ids ...uuid.UUID) {
+func (m *AddressMutation) RemoveShippingAddresIDs(ids ...int) {
 	if m.removed_ShippingAddress == nil {
-		m.removed_ShippingAddress = make(map[uuid.UUID]struct{})
+		m.removed_ShippingAddress = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_ShippingAddress[ids[i]] = struct{}{}
@@ -1082,7 +887,7 @@ func (m *AddressMutation) RemoveShippingAddresIDs(ids ...uuid.UUID) {
 }
 
 // RemovedShippingAddress returns the removed IDs of the "ShippingAddress" edge to the Shipping entity.
-func (m *AddressMutation) RemovedShippingAddressIDs() (ids []uuid.UUID) {
+func (m *AddressMutation) RemovedShippingAddressIDs() (ids []int) {
 	for id := range m.removed_ShippingAddress {
 		ids = append(ids, id)
 	}
@@ -1090,7 +895,7 @@ func (m *AddressMutation) RemovedShippingAddressIDs() (ids []uuid.UUID) {
 }
 
 // ShippingAddressIDs returns the "ShippingAddress" edge IDs in the mutation.
-func (m *AddressMutation) ShippingAddressIDs() (ids []uuid.UUID) {
+func (m *AddressMutation) ShippingAddressIDs() (ids []int) {
 	for id := range m._ShippingAddress {
 		ids = append(ids, id)
 	}
@@ -1105,9 +910,9 @@ func (m *AddressMutation) ResetShippingAddress() {
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by ids.
-func (m *AddressMutation) AddBillingAddresIDs(ids ...uuid.UUID) {
+func (m *AddressMutation) AddBillingAddresIDs(ids ...int) {
 	if m._BillingAddress == nil {
-		m._BillingAddress = make(map[uuid.UUID]struct{})
+		m._BillingAddress = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._BillingAddress[ids[i]] = struct{}{}
@@ -1125,9 +930,9 @@ func (m *AddressMutation) BillingAddressCleared() bool {
 }
 
 // RemoveBillingAddresIDs removes the "BillingAddress" edge to the Shipping entity by IDs.
-func (m *AddressMutation) RemoveBillingAddresIDs(ids ...uuid.UUID) {
+func (m *AddressMutation) RemoveBillingAddresIDs(ids ...int) {
 	if m.removed_BillingAddress == nil {
-		m.removed_BillingAddress = make(map[uuid.UUID]struct{})
+		m.removed_BillingAddress = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_BillingAddress[ids[i]] = struct{}{}
@@ -1135,7 +940,7 @@ func (m *AddressMutation) RemoveBillingAddresIDs(ids ...uuid.UUID) {
 }
 
 // RemovedBillingAddress returns the removed IDs of the "BillingAddress" edge to the Shipping entity.
-func (m *AddressMutation) RemovedBillingAddressIDs() (ids []uuid.UUID) {
+func (m *AddressMutation) RemovedBillingAddressIDs() (ids []int) {
 	for id := range m.removed_BillingAddress {
 		ids = append(ids, id)
 	}
@@ -1143,7 +948,7 @@ func (m *AddressMutation) RemovedBillingAddressIDs() (ids []uuid.UUID) {
 }
 
 // BillingAddressIDs returns the "BillingAddress" edge IDs in the mutation.
-func (m *AddressMutation) BillingAddressIDs() (ids []uuid.UUID) {
+func (m *AddressMutation) BillingAddressIDs() (ids []int) {
 	for id := range m._BillingAddress {
 		ids = append(ids, id)
 	}
@@ -1171,13 +976,7 @@ func (m *AddressMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AddressMutation) Fields() []string {
-	fields := make([]string, 0, 8)
-	if m.created_at != nil {
-		fields = append(fields, address.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, address.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 6)
 	if m._AddressLine != nil {
 		fields = append(fields, address.FieldAddressLine)
 	}
@@ -1204,10 +1003,6 @@ func (m *AddressMutation) Fields() []string {
 // schema.
 func (m *AddressMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case address.FieldCreatedAt:
-		return m.CreatedAt()
-	case address.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case address.FieldAddressLine:
 		return m.AddressLine()
 	case address.FieldAddressLine2:
@@ -1229,10 +1024,6 @@ func (m *AddressMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *AddressMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case address.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case address.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case address.FieldAddressLine:
 		return m.OldAddressLine(ctx)
 	case address.FieldAddressLine2:
@@ -1254,20 +1045,6 @@ func (m *AddressMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *AddressMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case address.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case address.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case address.FieldAddressLine:
 		v, ok := value.(string)
 		if !ok {
@@ -1368,12 +1145,6 @@ func (m *AddressMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *AddressMutation) ResetField(name string) error {
 	switch name {
-	case address.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case address.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case address.FieldAddressLine:
 		m.ResetAddressLine()
 		return nil
@@ -1511,27 +1282,25 @@ type AppMutation struct {
 	config
 	op                    Op
 	typ                   string
-	id                    *uuid.UUID
-	created_at            *time.Time
-	updated_at            *time.Time
+	id                    *int
 	first_login           *bool
 	clearedFields         map[string]struct{}
-	_User                 *uuid.UUID
+	_User                 *int
 	cleared_User          bool
-	_Settings             map[uuid.UUID]struct{}
-	removed_Settings      map[uuid.UUID]struct{}
+	_Settings             map[int]struct{}
+	removed_Settings      map[int]struct{}
 	cleared_Settings      bool
-	_ProxyLists           map[uuid.UUID]struct{}
-	removed_ProxyLists    map[uuid.UUID]struct{}
+	_ProxyLists           map[int]struct{}
+	removed_ProxyLists    map[int]struct{}
 	cleared_ProxyLists    bool
-	_ProfileGroups        map[uuid.UUID]struct{}
-	removed_ProfileGroups map[uuid.UUID]struct{}
+	_ProfileGroups        map[int]struct{}
+	removed_ProfileGroups map[int]struct{}
 	cleared_ProfileGroups bool
-	_TaskGroups           map[uuid.UUID]struct{}
-	removed_TaskGroups    map[uuid.UUID]struct{}
+	_TaskGroups           map[int]struct{}
+	removed_TaskGroups    map[int]struct{}
 	cleared_TaskGroups    bool
-	_AccountGroups        map[uuid.UUID]struct{}
-	removed_AccountGroups map[uuid.UUID]struct{}
+	_AccountGroups        map[int]struct{}
+	removed_AccountGroups map[int]struct{}
 	cleared_AccountGroups bool
 	done                  bool
 	oldValue              func(context.Context) (*App, error)
@@ -1558,7 +1327,7 @@ func newAppMutation(c config, op Op, opts ...appOption) *AppMutation {
 }
 
 // withAppID sets the ID field of the mutation.
-func withAppID(id uuid.UUID) appOption {
+func withAppID(id int) appOption {
 	return func(m *AppMutation) {
 		var (
 			err   error
@@ -1608,91 +1377,13 @@ func (m AppMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of App entities.
-func (m *AppMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *AppMutation) ID() (id uuid.UUID, exists bool) {
+func (m *AppMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *AppMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *AppMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the App entity.
-// If the App object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AppMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *AppMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *AppMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *AppMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the App entity.
-// If the App object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AppMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *AppMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetFirstLogin sets the "first_login" field.
@@ -1732,7 +1423,7 @@ func (m *AppMutation) ResetFirstLogin() {
 }
 
 // SetUserID sets the "User" edge to the User entity by id.
-func (m *AppMutation) SetUserID(id uuid.UUID) {
+func (m *AppMutation) SetUserID(id int) {
 	m._User = &id
 }
 
@@ -1747,7 +1438,7 @@ func (m *AppMutation) UserCleared() bool {
 }
 
 // UserID returns the "User" edge ID in the mutation.
-func (m *AppMutation) UserID() (id uuid.UUID, exists bool) {
+func (m *AppMutation) UserID() (id int, exists bool) {
 	if m._User != nil {
 		return *m._User, true
 	}
@@ -1757,7 +1448,7 @@ func (m *AppMutation) UserID() (id uuid.UUID, exists bool) {
 // UserIDs returns the "User" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *AppMutation) UserIDs() (ids []uuid.UUID) {
+func (m *AppMutation) UserIDs() (ids []int) {
 	if id := m._User; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1771,9 +1462,9 @@ func (m *AppMutation) ResetUser() {
 }
 
 // AddSettingIDs adds the "Settings" edge to the Settings entity by ids.
-func (m *AppMutation) AddSettingIDs(ids ...uuid.UUID) {
+func (m *AppMutation) AddSettingIDs(ids ...int) {
 	if m._Settings == nil {
-		m._Settings = make(map[uuid.UUID]struct{})
+		m._Settings = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Settings[ids[i]] = struct{}{}
@@ -1791,9 +1482,9 @@ func (m *AppMutation) SettingsCleared() bool {
 }
 
 // RemoveSettingIDs removes the "Settings" edge to the Settings entity by IDs.
-func (m *AppMutation) RemoveSettingIDs(ids ...uuid.UUID) {
+func (m *AppMutation) RemoveSettingIDs(ids ...int) {
 	if m.removed_Settings == nil {
-		m.removed_Settings = make(map[uuid.UUID]struct{})
+		m.removed_Settings = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Settings[ids[i]] = struct{}{}
@@ -1801,7 +1492,7 @@ func (m *AppMutation) RemoveSettingIDs(ids ...uuid.UUID) {
 }
 
 // RemovedSettings returns the removed IDs of the "Settings" edge to the Settings entity.
-func (m *AppMutation) RemovedSettingsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) RemovedSettingsIDs() (ids []int) {
 	for id := range m.removed_Settings {
 		ids = append(ids, id)
 	}
@@ -1809,7 +1500,7 @@ func (m *AppMutation) RemovedSettingsIDs() (ids []uuid.UUID) {
 }
 
 // SettingsIDs returns the "Settings" edge IDs in the mutation.
-func (m *AppMutation) SettingsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) SettingsIDs() (ids []int) {
 	for id := range m._Settings {
 		ids = append(ids, id)
 	}
@@ -1824,9 +1515,9 @@ func (m *AppMutation) ResetSettings() {
 }
 
 // AddProxyListIDs adds the "ProxyLists" edge to the ProxyList entity by ids.
-func (m *AppMutation) AddProxyListIDs(ids ...uuid.UUID) {
+func (m *AppMutation) AddProxyListIDs(ids ...int) {
 	if m._ProxyLists == nil {
-		m._ProxyLists = make(map[uuid.UUID]struct{})
+		m._ProxyLists = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._ProxyLists[ids[i]] = struct{}{}
@@ -1844,9 +1535,9 @@ func (m *AppMutation) ProxyListsCleared() bool {
 }
 
 // RemoveProxyListIDs removes the "ProxyLists" edge to the ProxyList entity by IDs.
-func (m *AppMutation) RemoveProxyListIDs(ids ...uuid.UUID) {
+func (m *AppMutation) RemoveProxyListIDs(ids ...int) {
 	if m.removed_ProxyLists == nil {
-		m.removed_ProxyLists = make(map[uuid.UUID]struct{})
+		m.removed_ProxyLists = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_ProxyLists[ids[i]] = struct{}{}
@@ -1854,7 +1545,7 @@ func (m *AppMutation) RemoveProxyListIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProxyLists returns the removed IDs of the "ProxyLists" edge to the ProxyList entity.
-func (m *AppMutation) RemovedProxyListsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) RemovedProxyListsIDs() (ids []int) {
 	for id := range m.removed_ProxyLists {
 		ids = append(ids, id)
 	}
@@ -1862,7 +1553,7 @@ func (m *AppMutation) RemovedProxyListsIDs() (ids []uuid.UUID) {
 }
 
 // ProxyListsIDs returns the "ProxyLists" edge IDs in the mutation.
-func (m *AppMutation) ProxyListsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) ProxyListsIDs() (ids []int) {
 	for id := range m._ProxyLists {
 		ids = append(ids, id)
 	}
@@ -1877,9 +1568,9 @@ func (m *AppMutation) ResetProxyLists() {
 }
 
 // AddProfileGroupIDs adds the "ProfileGroups" edge to the ProfileGroup entity by ids.
-func (m *AppMutation) AddProfileGroupIDs(ids ...uuid.UUID) {
+func (m *AppMutation) AddProfileGroupIDs(ids ...int) {
 	if m._ProfileGroups == nil {
-		m._ProfileGroups = make(map[uuid.UUID]struct{})
+		m._ProfileGroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._ProfileGroups[ids[i]] = struct{}{}
@@ -1897,9 +1588,9 @@ func (m *AppMutation) ProfileGroupsCleared() bool {
 }
 
 // RemoveProfileGroupIDs removes the "ProfileGroups" edge to the ProfileGroup entity by IDs.
-func (m *AppMutation) RemoveProfileGroupIDs(ids ...uuid.UUID) {
+func (m *AppMutation) RemoveProfileGroupIDs(ids ...int) {
 	if m.removed_ProfileGroups == nil {
-		m.removed_ProfileGroups = make(map[uuid.UUID]struct{})
+		m.removed_ProfileGroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_ProfileGroups[ids[i]] = struct{}{}
@@ -1907,7 +1598,7 @@ func (m *AppMutation) RemoveProfileGroupIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProfileGroups returns the removed IDs of the "ProfileGroups" edge to the ProfileGroup entity.
-func (m *AppMutation) RemovedProfileGroupsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) RemovedProfileGroupsIDs() (ids []int) {
 	for id := range m.removed_ProfileGroups {
 		ids = append(ids, id)
 	}
@@ -1915,7 +1606,7 @@ func (m *AppMutation) RemovedProfileGroupsIDs() (ids []uuid.UUID) {
 }
 
 // ProfileGroupsIDs returns the "ProfileGroups" edge IDs in the mutation.
-func (m *AppMutation) ProfileGroupsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) ProfileGroupsIDs() (ids []int) {
 	for id := range m._ProfileGroups {
 		ids = append(ids, id)
 	}
@@ -1930,9 +1621,9 @@ func (m *AppMutation) ResetProfileGroups() {
 }
 
 // AddTaskGroupIDs adds the "TaskGroups" edge to the TaskGroup entity by ids.
-func (m *AppMutation) AddTaskGroupIDs(ids ...uuid.UUID) {
+func (m *AppMutation) AddTaskGroupIDs(ids ...int) {
 	if m._TaskGroups == nil {
-		m._TaskGroups = make(map[uuid.UUID]struct{})
+		m._TaskGroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._TaskGroups[ids[i]] = struct{}{}
@@ -1950,9 +1641,9 @@ func (m *AppMutation) TaskGroupsCleared() bool {
 }
 
 // RemoveTaskGroupIDs removes the "TaskGroups" edge to the TaskGroup entity by IDs.
-func (m *AppMutation) RemoveTaskGroupIDs(ids ...uuid.UUID) {
+func (m *AppMutation) RemoveTaskGroupIDs(ids ...int) {
 	if m.removed_TaskGroups == nil {
-		m.removed_TaskGroups = make(map[uuid.UUID]struct{})
+		m.removed_TaskGroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_TaskGroups[ids[i]] = struct{}{}
@@ -1960,7 +1651,7 @@ func (m *AppMutation) RemoveTaskGroupIDs(ids ...uuid.UUID) {
 }
 
 // RemovedTaskGroups returns the removed IDs of the "TaskGroups" edge to the TaskGroup entity.
-func (m *AppMutation) RemovedTaskGroupsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) RemovedTaskGroupsIDs() (ids []int) {
 	for id := range m.removed_TaskGroups {
 		ids = append(ids, id)
 	}
@@ -1968,7 +1659,7 @@ func (m *AppMutation) RemovedTaskGroupsIDs() (ids []uuid.UUID) {
 }
 
 // TaskGroupsIDs returns the "TaskGroups" edge IDs in the mutation.
-func (m *AppMutation) TaskGroupsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) TaskGroupsIDs() (ids []int) {
 	for id := range m._TaskGroups {
 		ids = append(ids, id)
 	}
@@ -1983,9 +1674,9 @@ func (m *AppMutation) ResetTaskGroups() {
 }
 
 // AddAccountGroupIDs adds the "AccountGroups" edge to the AccountGroup entity by ids.
-func (m *AppMutation) AddAccountGroupIDs(ids ...uuid.UUID) {
+func (m *AppMutation) AddAccountGroupIDs(ids ...int) {
 	if m._AccountGroups == nil {
-		m._AccountGroups = make(map[uuid.UUID]struct{})
+		m._AccountGroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._AccountGroups[ids[i]] = struct{}{}
@@ -2003,9 +1694,9 @@ func (m *AppMutation) AccountGroupsCleared() bool {
 }
 
 // RemoveAccountGroupIDs removes the "AccountGroups" edge to the AccountGroup entity by IDs.
-func (m *AppMutation) RemoveAccountGroupIDs(ids ...uuid.UUID) {
+func (m *AppMutation) RemoveAccountGroupIDs(ids ...int) {
 	if m.removed_AccountGroups == nil {
-		m.removed_AccountGroups = make(map[uuid.UUID]struct{})
+		m.removed_AccountGroups = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_AccountGroups[ids[i]] = struct{}{}
@@ -2013,7 +1704,7 @@ func (m *AppMutation) RemoveAccountGroupIDs(ids ...uuid.UUID) {
 }
 
 // RemovedAccountGroups returns the removed IDs of the "AccountGroups" edge to the AccountGroup entity.
-func (m *AppMutation) RemovedAccountGroupsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) RemovedAccountGroupsIDs() (ids []int) {
 	for id := range m.removed_AccountGroups {
 		ids = append(ids, id)
 	}
@@ -2021,7 +1712,7 @@ func (m *AppMutation) RemovedAccountGroupsIDs() (ids []uuid.UUID) {
 }
 
 // AccountGroupsIDs returns the "AccountGroups" edge IDs in the mutation.
-func (m *AppMutation) AccountGroupsIDs() (ids []uuid.UUID) {
+func (m *AppMutation) AccountGroupsIDs() (ids []int) {
 	for id := range m._AccountGroups {
 		ids = append(ids, id)
 	}
@@ -2049,13 +1740,7 @@ func (m *AppMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AppMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.created_at != nil {
-		fields = append(fields, app.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, app.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 1)
 	if m.first_login != nil {
 		fields = append(fields, app.FieldFirstLogin)
 	}
@@ -2067,10 +1752,6 @@ func (m *AppMutation) Fields() []string {
 // schema.
 func (m *AppMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case app.FieldCreatedAt:
-		return m.CreatedAt()
-	case app.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case app.FieldFirstLogin:
 		return m.FirstLogin()
 	}
@@ -2082,10 +1763,6 @@ func (m *AppMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *AppMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case app.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case app.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case app.FieldFirstLogin:
 		return m.OldFirstLogin(ctx)
 	}
@@ -2097,20 +1774,6 @@ func (m *AppMutation) OldField(ctx context.Context, name string) (ent.Value, err
 // type.
 func (m *AppMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case app.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case app.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case app.FieldFirstLogin:
 		v, ok := value.(bool)
 		if !ok {
@@ -2167,12 +1830,6 @@ func (m *AppMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *AppMutation) ResetField(name string) error {
 	switch name {
-	case app.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case app.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case app.FieldFirstLogin:
 		m.ResetFirstLogin()
 		return nil
@@ -2391,17 +2048,15 @@ type BillingMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *uuid.UUID
-	created_at      *time.Time
-	updated_at      *time.Time
+	id              *int
 	_CardholderName *string
 	_CardNumber     *string
 	_ExpiryMonth    *string
 	_ExpiryYear     *string
 	_CVV            *string
 	clearedFields   map[string]struct{}
-	_Profile        map[uuid.UUID]struct{}
-	removed_Profile map[uuid.UUID]struct{}
+	_Profile        map[int]struct{}
+	removed_Profile map[int]struct{}
 	cleared_Profile bool
 	done            bool
 	oldValue        func(context.Context) (*Billing, error)
@@ -2428,7 +2083,7 @@ func newBillingMutation(c config, op Op, opts ...billingOption) *BillingMutation
 }
 
 // withBillingID sets the ID field of the mutation.
-func withBillingID(id uuid.UUID) billingOption {
+func withBillingID(id int) billingOption {
 	return func(m *BillingMutation) {
 		var (
 			err   error
@@ -2478,91 +2133,13 @@ func (m BillingMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Billing entities.
-func (m *BillingMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *BillingMutation) ID() (id uuid.UUID, exists bool) {
+func (m *BillingMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *BillingMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *BillingMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Billing entity.
-// If the Billing object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BillingMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *BillingMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *BillingMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *BillingMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Billing entity.
-// If the Billing object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BillingMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *BillingMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetCardholderName sets the "CardholderName" field.
@@ -2746,9 +2323,9 @@ func (m *BillingMutation) ResetCVV() {
 }
 
 // AddProfileIDs adds the "Profile" edge to the Profile entity by ids.
-func (m *BillingMutation) AddProfileIDs(ids ...uuid.UUID) {
+func (m *BillingMutation) AddProfileIDs(ids ...int) {
 	if m._Profile == nil {
-		m._Profile = make(map[uuid.UUID]struct{})
+		m._Profile = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Profile[ids[i]] = struct{}{}
@@ -2766,9 +2343,9 @@ func (m *BillingMutation) ProfileCleared() bool {
 }
 
 // RemoveProfileIDs removes the "Profile" edge to the Profile entity by IDs.
-func (m *BillingMutation) RemoveProfileIDs(ids ...uuid.UUID) {
+func (m *BillingMutation) RemoveProfileIDs(ids ...int) {
 	if m.removed_Profile == nil {
-		m.removed_Profile = make(map[uuid.UUID]struct{})
+		m.removed_Profile = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Profile[ids[i]] = struct{}{}
@@ -2776,7 +2353,7 @@ func (m *BillingMutation) RemoveProfileIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProfile returns the removed IDs of the "Profile" edge to the Profile entity.
-func (m *BillingMutation) RemovedProfileIDs() (ids []uuid.UUID) {
+func (m *BillingMutation) RemovedProfileIDs() (ids []int) {
 	for id := range m.removed_Profile {
 		ids = append(ids, id)
 	}
@@ -2784,7 +2361,7 @@ func (m *BillingMutation) RemovedProfileIDs() (ids []uuid.UUID) {
 }
 
 // ProfileIDs returns the "Profile" edge IDs in the mutation.
-func (m *BillingMutation) ProfileIDs() (ids []uuid.UUID) {
+func (m *BillingMutation) ProfileIDs() (ids []int) {
 	for id := range m._Profile {
 		ids = append(ids, id)
 	}
@@ -2812,13 +2389,7 @@ func (m *BillingMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BillingMutation) Fields() []string {
-	fields := make([]string, 0, 7)
-	if m.created_at != nil {
-		fields = append(fields, billing.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, billing.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 5)
 	if m._CardholderName != nil {
 		fields = append(fields, billing.FieldCardholderName)
 	}
@@ -2842,10 +2413,6 @@ func (m *BillingMutation) Fields() []string {
 // schema.
 func (m *BillingMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case billing.FieldCreatedAt:
-		return m.CreatedAt()
-	case billing.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case billing.FieldCardholderName:
 		return m.CardholderName()
 	case billing.FieldCardNumber:
@@ -2865,10 +2432,6 @@ func (m *BillingMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *BillingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case billing.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case billing.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case billing.FieldCardholderName:
 		return m.OldCardholderName(ctx)
 	case billing.FieldCardNumber:
@@ -2888,20 +2451,6 @@ func (m *BillingMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *BillingMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case billing.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case billing.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case billing.FieldCardholderName:
 		v, ok := value.(string)
 		if !ok {
@@ -2986,12 +2535,6 @@ func (m *BillingMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *BillingMutation) ResetField(name string) error {
 	switch name {
-	case billing.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case billing.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case billing.FieldCardholderName:
 		m.ResetCardholderName()
 		return nil
@@ -3100,18 +2643,16 @@ type LicenseMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *uuid.UUID
-	created_at        *time.Time
-	updated_at        *time.Time
+	id                *int
 	_Key              *string
 	_HardwareID       *string
 	_MobileHardwareID *string
 	_Type             *license.Type
 	clearedFields     map[string]struct{}
-	_User             *uuid.UUID
+	_User             *int
 	cleared_User      bool
-	_Stripe           map[uuid.UUID]struct{}
-	removed_Stripe    map[uuid.UUID]struct{}
+	_Stripe           map[int]struct{}
+	removed_Stripe    map[int]struct{}
 	cleared_Stripe    bool
 	done              bool
 	oldValue          func(context.Context) (*License, error)
@@ -3138,7 +2679,7 @@ func newLicenseMutation(c config, op Op, opts ...licenseOption) *LicenseMutation
 }
 
 // withLicenseID sets the ID field of the mutation.
-func withLicenseID(id uuid.UUID) licenseOption {
+func withLicenseID(id int) licenseOption {
 	return func(m *LicenseMutation) {
 		var (
 			err   error
@@ -3188,91 +2729,13 @@ func (m LicenseMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of License entities.
-func (m *LicenseMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *LicenseMutation) ID() (id uuid.UUID, exists bool) {
+func (m *LicenseMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *LicenseMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *LicenseMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the License entity.
-// If the License object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LicenseMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *LicenseMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *LicenseMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *LicenseMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the License entity.
-// If the License object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LicenseMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *LicenseMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetKey sets the "Key" field.
@@ -3446,7 +2909,7 @@ func (m *LicenseMutation) ResetType() {
 }
 
 // SetUserID sets the "User" edge to the User entity by id.
-func (m *LicenseMutation) SetUserID(id uuid.UUID) {
+func (m *LicenseMutation) SetUserID(id int) {
 	m._User = &id
 }
 
@@ -3461,7 +2924,7 @@ func (m *LicenseMutation) UserCleared() bool {
 }
 
 // UserID returns the "User" edge ID in the mutation.
-func (m *LicenseMutation) UserID() (id uuid.UUID, exists bool) {
+func (m *LicenseMutation) UserID() (id int, exists bool) {
 	if m._User != nil {
 		return *m._User, true
 	}
@@ -3471,7 +2934,7 @@ func (m *LicenseMutation) UserID() (id uuid.UUID, exists bool) {
 // UserIDs returns the "User" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *LicenseMutation) UserIDs() (ids []uuid.UUID) {
+func (m *LicenseMutation) UserIDs() (ids []int) {
 	if id := m._User; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3485,9 +2948,9 @@ func (m *LicenseMutation) ResetUser() {
 }
 
 // AddStripeIDs adds the "Stripe" edge to the Stripe entity by ids.
-func (m *LicenseMutation) AddStripeIDs(ids ...uuid.UUID) {
+func (m *LicenseMutation) AddStripeIDs(ids ...int) {
 	if m._Stripe == nil {
-		m._Stripe = make(map[uuid.UUID]struct{})
+		m._Stripe = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Stripe[ids[i]] = struct{}{}
@@ -3505,9 +2968,9 @@ func (m *LicenseMutation) StripeCleared() bool {
 }
 
 // RemoveStripeIDs removes the "Stripe" edge to the Stripe entity by IDs.
-func (m *LicenseMutation) RemoveStripeIDs(ids ...uuid.UUID) {
+func (m *LicenseMutation) RemoveStripeIDs(ids ...int) {
 	if m.removed_Stripe == nil {
-		m.removed_Stripe = make(map[uuid.UUID]struct{})
+		m.removed_Stripe = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Stripe[ids[i]] = struct{}{}
@@ -3515,7 +2978,7 @@ func (m *LicenseMutation) RemoveStripeIDs(ids ...uuid.UUID) {
 }
 
 // RemovedStripe returns the removed IDs of the "Stripe" edge to the Stripe entity.
-func (m *LicenseMutation) RemovedStripeIDs() (ids []uuid.UUID) {
+func (m *LicenseMutation) RemovedStripeIDs() (ids []int) {
 	for id := range m.removed_Stripe {
 		ids = append(ids, id)
 	}
@@ -3523,7 +2986,7 @@ func (m *LicenseMutation) RemovedStripeIDs() (ids []uuid.UUID) {
 }
 
 // StripeIDs returns the "Stripe" edge IDs in the mutation.
-func (m *LicenseMutation) StripeIDs() (ids []uuid.UUID) {
+func (m *LicenseMutation) StripeIDs() (ids []int) {
 	for id := range m._Stripe {
 		ids = append(ids, id)
 	}
@@ -3551,13 +3014,7 @@ func (m *LicenseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LicenseMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.created_at != nil {
-		fields = append(fields, license.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, license.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 4)
 	if m._Key != nil {
 		fields = append(fields, license.FieldKey)
 	}
@@ -3578,10 +3035,6 @@ func (m *LicenseMutation) Fields() []string {
 // schema.
 func (m *LicenseMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case license.FieldCreatedAt:
-		return m.CreatedAt()
-	case license.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case license.FieldKey:
 		return m.Key()
 	case license.FieldHardwareID:
@@ -3599,10 +3052,6 @@ func (m *LicenseMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *LicenseMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case license.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case license.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case license.FieldKey:
 		return m.OldKey(ctx)
 	case license.FieldHardwareID:
@@ -3620,20 +3069,6 @@ func (m *LicenseMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *LicenseMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case license.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case license.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case license.FieldKey:
 		v, ok := value.(string)
 		if !ok {
@@ -3726,12 +3161,6 @@ func (m *LicenseMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *LicenseMutation) ResetField(name string) error {
 	switch name {
-	case license.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case license.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case license.FieldKey:
 		m.ResetKey()
 		return nil
@@ -3855,9 +3284,7 @@ type ProductMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *uuid.UUID
-	created_at        *time.Time
-	updated_at        *time.Time
+	id                *int
 	_Name             *string
 	_Image            *string
 	_LookupType       *product.LookupType
@@ -3871,11 +3298,11 @@ type ProductMutation struct {
 	_Site             *product.Site
 	_Metadata         *sonic.Map
 	clearedFields     map[string]struct{}
-	_Task             map[uuid.UUID]struct{}
-	removed_Task      map[uuid.UUID]struct{}
+	_Task             map[int]struct{}
+	removed_Task      map[int]struct{}
 	cleared_Task      bool
-	_Statistic        map[uuid.UUID]struct{}
-	removed_Statistic map[uuid.UUID]struct{}
+	_Statistic        map[int]struct{}
+	removed_Statistic map[int]struct{}
 	cleared_Statistic bool
 	done              bool
 	oldValue          func(context.Context) (*Product, error)
@@ -3902,7 +3329,7 @@ func newProductMutation(c config, op Op, opts ...productOption) *ProductMutation
 }
 
 // withProductID sets the ID field of the mutation.
-func withProductID(id uuid.UUID) productOption {
+func withProductID(id int) productOption {
 	return func(m *ProductMutation) {
 		var (
 			err   error
@@ -3952,91 +3379,13 @@ func (m ProductMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Product entities.
-func (m *ProductMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *ProductMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ProductMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ProductMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ProductMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Product entity.
-// If the Product object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ProductMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ProductMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ProductMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Product entity.
-// If the Product object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ProductMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetName sets the "Name" field.
@@ -4508,9 +3857,9 @@ func (m *ProductMutation) ResetMetadata() {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by ids.
-func (m *ProductMutation) AddTaskIDs(ids ...uuid.UUID) {
+func (m *ProductMutation) AddTaskIDs(ids ...int) {
 	if m._Task == nil {
-		m._Task = make(map[uuid.UUID]struct{})
+		m._Task = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Task[ids[i]] = struct{}{}
@@ -4528,9 +3877,9 @@ func (m *ProductMutation) TaskCleared() bool {
 }
 
 // RemoveTaskIDs removes the "Task" edge to the Task entity by IDs.
-func (m *ProductMutation) RemoveTaskIDs(ids ...uuid.UUID) {
+func (m *ProductMutation) RemoveTaskIDs(ids ...int) {
 	if m.removed_Task == nil {
-		m.removed_Task = make(map[uuid.UUID]struct{})
+		m.removed_Task = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Task[ids[i]] = struct{}{}
@@ -4538,7 +3887,7 @@ func (m *ProductMutation) RemoveTaskIDs(ids ...uuid.UUID) {
 }
 
 // RemovedTask returns the removed IDs of the "Task" edge to the Task entity.
-func (m *ProductMutation) RemovedTaskIDs() (ids []uuid.UUID) {
+func (m *ProductMutation) RemovedTaskIDs() (ids []int) {
 	for id := range m.removed_Task {
 		ids = append(ids, id)
 	}
@@ -4546,7 +3895,7 @@ func (m *ProductMutation) RemovedTaskIDs() (ids []uuid.UUID) {
 }
 
 // TaskIDs returns the "Task" edge IDs in the mutation.
-func (m *ProductMutation) TaskIDs() (ids []uuid.UUID) {
+func (m *ProductMutation) TaskIDs() (ids []int) {
 	for id := range m._Task {
 		ids = append(ids, id)
 	}
@@ -4561,9 +3910,9 @@ func (m *ProductMutation) ResetTask() {
 }
 
 // AddStatisticIDs adds the "Statistic" edge to the Statistic entity by ids.
-func (m *ProductMutation) AddStatisticIDs(ids ...uuid.UUID) {
+func (m *ProductMutation) AddStatisticIDs(ids ...int) {
 	if m._Statistic == nil {
-		m._Statistic = make(map[uuid.UUID]struct{})
+		m._Statistic = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Statistic[ids[i]] = struct{}{}
@@ -4581,9 +3930,9 @@ func (m *ProductMutation) StatisticCleared() bool {
 }
 
 // RemoveStatisticIDs removes the "Statistic" edge to the Statistic entity by IDs.
-func (m *ProductMutation) RemoveStatisticIDs(ids ...uuid.UUID) {
+func (m *ProductMutation) RemoveStatisticIDs(ids ...int) {
 	if m.removed_Statistic == nil {
-		m.removed_Statistic = make(map[uuid.UUID]struct{})
+		m.removed_Statistic = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Statistic[ids[i]] = struct{}{}
@@ -4591,7 +3940,7 @@ func (m *ProductMutation) RemoveStatisticIDs(ids ...uuid.UUID) {
 }
 
 // RemovedStatistic returns the removed IDs of the "Statistic" edge to the Statistic entity.
-func (m *ProductMutation) RemovedStatisticIDs() (ids []uuid.UUID) {
+func (m *ProductMutation) RemovedStatisticIDs() (ids []int) {
 	for id := range m.removed_Statistic {
 		ids = append(ids, id)
 	}
@@ -4599,7 +3948,7 @@ func (m *ProductMutation) RemovedStatisticIDs() (ids []uuid.UUID) {
 }
 
 // StatisticIDs returns the "Statistic" edge IDs in the mutation.
-func (m *ProductMutation) StatisticIDs() (ids []uuid.UUID) {
+func (m *ProductMutation) StatisticIDs() (ids []int) {
 	for id := range m._Statistic {
 		ids = append(ids, id)
 	}
@@ -4627,13 +3976,7 @@ func (m *ProductMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProductMutation) Fields() []string {
-	fields := make([]string, 0, 13)
-	if m.created_at != nil {
-		fields = append(fields, product.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, product.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 11)
 	if m._Name != nil {
 		fields = append(fields, product.FieldName)
 	}
@@ -4675,10 +4018,6 @@ func (m *ProductMutation) Fields() []string {
 // schema.
 func (m *ProductMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case product.FieldCreatedAt:
-		return m.CreatedAt()
-	case product.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case product.FieldName:
 		return m.Name()
 	case product.FieldImage:
@@ -4710,10 +4049,6 @@ func (m *ProductMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProductMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case product.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case product.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case product.FieldName:
 		return m.OldName(ctx)
 	case product.FieldImage:
@@ -4745,20 +4080,6 @@ func (m *ProductMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *ProductMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case product.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case product.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case product.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -4927,12 +4248,6 @@ func (m *ProductMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProductMutation) ResetField(name string) error {
 	switch name {
-	case product.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case product.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case product.FieldName:
 		m.ResetName()
 		return nil
@@ -5085,19 +4400,17 @@ type ProfileMutation struct {
 	config
 	op                   Op
 	typ                  string
-	id                   *uuid.UUID
-	created_at           *time.Time
-	updated_at           *time.Time
+	id                   *int
 	_Name                *string
 	_Email               *string
 	clearedFields        map[string]struct{}
-	_ProfileGroup        *uuid.UUID
+	_ProfileGroup        *int
 	cleared_ProfileGroup bool
-	_Shipping            map[uuid.UUID]struct{}
-	removed_Shipping     map[uuid.UUID]struct{}
+	_Shipping            map[int]struct{}
+	removed_Shipping     map[int]struct{}
 	cleared_Shipping     bool
-	_Billing             map[uuid.UUID]struct{}
-	removed_Billing      map[uuid.UUID]struct{}
+	_Billing             map[int]struct{}
+	removed_Billing      map[int]struct{}
 	cleared_Billing      bool
 	done                 bool
 	oldValue             func(context.Context) (*Profile, error)
@@ -5124,7 +4437,7 @@ func newProfileMutation(c config, op Op, opts ...profileOption) *ProfileMutation
 }
 
 // withProfileID sets the ID field of the mutation.
-func withProfileID(id uuid.UUID) profileOption {
+func withProfileID(id int) profileOption {
 	return func(m *ProfileMutation) {
 		var (
 			err   error
@@ -5174,91 +4487,13 @@ func (m ProfileMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Profile entities.
-func (m *ProfileMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *ProfileMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ProfileMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ProfileMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ProfileMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Profile entity.
-// If the Profile object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProfileMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ProfileMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ProfileMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ProfileMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Profile entity.
-// If the Profile object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProfileMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ProfileMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetName sets the "Name" field.
@@ -5334,7 +4569,7 @@ func (m *ProfileMutation) ResetEmail() {
 }
 
 // SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by id.
-func (m *ProfileMutation) SetProfileGroupID(id uuid.UUID) {
+func (m *ProfileMutation) SetProfileGroupID(id int) {
 	m._ProfileGroup = &id
 }
 
@@ -5349,7 +4584,7 @@ func (m *ProfileMutation) ProfileGroupCleared() bool {
 }
 
 // ProfileGroupID returns the "ProfileGroup" edge ID in the mutation.
-func (m *ProfileMutation) ProfileGroupID() (id uuid.UUID, exists bool) {
+func (m *ProfileMutation) ProfileGroupID() (id int, exists bool) {
 	if m._ProfileGroup != nil {
 		return *m._ProfileGroup, true
 	}
@@ -5359,7 +4594,7 @@ func (m *ProfileMutation) ProfileGroupID() (id uuid.UUID, exists bool) {
 // ProfileGroupIDs returns the "ProfileGroup" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ProfileGroupID instead. It exists only for internal usage by the builders.
-func (m *ProfileMutation) ProfileGroupIDs() (ids []uuid.UUID) {
+func (m *ProfileMutation) ProfileGroupIDs() (ids []int) {
 	if id := m._ProfileGroup; id != nil {
 		ids = append(ids, *id)
 	}
@@ -5373,9 +4608,9 @@ func (m *ProfileMutation) ResetProfileGroup() {
 }
 
 // AddShippingIDs adds the "Shipping" edge to the Shipping entity by ids.
-func (m *ProfileMutation) AddShippingIDs(ids ...uuid.UUID) {
+func (m *ProfileMutation) AddShippingIDs(ids ...int) {
 	if m._Shipping == nil {
-		m._Shipping = make(map[uuid.UUID]struct{})
+		m._Shipping = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Shipping[ids[i]] = struct{}{}
@@ -5393,9 +4628,9 @@ func (m *ProfileMutation) ShippingCleared() bool {
 }
 
 // RemoveShippingIDs removes the "Shipping" edge to the Shipping entity by IDs.
-func (m *ProfileMutation) RemoveShippingIDs(ids ...uuid.UUID) {
+func (m *ProfileMutation) RemoveShippingIDs(ids ...int) {
 	if m.removed_Shipping == nil {
-		m.removed_Shipping = make(map[uuid.UUID]struct{})
+		m.removed_Shipping = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Shipping[ids[i]] = struct{}{}
@@ -5403,7 +4638,7 @@ func (m *ProfileMutation) RemoveShippingIDs(ids ...uuid.UUID) {
 }
 
 // RemovedShipping returns the removed IDs of the "Shipping" edge to the Shipping entity.
-func (m *ProfileMutation) RemovedShippingIDs() (ids []uuid.UUID) {
+func (m *ProfileMutation) RemovedShippingIDs() (ids []int) {
 	for id := range m.removed_Shipping {
 		ids = append(ids, id)
 	}
@@ -5411,7 +4646,7 @@ func (m *ProfileMutation) RemovedShippingIDs() (ids []uuid.UUID) {
 }
 
 // ShippingIDs returns the "Shipping" edge IDs in the mutation.
-func (m *ProfileMutation) ShippingIDs() (ids []uuid.UUID) {
+func (m *ProfileMutation) ShippingIDs() (ids []int) {
 	for id := range m._Shipping {
 		ids = append(ids, id)
 	}
@@ -5426,9 +4661,9 @@ func (m *ProfileMutation) ResetShipping() {
 }
 
 // AddBillingIDs adds the "Billing" edge to the Billing entity by ids.
-func (m *ProfileMutation) AddBillingIDs(ids ...uuid.UUID) {
+func (m *ProfileMutation) AddBillingIDs(ids ...int) {
 	if m._Billing == nil {
-		m._Billing = make(map[uuid.UUID]struct{})
+		m._Billing = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Billing[ids[i]] = struct{}{}
@@ -5446,9 +4681,9 @@ func (m *ProfileMutation) BillingCleared() bool {
 }
 
 // RemoveBillingIDs removes the "Billing" edge to the Billing entity by IDs.
-func (m *ProfileMutation) RemoveBillingIDs(ids ...uuid.UUID) {
+func (m *ProfileMutation) RemoveBillingIDs(ids ...int) {
 	if m.removed_Billing == nil {
-		m.removed_Billing = make(map[uuid.UUID]struct{})
+		m.removed_Billing = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Billing[ids[i]] = struct{}{}
@@ -5456,7 +4691,7 @@ func (m *ProfileMutation) RemoveBillingIDs(ids ...uuid.UUID) {
 }
 
 // RemovedBilling returns the removed IDs of the "Billing" edge to the Billing entity.
-func (m *ProfileMutation) RemovedBillingIDs() (ids []uuid.UUID) {
+func (m *ProfileMutation) RemovedBillingIDs() (ids []int) {
 	for id := range m.removed_Billing {
 		ids = append(ids, id)
 	}
@@ -5464,7 +4699,7 @@ func (m *ProfileMutation) RemovedBillingIDs() (ids []uuid.UUID) {
 }
 
 // BillingIDs returns the "Billing" edge IDs in the mutation.
-func (m *ProfileMutation) BillingIDs() (ids []uuid.UUID) {
+func (m *ProfileMutation) BillingIDs() (ids []int) {
 	for id := range m._Billing {
 		ids = append(ids, id)
 	}
@@ -5492,13 +4727,7 @@ func (m *ProfileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.created_at != nil {
-		fields = append(fields, profile.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, profile.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 2)
 	if m._Name != nil {
 		fields = append(fields, profile.FieldName)
 	}
@@ -5513,10 +4742,6 @@ func (m *ProfileMutation) Fields() []string {
 // schema.
 func (m *ProfileMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case profile.FieldCreatedAt:
-		return m.CreatedAt()
-	case profile.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case profile.FieldName:
 		return m.Name()
 	case profile.FieldEmail:
@@ -5530,10 +4755,6 @@ func (m *ProfileMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProfileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case profile.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case profile.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case profile.FieldName:
 		return m.OldName(ctx)
 	case profile.FieldEmail:
@@ -5547,20 +4768,6 @@ func (m *ProfileMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *ProfileMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case profile.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case profile.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case profile.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -5624,12 +4831,6 @@ func (m *ProfileMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProfileMutation) ResetField(name string) error {
 	switch name {
-	case profile.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case profile.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case profile.FieldName:
 		m.ResetName()
 		return nil
@@ -5773,19 +4974,17 @@ type ProfileGroupMutation struct {
 	config
 	op               Op
 	typ              string
-	id               *uuid.UUID
-	created_at       *time.Time
-	updated_at       *time.Time
+	id               *int
 	_Name            *string
 	clearedFields    map[string]struct{}
-	_Profiles        map[uuid.UUID]struct{}
-	removed_Profiles map[uuid.UUID]struct{}
+	_Profiles        map[int]struct{}
+	removed_Profiles map[int]struct{}
 	cleared_Profiles bool
-	_App             map[uuid.UUID]struct{}
-	removed_App      map[uuid.UUID]struct{}
+	_App             map[int]struct{}
+	removed_App      map[int]struct{}
 	cleared_App      bool
-	_Task            map[uuid.UUID]struct{}
-	removed_Task     map[uuid.UUID]struct{}
+	_Task            map[int]struct{}
+	removed_Task     map[int]struct{}
 	cleared_Task     bool
 	done             bool
 	oldValue         func(context.Context) (*ProfileGroup, error)
@@ -5812,7 +5011,7 @@ func newProfileGroupMutation(c config, op Op, opts ...profilegroupOption) *Profi
 }
 
 // withProfileGroupID sets the ID field of the mutation.
-func withProfileGroupID(id uuid.UUID) profilegroupOption {
+func withProfileGroupID(id int) profilegroupOption {
 	return func(m *ProfileGroupMutation) {
 		var (
 			err   error
@@ -5862,91 +5061,13 @@ func (m ProfileGroupMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of ProfileGroup entities.
-func (m *ProfileGroupMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *ProfileGroupMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ProfileGroupMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ProfileGroupMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ProfileGroupMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the ProfileGroup entity.
-// If the ProfileGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProfileGroupMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ProfileGroupMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ProfileGroupMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ProfileGroupMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the ProfileGroup entity.
-// If the ProfileGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProfileGroupMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ProfileGroupMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetName sets the "Name" field.
@@ -5986,9 +5107,9 @@ func (m *ProfileGroupMutation) ResetName() {
 }
 
 // AddProfileIDs adds the "Profiles" edge to the Profile entity by ids.
-func (m *ProfileGroupMutation) AddProfileIDs(ids ...uuid.UUID) {
+func (m *ProfileGroupMutation) AddProfileIDs(ids ...int) {
 	if m._Profiles == nil {
-		m._Profiles = make(map[uuid.UUID]struct{})
+		m._Profiles = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Profiles[ids[i]] = struct{}{}
@@ -6006,9 +5127,9 @@ func (m *ProfileGroupMutation) ProfilesCleared() bool {
 }
 
 // RemoveProfileIDs removes the "Profiles" edge to the Profile entity by IDs.
-func (m *ProfileGroupMutation) RemoveProfileIDs(ids ...uuid.UUID) {
+func (m *ProfileGroupMutation) RemoveProfileIDs(ids ...int) {
 	if m.removed_Profiles == nil {
-		m.removed_Profiles = make(map[uuid.UUID]struct{})
+		m.removed_Profiles = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Profiles[ids[i]] = struct{}{}
@@ -6016,7 +5137,7 @@ func (m *ProfileGroupMutation) RemoveProfileIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProfiles returns the removed IDs of the "Profiles" edge to the Profile entity.
-func (m *ProfileGroupMutation) RemovedProfilesIDs() (ids []uuid.UUID) {
+func (m *ProfileGroupMutation) RemovedProfilesIDs() (ids []int) {
 	for id := range m.removed_Profiles {
 		ids = append(ids, id)
 	}
@@ -6024,7 +5145,7 @@ func (m *ProfileGroupMutation) RemovedProfilesIDs() (ids []uuid.UUID) {
 }
 
 // ProfilesIDs returns the "Profiles" edge IDs in the mutation.
-func (m *ProfileGroupMutation) ProfilesIDs() (ids []uuid.UUID) {
+func (m *ProfileGroupMutation) ProfilesIDs() (ids []int) {
 	for id := range m._Profiles {
 		ids = append(ids, id)
 	}
@@ -6039,9 +5160,9 @@ func (m *ProfileGroupMutation) ResetProfiles() {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by ids.
-func (m *ProfileGroupMutation) AddAppIDs(ids ...uuid.UUID) {
+func (m *ProfileGroupMutation) AddAppIDs(ids ...int) {
 	if m._App == nil {
-		m._App = make(map[uuid.UUID]struct{})
+		m._App = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._App[ids[i]] = struct{}{}
@@ -6059,9 +5180,9 @@ func (m *ProfileGroupMutation) AppCleared() bool {
 }
 
 // RemoveAppIDs removes the "App" edge to the App entity by IDs.
-func (m *ProfileGroupMutation) RemoveAppIDs(ids ...uuid.UUID) {
+func (m *ProfileGroupMutation) RemoveAppIDs(ids ...int) {
 	if m.removed_App == nil {
-		m.removed_App = make(map[uuid.UUID]struct{})
+		m.removed_App = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_App[ids[i]] = struct{}{}
@@ -6069,7 +5190,7 @@ func (m *ProfileGroupMutation) RemoveAppIDs(ids ...uuid.UUID) {
 }
 
 // RemovedApp returns the removed IDs of the "App" edge to the App entity.
-func (m *ProfileGroupMutation) RemovedAppIDs() (ids []uuid.UUID) {
+func (m *ProfileGroupMutation) RemovedAppIDs() (ids []int) {
 	for id := range m.removed_App {
 		ids = append(ids, id)
 	}
@@ -6077,7 +5198,7 @@ func (m *ProfileGroupMutation) RemovedAppIDs() (ids []uuid.UUID) {
 }
 
 // AppIDs returns the "App" edge IDs in the mutation.
-func (m *ProfileGroupMutation) AppIDs() (ids []uuid.UUID) {
+func (m *ProfileGroupMutation) AppIDs() (ids []int) {
 	for id := range m._App {
 		ids = append(ids, id)
 	}
@@ -6092,9 +5213,9 @@ func (m *ProfileGroupMutation) ResetApp() {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by ids.
-func (m *ProfileGroupMutation) AddTaskIDs(ids ...uuid.UUID) {
+func (m *ProfileGroupMutation) AddTaskIDs(ids ...int) {
 	if m._Task == nil {
-		m._Task = make(map[uuid.UUID]struct{})
+		m._Task = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Task[ids[i]] = struct{}{}
@@ -6112,9 +5233,9 @@ func (m *ProfileGroupMutation) TaskCleared() bool {
 }
 
 // RemoveTaskIDs removes the "Task" edge to the Task entity by IDs.
-func (m *ProfileGroupMutation) RemoveTaskIDs(ids ...uuid.UUID) {
+func (m *ProfileGroupMutation) RemoveTaskIDs(ids ...int) {
 	if m.removed_Task == nil {
-		m.removed_Task = make(map[uuid.UUID]struct{})
+		m.removed_Task = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Task[ids[i]] = struct{}{}
@@ -6122,7 +5243,7 @@ func (m *ProfileGroupMutation) RemoveTaskIDs(ids ...uuid.UUID) {
 }
 
 // RemovedTask returns the removed IDs of the "Task" edge to the Task entity.
-func (m *ProfileGroupMutation) RemovedTaskIDs() (ids []uuid.UUID) {
+func (m *ProfileGroupMutation) RemovedTaskIDs() (ids []int) {
 	for id := range m.removed_Task {
 		ids = append(ids, id)
 	}
@@ -6130,7 +5251,7 @@ func (m *ProfileGroupMutation) RemovedTaskIDs() (ids []uuid.UUID) {
 }
 
 // TaskIDs returns the "Task" edge IDs in the mutation.
-func (m *ProfileGroupMutation) TaskIDs() (ids []uuid.UUID) {
+func (m *ProfileGroupMutation) TaskIDs() (ids []int) {
 	for id := range m._Task {
 		ids = append(ids, id)
 	}
@@ -6158,13 +5279,7 @@ func (m *ProfileGroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileGroupMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.created_at != nil {
-		fields = append(fields, profilegroup.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, profilegroup.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 1)
 	if m._Name != nil {
 		fields = append(fields, profilegroup.FieldName)
 	}
@@ -6176,10 +5291,6 @@ func (m *ProfileGroupMutation) Fields() []string {
 // schema.
 func (m *ProfileGroupMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case profilegroup.FieldCreatedAt:
-		return m.CreatedAt()
-	case profilegroup.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case profilegroup.FieldName:
 		return m.Name()
 	}
@@ -6191,10 +5302,6 @@ func (m *ProfileGroupMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProfileGroupMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case profilegroup.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case profilegroup.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case profilegroup.FieldName:
 		return m.OldName(ctx)
 	}
@@ -6206,20 +5313,6 @@ func (m *ProfileGroupMutation) OldField(ctx context.Context, name string) (ent.V
 // type.
 func (m *ProfileGroupMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case profilegroup.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case profilegroup.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case profilegroup.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -6276,12 +5369,6 @@ func (m *ProfileGroupMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProfileGroupMutation) ResetField(name string) error {
 	switch name {
-	case profilegroup.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case profilegroup.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case profilegroup.FieldName:
 		m.ResetName()
 		return nil
@@ -6430,15 +5517,13 @@ type ProxyMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *uuid.UUID
-	created_at        *time.Time
-	updated_at        *time.Time
+	id                *int
 	_Username         *string
 	_Password         *string
 	_IP               *string
 	_Port             *string
 	clearedFields     map[string]struct{}
-	_ProxyList        *uuid.UUID
+	_ProxyList        *int
 	cleared_ProxyList bool
 	done              bool
 	oldValue          func(context.Context) (*Proxy, error)
@@ -6465,7 +5550,7 @@ func newProxyMutation(c config, op Op, opts ...proxyOption) *ProxyMutation {
 }
 
 // withProxyID sets the ID field of the mutation.
-func withProxyID(id uuid.UUID) proxyOption {
+func withProxyID(id int) proxyOption {
 	return func(m *ProxyMutation) {
 		var (
 			err   error
@@ -6515,91 +5600,13 @@ func (m ProxyMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Proxy entities.
-func (m *ProxyMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *ProxyMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ProxyMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ProxyMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ProxyMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Proxy entity.
-// If the Proxy object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProxyMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ProxyMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ProxyMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ProxyMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Proxy entity.
-// If the Proxy object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProxyMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ProxyMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetUsername sets the "Username" field.
@@ -6773,7 +5780,7 @@ func (m *ProxyMutation) ResetPort() {
 }
 
 // SetProxyListID sets the "ProxyList" edge to the ProxyList entity by id.
-func (m *ProxyMutation) SetProxyListID(id uuid.UUID) {
+func (m *ProxyMutation) SetProxyListID(id int) {
 	m._ProxyList = &id
 }
 
@@ -6788,7 +5795,7 @@ func (m *ProxyMutation) ProxyListCleared() bool {
 }
 
 // ProxyListID returns the "ProxyList" edge ID in the mutation.
-func (m *ProxyMutation) ProxyListID() (id uuid.UUID, exists bool) {
+func (m *ProxyMutation) ProxyListID() (id int, exists bool) {
 	if m._ProxyList != nil {
 		return *m._ProxyList, true
 	}
@@ -6798,7 +5805,7 @@ func (m *ProxyMutation) ProxyListID() (id uuid.UUID, exists bool) {
 // ProxyListIDs returns the "ProxyList" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ProxyListID instead. It exists only for internal usage by the builders.
-func (m *ProxyMutation) ProxyListIDs() (ids []uuid.UUID) {
+func (m *ProxyMutation) ProxyListIDs() (ids []int) {
 	if id := m._ProxyList; id != nil {
 		ids = append(ids, *id)
 	}
@@ -6825,13 +5832,7 @@ func (m *ProxyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProxyMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.created_at != nil {
-		fields = append(fields, proxy.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, proxy.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 4)
 	if m._Username != nil {
 		fields = append(fields, proxy.FieldUsername)
 	}
@@ -6852,10 +5853,6 @@ func (m *ProxyMutation) Fields() []string {
 // schema.
 func (m *ProxyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case proxy.FieldCreatedAt:
-		return m.CreatedAt()
-	case proxy.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case proxy.FieldUsername:
 		return m.Username()
 	case proxy.FieldPassword:
@@ -6873,10 +5870,6 @@ func (m *ProxyMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProxyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case proxy.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case proxy.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case proxy.FieldUsername:
 		return m.OldUsername(ctx)
 	case proxy.FieldPassword:
@@ -6894,20 +5887,6 @@ func (m *ProxyMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *ProxyMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case proxy.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case proxy.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case proxy.FieldUsername:
 		v, ok := value.(string)
 		if !ok {
@@ -7000,12 +5979,6 @@ func (m *ProxyMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProxyMutation) ResetField(name string) error {
 	switch name {
-	case proxy.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case proxy.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case proxy.FieldUsername:
 		m.ResetUsername()
 		return nil
@@ -7103,20 +6076,18 @@ type ProxyListMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *uuid.UUID
-	created_at      *time.Time
-	updated_at      *time.Time
+	id              *int
 	_Name           *string
 	_Type           *proxylist.Type
 	clearedFields   map[string]struct{}
-	_App            map[uuid.UUID]struct{}
-	removed_App     map[uuid.UUID]struct{}
+	_App            map[int]struct{}
+	removed_App     map[int]struct{}
 	cleared_App     bool
-	_Proxies        map[uuid.UUID]struct{}
-	removed_Proxies map[uuid.UUID]struct{}
+	_Proxies        map[int]struct{}
+	removed_Proxies map[int]struct{}
 	cleared_Proxies bool
-	_Task           map[uuid.UUID]struct{}
-	removed_Task    map[uuid.UUID]struct{}
+	_Task           map[int]struct{}
+	removed_Task    map[int]struct{}
 	cleared_Task    bool
 	done            bool
 	oldValue        func(context.Context) (*ProxyList, error)
@@ -7143,7 +6114,7 @@ func newProxyListMutation(c config, op Op, opts ...proxylistOption) *ProxyListMu
 }
 
 // withProxyListID sets the ID field of the mutation.
-func withProxyListID(id uuid.UUID) proxylistOption {
+func withProxyListID(id int) proxylistOption {
 	return func(m *ProxyListMutation) {
 		var (
 			err   error
@@ -7193,91 +6164,13 @@ func (m ProxyListMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of ProxyList entities.
-func (m *ProxyListMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *ProxyListMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ProxyListMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ProxyListMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ProxyListMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the ProxyList entity.
-// If the ProxyList object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProxyListMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ProxyListMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ProxyListMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ProxyListMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the ProxyList entity.
-// If the ProxyList object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProxyListMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ProxyListMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetName sets the "Name" field.
@@ -7353,9 +6246,9 @@ func (m *ProxyListMutation) ResetType() {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by ids.
-func (m *ProxyListMutation) AddAppIDs(ids ...uuid.UUID) {
+func (m *ProxyListMutation) AddAppIDs(ids ...int) {
 	if m._App == nil {
-		m._App = make(map[uuid.UUID]struct{})
+		m._App = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._App[ids[i]] = struct{}{}
@@ -7373,9 +6266,9 @@ func (m *ProxyListMutation) AppCleared() bool {
 }
 
 // RemoveAppIDs removes the "App" edge to the App entity by IDs.
-func (m *ProxyListMutation) RemoveAppIDs(ids ...uuid.UUID) {
+func (m *ProxyListMutation) RemoveAppIDs(ids ...int) {
 	if m.removed_App == nil {
-		m.removed_App = make(map[uuid.UUID]struct{})
+		m.removed_App = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_App[ids[i]] = struct{}{}
@@ -7383,7 +6276,7 @@ func (m *ProxyListMutation) RemoveAppIDs(ids ...uuid.UUID) {
 }
 
 // RemovedApp returns the removed IDs of the "App" edge to the App entity.
-func (m *ProxyListMutation) RemovedAppIDs() (ids []uuid.UUID) {
+func (m *ProxyListMutation) RemovedAppIDs() (ids []int) {
 	for id := range m.removed_App {
 		ids = append(ids, id)
 	}
@@ -7391,7 +6284,7 @@ func (m *ProxyListMutation) RemovedAppIDs() (ids []uuid.UUID) {
 }
 
 // AppIDs returns the "App" edge IDs in the mutation.
-func (m *ProxyListMutation) AppIDs() (ids []uuid.UUID) {
+func (m *ProxyListMutation) AppIDs() (ids []int) {
 	for id := range m._App {
 		ids = append(ids, id)
 	}
@@ -7406,9 +6299,9 @@ func (m *ProxyListMutation) ResetApp() {
 }
 
 // AddProxyIDs adds the "Proxies" edge to the Proxy entity by ids.
-func (m *ProxyListMutation) AddProxyIDs(ids ...uuid.UUID) {
+func (m *ProxyListMutation) AddProxyIDs(ids ...int) {
 	if m._Proxies == nil {
-		m._Proxies = make(map[uuid.UUID]struct{})
+		m._Proxies = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Proxies[ids[i]] = struct{}{}
@@ -7426,9 +6319,9 @@ func (m *ProxyListMutation) ProxiesCleared() bool {
 }
 
 // RemoveProxyIDs removes the "Proxies" edge to the Proxy entity by IDs.
-func (m *ProxyListMutation) RemoveProxyIDs(ids ...uuid.UUID) {
+func (m *ProxyListMutation) RemoveProxyIDs(ids ...int) {
 	if m.removed_Proxies == nil {
-		m.removed_Proxies = make(map[uuid.UUID]struct{})
+		m.removed_Proxies = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Proxies[ids[i]] = struct{}{}
@@ -7436,7 +6329,7 @@ func (m *ProxyListMutation) RemoveProxyIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProxies returns the removed IDs of the "Proxies" edge to the Proxy entity.
-func (m *ProxyListMutation) RemovedProxiesIDs() (ids []uuid.UUID) {
+func (m *ProxyListMutation) RemovedProxiesIDs() (ids []int) {
 	for id := range m.removed_Proxies {
 		ids = append(ids, id)
 	}
@@ -7444,7 +6337,7 @@ func (m *ProxyListMutation) RemovedProxiesIDs() (ids []uuid.UUID) {
 }
 
 // ProxiesIDs returns the "Proxies" edge IDs in the mutation.
-func (m *ProxyListMutation) ProxiesIDs() (ids []uuid.UUID) {
+func (m *ProxyListMutation) ProxiesIDs() (ids []int) {
 	for id := range m._Proxies {
 		ids = append(ids, id)
 	}
@@ -7459,9 +6352,9 @@ func (m *ProxyListMutation) ResetProxies() {
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by ids.
-func (m *ProxyListMutation) AddTaskIDs(ids ...uuid.UUID) {
+func (m *ProxyListMutation) AddTaskIDs(ids ...int) {
 	if m._Task == nil {
-		m._Task = make(map[uuid.UUID]struct{})
+		m._Task = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Task[ids[i]] = struct{}{}
@@ -7479,9 +6372,9 @@ func (m *ProxyListMutation) TaskCleared() bool {
 }
 
 // RemoveTaskIDs removes the "Task" edge to the Task entity by IDs.
-func (m *ProxyListMutation) RemoveTaskIDs(ids ...uuid.UUID) {
+func (m *ProxyListMutation) RemoveTaskIDs(ids ...int) {
 	if m.removed_Task == nil {
-		m.removed_Task = make(map[uuid.UUID]struct{})
+		m.removed_Task = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Task[ids[i]] = struct{}{}
@@ -7489,7 +6382,7 @@ func (m *ProxyListMutation) RemoveTaskIDs(ids ...uuid.UUID) {
 }
 
 // RemovedTask returns the removed IDs of the "Task" edge to the Task entity.
-func (m *ProxyListMutation) RemovedTaskIDs() (ids []uuid.UUID) {
+func (m *ProxyListMutation) RemovedTaskIDs() (ids []int) {
 	for id := range m.removed_Task {
 		ids = append(ids, id)
 	}
@@ -7497,7 +6390,7 @@ func (m *ProxyListMutation) RemovedTaskIDs() (ids []uuid.UUID) {
 }
 
 // TaskIDs returns the "Task" edge IDs in the mutation.
-func (m *ProxyListMutation) TaskIDs() (ids []uuid.UUID) {
+func (m *ProxyListMutation) TaskIDs() (ids []int) {
 	for id := range m._Task {
 		ids = append(ids, id)
 	}
@@ -7525,13 +6418,7 @@ func (m *ProxyListMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProxyListMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.created_at != nil {
-		fields = append(fields, proxylist.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, proxylist.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 2)
 	if m._Name != nil {
 		fields = append(fields, proxylist.FieldName)
 	}
@@ -7546,10 +6433,6 @@ func (m *ProxyListMutation) Fields() []string {
 // schema.
 func (m *ProxyListMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case proxylist.FieldCreatedAt:
-		return m.CreatedAt()
-	case proxylist.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case proxylist.FieldName:
 		return m.Name()
 	case proxylist.FieldType:
@@ -7563,10 +6446,6 @@ func (m *ProxyListMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ProxyListMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case proxylist.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case proxylist.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case proxylist.FieldName:
 		return m.OldName(ctx)
 	case proxylist.FieldType:
@@ -7580,20 +6459,6 @@ func (m *ProxyListMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *ProxyListMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case proxylist.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case proxylist.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case proxylist.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -7657,12 +6522,6 @@ func (m *ProxyListMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ProxyListMutation) ResetField(name string) error {
 	switch name {
-	case proxylist.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case proxylist.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case proxylist.FieldName:
 		m.ResetName()
 		return nil
@@ -7814,9 +6673,7 @@ type SettingsMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *uuid.UUID
-	created_at        *time.Time
-	updated_at        *time.Time
+	id                *int
 	_SuccessWebhook   *string
 	_DeclineWebhook   *string
 	_CheckoutDelay    *int
@@ -7824,7 +6681,7 @@ type SettingsMutation struct {
 	_ATCDelay         *int
 	add_ATCDelay      *int
 	clearedFields     map[string]struct{}
-	_App              *uuid.UUID
+	_App              *int
 	cleared_App       bool
 	done              bool
 	oldValue          func(context.Context) (*Settings, error)
@@ -7851,7 +6708,7 @@ func newSettingsMutation(c config, op Op, opts ...settingsOption) *SettingsMutat
 }
 
 // withSettingsID sets the ID field of the mutation.
-func withSettingsID(id uuid.UUID) settingsOption {
+func withSettingsID(id int) settingsOption {
 	return func(m *SettingsMutation) {
 		var (
 			err   error
@@ -7901,91 +6758,13 @@ func (m SettingsMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Settings entities.
-func (m *SettingsMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *SettingsMutation) ID() (id uuid.UUID, exists bool) {
+func (m *SettingsMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *SettingsMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *SettingsMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Settings entity.
-// If the Settings object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SettingsMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *SettingsMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *SettingsMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *SettingsMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Settings entity.
-// If the Settings object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SettingsMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *SettingsMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetSuccessWebhook sets the "SuccessWebhook" field.
@@ -8173,7 +6952,7 @@ func (m *SettingsMutation) ResetATCDelay() {
 }
 
 // SetAppID sets the "App" edge to the App entity by id.
-func (m *SettingsMutation) SetAppID(id uuid.UUID) {
+func (m *SettingsMutation) SetAppID(id int) {
 	m._App = &id
 }
 
@@ -8188,7 +6967,7 @@ func (m *SettingsMutation) AppCleared() bool {
 }
 
 // AppID returns the "App" edge ID in the mutation.
-func (m *SettingsMutation) AppID() (id uuid.UUID, exists bool) {
+func (m *SettingsMutation) AppID() (id int, exists bool) {
 	if m._App != nil {
 		return *m._App, true
 	}
@@ -8198,7 +6977,7 @@ func (m *SettingsMutation) AppID() (id uuid.UUID, exists bool) {
 // AppIDs returns the "App" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AppID instead. It exists only for internal usage by the builders.
-func (m *SettingsMutation) AppIDs() (ids []uuid.UUID) {
+func (m *SettingsMutation) AppIDs() (ids []int) {
 	if id := m._App; id != nil {
 		ids = append(ids, *id)
 	}
@@ -8225,13 +7004,7 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.created_at != nil {
-		fields = append(fields, settings.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, settings.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 4)
 	if m._SuccessWebhook != nil {
 		fields = append(fields, settings.FieldSuccessWebhook)
 	}
@@ -8252,10 +7025,6 @@ func (m *SettingsMutation) Fields() []string {
 // schema.
 func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case settings.FieldCreatedAt:
-		return m.CreatedAt()
-	case settings.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case settings.FieldSuccessWebhook:
 		return m.SuccessWebhook()
 	case settings.FieldDeclineWebhook:
@@ -8273,10 +7042,6 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case settings.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case settings.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case settings.FieldSuccessWebhook:
 		return m.OldSuccessWebhook(ctx)
 	case settings.FieldDeclineWebhook:
@@ -8294,20 +7059,6 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 // type.
 func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case settings.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case settings.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case settings.FieldSuccessWebhook:
 		v, ok := value.(string)
 		if !ok {
@@ -8412,12 +7163,6 @@ func (m *SettingsMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *SettingsMutation) ResetField(name string) error {
 	switch name {
-	case settings.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case settings.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case settings.FieldSuccessWebhook:
 		m.ResetSuccessWebhook()
 		return nil
@@ -8515,21 +7260,19 @@ type ShippingMutation struct {
 	config
 	op                      Op
 	typ                     string
-	id                      *uuid.UUID
-	created_at              *time.Time
-	updated_at              *time.Time
+	id                      *int
 	_FirstName              *string
 	_LastName               *string
 	_PhoneNumber            *string
 	_BillingIsShipping      *bool
 	clearedFields           map[string]struct{}
-	_Profile                *uuid.UUID
+	_Profile                *int
 	cleared_Profile         bool
-	_ShippingAddress        map[uuid.UUID]struct{}
-	removed_ShippingAddress map[uuid.UUID]struct{}
+	_ShippingAddress        map[int]struct{}
+	removed_ShippingAddress map[int]struct{}
 	cleared_ShippingAddress bool
-	_BillingAddress         map[uuid.UUID]struct{}
-	removed_BillingAddress  map[uuid.UUID]struct{}
+	_BillingAddress         map[int]struct{}
+	removed_BillingAddress  map[int]struct{}
 	cleared_BillingAddress  bool
 	done                    bool
 	oldValue                func(context.Context) (*Shipping, error)
@@ -8556,7 +7299,7 @@ func newShippingMutation(c config, op Op, opts ...shippingOption) *ShippingMutat
 }
 
 // withShippingID sets the ID field of the mutation.
-func withShippingID(id uuid.UUID) shippingOption {
+func withShippingID(id int) shippingOption {
 	return func(m *ShippingMutation) {
 		var (
 			err   error
@@ -8606,91 +7349,13 @@ func (m ShippingMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Shipping entities.
-func (m *ShippingMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *ShippingMutation) ID() (id uuid.UUID, exists bool) {
+func (m *ShippingMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ShippingMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ShippingMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Shipping entity.
-// If the Shipping object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ShippingMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ShippingMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ShippingMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ShippingMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Shipping entity.
-// If the Shipping object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ShippingMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ShippingMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetFirstName sets the "FirstName" field.
@@ -8838,7 +7503,7 @@ func (m *ShippingMutation) ResetBillingIsShipping() {
 }
 
 // SetProfileID sets the "Profile" edge to the Profile entity by id.
-func (m *ShippingMutation) SetProfileID(id uuid.UUID) {
+func (m *ShippingMutation) SetProfileID(id int) {
 	m._Profile = &id
 }
 
@@ -8853,7 +7518,7 @@ func (m *ShippingMutation) ProfileCleared() bool {
 }
 
 // ProfileID returns the "Profile" edge ID in the mutation.
-func (m *ShippingMutation) ProfileID() (id uuid.UUID, exists bool) {
+func (m *ShippingMutation) ProfileID() (id int, exists bool) {
 	if m._Profile != nil {
 		return *m._Profile, true
 	}
@@ -8863,7 +7528,7 @@ func (m *ShippingMutation) ProfileID() (id uuid.UUID, exists bool) {
 // ProfileIDs returns the "Profile" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ProfileID instead. It exists only for internal usage by the builders.
-func (m *ShippingMutation) ProfileIDs() (ids []uuid.UUID) {
+func (m *ShippingMutation) ProfileIDs() (ids []int) {
 	if id := m._Profile; id != nil {
 		ids = append(ids, *id)
 	}
@@ -8877,9 +7542,9 @@ func (m *ShippingMutation) ResetProfile() {
 }
 
 // AddShippingAddresIDs adds the "ShippingAddress" edge to the Address entity by ids.
-func (m *ShippingMutation) AddShippingAddresIDs(ids ...uuid.UUID) {
+func (m *ShippingMutation) AddShippingAddresIDs(ids ...int) {
 	if m._ShippingAddress == nil {
-		m._ShippingAddress = make(map[uuid.UUID]struct{})
+		m._ShippingAddress = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._ShippingAddress[ids[i]] = struct{}{}
@@ -8897,9 +7562,9 @@ func (m *ShippingMutation) ShippingAddressCleared() bool {
 }
 
 // RemoveShippingAddresIDs removes the "ShippingAddress" edge to the Address entity by IDs.
-func (m *ShippingMutation) RemoveShippingAddresIDs(ids ...uuid.UUID) {
+func (m *ShippingMutation) RemoveShippingAddresIDs(ids ...int) {
 	if m.removed_ShippingAddress == nil {
-		m.removed_ShippingAddress = make(map[uuid.UUID]struct{})
+		m.removed_ShippingAddress = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_ShippingAddress[ids[i]] = struct{}{}
@@ -8907,7 +7572,7 @@ func (m *ShippingMutation) RemoveShippingAddresIDs(ids ...uuid.UUID) {
 }
 
 // RemovedShippingAddress returns the removed IDs of the "ShippingAddress" edge to the Address entity.
-func (m *ShippingMutation) RemovedShippingAddressIDs() (ids []uuid.UUID) {
+func (m *ShippingMutation) RemovedShippingAddressIDs() (ids []int) {
 	for id := range m.removed_ShippingAddress {
 		ids = append(ids, id)
 	}
@@ -8915,7 +7580,7 @@ func (m *ShippingMutation) RemovedShippingAddressIDs() (ids []uuid.UUID) {
 }
 
 // ShippingAddressIDs returns the "ShippingAddress" edge IDs in the mutation.
-func (m *ShippingMutation) ShippingAddressIDs() (ids []uuid.UUID) {
+func (m *ShippingMutation) ShippingAddressIDs() (ids []int) {
 	for id := range m._ShippingAddress {
 		ids = append(ids, id)
 	}
@@ -8930,9 +7595,9 @@ func (m *ShippingMutation) ResetShippingAddress() {
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Address entity by ids.
-func (m *ShippingMutation) AddBillingAddresIDs(ids ...uuid.UUID) {
+func (m *ShippingMutation) AddBillingAddresIDs(ids ...int) {
 	if m._BillingAddress == nil {
-		m._BillingAddress = make(map[uuid.UUID]struct{})
+		m._BillingAddress = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._BillingAddress[ids[i]] = struct{}{}
@@ -8950,9 +7615,9 @@ func (m *ShippingMutation) BillingAddressCleared() bool {
 }
 
 // RemoveBillingAddresIDs removes the "BillingAddress" edge to the Address entity by IDs.
-func (m *ShippingMutation) RemoveBillingAddresIDs(ids ...uuid.UUID) {
+func (m *ShippingMutation) RemoveBillingAddresIDs(ids ...int) {
 	if m.removed_BillingAddress == nil {
-		m.removed_BillingAddress = make(map[uuid.UUID]struct{})
+		m.removed_BillingAddress = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_BillingAddress[ids[i]] = struct{}{}
@@ -8960,7 +7625,7 @@ func (m *ShippingMutation) RemoveBillingAddresIDs(ids ...uuid.UUID) {
 }
 
 // RemovedBillingAddress returns the removed IDs of the "BillingAddress" edge to the Address entity.
-func (m *ShippingMutation) RemovedBillingAddressIDs() (ids []uuid.UUID) {
+func (m *ShippingMutation) RemovedBillingAddressIDs() (ids []int) {
 	for id := range m.removed_BillingAddress {
 		ids = append(ids, id)
 	}
@@ -8968,7 +7633,7 @@ func (m *ShippingMutation) RemovedBillingAddressIDs() (ids []uuid.UUID) {
 }
 
 // BillingAddressIDs returns the "BillingAddress" edge IDs in the mutation.
-func (m *ShippingMutation) BillingAddressIDs() (ids []uuid.UUID) {
+func (m *ShippingMutation) BillingAddressIDs() (ids []int) {
 	for id := range m._BillingAddress {
 		ids = append(ids, id)
 	}
@@ -8996,13 +7661,7 @@ func (m *ShippingMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ShippingMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.created_at != nil {
-		fields = append(fields, shipping.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, shipping.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 4)
 	if m._FirstName != nil {
 		fields = append(fields, shipping.FieldFirstName)
 	}
@@ -9023,10 +7682,6 @@ func (m *ShippingMutation) Fields() []string {
 // schema.
 func (m *ShippingMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case shipping.FieldCreatedAt:
-		return m.CreatedAt()
-	case shipping.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case shipping.FieldFirstName:
 		return m.FirstName()
 	case shipping.FieldLastName:
@@ -9044,10 +7699,6 @@ func (m *ShippingMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ShippingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case shipping.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case shipping.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case shipping.FieldFirstName:
 		return m.OldFirstName(ctx)
 	case shipping.FieldLastName:
@@ -9065,20 +7716,6 @@ func (m *ShippingMutation) OldField(ctx context.Context, name string) (ent.Value
 // type.
 func (m *ShippingMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case shipping.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case shipping.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case shipping.FieldFirstName:
 		v, ok := value.(string)
 		if !ok {
@@ -9156,12 +7793,6 @@ func (m *ShippingMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ShippingMutation) ResetField(name string) error {
 	switch name {
-	case shipping.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case shipping.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case shipping.FieldFirstName:
 		m.ResetFirstName()
 		return nil
@@ -9311,16 +7942,14 @@ type StatisticMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *uuid.UUID
-	created_at      *time.Time
-	updated_at      *time.Time
+	id              *int
 	_Type           *statistic.Type
 	clearedFields   map[string]struct{}
-	_User           map[uuid.UUID]struct{}
-	removed_User    map[uuid.UUID]struct{}
+	_User           map[int]struct{}
+	removed_User    map[int]struct{}
 	cleared_User    bool
-	_Product        map[uuid.UUID]struct{}
-	removed_Product map[uuid.UUID]struct{}
+	_Product        map[int]struct{}
+	removed_Product map[int]struct{}
 	cleared_Product bool
 	done            bool
 	oldValue        func(context.Context) (*Statistic, error)
@@ -9347,7 +7976,7 @@ func newStatisticMutation(c config, op Op, opts ...statisticOption) *StatisticMu
 }
 
 // withStatisticID sets the ID field of the mutation.
-func withStatisticID(id uuid.UUID) statisticOption {
+func withStatisticID(id int) statisticOption {
 	return func(m *StatisticMutation) {
 		var (
 			err   error
@@ -9397,91 +8026,13 @@ func (m StatisticMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Statistic entities.
-func (m *StatisticMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *StatisticMutation) ID() (id uuid.UUID, exists bool) {
+func (m *StatisticMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *StatisticMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *StatisticMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Statistic entity.
-// If the Statistic object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StatisticMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *StatisticMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *StatisticMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *StatisticMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Statistic entity.
-// If the Statistic object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StatisticMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *StatisticMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetType sets the "Type" field.
@@ -9521,9 +8072,9 @@ func (m *StatisticMutation) ResetType() {
 }
 
 // AddUserIDs adds the "User" edge to the User entity by ids.
-func (m *StatisticMutation) AddUserIDs(ids ...uuid.UUID) {
+func (m *StatisticMutation) AddUserIDs(ids ...int) {
 	if m._User == nil {
-		m._User = make(map[uuid.UUID]struct{})
+		m._User = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._User[ids[i]] = struct{}{}
@@ -9541,9 +8092,9 @@ func (m *StatisticMutation) UserCleared() bool {
 }
 
 // RemoveUserIDs removes the "User" edge to the User entity by IDs.
-func (m *StatisticMutation) RemoveUserIDs(ids ...uuid.UUID) {
+func (m *StatisticMutation) RemoveUserIDs(ids ...int) {
 	if m.removed_User == nil {
-		m.removed_User = make(map[uuid.UUID]struct{})
+		m.removed_User = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_User[ids[i]] = struct{}{}
@@ -9551,7 +8102,7 @@ func (m *StatisticMutation) RemoveUserIDs(ids ...uuid.UUID) {
 }
 
 // RemovedUser returns the removed IDs of the "User" edge to the User entity.
-func (m *StatisticMutation) RemovedUserIDs() (ids []uuid.UUID) {
+func (m *StatisticMutation) RemovedUserIDs() (ids []int) {
 	for id := range m.removed_User {
 		ids = append(ids, id)
 	}
@@ -9559,7 +8110,7 @@ func (m *StatisticMutation) RemovedUserIDs() (ids []uuid.UUID) {
 }
 
 // UserIDs returns the "User" edge IDs in the mutation.
-func (m *StatisticMutation) UserIDs() (ids []uuid.UUID) {
+func (m *StatisticMutation) UserIDs() (ids []int) {
 	for id := range m._User {
 		ids = append(ids, id)
 	}
@@ -9574,9 +8125,9 @@ func (m *StatisticMutation) ResetUser() {
 }
 
 // AddProductIDs adds the "Product" edge to the Product entity by ids.
-func (m *StatisticMutation) AddProductIDs(ids ...uuid.UUID) {
+func (m *StatisticMutation) AddProductIDs(ids ...int) {
 	if m._Product == nil {
-		m._Product = make(map[uuid.UUID]struct{})
+		m._Product = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Product[ids[i]] = struct{}{}
@@ -9594,9 +8145,9 @@ func (m *StatisticMutation) ProductCleared() bool {
 }
 
 // RemoveProductIDs removes the "Product" edge to the Product entity by IDs.
-func (m *StatisticMutation) RemoveProductIDs(ids ...uuid.UUID) {
+func (m *StatisticMutation) RemoveProductIDs(ids ...int) {
 	if m.removed_Product == nil {
-		m.removed_Product = make(map[uuid.UUID]struct{})
+		m.removed_Product = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Product[ids[i]] = struct{}{}
@@ -9604,7 +8155,7 @@ func (m *StatisticMutation) RemoveProductIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProduct returns the removed IDs of the "Product" edge to the Product entity.
-func (m *StatisticMutation) RemovedProductIDs() (ids []uuid.UUID) {
+func (m *StatisticMutation) RemovedProductIDs() (ids []int) {
 	for id := range m.removed_Product {
 		ids = append(ids, id)
 	}
@@ -9612,7 +8163,7 @@ func (m *StatisticMutation) RemovedProductIDs() (ids []uuid.UUID) {
 }
 
 // ProductIDs returns the "Product" edge IDs in the mutation.
-func (m *StatisticMutation) ProductIDs() (ids []uuid.UUID) {
+func (m *StatisticMutation) ProductIDs() (ids []int) {
 	for id := range m._Product {
 		ids = append(ids, id)
 	}
@@ -9640,13 +8191,7 @@ func (m *StatisticMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StatisticMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.created_at != nil {
-		fields = append(fields, statistic.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, statistic.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 1)
 	if m._Type != nil {
 		fields = append(fields, statistic.FieldType)
 	}
@@ -9658,10 +8203,6 @@ func (m *StatisticMutation) Fields() []string {
 // schema.
 func (m *StatisticMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case statistic.FieldCreatedAt:
-		return m.CreatedAt()
-	case statistic.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case statistic.FieldType:
 		return m.GetType()
 	}
@@ -9673,10 +8214,6 @@ func (m *StatisticMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *StatisticMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case statistic.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case statistic.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case statistic.FieldType:
 		return m.OldType(ctx)
 	}
@@ -9688,20 +8225,6 @@ func (m *StatisticMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *StatisticMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case statistic.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case statistic.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case statistic.FieldType:
 		v, ok := value.(statistic.Type)
 		if !ok {
@@ -9758,12 +8281,6 @@ func (m *StatisticMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *StatisticMutation) ResetField(name string) error {
 	switch name {
-	case statistic.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case statistic.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case statistic.FieldType:
 		m.ResetType()
 		return nil
@@ -9886,14 +8403,12 @@ type StripeMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *uuid.UUID
-	created_at      *time.Time
-	updated_at      *time.Time
+	id              *int
 	_CustomerID     *string
 	_SubscriptionID *string
 	_RenewalDate    *time.Time
 	clearedFields   map[string]struct{}
-	_License        *uuid.UUID
+	_License        *int
 	cleared_License bool
 	done            bool
 	oldValue        func(context.Context) (*Stripe, error)
@@ -9920,7 +8435,7 @@ func newStripeMutation(c config, op Op, opts ...stripeOption) *StripeMutation {
 }
 
 // withStripeID sets the ID field of the mutation.
-func withStripeID(id uuid.UUID) stripeOption {
+func withStripeID(id int) stripeOption {
 	return func(m *StripeMutation) {
 		var (
 			err   error
@@ -9970,91 +8485,13 @@ func (m StripeMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Stripe entities.
-func (m *StripeMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *StripeMutation) ID() (id uuid.UUID, exists bool) {
+func (m *StripeMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *StripeMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *StripeMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Stripe entity.
-// If the Stripe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StripeMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *StripeMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *StripeMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *StripeMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Stripe entity.
-// If the Stripe object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StripeMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *StripeMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetCustomerID sets the "CustomerID" field.
@@ -10192,7 +8629,7 @@ func (m *StripeMutation) ResetRenewalDate() {
 }
 
 // SetLicenseID sets the "License" edge to the License entity by id.
-func (m *StripeMutation) SetLicenseID(id uuid.UUID) {
+func (m *StripeMutation) SetLicenseID(id int) {
 	m._License = &id
 }
 
@@ -10207,7 +8644,7 @@ func (m *StripeMutation) LicenseCleared() bool {
 }
 
 // LicenseID returns the "License" edge ID in the mutation.
-func (m *StripeMutation) LicenseID() (id uuid.UUID, exists bool) {
+func (m *StripeMutation) LicenseID() (id int, exists bool) {
 	if m._License != nil {
 		return *m._License, true
 	}
@@ -10217,7 +8654,7 @@ func (m *StripeMutation) LicenseID() (id uuid.UUID, exists bool) {
 // LicenseIDs returns the "License" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // LicenseID instead. It exists only for internal usage by the builders.
-func (m *StripeMutation) LicenseIDs() (ids []uuid.UUID) {
+func (m *StripeMutation) LicenseIDs() (ids []int) {
 	if id := m._License; id != nil {
 		ids = append(ids, *id)
 	}
@@ -10244,13 +8681,7 @@ func (m *StripeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StripeMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.created_at != nil {
-		fields = append(fields, stripe.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, stripe.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 3)
 	if m._CustomerID != nil {
 		fields = append(fields, stripe.FieldCustomerID)
 	}
@@ -10268,10 +8699,6 @@ func (m *StripeMutation) Fields() []string {
 // schema.
 func (m *StripeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case stripe.FieldCreatedAt:
-		return m.CreatedAt()
-	case stripe.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case stripe.FieldCustomerID:
 		return m.CustomerID()
 	case stripe.FieldSubscriptionID:
@@ -10287,10 +8714,6 @@ func (m *StripeMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *StripeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case stripe.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case stripe.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case stripe.FieldCustomerID:
 		return m.OldCustomerID(ctx)
 	case stripe.FieldSubscriptionID:
@@ -10306,20 +8729,6 @@ func (m *StripeMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *StripeMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case stripe.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case stripe.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case stripe.FieldCustomerID:
 		v, ok := value.(string)
 		if !ok {
@@ -10405,12 +8814,6 @@ func (m *StripeMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *StripeMutation) ResetField(name string) error {
 	switch name {
-	case stripe.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case stripe.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case stripe.FieldCustomerID:
 		m.ResetCustomerID()
 		return nil
@@ -10505,22 +8908,20 @@ type TaskMutation struct {
 	config
 	op                   Op
 	typ                  string
-	id                   *uuid.UUID
-	created_at           *time.Time
-	updated_at           *time.Time
+	id                   *int
 	_StartTime           *time.Time
 	clearedFields        map[string]struct{}
-	_Product             map[uuid.UUID]struct{}
-	removed_Product      map[uuid.UUID]struct{}
+	_Product             map[int]struct{}
+	removed_Product      map[int]struct{}
 	cleared_Product      bool
-	_ProxyList           map[uuid.UUID]struct{}
-	removed_ProxyList    map[uuid.UUID]struct{}
+	_ProxyList           map[int]struct{}
+	removed_ProxyList    map[int]struct{}
 	cleared_ProxyList    bool
-	_ProfileGroup        map[uuid.UUID]struct{}
-	removed_ProfileGroup map[uuid.UUID]struct{}
+	_ProfileGroup        map[int]struct{}
+	removed_ProfileGroup map[int]struct{}
 	cleared_ProfileGroup bool
-	_TaskGroup           map[uuid.UUID]struct{}
-	removed_TaskGroup    map[uuid.UUID]struct{}
+	_TaskGroup           map[int]struct{}
+	removed_TaskGroup    map[int]struct{}
 	cleared_TaskGroup    bool
 	done                 bool
 	oldValue             func(context.Context) (*Task, error)
@@ -10547,7 +8948,7 @@ func newTaskMutation(c config, op Op, opts ...taskOption) *TaskMutation {
 }
 
 // withTaskID sets the ID field of the mutation.
-func withTaskID(id uuid.UUID) taskOption {
+func withTaskID(id int) taskOption {
 	return func(m *TaskMutation) {
 		var (
 			err   error
@@ -10597,91 +8998,13 @@ func (m TaskMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Task entities.
-func (m *TaskMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *TaskMutation) ID() (id uuid.UUID, exists bool) {
+func (m *TaskMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *TaskMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *TaskMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Task entity.
-// If the Task object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *TaskMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *TaskMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *TaskMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Task entity.
-// If the Task object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *TaskMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetStartTime sets the "StartTime" field.
@@ -10734,9 +9057,9 @@ func (m *TaskMutation) ResetStartTime() {
 }
 
 // AddProductIDs adds the "Product" edge to the Product entity by ids.
-func (m *TaskMutation) AddProductIDs(ids ...uuid.UUID) {
+func (m *TaskMutation) AddProductIDs(ids ...int) {
 	if m._Product == nil {
-		m._Product = make(map[uuid.UUID]struct{})
+		m._Product = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Product[ids[i]] = struct{}{}
@@ -10754,9 +9077,9 @@ func (m *TaskMutation) ProductCleared() bool {
 }
 
 // RemoveProductIDs removes the "Product" edge to the Product entity by IDs.
-func (m *TaskMutation) RemoveProductIDs(ids ...uuid.UUID) {
+func (m *TaskMutation) RemoveProductIDs(ids ...int) {
 	if m.removed_Product == nil {
-		m.removed_Product = make(map[uuid.UUID]struct{})
+		m.removed_Product = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Product[ids[i]] = struct{}{}
@@ -10764,7 +9087,7 @@ func (m *TaskMutation) RemoveProductIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProduct returns the removed IDs of the "Product" edge to the Product entity.
-func (m *TaskMutation) RemovedProductIDs() (ids []uuid.UUID) {
+func (m *TaskMutation) RemovedProductIDs() (ids []int) {
 	for id := range m.removed_Product {
 		ids = append(ids, id)
 	}
@@ -10772,7 +9095,7 @@ func (m *TaskMutation) RemovedProductIDs() (ids []uuid.UUID) {
 }
 
 // ProductIDs returns the "Product" edge IDs in the mutation.
-func (m *TaskMutation) ProductIDs() (ids []uuid.UUID) {
+func (m *TaskMutation) ProductIDs() (ids []int) {
 	for id := range m._Product {
 		ids = append(ids, id)
 	}
@@ -10787,9 +9110,9 @@ func (m *TaskMutation) ResetProduct() {
 }
 
 // AddProxyListIDs adds the "ProxyList" edge to the ProxyList entity by ids.
-func (m *TaskMutation) AddProxyListIDs(ids ...uuid.UUID) {
+func (m *TaskMutation) AddProxyListIDs(ids ...int) {
 	if m._ProxyList == nil {
-		m._ProxyList = make(map[uuid.UUID]struct{})
+		m._ProxyList = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._ProxyList[ids[i]] = struct{}{}
@@ -10807,9 +9130,9 @@ func (m *TaskMutation) ProxyListCleared() bool {
 }
 
 // RemoveProxyListIDs removes the "ProxyList" edge to the ProxyList entity by IDs.
-func (m *TaskMutation) RemoveProxyListIDs(ids ...uuid.UUID) {
+func (m *TaskMutation) RemoveProxyListIDs(ids ...int) {
 	if m.removed_ProxyList == nil {
-		m.removed_ProxyList = make(map[uuid.UUID]struct{})
+		m.removed_ProxyList = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_ProxyList[ids[i]] = struct{}{}
@@ -10817,7 +9140,7 @@ func (m *TaskMutation) RemoveProxyListIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProxyList returns the removed IDs of the "ProxyList" edge to the ProxyList entity.
-func (m *TaskMutation) RemovedProxyListIDs() (ids []uuid.UUID) {
+func (m *TaskMutation) RemovedProxyListIDs() (ids []int) {
 	for id := range m.removed_ProxyList {
 		ids = append(ids, id)
 	}
@@ -10825,7 +9148,7 @@ func (m *TaskMutation) RemovedProxyListIDs() (ids []uuid.UUID) {
 }
 
 // ProxyListIDs returns the "ProxyList" edge IDs in the mutation.
-func (m *TaskMutation) ProxyListIDs() (ids []uuid.UUID) {
+func (m *TaskMutation) ProxyListIDs() (ids []int) {
 	for id := range m._ProxyList {
 		ids = append(ids, id)
 	}
@@ -10840,9 +9163,9 @@ func (m *TaskMutation) ResetProxyList() {
 }
 
 // AddProfileGroupIDs adds the "ProfileGroup" edge to the ProfileGroup entity by ids.
-func (m *TaskMutation) AddProfileGroupIDs(ids ...uuid.UUID) {
+func (m *TaskMutation) AddProfileGroupIDs(ids ...int) {
 	if m._ProfileGroup == nil {
-		m._ProfileGroup = make(map[uuid.UUID]struct{})
+		m._ProfileGroup = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._ProfileGroup[ids[i]] = struct{}{}
@@ -10860,9 +9183,9 @@ func (m *TaskMutation) ProfileGroupCleared() bool {
 }
 
 // RemoveProfileGroupIDs removes the "ProfileGroup" edge to the ProfileGroup entity by IDs.
-func (m *TaskMutation) RemoveProfileGroupIDs(ids ...uuid.UUID) {
+func (m *TaskMutation) RemoveProfileGroupIDs(ids ...int) {
 	if m.removed_ProfileGroup == nil {
-		m.removed_ProfileGroup = make(map[uuid.UUID]struct{})
+		m.removed_ProfileGroup = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_ProfileGroup[ids[i]] = struct{}{}
@@ -10870,7 +9193,7 @@ func (m *TaskMutation) RemoveProfileGroupIDs(ids ...uuid.UUID) {
 }
 
 // RemovedProfileGroup returns the removed IDs of the "ProfileGroup" edge to the ProfileGroup entity.
-func (m *TaskMutation) RemovedProfileGroupIDs() (ids []uuid.UUID) {
+func (m *TaskMutation) RemovedProfileGroupIDs() (ids []int) {
 	for id := range m.removed_ProfileGroup {
 		ids = append(ids, id)
 	}
@@ -10878,7 +9201,7 @@ func (m *TaskMutation) RemovedProfileGroupIDs() (ids []uuid.UUID) {
 }
 
 // ProfileGroupIDs returns the "ProfileGroup" edge IDs in the mutation.
-func (m *TaskMutation) ProfileGroupIDs() (ids []uuid.UUID) {
+func (m *TaskMutation) ProfileGroupIDs() (ids []int) {
 	for id := range m._ProfileGroup {
 		ids = append(ids, id)
 	}
@@ -10893,9 +9216,9 @@ func (m *TaskMutation) ResetProfileGroup() {
 }
 
 // AddTaskGroupIDs adds the "TaskGroup" edge to the TaskGroup entity by ids.
-func (m *TaskMutation) AddTaskGroupIDs(ids ...uuid.UUID) {
+func (m *TaskMutation) AddTaskGroupIDs(ids ...int) {
 	if m._TaskGroup == nil {
-		m._TaskGroup = make(map[uuid.UUID]struct{})
+		m._TaskGroup = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._TaskGroup[ids[i]] = struct{}{}
@@ -10913,9 +9236,9 @@ func (m *TaskMutation) TaskGroupCleared() bool {
 }
 
 // RemoveTaskGroupIDs removes the "TaskGroup" edge to the TaskGroup entity by IDs.
-func (m *TaskMutation) RemoveTaskGroupIDs(ids ...uuid.UUID) {
+func (m *TaskMutation) RemoveTaskGroupIDs(ids ...int) {
 	if m.removed_TaskGroup == nil {
-		m.removed_TaskGroup = make(map[uuid.UUID]struct{})
+		m.removed_TaskGroup = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_TaskGroup[ids[i]] = struct{}{}
@@ -10923,7 +9246,7 @@ func (m *TaskMutation) RemoveTaskGroupIDs(ids ...uuid.UUID) {
 }
 
 // RemovedTaskGroup returns the removed IDs of the "TaskGroup" edge to the TaskGroup entity.
-func (m *TaskMutation) RemovedTaskGroupIDs() (ids []uuid.UUID) {
+func (m *TaskMutation) RemovedTaskGroupIDs() (ids []int) {
 	for id := range m.removed_TaskGroup {
 		ids = append(ids, id)
 	}
@@ -10931,7 +9254,7 @@ func (m *TaskMutation) RemovedTaskGroupIDs() (ids []uuid.UUID) {
 }
 
 // TaskGroupIDs returns the "TaskGroup" edge IDs in the mutation.
-func (m *TaskMutation) TaskGroupIDs() (ids []uuid.UUID) {
+func (m *TaskMutation) TaskGroupIDs() (ids []int) {
 	for id := range m._TaskGroup {
 		ids = append(ids, id)
 	}
@@ -10959,13 +9282,7 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.created_at != nil {
-		fields = append(fields, task.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, task.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 1)
 	if m._StartTime != nil {
 		fields = append(fields, task.FieldStartTime)
 	}
@@ -10977,10 +9294,6 @@ func (m *TaskMutation) Fields() []string {
 // schema.
 func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case task.FieldCreatedAt:
-		return m.CreatedAt()
-	case task.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case task.FieldStartTime:
 		return m.StartTime()
 	}
@@ -10992,10 +9305,6 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case task.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case task.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case task.FieldStartTime:
 		return m.OldStartTime(ctx)
 	}
@@ -11007,20 +9316,6 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *TaskMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case task.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case task.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case task.FieldStartTime:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -11086,12 +9381,6 @@ func (m *TaskMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TaskMutation) ResetField(name string) error {
 	switch name {
-	case task.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case task.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case task.FieldStartTime:
 		m.ResetStartTime()
 		return nil
@@ -11266,16 +9555,14 @@ type TaskGroupMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
-	created_at    *time.Time
-	updated_at    *time.Time
+	id            *int
 	_Name         *string
 	clearedFields map[string]struct{}
-	_App          map[uuid.UUID]struct{}
-	removed_App   map[uuid.UUID]struct{}
+	_App          map[int]struct{}
+	removed_App   map[int]struct{}
 	cleared_App   bool
-	_Tasks        map[uuid.UUID]struct{}
-	removed_Tasks map[uuid.UUID]struct{}
+	_Tasks        map[int]struct{}
+	removed_Tasks map[int]struct{}
 	cleared_Tasks bool
 	done          bool
 	oldValue      func(context.Context) (*TaskGroup, error)
@@ -11302,7 +9589,7 @@ func newTaskGroupMutation(c config, op Op, opts ...taskgroupOption) *TaskGroupMu
 }
 
 // withTaskGroupID sets the ID field of the mutation.
-func withTaskGroupID(id uuid.UUID) taskgroupOption {
+func withTaskGroupID(id int) taskgroupOption {
 	return func(m *TaskGroupMutation) {
 		var (
 			err   error
@@ -11352,91 +9639,13 @@ func (m TaskGroupMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of TaskGroup entities.
-func (m *TaskGroupMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *TaskGroupMutation) ID() (id uuid.UUID, exists bool) {
+func (m *TaskGroupMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *TaskGroupMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *TaskGroupMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the TaskGroup entity.
-// If the TaskGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskGroupMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *TaskGroupMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *TaskGroupMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *TaskGroupMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the TaskGroup entity.
-// If the TaskGroup object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskGroupMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *TaskGroupMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetName sets the "Name" field.
@@ -11476,9 +9685,9 @@ func (m *TaskGroupMutation) ResetName() {
 }
 
 // AddAppIDs adds the "App" edge to the App entity by ids.
-func (m *TaskGroupMutation) AddAppIDs(ids ...uuid.UUID) {
+func (m *TaskGroupMutation) AddAppIDs(ids ...int) {
 	if m._App == nil {
-		m._App = make(map[uuid.UUID]struct{})
+		m._App = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._App[ids[i]] = struct{}{}
@@ -11496,9 +9705,9 @@ func (m *TaskGroupMutation) AppCleared() bool {
 }
 
 // RemoveAppIDs removes the "App" edge to the App entity by IDs.
-func (m *TaskGroupMutation) RemoveAppIDs(ids ...uuid.UUID) {
+func (m *TaskGroupMutation) RemoveAppIDs(ids ...int) {
 	if m.removed_App == nil {
-		m.removed_App = make(map[uuid.UUID]struct{})
+		m.removed_App = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_App[ids[i]] = struct{}{}
@@ -11506,7 +9715,7 @@ func (m *TaskGroupMutation) RemoveAppIDs(ids ...uuid.UUID) {
 }
 
 // RemovedApp returns the removed IDs of the "App" edge to the App entity.
-func (m *TaskGroupMutation) RemovedAppIDs() (ids []uuid.UUID) {
+func (m *TaskGroupMutation) RemovedAppIDs() (ids []int) {
 	for id := range m.removed_App {
 		ids = append(ids, id)
 	}
@@ -11514,7 +9723,7 @@ func (m *TaskGroupMutation) RemovedAppIDs() (ids []uuid.UUID) {
 }
 
 // AppIDs returns the "App" edge IDs in the mutation.
-func (m *TaskGroupMutation) AppIDs() (ids []uuid.UUID) {
+func (m *TaskGroupMutation) AppIDs() (ids []int) {
 	for id := range m._App {
 		ids = append(ids, id)
 	}
@@ -11529,9 +9738,9 @@ func (m *TaskGroupMutation) ResetApp() {
 }
 
 // AddTaskIDs adds the "Tasks" edge to the Task entity by ids.
-func (m *TaskGroupMutation) AddTaskIDs(ids ...uuid.UUID) {
+func (m *TaskGroupMutation) AddTaskIDs(ids ...int) {
 	if m._Tasks == nil {
-		m._Tasks = make(map[uuid.UUID]struct{})
+		m._Tasks = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Tasks[ids[i]] = struct{}{}
@@ -11549,9 +9758,9 @@ func (m *TaskGroupMutation) TasksCleared() bool {
 }
 
 // RemoveTaskIDs removes the "Tasks" edge to the Task entity by IDs.
-func (m *TaskGroupMutation) RemoveTaskIDs(ids ...uuid.UUID) {
+func (m *TaskGroupMutation) RemoveTaskIDs(ids ...int) {
 	if m.removed_Tasks == nil {
-		m.removed_Tasks = make(map[uuid.UUID]struct{})
+		m.removed_Tasks = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Tasks[ids[i]] = struct{}{}
@@ -11559,7 +9768,7 @@ func (m *TaskGroupMutation) RemoveTaskIDs(ids ...uuid.UUID) {
 }
 
 // RemovedTasks returns the removed IDs of the "Tasks" edge to the Task entity.
-func (m *TaskGroupMutation) RemovedTasksIDs() (ids []uuid.UUID) {
+func (m *TaskGroupMutation) RemovedTasksIDs() (ids []int) {
 	for id := range m.removed_Tasks {
 		ids = append(ids, id)
 	}
@@ -11567,7 +9776,7 @@ func (m *TaskGroupMutation) RemovedTasksIDs() (ids []uuid.UUID) {
 }
 
 // TasksIDs returns the "Tasks" edge IDs in the mutation.
-func (m *TaskGroupMutation) TasksIDs() (ids []uuid.UUID) {
+func (m *TaskGroupMutation) TasksIDs() (ids []int) {
 	for id := range m._Tasks {
 		ids = append(ids, id)
 	}
@@ -11595,13 +9804,7 @@ func (m *TaskGroupMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskGroupMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.created_at != nil {
-		fields = append(fields, taskgroup.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, taskgroup.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 1)
 	if m._Name != nil {
 		fields = append(fields, taskgroup.FieldName)
 	}
@@ -11613,10 +9816,6 @@ func (m *TaskGroupMutation) Fields() []string {
 // schema.
 func (m *TaskGroupMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case taskgroup.FieldCreatedAt:
-		return m.CreatedAt()
-	case taskgroup.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case taskgroup.FieldName:
 		return m.Name()
 	}
@@ -11628,10 +9827,6 @@ func (m *TaskGroupMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TaskGroupMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case taskgroup.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case taskgroup.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case taskgroup.FieldName:
 		return m.OldName(ctx)
 	}
@@ -11643,20 +9838,6 @@ func (m *TaskGroupMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *TaskGroupMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case taskgroup.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case taskgroup.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case taskgroup.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -11713,12 +9894,6 @@ func (m *TaskGroupMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TaskGroupMutation) ResetField(name string) error {
 	switch name {
-	case taskgroup.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case taskgroup.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case taskgroup.FieldName:
 		m.ResetName()
 		return nil
@@ -11841,17 +10016,15 @@ type UserMutation struct {
 	config
 	op                 Op
 	typ                string
-	id                 *uuid.UUID
-	created_at         *time.Time
-	updated_at         *time.Time
+	id                 *int
 	_Disabled          *bool
 	clearedFields      map[string]struct{}
-	_License           *uuid.UUID
+	_License           *int
 	cleared_License    bool
-	_Statistics        map[uuid.UUID]struct{}
-	removed_Statistics map[uuid.UUID]struct{}
+	_Statistics        map[int]struct{}
+	removed_Statistics map[int]struct{}
 	cleared_Statistics bool
-	_App               *uuid.UUID
+	_App               *int
 	cleared_App        bool
 	done               bool
 	oldValue           func(context.Context) (*User, error)
@@ -11878,7 +10051,7 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 }
 
 // withUserID sets the ID field of the mutation.
-func withUserID(id uuid.UUID) userOption {
+func withUserID(id int) userOption {
 	return func(m *UserMutation) {
 		var (
 			err   error
@@ -11928,91 +10101,13 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID
 // is only available if it was provided to the builder.
-func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
+func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *UserMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *UserMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *UserMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *UserMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // SetDisabled sets the "Disabled" field.
@@ -12052,7 +10147,7 @@ func (m *UserMutation) ResetDisabled() {
 }
 
 // SetLicenseID sets the "License" edge to the License entity by id.
-func (m *UserMutation) SetLicenseID(id uuid.UUID) {
+func (m *UserMutation) SetLicenseID(id int) {
 	m._License = &id
 }
 
@@ -12067,7 +10162,7 @@ func (m *UserMutation) LicenseCleared() bool {
 }
 
 // LicenseID returns the "License" edge ID in the mutation.
-func (m *UserMutation) LicenseID() (id uuid.UUID, exists bool) {
+func (m *UserMutation) LicenseID() (id int, exists bool) {
 	if m._License != nil {
 		return *m._License, true
 	}
@@ -12077,7 +10172,7 @@ func (m *UserMutation) LicenseID() (id uuid.UUID, exists bool) {
 // LicenseIDs returns the "License" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // LicenseID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) LicenseIDs() (ids []uuid.UUID) {
+func (m *UserMutation) LicenseIDs() (ids []int) {
 	if id := m._License; id != nil {
 		ids = append(ids, *id)
 	}
@@ -12091,9 +10186,9 @@ func (m *UserMutation) ResetLicense() {
 }
 
 // AddStatisticIDs adds the "Statistics" edge to the Statistic entity by ids.
-func (m *UserMutation) AddStatisticIDs(ids ...uuid.UUID) {
+func (m *UserMutation) AddStatisticIDs(ids ...int) {
 	if m._Statistics == nil {
-		m._Statistics = make(map[uuid.UUID]struct{})
+		m._Statistics = make(map[int]struct{})
 	}
 	for i := range ids {
 		m._Statistics[ids[i]] = struct{}{}
@@ -12111,9 +10206,9 @@ func (m *UserMutation) StatisticsCleared() bool {
 }
 
 // RemoveStatisticIDs removes the "Statistics" edge to the Statistic entity by IDs.
-func (m *UserMutation) RemoveStatisticIDs(ids ...uuid.UUID) {
+func (m *UserMutation) RemoveStatisticIDs(ids ...int) {
 	if m.removed_Statistics == nil {
-		m.removed_Statistics = make(map[uuid.UUID]struct{})
+		m.removed_Statistics = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.removed_Statistics[ids[i]] = struct{}{}
@@ -12121,7 +10216,7 @@ func (m *UserMutation) RemoveStatisticIDs(ids ...uuid.UUID) {
 }
 
 // RemovedStatistics returns the removed IDs of the "Statistics" edge to the Statistic entity.
-func (m *UserMutation) RemovedStatisticsIDs() (ids []uuid.UUID) {
+func (m *UserMutation) RemovedStatisticsIDs() (ids []int) {
 	for id := range m.removed_Statistics {
 		ids = append(ids, id)
 	}
@@ -12129,7 +10224,7 @@ func (m *UserMutation) RemovedStatisticsIDs() (ids []uuid.UUID) {
 }
 
 // StatisticsIDs returns the "Statistics" edge IDs in the mutation.
-func (m *UserMutation) StatisticsIDs() (ids []uuid.UUID) {
+func (m *UserMutation) StatisticsIDs() (ids []int) {
 	for id := range m._Statistics {
 		ids = append(ids, id)
 	}
@@ -12144,7 +10239,7 @@ func (m *UserMutation) ResetStatistics() {
 }
 
 // SetAppID sets the "App" edge to the App entity by id.
-func (m *UserMutation) SetAppID(id uuid.UUID) {
+func (m *UserMutation) SetAppID(id int) {
 	m._App = &id
 }
 
@@ -12159,7 +10254,7 @@ func (m *UserMutation) AppCleared() bool {
 }
 
 // AppID returns the "App" edge ID in the mutation.
-func (m *UserMutation) AppID() (id uuid.UUID, exists bool) {
+func (m *UserMutation) AppID() (id int, exists bool) {
 	if m._App != nil {
 		return *m._App, true
 	}
@@ -12169,7 +10264,7 @@ func (m *UserMutation) AppID() (id uuid.UUID, exists bool) {
 // AppIDs returns the "App" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AppID instead. It exists only for internal usage by the builders.
-func (m *UserMutation) AppIDs() (ids []uuid.UUID) {
+func (m *UserMutation) AppIDs() (ids []int) {
 	if id := m._App; id != nil {
 		ids = append(ids, *id)
 	}
@@ -12196,13 +10291,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.created_at != nil {
-		fields = append(fields, user.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, user.FieldUpdatedAt)
-	}
+	fields := make([]string, 0, 1)
 	if m._Disabled != nil {
 		fields = append(fields, user.FieldDisabled)
 	}
@@ -12214,10 +10303,6 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.FieldCreatedAt:
-		return m.CreatedAt()
-	case user.FieldUpdatedAt:
-		return m.UpdatedAt()
 	case user.FieldDisabled:
 		return m.Disabled()
 	}
@@ -12229,10 +10314,6 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case user.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case user.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	case user.FieldDisabled:
 		return m.OldDisabled(ctx)
 	}
@@ -12244,20 +10325,6 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case user.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
 	case user.FieldDisabled:
 		v, ok := value.(bool)
 		if !ok {
@@ -12314,12 +10381,6 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
-	case user.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case user.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
 	case user.FieldDisabled:
 		m.ResetDisabled()
 		return nil

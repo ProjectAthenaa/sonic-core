@@ -11,10 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxy"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
 )
 
 // ProxyQuery is the builder for querying Proxy entities.
@@ -111,8 +110,8 @@ func (pq *ProxyQuery) FirstX(ctx context.Context) *Proxy {
 
 // FirstID returns the first Proxy ID from the query.
 // Returns a *NotFoundError when no Proxy ID was found.
-func (pq *ProxyQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (pq *ProxyQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -124,7 +123,7 @@ func (pq *ProxyQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *ProxyQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (pq *ProxyQuery) FirstIDX(ctx context.Context) int {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -162,8 +161,8 @@ func (pq *ProxyQuery) OnlyX(ctx context.Context) *Proxy {
 // OnlyID is like Only, but returns the only Proxy ID in the query.
 // Returns a *NotSingularError when exactly one Proxy ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *ProxyQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (pq *ProxyQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -179,7 +178,7 @@ func (pq *ProxyQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *ProxyQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (pq *ProxyQuery) OnlyIDX(ctx context.Context) int {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -205,8 +204,8 @@ func (pq *ProxyQuery) AllX(ctx context.Context) []*Proxy {
 }
 
 // IDs executes the query and returns a list of Proxy IDs.
-func (pq *ProxyQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (pq *ProxyQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := pq.Select(proxy.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -214,7 +213,7 @@ func (pq *ProxyQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *ProxyQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (pq *ProxyQuery) IDsX(ctx context.Context) []int {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -292,12 +291,12 @@ func (pq *ProxyQuery) WithProxyList(opts ...func(*ProxyListQuery)) *ProxyQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Username string `json:"Username,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Proxy.Query().
-//		GroupBy(proxy.FieldCreatedAt).
+//		GroupBy(proxy.FieldUsername).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -319,11 +318,11 @@ func (pq *ProxyQuery) GroupBy(field string, fields ...string) *ProxyGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Username string `json:"Username,omitempty"`
 //	}
 //
 //	client.Proxy.Query().
-//		Select(proxy.FieldCreatedAt).
+//		Select(proxy.FieldUsername).
 //		Scan(ctx, &v)
 //
 func (pq *ProxyQuery) Select(field string, fields ...string) *ProxySelect {
@@ -383,8 +382,8 @@ func (pq *ProxyQuery) sqlAll(ctx context.Context) ([]*Proxy, error) {
 	}
 
 	if query := pq.withProxyList; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*Proxy)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Proxy)
 		for i := range nodes {
 			if nodes[i].proxy_list_proxies == nil {
 				continue
@@ -433,7 +432,7 @@ func (pq *ProxyQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   proxy.Table,
 			Columns: proxy.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: proxy.FieldID,
 			},
 		},

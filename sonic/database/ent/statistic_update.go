@@ -5,16 +5,14 @@ package ent
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // StatisticUpdate is the builder for updating Statistic entities.
@@ -30,26 +28,6 @@ func (su *StatisticUpdate) Where(ps ...predicate.Statistic) *StatisticUpdate {
 	return su
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (su *StatisticUpdate) SetCreatedAt(t time.Time) *StatisticUpdate {
-	su.mutation.SetCreatedAt(t)
-	return su
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (su *StatisticUpdate) SetNillableCreatedAt(t *time.Time) *StatisticUpdate {
-	if t != nil {
-		su.SetCreatedAt(*t)
-	}
-	return su
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (su *StatisticUpdate) SetUpdatedAt(t time.Time) *StatisticUpdate {
-	su.mutation.SetUpdatedAt(t)
-	return su
-}
-
 // SetType sets the "Type" field.
 func (su *StatisticUpdate) SetType(s statistic.Type) *StatisticUpdate {
 	su.mutation.SetType(s)
@@ -57,14 +35,14 @@ func (su *StatisticUpdate) SetType(s statistic.Type) *StatisticUpdate {
 }
 
 // AddUserIDs adds the "User" edge to the User entity by IDs.
-func (su *StatisticUpdate) AddUserIDs(ids ...uuid.UUID) *StatisticUpdate {
+func (su *StatisticUpdate) AddUserIDs(ids ...int) *StatisticUpdate {
 	su.mutation.AddUserIDs(ids...)
 	return su
 }
 
 // AddUser adds the "User" edges to the User entity.
 func (su *StatisticUpdate) AddUser(u ...*User) *StatisticUpdate {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -72,14 +50,14 @@ func (su *StatisticUpdate) AddUser(u ...*User) *StatisticUpdate {
 }
 
 // AddProductIDs adds the "Product" edge to the Product entity by IDs.
-func (su *StatisticUpdate) AddProductIDs(ids ...uuid.UUID) *StatisticUpdate {
+func (su *StatisticUpdate) AddProductIDs(ids ...int) *StatisticUpdate {
 	su.mutation.AddProductIDs(ids...)
 	return su
 }
 
 // AddProduct adds the "Product" edges to the Product entity.
 func (su *StatisticUpdate) AddProduct(p ...*Product) *StatisticUpdate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -98,14 +76,14 @@ func (su *StatisticUpdate) ClearUser() *StatisticUpdate {
 }
 
 // RemoveUserIDs removes the "User" edge to User entities by IDs.
-func (su *StatisticUpdate) RemoveUserIDs(ids ...uuid.UUID) *StatisticUpdate {
+func (su *StatisticUpdate) RemoveUserIDs(ids ...int) *StatisticUpdate {
 	su.mutation.RemoveUserIDs(ids...)
 	return su
 }
 
 // RemoveUser removes "User" edges to User entities.
 func (su *StatisticUpdate) RemoveUser(u ...*User) *StatisticUpdate {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -119,14 +97,14 @@ func (su *StatisticUpdate) ClearProduct() *StatisticUpdate {
 }
 
 // RemoveProductIDs removes the "Product" edge to Product entities by IDs.
-func (su *StatisticUpdate) RemoveProductIDs(ids ...uuid.UUID) *StatisticUpdate {
+func (su *StatisticUpdate) RemoveProductIDs(ids ...int) *StatisticUpdate {
 	su.mutation.RemoveProductIDs(ids...)
 	return su
 }
 
 // RemoveProduct removes "Product" edges to Product entities.
 func (su *StatisticUpdate) RemoveProduct(p ...*Product) *StatisticUpdate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -139,7 +117,6 @@ func (su *StatisticUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	su.defaults()
 	if len(su.hooks) == 0 {
 		if err = su.check(); err != nil {
 			return 0, err
@@ -191,14 +168,6 @@ func (su *StatisticUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (su *StatisticUpdate) defaults() {
-	if _, ok := su.mutation.UpdatedAt(); !ok {
-		v := statistic.UpdateDefaultUpdatedAt()
-		su.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (su *StatisticUpdate) check() error {
 	if v, ok := su.mutation.GetType(); ok {
@@ -215,7 +184,7 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   statistic.Table,
 			Columns: statistic.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: statistic.FieldID,
 			},
 		},
@@ -226,20 +195,6 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := su.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: statistic.FieldCreatedAt,
-		})
-	}
-	if value, ok := su.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: statistic.FieldUpdatedAt,
-		})
 	}
 	if value, ok := su.mutation.GetType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -257,7 +212,7 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -273,7 +228,7 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -292,7 +247,7 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -311,7 +266,7 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: product.FieldID,
 				},
 			},
@@ -327,7 +282,7 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: product.FieldID,
 				},
 			},
@@ -346,7 +301,7 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: product.FieldID,
 				},
 			},
@@ -375,26 +330,6 @@ type StatisticUpdateOne struct {
 	mutation *StatisticMutation
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (suo *StatisticUpdateOne) SetCreatedAt(t time.Time) *StatisticUpdateOne {
-	suo.mutation.SetCreatedAt(t)
-	return suo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (suo *StatisticUpdateOne) SetNillableCreatedAt(t *time.Time) *StatisticUpdateOne {
-	if t != nil {
-		suo.SetCreatedAt(*t)
-	}
-	return suo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (suo *StatisticUpdateOne) SetUpdatedAt(t time.Time) *StatisticUpdateOne {
-	suo.mutation.SetUpdatedAt(t)
-	return suo
-}
-
 // SetType sets the "Type" field.
 func (suo *StatisticUpdateOne) SetType(s statistic.Type) *StatisticUpdateOne {
 	suo.mutation.SetType(s)
@@ -402,14 +337,14 @@ func (suo *StatisticUpdateOne) SetType(s statistic.Type) *StatisticUpdateOne {
 }
 
 // AddUserIDs adds the "User" edge to the User entity by IDs.
-func (suo *StatisticUpdateOne) AddUserIDs(ids ...uuid.UUID) *StatisticUpdateOne {
+func (suo *StatisticUpdateOne) AddUserIDs(ids ...int) *StatisticUpdateOne {
 	suo.mutation.AddUserIDs(ids...)
 	return suo
 }
 
 // AddUser adds the "User" edges to the User entity.
 func (suo *StatisticUpdateOne) AddUser(u ...*User) *StatisticUpdateOne {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -417,14 +352,14 @@ func (suo *StatisticUpdateOne) AddUser(u ...*User) *StatisticUpdateOne {
 }
 
 // AddProductIDs adds the "Product" edge to the Product entity by IDs.
-func (suo *StatisticUpdateOne) AddProductIDs(ids ...uuid.UUID) *StatisticUpdateOne {
+func (suo *StatisticUpdateOne) AddProductIDs(ids ...int) *StatisticUpdateOne {
 	suo.mutation.AddProductIDs(ids...)
 	return suo
 }
 
 // AddProduct adds the "Product" edges to the Product entity.
 func (suo *StatisticUpdateOne) AddProduct(p ...*Product) *StatisticUpdateOne {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -443,14 +378,14 @@ func (suo *StatisticUpdateOne) ClearUser() *StatisticUpdateOne {
 }
 
 // RemoveUserIDs removes the "User" edge to User entities by IDs.
-func (suo *StatisticUpdateOne) RemoveUserIDs(ids ...uuid.UUID) *StatisticUpdateOne {
+func (suo *StatisticUpdateOne) RemoveUserIDs(ids ...int) *StatisticUpdateOne {
 	suo.mutation.RemoveUserIDs(ids...)
 	return suo
 }
 
 // RemoveUser removes "User" edges to User entities.
 func (suo *StatisticUpdateOne) RemoveUser(u ...*User) *StatisticUpdateOne {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -464,14 +399,14 @@ func (suo *StatisticUpdateOne) ClearProduct() *StatisticUpdateOne {
 }
 
 // RemoveProductIDs removes the "Product" edge to Product entities by IDs.
-func (suo *StatisticUpdateOne) RemoveProductIDs(ids ...uuid.UUID) *StatisticUpdateOne {
+func (suo *StatisticUpdateOne) RemoveProductIDs(ids ...int) *StatisticUpdateOne {
 	suo.mutation.RemoveProductIDs(ids...)
 	return suo
 }
 
 // RemoveProduct removes "Product" edges to Product entities.
 func (suo *StatisticUpdateOne) RemoveProduct(p ...*Product) *StatisticUpdateOne {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -491,7 +426,6 @@ func (suo *StatisticUpdateOne) Save(ctx context.Context) (*Statistic, error) {
 		err  error
 		node *Statistic
 	)
-	suo.defaults()
 	if len(suo.hooks) == 0 {
 		if err = suo.check(); err != nil {
 			return nil, err
@@ -543,14 +477,6 @@ func (suo *StatisticUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (suo *StatisticUpdateOne) defaults() {
-	if _, ok := suo.mutation.UpdatedAt(); !ok {
-		v := statistic.UpdateDefaultUpdatedAt()
-		suo.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (suo *StatisticUpdateOne) check() error {
 	if v, ok := suo.mutation.GetType(); ok {
@@ -567,7 +493,7 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			Table:   statistic.Table,
 			Columns: statistic.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: statistic.FieldID,
 			},
 		},
@@ -596,20 +522,6 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			}
 		}
 	}
-	if value, ok := suo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: statistic.FieldCreatedAt,
-		})
-	}
-	if value, ok := suo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: statistic.FieldUpdatedAt,
-		})
-	}
 	if value, ok := suo.mutation.GetType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
@@ -626,7 +538,7 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -642,7 +554,7 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -661,7 +573,7 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -680,7 +592,7 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: product.FieldID,
 				},
 			},
@@ -696,7 +608,7 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: product.FieldID,
 				},
 			},
@@ -715,7 +627,7 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: product.FieldID,
 				},
 			},

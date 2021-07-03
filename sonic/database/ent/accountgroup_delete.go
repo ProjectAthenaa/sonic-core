@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
 )
 
 // AccountGroupDelete is the builder for deleting a AccountGroup entity.
@@ -69,7 +69,7 @@ func (agd *AccountGroupDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: accountgroup.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: accountgroup.FieldID,
 			},
 		},

@@ -5,9 +5,9 @@ package enttest
 import (
 	"context"
 
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent"
 	// required by schema hooks.
-	_ "github.com/ProjectAthenaa/sonic-core/sonic/database/ent/runtime"
+	_ "github.com/ProjectAthenaa/sonic-core/sonic/models/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

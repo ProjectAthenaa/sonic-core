@@ -6,14 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // StatisticCreate is the builder for creating a Statistic entity.
@@ -23,55 +21,21 @@ type StatisticCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (sc *StatisticCreate) SetCreatedAt(t time.Time) *StatisticCreate {
-	sc.mutation.SetCreatedAt(t)
-	return sc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (sc *StatisticCreate) SetNillableCreatedAt(t *time.Time) *StatisticCreate {
-	if t != nil {
-		sc.SetCreatedAt(*t)
-	}
-	return sc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (sc *StatisticCreate) SetUpdatedAt(t time.Time) *StatisticCreate {
-	sc.mutation.SetUpdatedAt(t)
-	return sc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (sc *StatisticCreate) SetNillableUpdatedAt(t *time.Time) *StatisticCreate {
-	if t != nil {
-		sc.SetUpdatedAt(*t)
-	}
-	return sc
-}
-
 // SetType sets the "Type" field.
 func (sc *StatisticCreate) SetType(s statistic.Type) *StatisticCreate {
 	sc.mutation.SetType(s)
 	return sc
 }
 
-// SetID sets the "id" field.
-func (sc *StatisticCreate) SetID(u uuid.UUID) *StatisticCreate {
-	sc.mutation.SetID(u)
-	return sc
-}
-
 // AddUserIDs adds the "User" edge to the User entity by IDs.
-func (sc *StatisticCreate) AddUserIDs(ids ...uuid.UUID) *StatisticCreate {
+func (sc *StatisticCreate) AddUserIDs(ids ...int) *StatisticCreate {
 	sc.mutation.AddUserIDs(ids...)
 	return sc
 }
 
 // AddUser adds the "User" edges to the User entity.
 func (sc *StatisticCreate) AddUser(u ...*User) *StatisticCreate {
-	ids := make([]uuid.UUID, len(u))
+	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
@@ -79,14 +43,14 @@ func (sc *StatisticCreate) AddUser(u ...*User) *StatisticCreate {
 }
 
 // AddProductIDs adds the "Product" edge to the Product entity by IDs.
-func (sc *StatisticCreate) AddProductIDs(ids ...uuid.UUID) *StatisticCreate {
+func (sc *StatisticCreate) AddProductIDs(ids ...int) *StatisticCreate {
 	sc.mutation.AddProductIDs(ids...)
 	return sc
 }
 
 // AddProduct adds the "Product" edges to the Product entity.
 func (sc *StatisticCreate) AddProduct(p ...*Product) *StatisticCreate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -104,7 +68,6 @@ func (sc *StatisticCreate) Save(ctx context.Context) (*Statistic, error) {
 		err  error
 		node *Statistic
 	)
-	sc.defaults()
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err
@@ -143,30 +106,8 @@ func (sc *StatisticCreate) SaveX(ctx context.Context) *Statistic {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (sc *StatisticCreate) defaults() {
-	if _, ok := sc.mutation.CreatedAt(); !ok {
-		v := statistic.DefaultCreatedAt()
-		sc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := sc.mutation.UpdatedAt(); !ok {
-		v := statistic.DefaultUpdatedAt()
-		sc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := sc.mutation.ID(); !ok {
-		v := statistic.DefaultID()
-		sc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (sc *StatisticCreate) check() error {
-	if _, ok := sc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := sc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := sc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "Type", err: errors.New("ent: missing required field \"Type\"")}
 	}
@@ -186,6 +127,8 @@ func (sc *StatisticCreate) sqlSave(ctx context.Context) (*Statistic, error) {
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -195,31 +138,11 @@ func (sc *StatisticCreate) createSpec() (*Statistic, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: statistic.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: statistic.FieldID,
 			},
 		}
 	)
-	if id, ok := sc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := sc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: statistic.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := sc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: statistic.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := sc.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
@@ -237,7 +160,7 @@ func (sc *StatisticCreate) createSpec() (*Statistic, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -256,7 +179,7 @@ func (sc *StatisticCreate) createSpec() (*Statistic, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: product.FieldID,
 				},
 			},
@@ -283,7 +206,6 @@ func (scb *StatisticCreateBulk) Save(ctx context.Context) ([]*Statistic, error) 
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*StatisticMutation)
 				if !ok {
@@ -309,6 +231,8 @@ func (scb *StatisticCreateBulk) Save(ctx context.Context) ([]*Statistic, error) 
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

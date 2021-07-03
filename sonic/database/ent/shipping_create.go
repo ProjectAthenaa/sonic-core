@@ -6,14 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/address"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profile"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/shipping"
 )
 
 // ShippingCreate is the builder for creating a Shipping entity.
@@ -21,34 +19,6 @@ type ShippingCreate struct {
 	config
 	mutation *ShippingMutation
 	hooks    []Hook
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (sc *ShippingCreate) SetCreatedAt(t time.Time) *ShippingCreate {
-	sc.mutation.SetCreatedAt(t)
-	return sc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (sc *ShippingCreate) SetNillableCreatedAt(t *time.Time) *ShippingCreate {
-	if t != nil {
-		sc.SetCreatedAt(*t)
-	}
-	return sc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (sc *ShippingCreate) SetUpdatedAt(t time.Time) *ShippingCreate {
-	sc.mutation.SetUpdatedAt(t)
-	return sc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (sc *ShippingCreate) SetNillableUpdatedAt(t *time.Time) *ShippingCreate {
-	if t != nil {
-		sc.SetUpdatedAt(*t)
-	}
-	return sc
 }
 
 // SetFirstName sets the "FirstName" field.
@@ -75,14 +45,8 @@ func (sc *ShippingCreate) SetBillingIsShipping(b bool) *ShippingCreate {
 	return sc
 }
 
-// SetID sets the "id" field.
-func (sc *ShippingCreate) SetID(u uuid.UUID) *ShippingCreate {
-	sc.mutation.SetID(u)
-	return sc
-}
-
 // SetProfileID sets the "Profile" edge to the Profile entity by ID.
-func (sc *ShippingCreate) SetProfileID(id uuid.UUID) *ShippingCreate {
+func (sc *ShippingCreate) SetProfileID(id int) *ShippingCreate {
 	sc.mutation.SetProfileID(id)
 	return sc
 }
@@ -93,14 +57,14 @@ func (sc *ShippingCreate) SetProfile(p *Profile) *ShippingCreate {
 }
 
 // AddShippingAddresIDs adds the "ShippingAddress" edge to the Address entity by IDs.
-func (sc *ShippingCreate) AddShippingAddresIDs(ids ...uuid.UUID) *ShippingCreate {
+func (sc *ShippingCreate) AddShippingAddresIDs(ids ...int) *ShippingCreate {
 	sc.mutation.AddShippingAddresIDs(ids...)
 	return sc
 }
 
 // AddShippingAddress adds the "ShippingAddress" edges to the Address entity.
 func (sc *ShippingCreate) AddShippingAddress(a ...*Address) *ShippingCreate {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -108,14 +72,14 @@ func (sc *ShippingCreate) AddShippingAddress(a ...*Address) *ShippingCreate {
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Address entity by IDs.
-func (sc *ShippingCreate) AddBillingAddresIDs(ids ...uuid.UUID) *ShippingCreate {
+func (sc *ShippingCreate) AddBillingAddresIDs(ids ...int) *ShippingCreate {
 	sc.mutation.AddBillingAddresIDs(ids...)
 	return sc
 }
 
 // AddBillingAddress adds the "BillingAddress" edges to the Address entity.
 func (sc *ShippingCreate) AddBillingAddress(a ...*Address) *ShippingCreate {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -133,7 +97,6 @@ func (sc *ShippingCreate) Save(ctx context.Context) (*Shipping, error) {
 		err  error
 		node *Shipping
 	)
-	sc.defaults()
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err
@@ -172,30 +135,8 @@ func (sc *ShippingCreate) SaveX(ctx context.Context) *Shipping {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (sc *ShippingCreate) defaults() {
-	if _, ok := sc.mutation.CreatedAt(); !ok {
-		v := shipping.DefaultCreatedAt()
-		sc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := sc.mutation.UpdatedAt(); !ok {
-		v := shipping.DefaultUpdatedAt()
-		sc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := sc.mutation.ID(); !ok {
-		v := shipping.DefaultID()
-		sc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (sc *ShippingCreate) check() error {
-	if _, ok := sc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := sc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := sc.mutation.FirstName(); !ok {
 		return &ValidationError{Name: "FirstName", err: errors.New("ent: missing required field \"FirstName\"")}
 	}
@@ -222,6 +163,8 @@ func (sc *ShippingCreate) sqlSave(ctx context.Context) (*Shipping, error) {
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -231,31 +174,11 @@ func (sc *ShippingCreate) createSpec() (*Shipping, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: shipping.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: shipping.FieldID,
 			},
 		}
 	)
-	if id, ok := sc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := sc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: shipping.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := sc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: shipping.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := sc.mutation.FirstName(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -297,7 +220,7 @@ func (sc *ShippingCreate) createSpec() (*Shipping, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profile.FieldID,
 				},
 			},
@@ -317,7 +240,7 @@ func (sc *ShippingCreate) createSpec() (*Shipping, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: address.FieldID,
 				},
 			},
@@ -336,7 +259,7 @@ func (sc *ShippingCreate) createSpec() (*Shipping, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: address.FieldID,
 				},
 			},
@@ -363,7 +286,6 @@ func (scb *ShippingCreateBulk) Save(ctx context.Context) ([]*Shipping, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ShippingMutation)
 				if !ok {
@@ -389,6 +311,8 @@ func (scb *ShippingCreateBulk) Save(ctx context.Context) ([]*Shipping, error) {
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

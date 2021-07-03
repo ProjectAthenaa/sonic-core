@@ -6,18 +6,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/settings"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/taskgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // AppCreate is the builder for creating a App entity.
@@ -27,48 +25,14 @@ type AppCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (ac *AppCreate) SetCreatedAt(t time.Time) *AppCreate {
-	ac.mutation.SetCreatedAt(t)
-	return ac
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ac *AppCreate) SetNillableCreatedAt(t *time.Time) *AppCreate {
-	if t != nil {
-		ac.SetCreatedAt(*t)
-	}
-	return ac
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (ac *AppCreate) SetUpdatedAt(t time.Time) *AppCreate {
-	ac.mutation.SetUpdatedAt(t)
-	return ac
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ac *AppCreate) SetNillableUpdatedAt(t *time.Time) *AppCreate {
-	if t != nil {
-		ac.SetUpdatedAt(*t)
-	}
-	return ac
-}
-
 // SetFirstLogin sets the "first_login" field.
 func (ac *AppCreate) SetFirstLogin(b bool) *AppCreate {
 	ac.mutation.SetFirstLogin(b)
 	return ac
 }
 
-// SetID sets the "id" field.
-func (ac *AppCreate) SetID(u uuid.UUID) *AppCreate {
-	ac.mutation.SetID(u)
-	return ac
-}
-
 // SetUserID sets the "User" edge to the User entity by ID.
-func (ac *AppCreate) SetUserID(id uuid.UUID) *AppCreate {
+func (ac *AppCreate) SetUserID(id int) *AppCreate {
 	ac.mutation.SetUserID(id)
 	return ac
 }
@@ -79,14 +43,14 @@ func (ac *AppCreate) SetUser(u *User) *AppCreate {
 }
 
 // AddSettingIDs adds the "Settings" edge to the Settings entity by IDs.
-func (ac *AppCreate) AddSettingIDs(ids ...uuid.UUID) *AppCreate {
+func (ac *AppCreate) AddSettingIDs(ids ...int) *AppCreate {
 	ac.mutation.AddSettingIDs(ids...)
 	return ac
 }
 
 // AddSettings adds the "Settings" edges to the Settings entity.
 func (ac *AppCreate) AddSettings(s ...*Settings) *AppCreate {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -94,14 +58,14 @@ func (ac *AppCreate) AddSettings(s ...*Settings) *AppCreate {
 }
 
 // AddProxyListIDs adds the "ProxyLists" edge to the ProxyList entity by IDs.
-func (ac *AppCreate) AddProxyListIDs(ids ...uuid.UUID) *AppCreate {
+func (ac *AppCreate) AddProxyListIDs(ids ...int) *AppCreate {
 	ac.mutation.AddProxyListIDs(ids...)
 	return ac
 }
 
 // AddProxyLists adds the "ProxyLists" edges to the ProxyList entity.
 func (ac *AppCreate) AddProxyLists(p ...*ProxyList) *AppCreate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -109,14 +73,14 @@ func (ac *AppCreate) AddProxyLists(p ...*ProxyList) *AppCreate {
 }
 
 // AddProfileGroupIDs adds the "ProfileGroups" edge to the ProfileGroup entity by IDs.
-func (ac *AppCreate) AddProfileGroupIDs(ids ...uuid.UUID) *AppCreate {
+func (ac *AppCreate) AddProfileGroupIDs(ids ...int) *AppCreate {
 	ac.mutation.AddProfileGroupIDs(ids...)
 	return ac
 }
 
 // AddProfileGroups adds the "ProfileGroups" edges to the ProfileGroup entity.
 func (ac *AppCreate) AddProfileGroups(p ...*ProfileGroup) *AppCreate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -124,14 +88,14 @@ func (ac *AppCreate) AddProfileGroups(p ...*ProfileGroup) *AppCreate {
 }
 
 // AddTaskGroupIDs adds the "TaskGroups" edge to the TaskGroup entity by IDs.
-func (ac *AppCreate) AddTaskGroupIDs(ids ...uuid.UUID) *AppCreate {
+func (ac *AppCreate) AddTaskGroupIDs(ids ...int) *AppCreate {
 	ac.mutation.AddTaskGroupIDs(ids...)
 	return ac
 }
 
 // AddTaskGroups adds the "TaskGroups" edges to the TaskGroup entity.
 func (ac *AppCreate) AddTaskGroups(t ...*TaskGroup) *AppCreate {
-	ids := make([]uuid.UUID, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -139,14 +103,14 @@ func (ac *AppCreate) AddTaskGroups(t ...*TaskGroup) *AppCreate {
 }
 
 // AddAccountGroupIDs adds the "AccountGroups" edge to the AccountGroup entity by IDs.
-func (ac *AppCreate) AddAccountGroupIDs(ids ...uuid.UUID) *AppCreate {
+func (ac *AppCreate) AddAccountGroupIDs(ids ...int) *AppCreate {
 	ac.mutation.AddAccountGroupIDs(ids...)
 	return ac
 }
 
 // AddAccountGroups adds the "AccountGroups" edges to the AccountGroup entity.
 func (ac *AppCreate) AddAccountGroups(a ...*AccountGroup) *AppCreate {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -164,7 +128,6 @@ func (ac *AppCreate) Save(ctx context.Context) (*App, error) {
 		err  error
 		node *App
 	)
-	ac.defaults()
 	if len(ac.hooks) == 0 {
 		if err = ac.check(); err != nil {
 			return nil, err
@@ -203,30 +166,8 @@ func (ac *AppCreate) SaveX(ctx context.Context) *App {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (ac *AppCreate) defaults() {
-	if _, ok := ac.mutation.CreatedAt(); !ok {
-		v := app.DefaultCreatedAt()
-		ac.mutation.SetCreatedAt(v)
-	}
-	if _, ok := ac.mutation.UpdatedAt(); !ok {
-		v := app.DefaultUpdatedAt()
-		ac.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := ac.mutation.ID(); !ok {
-		v := app.DefaultID()
-		ac.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (ac *AppCreate) check() error {
-	if _, ok := ac.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := ac.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := ac.mutation.FirstLogin(); !ok {
 		return &ValidationError{Name: "first_login", err: errors.New("ent: missing required field \"first_login\"")}
 	}
@@ -244,6 +185,8 @@ func (ac *AppCreate) sqlSave(ctx context.Context) (*App, error) {
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -253,31 +196,11 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: app.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: app.FieldID,
 			},
 		}
 	)
-	if id, ok := ac.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := ac.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: app.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := ac.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: app.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := ac.mutation.FirstLogin(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -295,7 +218,7 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -315,7 +238,7 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: settings.FieldID,
 				},
 			},
@@ -334,7 +257,7 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -353,7 +276,7 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -372,7 +295,7 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -391,7 +314,7 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: accountgroup.FieldID,
 				},
 			},
@@ -418,7 +341,6 @@ func (acb *AppCreateBulk) Save(ctx context.Context) ([]*App, error) {
 	for i := range acb.builders {
 		func(i int, root context.Context) {
 			builder := acb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AppMutation)
 				if !ok {
@@ -444,6 +366,8 @@ func (acb *AppCreateBulk) Save(ctx context.Context) ([]*App, error) {
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

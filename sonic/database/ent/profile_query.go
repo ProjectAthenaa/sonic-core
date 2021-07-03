@@ -12,12 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/billing"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profile"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/shipping"
 )
 
 // ProfileQuery is the builder for querying Profile entities.
@@ -160,8 +159,8 @@ func (pq *ProfileQuery) FirstX(ctx context.Context) *Profile {
 
 // FirstID returns the first Profile ID from the query.
 // Returns a *NotFoundError when no Profile ID was found.
-func (pq *ProfileQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (pq *ProfileQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -173,7 +172,7 @@ func (pq *ProfileQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *ProfileQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (pq *ProfileQuery) FirstIDX(ctx context.Context) int {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -211,8 +210,8 @@ func (pq *ProfileQuery) OnlyX(ctx context.Context) *Profile {
 // OnlyID is like Only, but returns the only Profile ID in the query.
 // Returns a *NotSingularError when exactly one Profile ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *ProfileQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (pq *ProfileQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -228,7 +227,7 @@ func (pq *ProfileQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *ProfileQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (pq *ProfileQuery) OnlyIDX(ctx context.Context) int {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -254,8 +253,8 @@ func (pq *ProfileQuery) AllX(ctx context.Context) []*Profile {
 }
 
 // IDs executes the query and returns a list of Profile IDs.
-func (pq *ProfileQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (pq *ProfileQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := pq.Select(profile.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -263,7 +262,7 @@ func (pq *ProfileQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *ProfileQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (pq *ProfileQuery) IDsX(ctx context.Context) []int {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -365,12 +364,12 @@ func (pq *ProfileQuery) WithBilling(opts ...func(*BillingQuery)) *ProfileQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Name string `json:"Name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Profile.Query().
-//		GroupBy(profile.FieldCreatedAt).
+//		GroupBy(profile.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -392,11 +391,11 @@ func (pq *ProfileQuery) GroupBy(field string, fields ...string) *ProfileGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Name string `json:"Name,omitempty"`
 //	}
 //
 //	client.Profile.Query().
-//		Select(profile.FieldCreatedAt).
+//		Select(profile.FieldName).
 //		Scan(ctx, &v)
 //
 func (pq *ProfileQuery) Select(field string, fields ...string) *ProfileSelect {
@@ -458,8 +457,8 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 	}
 
 	if query := pq.withProfileGroup; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*Profile)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Profile)
 		for i := range nodes {
 			if nodes[i].profile_group_profiles == nil {
 				continue
@@ -488,7 +487,7 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 
 	if query := pq.withShipping; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Profile)
+		nodeids := make(map[int]*Profile)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
@@ -517,15 +516,15 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 
 	if query := pq.withBilling; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*Profile, len(nodes))
+		ids := make(map[int]*Profile, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.Billing = []*Billing{}
 		}
 		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*Profile)
+			edgeids []int
+			edges   = make(map[int][]*Profile)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -537,19 +536,19 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 				s.Where(sql.InValues(profile.BillingPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
+				eout, ok := out.(*sql.NullInt64)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*uuid.UUID)
+				ein, ok := in.(*sql.NullInt64)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := *eout
-				inValue := *ein
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -602,7 +601,7 @@ func (pq *ProfileQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   profile.Table,
 			Columns: profile.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: profile.FieldID,
 			},
 		},

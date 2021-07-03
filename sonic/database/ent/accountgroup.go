@@ -5,24 +5,18 @@ package ent
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
 )
 
 // AccountGroup is the model entity for the AccountGroup schema.
 type AccountGroup struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID uuid.UUID `json:"id,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	// UpdatedAt holds the value of the "updated_at" field.
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	ID int `json:"id,omitempty"`
 	// Name holds the value of the "Name" field.
 	Name string `json:"Name,omitempty"`
 	// Site holds the value of the "Site" field.
@@ -32,7 +26,7 @@ type AccountGroup struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AccountGroupQuery when eager-loading is set.
 	Edges              AccountGroupEdges `json:"edges"`
-	app_account_groups *uuid.UUID
+	app_account_groups *int
 }
 
 // AccountGroupEdges holds the relations/edges for other nodes in the graph.
@@ -65,14 +59,12 @@ func (*AccountGroup) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case accountgroup.FieldAccounts:
 			values[i] = new(sonic.Map)
+		case accountgroup.FieldID:
+			values[i] = new(sql.NullInt64)
 		case accountgroup.FieldName, accountgroup.FieldSite:
 			values[i] = new(sql.NullString)
-		case accountgroup.FieldCreatedAt, accountgroup.FieldUpdatedAt:
-			values[i] = new(sql.NullTime)
-		case accountgroup.FieldID:
-			values[i] = new(uuid.UUID)
 		case accountgroup.ForeignKeys[0]: // app_account_groups
-			values[i] = new(uuid.UUID)
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type AccountGroup", columns[i])
 		}
@@ -89,23 +81,11 @@ func (ag *AccountGroup) assignValues(columns []string, values []interface{}) err
 	for i := range columns {
 		switch columns[i] {
 		case accountgroup.FieldID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				ag.ID = *value
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-		case accountgroup.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				ag.CreatedAt = value.Time
-			}
-		case accountgroup.FieldUpdatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
-			} else if value.Valid {
-				ag.UpdatedAt = value.Time
-			}
+			ag.ID = int(value.Int64)
 		case accountgroup.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field Name", values[i])
@@ -125,10 +105,11 @@ func (ag *AccountGroup) assignValues(columns []string, values []interface{}) err
 				ag.Accounts = *value
 			}
 		case accountgroup.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field app_account_groups", values[i])
-			} else if value != nil {
-				ag.app_account_groups = value
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field app_account_groups", value)
+			} else if value.Valid {
+				ag.app_account_groups = new(int)
+				*ag.app_account_groups = int(value.Int64)
 			}
 		}
 	}
@@ -163,10 +144,6 @@ func (ag *AccountGroup) String() string {
 	var builder strings.Builder
 	builder.WriteString("AccountGroup(")
 	builder.WriteString(fmt.Sprintf("id=%v", ag.ID))
-	builder.WriteString(", created_at=")
-	builder.WriteString(ag.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", updated_at=")
-	builder.WriteString(ag.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Name=")
 	builder.WriteString(ag.Name)
 	builder.WriteString(", Site=")

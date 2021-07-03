@@ -6,13 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/settings"
 )
 
 // SettingsCreate is the builder for creating a Settings entity.
@@ -20,34 +18,6 @@ type SettingsCreate struct {
 	config
 	mutation *SettingsMutation
 	hooks    []Hook
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (sc *SettingsCreate) SetCreatedAt(t time.Time) *SettingsCreate {
-	sc.mutation.SetCreatedAt(t)
-	return sc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (sc *SettingsCreate) SetNillableCreatedAt(t *time.Time) *SettingsCreate {
-	if t != nil {
-		sc.SetCreatedAt(*t)
-	}
-	return sc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (sc *SettingsCreate) SetUpdatedAt(t time.Time) *SettingsCreate {
-	sc.mutation.SetUpdatedAt(t)
-	return sc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (sc *SettingsCreate) SetNillableUpdatedAt(t *time.Time) *SettingsCreate {
-	if t != nil {
-		sc.SetUpdatedAt(*t)
-	}
-	return sc
 }
 
 // SetSuccessWebhook sets the "SuccessWebhook" field.
@@ -74,14 +44,8 @@ func (sc *SettingsCreate) SetATCDelay(i int) *SettingsCreate {
 	return sc
 }
 
-// SetID sets the "id" field.
-func (sc *SettingsCreate) SetID(u uuid.UUID) *SettingsCreate {
-	sc.mutation.SetID(u)
-	return sc
-}
-
 // SetAppID sets the "App" edge to the App entity by ID.
-func (sc *SettingsCreate) SetAppID(id uuid.UUID) *SettingsCreate {
+func (sc *SettingsCreate) SetAppID(id int) *SettingsCreate {
 	sc.mutation.SetAppID(id)
 	return sc
 }
@@ -102,7 +66,6 @@ func (sc *SettingsCreate) Save(ctx context.Context) (*Settings, error) {
 		err  error
 		node *Settings
 	)
-	sc.defaults()
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err
@@ -141,30 +104,8 @@ func (sc *SettingsCreate) SaveX(ctx context.Context) *Settings {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (sc *SettingsCreate) defaults() {
-	if _, ok := sc.mutation.CreatedAt(); !ok {
-		v := settings.DefaultCreatedAt()
-		sc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := sc.mutation.UpdatedAt(); !ok {
-		v := settings.DefaultUpdatedAt()
-		sc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := sc.mutation.ID(); !ok {
-		v := settings.DefaultID()
-		sc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (sc *SettingsCreate) check() error {
-	if _, ok := sc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := sc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := sc.mutation.SuccessWebhook(); !ok {
 		return &ValidationError{Name: "SuccessWebhook", err: errors.New("ent: missing required field \"SuccessWebhook\"")}
 	}
@@ -191,6 +132,8 @@ func (sc *SettingsCreate) sqlSave(ctx context.Context) (*Settings, error) {
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -200,31 +143,11 @@ func (sc *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: settings.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: settings.FieldID,
 			},
 		}
 	)
-	if id, ok := sc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := sc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: settings.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := sc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: settings.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := sc.mutation.SuccessWebhook(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -266,7 +189,7 @@ func (sc *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -294,7 +217,6 @@ func (scb *SettingsCreateBulk) Save(ctx context.Context) ([]*Settings, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SettingsMutation)
 				if !ok {
@@ -320,6 +242,8 @@ func (scb *SettingsCreateBulk) Save(ctx context.Context) ([]*Settings, error) {
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

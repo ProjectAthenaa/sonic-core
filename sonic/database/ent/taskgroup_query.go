@@ -12,11 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/task"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/taskgroup"
 )
 
 // TaskGroupQuery is the builder for querying TaskGroup entities.
@@ -135,8 +134,8 @@ func (tgq *TaskGroupQuery) FirstX(ctx context.Context) *TaskGroup {
 
 // FirstID returns the first TaskGroup ID from the query.
 // Returns a *NotFoundError when no TaskGroup ID was found.
-func (tgq *TaskGroupQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (tgq *TaskGroupQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = tgq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -148,7 +147,7 @@ func (tgq *TaskGroupQuery) FirstID(ctx context.Context) (id uuid.UUID, err error
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tgq *TaskGroupQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (tgq *TaskGroupQuery) FirstIDX(ctx context.Context) int {
 	id, err := tgq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -186,8 +185,8 @@ func (tgq *TaskGroupQuery) OnlyX(ctx context.Context) *TaskGroup {
 // OnlyID is like Only, but returns the only TaskGroup ID in the query.
 // Returns a *NotSingularError when exactly one TaskGroup ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (tgq *TaskGroupQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (tgq *TaskGroupQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = tgq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -203,7 +202,7 @@ func (tgq *TaskGroupQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error)
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tgq *TaskGroupQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (tgq *TaskGroupQuery) OnlyIDX(ctx context.Context) int {
 	id, err := tgq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -229,8 +228,8 @@ func (tgq *TaskGroupQuery) AllX(ctx context.Context) []*TaskGroup {
 }
 
 // IDs executes the query and returns a list of TaskGroup IDs.
-func (tgq *TaskGroupQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (tgq *TaskGroupQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := tgq.Select(taskgroup.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -238,7 +237,7 @@ func (tgq *TaskGroupQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tgq *TaskGroupQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (tgq *TaskGroupQuery) IDsX(ctx context.Context) []int {
 	ids, err := tgq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -328,12 +327,12 @@ func (tgq *TaskGroupQuery) WithTasks(opts ...func(*TaskQuery)) *TaskGroupQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Name string `json:"Name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TaskGroup.Query().
-//		GroupBy(taskgroup.FieldCreatedAt).
+//		GroupBy(taskgroup.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -355,11 +354,11 @@ func (tgq *TaskGroupQuery) GroupBy(field string, fields ...string) *TaskGroupGro
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Name string `json:"Name,omitempty"`
 //	}
 //
 //	client.TaskGroup.Query().
-//		Select(taskgroup.FieldCreatedAt).
+//		Select(taskgroup.FieldName).
 //		Scan(ctx, &v)
 //
 func (tgq *TaskGroupQuery) Select(field string, fields ...string) *TaskGroupSelect {
@@ -414,15 +413,15 @@ func (tgq *TaskGroupQuery) sqlAll(ctx context.Context) ([]*TaskGroup, error) {
 
 	if query := tgq.withApp; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*TaskGroup, len(nodes))
+		ids := make(map[int]*TaskGroup, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.App = []*App{}
 		}
 		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*TaskGroup)
+			edgeids []int
+			edges   = make(map[int][]*TaskGroup)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -434,19 +433,19 @@ func (tgq *TaskGroupQuery) sqlAll(ctx context.Context) ([]*TaskGroup, error) {
 				s.Where(sql.InValues(taskgroup.AppPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
+				eout, ok := out.(*sql.NullInt64)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*uuid.UUID)
+				ein, ok := in.(*sql.NullInt64)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := *eout
-				inValue := *ein
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -479,15 +478,15 @@ func (tgq *TaskGroupQuery) sqlAll(ctx context.Context) ([]*TaskGroup, error) {
 
 	if query := tgq.withTasks; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*TaskGroup, len(nodes))
+		ids := make(map[int]*TaskGroup, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.Tasks = []*Task{}
 		}
 		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*TaskGroup)
+			edgeids []int
+			edges   = make(map[int][]*TaskGroup)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -499,19 +498,19 @@ func (tgq *TaskGroupQuery) sqlAll(ctx context.Context) ([]*TaskGroup, error) {
 				s.Where(sql.InValues(taskgroup.TasksPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
+				eout, ok := out.(*sql.NullInt64)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*uuid.UUID)
+				ein, ok := in.(*sql.NullInt64)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := *eout
-				inValue := *ein
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -564,7 +563,7 @@ func (tgq *TaskGroupQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   taskgroup.Table,
 			Columns: taskgroup.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: taskgroup.FieldID,
 			},
 		},

@@ -12,11 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/stripe"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // LicenseQuery is the builder for querying License entities.
@@ -136,8 +135,8 @@ func (lq *LicenseQuery) FirstX(ctx context.Context) *License {
 
 // FirstID returns the first License ID from the query.
 // Returns a *NotFoundError when no License ID was found.
-func (lq *LicenseQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (lq *LicenseQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = lq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -149,7 +148,7 @@ func (lq *LicenseQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (lq *LicenseQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (lq *LicenseQuery) FirstIDX(ctx context.Context) int {
 	id, err := lq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -187,8 +186,8 @@ func (lq *LicenseQuery) OnlyX(ctx context.Context) *License {
 // OnlyID is like Only, but returns the only License ID in the query.
 // Returns a *NotSingularError when exactly one License ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (lq *LicenseQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (lq *LicenseQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = lq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -204,7 +203,7 @@ func (lq *LicenseQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (lq *LicenseQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (lq *LicenseQuery) OnlyIDX(ctx context.Context) int {
 	id, err := lq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -230,8 +229,8 @@ func (lq *LicenseQuery) AllX(ctx context.Context) []*License {
 }
 
 // IDs executes the query and returns a list of License IDs.
-func (lq *LicenseQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (lq *LicenseQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := lq.Select(license.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -239,7 +238,7 @@ func (lq *LicenseQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (lq *LicenseQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (lq *LicenseQuery) IDsX(ctx context.Context) []int {
 	ids, err := lq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -329,12 +328,12 @@ func (lq *LicenseQuery) WithStripe(opts ...func(*StripeQuery)) *LicenseQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Key string `json:"Key,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.License.Query().
-//		GroupBy(license.FieldCreatedAt).
+//		GroupBy(license.FieldKey).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -356,11 +355,11 @@ func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		Key string `json:"Key,omitempty"`
 //	}
 //
 //	client.License.Query().
-//		Select(license.FieldCreatedAt).
+//		Select(license.FieldKey).
 //		Scan(ctx, &v)
 //
 func (lq *LicenseQuery) Select(field string, fields ...string) *LicenseSelect {
@@ -421,8 +420,8 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context) ([]*License, error) {
 	}
 
 	if query := lq.withUser; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*License)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*License)
 		for i := range nodes {
 			if nodes[i].user_license == nil {
 				continue
@@ -451,7 +450,7 @@ func (lq *LicenseQuery) sqlAll(ctx context.Context) ([]*License, error) {
 
 	if query := lq.withStripe; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*License)
+		nodeids := make(map[int]*License)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
@@ -500,7 +499,7 @@ func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   license.Table,
 			Columns: license.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: license.FieldID,
 			},
 		},

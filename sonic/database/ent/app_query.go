@@ -12,15 +12,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/settings"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/taskgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // AppQuery is the builder for querying App entities.
@@ -232,8 +231,8 @@ func (aq *AppQuery) FirstX(ctx context.Context) *App {
 
 // FirstID returns the first App ID from the query.
 // Returns a *NotFoundError when no App ID was found.
-func (aq *AppQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (aq *AppQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = aq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -245,7 +244,7 @@ func (aq *AppQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *AppQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (aq *AppQuery) FirstIDX(ctx context.Context) int {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -283,8 +282,8 @@ func (aq *AppQuery) OnlyX(ctx context.Context) *App {
 // OnlyID is like Only, but returns the only App ID in the query.
 // Returns a *NotSingularError when exactly one App ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *AppQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (aq *AppQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = aq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -300,7 +299,7 @@ func (aq *AppQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *AppQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (aq *AppQuery) OnlyIDX(ctx context.Context) int {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -326,8 +325,8 @@ func (aq *AppQuery) AllX(ctx context.Context) []*App {
 }
 
 // IDs executes the query and returns a list of App IDs.
-func (aq *AppQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (aq *AppQuery) IDs(ctx context.Context) ([]int, error) {
+	var ids []int
 	if err := aq.Select(app.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -335,7 +334,7 @@ func (aq *AppQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *AppQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (aq *AppQuery) IDsX(ctx context.Context) []int {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -473,12 +472,12 @@ func (aq *AppQuery) WithAccountGroups(opts ...func(*AccountGroupQuery)) *AppQuer
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		FirstLogin bool `json:"first_login,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.App.Query().
-//		GroupBy(app.FieldCreatedAt).
+//		GroupBy(app.FieldFirstLogin).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -500,11 +499,11 @@ func (aq *AppQuery) GroupBy(field string, fields ...string) *AppGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		FirstLogin bool `json:"first_login,omitempty"`
 //	}
 //
 //	client.App.Query().
-//		Select(app.FieldCreatedAt).
+//		Select(app.FieldFirstLogin).
 //		Scan(ctx, &v)
 //
 func (aq *AppQuery) Select(field string, fields ...string) *AppSelect {
@@ -569,8 +568,8 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 	}
 
 	if query := aq.withUser; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*App)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*App)
 		for i := range nodes {
 			if nodes[i].user_app == nil {
 				continue
@@ -599,7 +598,7 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 
 	if query := aq.withSettings; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*App)
+		nodeids := make(map[int]*App)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
@@ -628,15 +627,15 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 
 	if query := aq.withProxyLists; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*App, len(nodes))
+		ids := make(map[int]*App, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.ProxyLists = []*ProxyList{}
 		}
 		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*App)
+			edgeids []int
+			edges   = make(map[int][]*App)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -648,19 +647,19 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 				s.Where(sql.InValues(app.ProxyListsPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
+				eout, ok := out.(*sql.NullInt64)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*uuid.UUID)
+				ein, ok := in.(*sql.NullInt64)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := *eout
-				inValue := *ein
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -693,15 +692,15 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 
 	if query := aq.withProfileGroups; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*App, len(nodes))
+		ids := make(map[int]*App, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.ProfileGroups = []*ProfileGroup{}
 		}
 		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*App)
+			edgeids []int
+			edges   = make(map[int][]*App)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -713,19 +712,19 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 				s.Where(sql.InValues(app.ProfileGroupsPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
+				eout, ok := out.(*sql.NullInt64)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*uuid.UUID)
+				ein, ok := in.(*sql.NullInt64)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := *eout
-				inValue := *ein
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -758,15 +757,15 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 
 	if query := aq.withTaskGroups; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*App, len(nodes))
+		ids := make(map[int]*App, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
 			node.Edges.TaskGroups = []*TaskGroup{}
 		}
 		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*App)
+			edgeids []int
+			edges   = make(map[int][]*App)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
@@ -778,19 +777,19 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 				s.Where(sql.InValues(app.TaskGroupsPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
 			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
+				eout, ok := out.(*sql.NullInt64)
 				if !ok || eout == nil {
 					return fmt.Errorf("unexpected id value for edge-out")
 				}
-				ein, ok := in.(*uuid.UUID)
+				ein, ok := in.(*sql.NullInt64)
 				if !ok || ein == nil {
 					return fmt.Errorf("unexpected id value for edge-in")
 				}
-				outValue := *eout
-				inValue := *ein
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
 				node, ok := ids[outValue]
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
@@ -823,7 +822,7 @@ func (aq *AppQuery) sqlAll(ctx context.Context) ([]*App, error) {
 
 	if query := aq.withAccountGroups; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*App)
+		nodeids := make(map[int]*App)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
@@ -872,7 +871,7 @@ func (aq *AppQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   app.Table,
 			Columns: app.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: app.FieldID,
 			},
 		},

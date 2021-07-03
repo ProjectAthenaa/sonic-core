@@ -6,15 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/task"
 	"github.com/lib/pq"
 )
 
@@ -23,34 +21,6 @@ type ProductCreate struct {
 	config
 	mutation *ProductMutation
 	hooks    []Hook
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (pc *ProductCreate) SetCreatedAt(t time.Time) *ProductCreate {
-	pc.mutation.SetCreatedAt(t)
-	return pc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (pc *ProductCreate) SetNillableCreatedAt(t *time.Time) *ProductCreate {
-	if t != nil {
-		pc.SetCreatedAt(*t)
-	}
-	return pc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (pc *ProductCreate) SetUpdatedAt(t time.Time) *ProductCreate {
-	pc.mutation.SetUpdatedAt(t)
-	return pc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (pc *ProductCreate) SetNillableUpdatedAt(t *time.Time) *ProductCreate {
-	if t != nil {
-		pc.SetUpdatedAt(*t)
-	}
-	return pc
 }
 
 // SetName sets the "Name" field.
@@ -135,21 +105,15 @@ func (pc *ProductCreate) SetMetadata(s sonic.Map) *ProductCreate {
 	return pc
 }
 
-// SetID sets the "id" field.
-func (pc *ProductCreate) SetID(u uuid.UUID) *ProductCreate {
-	pc.mutation.SetID(u)
-	return pc
-}
-
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (pc *ProductCreate) AddTaskIDs(ids ...uuid.UUID) *ProductCreate {
+func (pc *ProductCreate) AddTaskIDs(ids ...int) *ProductCreate {
 	pc.mutation.AddTaskIDs(ids...)
 	return pc
 }
 
 // AddTask adds the "Task" edges to the Task entity.
 func (pc *ProductCreate) AddTask(t ...*Task) *ProductCreate {
-	ids := make([]uuid.UUID, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -157,14 +121,14 @@ func (pc *ProductCreate) AddTask(t ...*Task) *ProductCreate {
 }
 
 // AddStatisticIDs adds the "Statistic" edge to the Statistic entity by IDs.
-func (pc *ProductCreate) AddStatisticIDs(ids ...uuid.UUID) *ProductCreate {
+func (pc *ProductCreate) AddStatisticIDs(ids ...int) *ProductCreate {
 	pc.mutation.AddStatisticIDs(ids...)
 	return pc
 }
 
 // AddStatistic adds the "Statistic" edges to the Statistic entity.
 func (pc *ProductCreate) AddStatistic(s ...*Statistic) *ProductCreate {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -182,7 +146,6 @@ func (pc *ProductCreate) Save(ctx context.Context) (*Product, error) {
 		err  error
 		node *Product
 	)
-	pc.defaults()
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -221,30 +184,8 @@ func (pc *ProductCreate) SaveX(ctx context.Context) *Product {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (pc *ProductCreate) defaults() {
-	if _, ok := pc.mutation.CreatedAt(); !ok {
-		v := product.DefaultCreatedAt()
-		pc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := pc.mutation.UpdatedAt(); !ok {
-		v := product.DefaultUpdatedAt()
-		pc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := pc.mutation.ID(); !ok {
-		v := product.DefaultID()
-		pc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProductCreate) check() error {
-	if _, ok := pc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := pc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "Name", err: errors.New("ent: missing required field \"Name\"")}
 	}
@@ -290,6 +231,8 @@ func (pc *ProductCreate) sqlSave(ctx context.Context) (*Product, error) {
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -299,31 +242,11 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: product.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: product.FieldID,
 			},
 		}
 	)
-	if id, ok := pc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := pc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: product.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := pc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: product.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -421,7 +344,7 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: task.FieldID,
 				},
 			},
@@ -440,7 +363,7 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: statistic.FieldID,
 				},
 			},
@@ -467,7 +390,6 @@ func (pcb *ProductCreateBulk) Save(ctx context.Context) ([]*Product, error) {
 	for i := range pcb.builders {
 		func(i int, root context.Context) {
 			builder := pcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProductMutation)
 				if !ok {
@@ -493,6 +415,8 @@ func (pcb *ProductCreateBulk) Save(ctx context.Context) ([]*Product, error) {
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

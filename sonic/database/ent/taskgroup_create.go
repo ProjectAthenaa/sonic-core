@@ -6,14 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/task"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/taskgroup"
 )
 
 // TaskGroupCreate is the builder for creating a TaskGroup entity.
@@ -23,55 +21,21 @@ type TaskGroupCreate struct {
 	hooks    []Hook
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (tgc *TaskGroupCreate) SetCreatedAt(t time.Time) *TaskGroupCreate {
-	tgc.mutation.SetCreatedAt(t)
-	return tgc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (tgc *TaskGroupCreate) SetNillableCreatedAt(t *time.Time) *TaskGroupCreate {
-	if t != nil {
-		tgc.SetCreatedAt(*t)
-	}
-	return tgc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (tgc *TaskGroupCreate) SetUpdatedAt(t time.Time) *TaskGroupCreate {
-	tgc.mutation.SetUpdatedAt(t)
-	return tgc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tgc *TaskGroupCreate) SetNillableUpdatedAt(t *time.Time) *TaskGroupCreate {
-	if t != nil {
-		tgc.SetUpdatedAt(*t)
-	}
-	return tgc
-}
-
 // SetName sets the "Name" field.
 func (tgc *TaskGroupCreate) SetName(s string) *TaskGroupCreate {
 	tgc.mutation.SetName(s)
 	return tgc
 }
 
-// SetID sets the "id" field.
-func (tgc *TaskGroupCreate) SetID(u uuid.UUID) *TaskGroupCreate {
-	tgc.mutation.SetID(u)
-	return tgc
-}
-
 // AddAppIDs adds the "App" edge to the App entity by IDs.
-func (tgc *TaskGroupCreate) AddAppIDs(ids ...uuid.UUID) *TaskGroupCreate {
+func (tgc *TaskGroupCreate) AddAppIDs(ids ...int) *TaskGroupCreate {
 	tgc.mutation.AddAppIDs(ids...)
 	return tgc
 }
 
 // AddApp adds the "App" edges to the App entity.
 func (tgc *TaskGroupCreate) AddApp(a ...*App) *TaskGroupCreate {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -79,14 +43,14 @@ func (tgc *TaskGroupCreate) AddApp(a ...*App) *TaskGroupCreate {
 }
 
 // AddTaskIDs adds the "Tasks" edge to the Task entity by IDs.
-func (tgc *TaskGroupCreate) AddTaskIDs(ids ...uuid.UUID) *TaskGroupCreate {
+func (tgc *TaskGroupCreate) AddTaskIDs(ids ...int) *TaskGroupCreate {
 	tgc.mutation.AddTaskIDs(ids...)
 	return tgc
 }
 
 // AddTasks adds the "Tasks" edges to the Task entity.
 func (tgc *TaskGroupCreate) AddTasks(t ...*Task) *TaskGroupCreate {
-	ids := make([]uuid.UUID, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -104,7 +68,6 @@ func (tgc *TaskGroupCreate) Save(ctx context.Context) (*TaskGroup, error) {
 		err  error
 		node *TaskGroup
 	)
-	tgc.defaults()
 	if len(tgc.hooks) == 0 {
 		if err = tgc.check(); err != nil {
 			return nil, err
@@ -143,30 +106,8 @@ func (tgc *TaskGroupCreate) SaveX(ctx context.Context) *TaskGroup {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (tgc *TaskGroupCreate) defaults() {
-	if _, ok := tgc.mutation.CreatedAt(); !ok {
-		v := taskgroup.DefaultCreatedAt()
-		tgc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := tgc.mutation.UpdatedAt(); !ok {
-		v := taskgroup.DefaultUpdatedAt()
-		tgc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := tgc.mutation.ID(); !ok {
-		v := taskgroup.DefaultID()
-		tgc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (tgc *TaskGroupCreate) check() error {
-	if _, ok := tgc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := tgc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := tgc.mutation.Name(); !ok {
 		return &ValidationError{Name: "Name", err: errors.New("ent: missing required field \"Name\"")}
 	}
@@ -184,6 +125,8 @@ func (tgc *TaskGroupCreate) sqlSave(ctx context.Context) (*TaskGroup, error) {
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -193,31 +136,11 @@ func (tgc *TaskGroupCreate) createSpec() (*TaskGroup, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: taskgroup.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: taskgroup.FieldID,
 			},
 		}
 	)
-	if id, ok := tgc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := tgc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taskgroup.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := tgc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taskgroup.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := tgc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -235,7 +158,7 @@ func (tgc *TaskGroupCreate) createSpec() (*TaskGroup, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: app.FieldID,
 				},
 			},
@@ -254,7 +177,7 @@ func (tgc *TaskGroupCreate) createSpec() (*TaskGroup, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: task.FieldID,
 				},
 			},
@@ -281,7 +204,6 @@ func (tgcb *TaskGroupCreateBulk) Save(ctx context.Context) ([]*TaskGroup, error)
 	for i := range tgcb.builders {
 		func(i int, root context.Context) {
 			builder := tgcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TaskGroupMutation)
 				if !ok {
@@ -307,6 +229,8 @@ func (tgcb *TaskGroupCreateBulk) Save(ctx context.Context) ([]*TaskGroup, error)
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

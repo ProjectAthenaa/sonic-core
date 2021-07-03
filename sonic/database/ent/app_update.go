@@ -6,20 +6,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/settings"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/taskgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
 )
 
 // AppUpdate is the builder for updating App entities.
@@ -35,26 +33,6 @@ func (au *AppUpdate) Where(ps ...predicate.App) *AppUpdate {
 	return au
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (au *AppUpdate) SetCreatedAt(t time.Time) *AppUpdate {
-	au.mutation.SetCreatedAt(t)
-	return au
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (au *AppUpdate) SetNillableCreatedAt(t *time.Time) *AppUpdate {
-	if t != nil {
-		au.SetCreatedAt(*t)
-	}
-	return au
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (au *AppUpdate) SetUpdatedAt(t time.Time) *AppUpdate {
-	au.mutation.SetUpdatedAt(t)
-	return au
-}
-
 // SetFirstLogin sets the "first_login" field.
 func (au *AppUpdate) SetFirstLogin(b bool) *AppUpdate {
 	au.mutation.SetFirstLogin(b)
@@ -62,7 +40,7 @@ func (au *AppUpdate) SetFirstLogin(b bool) *AppUpdate {
 }
 
 // SetUserID sets the "User" edge to the User entity by ID.
-func (au *AppUpdate) SetUserID(id uuid.UUID) *AppUpdate {
+func (au *AppUpdate) SetUserID(id int) *AppUpdate {
 	au.mutation.SetUserID(id)
 	return au
 }
@@ -73,14 +51,14 @@ func (au *AppUpdate) SetUser(u *User) *AppUpdate {
 }
 
 // AddSettingIDs adds the "Settings" edge to the Settings entity by IDs.
-func (au *AppUpdate) AddSettingIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) AddSettingIDs(ids ...int) *AppUpdate {
 	au.mutation.AddSettingIDs(ids...)
 	return au
 }
 
 // AddSettings adds the "Settings" edges to the Settings entity.
 func (au *AppUpdate) AddSettings(s ...*Settings) *AppUpdate {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -88,14 +66,14 @@ func (au *AppUpdate) AddSettings(s ...*Settings) *AppUpdate {
 }
 
 // AddProxyListIDs adds the "ProxyLists" edge to the ProxyList entity by IDs.
-func (au *AppUpdate) AddProxyListIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) AddProxyListIDs(ids ...int) *AppUpdate {
 	au.mutation.AddProxyListIDs(ids...)
 	return au
 }
 
 // AddProxyLists adds the "ProxyLists" edges to the ProxyList entity.
 func (au *AppUpdate) AddProxyLists(p ...*ProxyList) *AppUpdate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -103,14 +81,14 @@ func (au *AppUpdate) AddProxyLists(p ...*ProxyList) *AppUpdate {
 }
 
 // AddProfileGroupIDs adds the "ProfileGroups" edge to the ProfileGroup entity by IDs.
-func (au *AppUpdate) AddProfileGroupIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) AddProfileGroupIDs(ids ...int) *AppUpdate {
 	au.mutation.AddProfileGroupIDs(ids...)
 	return au
 }
 
 // AddProfileGroups adds the "ProfileGroups" edges to the ProfileGroup entity.
 func (au *AppUpdate) AddProfileGroups(p ...*ProfileGroup) *AppUpdate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -118,14 +96,14 @@ func (au *AppUpdate) AddProfileGroups(p ...*ProfileGroup) *AppUpdate {
 }
 
 // AddTaskGroupIDs adds the "TaskGroups" edge to the TaskGroup entity by IDs.
-func (au *AppUpdate) AddTaskGroupIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) AddTaskGroupIDs(ids ...int) *AppUpdate {
 	au.mutation.AddTaskGroupIDs(ids...)
 	return au
 }
 
 // AddTaskGroups adds the "TaskGroups" edges to the TaskGroup entity.
 func (au *AppUpdate) AddTaskGroups(t ...*TaskGroup) *AppUpdate {
-	ids := make([]uuid.UUID, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -133,14 +111,14 @@ func (au *AppUpdate) AddTaskGroups(t ...*TaskGroup) *AppUpdate {
 }
 
 // AddAccountGroupIDs adds the "AccountGroups" edge to the AccountGroup entity by IDs.
-func (au *AppUpdate) AddAccountGroupIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) AddAccountGroupIDs(ids ...int) *AppUpdate {
 	au.mutation.AddAccountGroupIDs(ids...)
 	return au
 }
 
 // AddAccountGroups adds the "AccountGroups" edges to the AccountGroup entity.
 func (au *AppUpdate) AddAccountGroups(a ...*AccountGroup) *AppUpdate {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -165,14 +143,14 @@ func (au *AppUpdate) ClearSettings() *AppUpdate {
 }
 
 // RemoveSettingIDs removes the "Settings" edge to Settings entities by IDs.
-func (au *AppUpdate) RemoveSettingIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) RemoveSettingIDs(ids ...int) *AppUpdate {
 	au.mutation.RemoveSettingIDs(ids...)
 	return au
 }
 
 // RemoveSettings removes "Settings" edges to Settings entities.
 func (au *AppUpdate) RemoveSettings(s ...*Settings) *AppUpdate {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -186,14 +164,14 @@ func (au *AppUpdate) ClearProxyLists() *AppUpdate {
 }
 
 // RemoveProxyListIDs removes the "ProxyLists" edge to ProxyList entities by IDs.
-func (au *AppUpdate) RemoveProxyListIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) RemoveProxyListIDs(ids ...int) *AppUpdate {
 	au.mutation.RemoveProxyListIDs(ids...)
 	return au
 }
 
 // RemoveProxyLists removes "ProxyLists" edges to ProxyList entities.
 func (au *AppUpdate) RemoveProxyLists(p ...*ProxyList) *AppUpdate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -207,14 +185,14 @@ func (au *AppUpdate) ClearProfileGroups() *AppUpdate {
 }
 
 // RemoveProfileGroupIDs removes the "ProfileGroups" edge to ProfileGroup entities by IDs.
-func (au *AppUpdate) RemoveProfileGroupIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) RemoveProfileGroupIDs(ids ...int) *AppUpdate {
 	au.mutation.RemoveProfileGroupIDs(ids...)
 	return au
 }
 
 // RemoveProfileGroups removes "ProfileGroups" edges to ProfileGroup entities.
 func (au *AppUpdate) RemoveProfileGroups(p ...*ProfileGroup) *AppUpdate {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -228,14 +206,14 @@ func (au *AppUpdate) ClearTaskGroups() *AppUpdate {
 }
 
 // RemoveTaskGroupIDs removes the "TaskGroups" edge to TaskGroup entities by IDs.
-func (au *AppUpdate) RemoveTaskGroupIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) RemoveTaskGroupIDs(ids ...int) *AppUpdate {
 	au.mutation.RemoveTaskGroupIDs(ids...)
 	return au
 }
 
 // RemoveTaskGroups removes "TaskGroups" edges to TaskGroup entities.
 func (au *AppUpdate) RemoveTaskGroups(t ...*TaskGroup) *AppUpdate {
-	ids := make([]uuid.UUID, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -249,14 +227,14 @@ func (au *AppUpdate) ClearAccountGroups() *AppUpdate {
 }
 
 // RemoveAccountGroupIDs removes the "AccountGroups" edge to AccountGroup entities by IDs.
-func (au *AppUpdate) RemoveAccountGroupIDs(ids ...uuid.UUID) *AppUpdate {
+func (au *AppUpdate) RemoveAccountGroupIDs(ids ...int) *AppUpdate {
 	au.mutation.RemoveAccountGroupIDs(ids...)
 	return au
 }
 
 // RemoveAccountGroups removes "AccountGroups" edges to AccountGroup entities.
 func (au *AppUpdate) RemoveAccountGroups(a ...*AccountGroup) *AppUpdate {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -269,7 +247,6 @@ func (au *AppUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	au.defaults()
 	if len(au.hooks) == 0 {
 		if err = au.check(); err != nil {
 			return 0, err
@@ -321,14 +298,6 @@ func (au *AppUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (au *AppUpdate) defaults() {
-	if _, ok := au.mutation.UpdatedAt(); !ok {
-		v := app.UpdateDefaultUpdatedAt()
-		au.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (au *AppUpdate) check() error {
 	if _, ok := au.mutation.UserID(); au.mutation.UserCleared() && !ok {
@@ -343,7 +312,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   app.Table,
 			Columns: app.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: app.FieldID,
 			},
 		},
@@ -354,20 +323,6 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := au.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: app.FieldCreatedAt,
-		})
-	}
-	if value, ok := au.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: app.FieldUpdatedAt,
-		})
 	}
 	if value, ok := au.mutation.FirstLogin(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -385,7 +340,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -401,7 +356,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -420,7 +375,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: settings.FieldID,
 				},
 			},
@@ -436,7 +391,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: settings.FieldID,
 				},
 			},
@@ -455,7 +410,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: settings.FieldID,
 				},
 			},
@@ -474,7 +429,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -490,7 +445,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -509,7 +464,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -528,7 +483,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -544,7 +499,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -563,7 +518,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -582,7 +537,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -598,7 +553,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -617,7 +572,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -636,7 +591,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: accountgroup.FieldID,
 				},
 			},
@@ -652,7 +607,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: accountgroup.FieldID,
 				},
 			},
@@ -671,7 +626,7 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: accountgroup.FieldID,
 				},
 			},
@@ -700,26 +655,6 @@ type AppUpdateOne struct {
 	mutation *AppMutation
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (auo *AppUpdateOne) SetCreatedAt(t time.Time) *AppUpdateOne {
-	auo.mutation.SetCreatedAt(t)
-	return auo
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (auo *AppUpdateOne) SetNillableCreatedAt(t *time.Time) *AppUpdateOne {
-	if t != nil {
-		auo.SetCreatedAt(*t)
-	}
-	return auo
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (auo *AppUpdateOne) SetUpdatedAt(t time.Time) *AppUpdateOne {
-	auo.mutation.SetUpdatedAt(t)
-	return auo
-}
-
 // SetFirstLogin sets the "first_login" field.
 func (auo *AppUpdateOne) SetFirstLogin(b bool) *AppUpdateOne {
 	auo.mutation.SetFirstLogin(b)
@@ -727,7 +662,7 @@ func (auo *AppUpdateOne) SetFirstLogin(b bool) *AppUpdateOne {
 }
 
 // SetUserID sets the "User" edge to the User entity by ID.
-func (auo *AppUpdateOne) SetUserID(id uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) SetUserID(id int) *AppUpdateOne {
 	auo.mutation.SetUserID(id)
 	return auo
 }
@@ -738,14 +673,14 @@ func (auo *AppUpdateOne) SetUser(u *User) *AppUpdateOne {
 }
 
 // AddSettingIDs adds the "Settings" edge to the Settings entity by IDs.
-func (auo *AppUpdateOne) AddSettingIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) AddSettingIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.AddSettingIDs(ids...)
 	return auo
 }
 
 // AddSettings adds the "Settings" edges to the Settings entity.
 func (auo *AppUpdateOne) AddSettings(s ...*Settings) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -753,14 +688,14 @@ func (auo *AppUpdateOne) AddSettings(s ...*Settings) *AppUpdateOne {
 }
 
 // AddProxyListIDs adds the "ProxyLists" edge to the ProxyList entity by IDs.
-func (auo *AppUpdateOne) AddProxyListIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) AddProxyListIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.AddProxyListIDs(ids...)
 	return auo
 }
 
 // AddProxyLists adds the "ProxyLists" edges to the ProxyList entity.
 func (auo *AppUpdateOne) AddProxyLists(p ...*ProxyList) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -768,14 +703,14 @@ func (auo *AppUpdateOne) AddProxyLists(p ...*ProxyList) *AppUpdateOne {
 }
 
 // AddProfileGroupIDs adds the "ProfileGroups" edge to the ProfileGroup entity by IDs.
-func (auo *AppUpdateOne) AddProfileGroupIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) AddProfileGroupIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.AddProfileGroupIDs(ids...)
 	return auo
 }
 
 // AddProfileGroups adds the "ProfileGroups" edges to the ProfileGroup entity.
 func (auo *AppUpdateOne) AddProfileGroups(p ...*ProfileGroup) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -783,14 +718,14 @@ func (auo *AppUpdateOne) AddProfileGroups(p ...*ProfileGroup) *AppUpdateOne {
 }
 
 // AddTaskGroupIDs adds the "TaskGroups" edge to the TaskGroup entity by IDs.
-func (auo *AppUpdateOne) AddTaskGroupIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) AddTaskGroupIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.AddTaskGroupIDs(ids...)
 	return auo
 }
 
 // AddTaskGroups adds the "TaskGroups" edges to the TaskGroup entity.
 func (auo *AppUpdateOne) AddTaskGroups(t ...*TaskGroup) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -798,14 +733,14 @@ func (auo *AppUpdateOne) AddTaskGroups(t ...*TaskGroup) *AppUpdateOne {
 }
 
 // AddAccountGroupIDs adds the "AccountGroups" edge to the AccountGroup entity by IDs.
-func (auo *AppUpdateOne) AddAccountGroupIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) AddAccountGroupIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.AddAccountGroupIDs(ids...)
 	return auo
 }
 
 // AddAccountGroups adds the "AccountGroups" edges to the AccountGroup entity.
 func (auo *AppUpdateOne) AddAccountGroups(a ...*AccountGroup) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -830,14 +765,14 @@ func (auo *AppUpdateOne) ClearSettings() *AppUpdateOne {
 }
 
 // RemoveSettingIDs removes the "Settings" edge to Settings entities by IDs.
-func (auo *AppUpdateOne) RemoveSettingIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) RemoveSettingIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.RemoveSettingIDs(ids...)
 	return auo
 }
 
 // RemoveSettings removes "Settings" edges to Settings entities.
 func (auo *AppUpdateOne) RemoveSettings(s ...*Settings) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(s))
+	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -851,14 +786,14 @@ func (auo *AppUpdateOne) ClearProxyLists() *AppUpdateOne {
 }
 
 // RemoveProxyListIDs removes the "ProxyLists" edge to ProxyList entities by IDs.
-func (auo *AppUpdateOne) RemoveProxyListIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) RemoveProxyListIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.RemoveProxyListIDs(ids...)
 	return auo
 }
 
 // RemoveProxyLists removes "ProxyLists" edges to ProxyList entities.
 func (auo *AppUpdateOne) RemoveProxyLists(p ...*ProxyList) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -872,14 +807,14 @@ func (auo *AppUpdateOne) ClearProfileGroups() *AppUpdateOne {
 }
 
 // RemoveProfileGroupIDs removes the "ProfileGroups" edge to ProfileGroup entities by IDs.
-func (auo *AppUpdateOne) RemoveProfileGroupIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) RemoveProfileGroupIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.RemoveProfileGroupIDs(ids...)
 	return auo
 }
 
 // RemoveProfileGroups removes "ProfileGroups" edges to ProfileGroup entities.
 func (auo *AppUpdateOne) RemoveProfileGroups(p ...*ProfileGroup) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -893,14 +828,14 @@ func (auo *AppUpdateOne) ClearTaskGroups() *AppUpdateOne {
 }
 
 // RemoveTaskGroupIDs removes the "TaskGroups" edge to TaskGroup entities by IDs.
-func (auo *AppUpdateOne) RemoveTaskGroupIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) RemoveTaskGroupIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.RemoveTaskGroupIDs(ids...)
 	return auo
 }
 
 // RemoveTaskGroups removes "TaskGroups" edges to TaskGroup entities.
 func (auo *AppUpdateOne) RemoveTaskGroups(t ...*TaskGroup) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -914,14 +849,14 @@ func (auo *AppUpdateOne) ClearAccountGroups() *AppUpdateOne {
 }
 
 // RemoveAccountGroupIDs removes the "AccountGroups" edge to AccountGroup entities by IDs.
-func (auo *AppUpdateOne) RemoveAccountGroupIDs(ids ...uuid.UUID) *AppUpdateOne {
+func (auo *AppUpdateOne) RemoveAccountGroupIDs(ids ...int) *AppUpdateOne {
 	auo.mutation.RemoveAccountGroupIDs(ids...)
 	return auo
 }
 
 // RemoveAccountGroups removes "AccountGroups" edges to AccountGroup entities.
 func (auo *AppUpdateOne) RemoveAccountGroups(a ...*AccountGroup) *AppUpdateOne {
-	ids := make([]uuid.UUID, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -941,7 +876,6 @@ func (auo *AppUpdateOne) Save(ctx context.Context) (*App, error) {
 		err  error
 		node *App
 	)
-	auo.defaults()
 	if len(auo.hooks) == 0 {
 		if err = auo.check(); err != nil {
 			return nil, err
@@ -993,14 +927,6 @@ func (auo *AppUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (auo *AppUpdateOne) defaults() {
-	if _, ok := auo.mutation.UpdatedAt(); !ok {
-		v := app.UpdateDefaultUpdatedAt()
-		auo.mutation.SetUpdatedAt(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (auo *AppUpdateOne) check() error {
 	if _, ok := auo.mutation.UserID(); auo.mutation.UserCleared() && !ok {
@@ -1015,7 +941,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Table:   app.Table,
 			Columns: app.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: app.FieldID,
 			},
 		},
@@ -1044,20 +970,6 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			}
 		}
 	}
-	if value, ok := auo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: app.FieldCreatedAt,
-		})
-	}
-	if value, ok := auo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: app.FieldUpdatedAt,
-		})
-	}
 	if value, ok := auo.mutation.FirstLogin(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -1074,7 +986,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -1090,7 +1002,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: user.FieldID,
 				},
 			},
@@ -1109,7 +1021,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: settings.FieldID,
 				},
 			},
@@ -1125,7 +1037,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: settings.FieldID,
 				},
 			},
@@ -1144,7 +1056,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: settings.FieldID,
 				},
 			},
@@ -1163,7 +1075,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -1179,7 +1091,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -1198,7 +1110,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -1217,7 +1129,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -1233,7 +1145,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -1252,7 +1164,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: profilegroup.FieldID,
 				},
 			},
@@ -1271,7 +1183,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -1287,7 +1199,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -1306,7 +1218,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: taskgroup.FieldID,
 				},
 			},
@@ -1325,7 +1237,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: accountgroup.FieldID,
 				},
 			},
@@ -1341,7 +1253,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: accountgroup.FieldID,
 				},
 			},
@@ -1360,7 +1272,7 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: accountgroup.FieldID,
 				},
 			},

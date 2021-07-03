@@ -6,13 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxy"
+	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
 )
 
 // ProxyCreate is the builder for creating a Proxy entity.
@@ -20,34 +18,6 @@ type ProxyCreate struct {
 	config
 	mutation *ProxyMutation
 	hooks    []Hook
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (pc *ProxyCreate) SetCreatedAt(t time.Time) *ProxyCreate {
-	pc.mutation.SetCreatedAt(t)
-	return pc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (pc *ProxyCreate) SetNillableCreatedAt(t *time.Time) *ProxyCreate {
-	if t != nil {
-		pc.SetCreatedAt(*t)
-	}
-	return pc
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (pc *ProxyCreate) SetUpdatedAt(t time.Time) *ProxyCreate {
-	pc.mutation.SetUpdatedAt(t)
-	return pc
-}
-
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (pc *ProxyCreate) SetNillableUpdatedAt(t *time.Time) *ProxyCreate {
-	if t != nil {
-		pc.SetUpdatedAt(*t)
-	}
-	return pc
 }
 
 // SetUsername sets the "Username" field.
@@ -90,20 +60,14 @@ func (pc *ProxyCreate) SetPort(s string) *ProxyCreate {
 	return pc
 }
 
-// SetID sets the "id" field.
-func (pc *ProxyCreate) SetID(u uuid.UUID) *ProxyCreate {
-	pc.mutation.SetID(u)
-	return pc
-}
-
 // SetProxyListID sets the "ProxyList" edge to the ProxyList entity by ID.
-func (pc *ProxyCreate) SetProxyListID(id uuid.UUID) *ProxyCreate {
+func (pc *ProxyCreate) SetProxyListID(id int) *ProxyCreate {
 	pc.mutation.SetProxyListID(id)
 	return pc
 }
 
 // SetNillableProxyListID sets the "ProxyList" edge to the ProxyList entity by ID if the given value is not nil.
-func (pc *ProxyCreate) SetNillableProxyListID(id *uuid.UUID) *ProxyCreate {
+func (pc *ProxyCreate) SetNillableProxyListID(id *int) *ProxyCreate {
 	if id != nil {
 		pc = pc.SetProxyListID(*id)
 	}
@@ -126,7 +90,6 @@ func (pc *ProxyCreate) Save(ctx context.Context) (*Proxy, error) {
 		err  error
 		node *Proxy
 	)
-	pc.defaults()
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -165,30 +128,8 @@ func (pc *ProxyCreate) SaveX(ctx context.Context) *Proxy {
 	return v
 }
 
-// defaults sets the default values of the builder before save.
-func (pc *ProxyCreate) defaults() {
-	if _, ok := pc.mutation.CreatedAt(); !ok {
-		v := proxy.DefaultCreatedAt()
-		pc.mutation.SetCreatedAt(v)
-	}
-	if _, ok := pc.mutation.UpdatedAt(); !ok {
-		v := proxy.DefaultUpdatedAt()
-		pc.mutation.SetUpdatedAt(v)
-	}
-	if _, ok := pc.mutation.ID(); !ok {
-		v := proxy.DefaultID()
-		pc.mutation.SetID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (pc *ProxyCreate) check() error {
-	if _, ok := pc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := pc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
 	if _, ok := pc.mutation.IP(); !ok {
 		return &ValidationError{Name: "IP", err: errors.New("ent: missing required field \"IP\"")}
 	}
@@ -206,6 +147,8 @@ func (pc *ProxyCreate) sqlSave(ctx context.Context) (*Proxy, error) {
 		}
 		return nil, err
 	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -215,31 +158,11 @@ func (pc *ProxyCreate) createSpec() (*Proxy, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: proxy.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeInt,
 				Column: proxy.FieldID,
 			},
 		}
 	)
-	if id, ok := pc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := pc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: proxy.FieldCreatedAt,
-		})
-		_node.CreatedAt = value
-	}
-	if value, ok := pc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: proxy.FieldUpdatedAt,
-		})
-		_node.UpdatedAt = value
-	}
 	if value, ok := pc.mutation.Username(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -281,7 +204,7 @@ func (pc *ProxyCreate) createSpec() (*Proxy, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
+					Type:   field.TypeInt,
 					Column: proxylist.FieldID,
 				},
 			},
@@ -309,7 +232,6 @@ func (pcb *ProxyCreateBulk) Save(ctx context.Context) ([]*Proxy, error) {
 	for i := range pcb.builders {
 		func(i int, root context.Context) {
 			builder := pcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProxyMutation)
 				if !ok {
@@ -335,6 +257,8 @@ func (pcb *ProxyCreateBulk) Save(ctx context.Context) ([]*Proxy, error) {
 				if err != nil {
 					return nil, err
 				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
