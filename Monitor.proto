@@ -1,16 +1,14 @@
-syntax="proto3";
+syntax = "proto3";
 
+package monitor_controller;
 
-option go_package="sonic/monitor";
+option go_package = "main/monitor_controller";
 
 service Monitor{
-  rpc Start(Task) returns (BoolResponse);
+  rpc NewTask(Task) returns (RedisChannel);
+  rpc Stop(Key) returns (BoolResponse);
 }
 
-message BoolResponse{
-  bool Started = 1;
-  optional string Error = 2;
-}
 
 message Keywords{
   repeated string Positive = 1;
@@ -24,5 +22,18 @@ message Task{
     string Link = 3;
   }
   map<string, string> Metadata = 4;
-  string RedisChannelName = 5;
+}
+
+message RedisChannel{
+  string ChannelName = 1;
+  string SubscriberKey = 2;
+}
+
+message Key{
+  string Value = 1;
+}
+
+message BoolResponse{
+  bool Stopped = 1;
+  optional string Error = 2;
 }
