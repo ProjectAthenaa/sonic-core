@@ -23,7 +23,7 @@ func (User) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Bool("Disabled"),
+		field.Bool("Disabled").Default(false),
 	}
 }
 

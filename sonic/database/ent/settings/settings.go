@@ -77,6 +77,14 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultSuccessWebhook holds the default value on creation for the "SuccessWebhook" field.
+	DefaultSuccessWebhook string
+	// DefaultDeclineWebhook holds the default value on creation for the "DeclineWebhook" field.
+	DefaultDeclineWebhook string
+	// DefaultCheckoutDelay holds the default value on creation for the "CheckoutDelay" field.
+	DefaultCheckoutDelay int32
+	// DefaultATCDelay holds the default value on creation for the "ATCDelay" field.
+	DefaultATCDelay int32
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

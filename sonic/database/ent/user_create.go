@@ -58,6 +58,14 @@ func (uc *UserCreate) SetDisabled(b bool) *UserCreate {
 	return uc
 }
 
+// SetNillableDisabled sets the "Disabled" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDisabled(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetDisabled(*b)
+	}
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
 	uc.mutation.SetID(u)
@@ -176,6 +184,10 @@ func (uc *UserCreate) defaults() {
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := uc.mutation.Disabled(); !ok {
+		v := user.DefaultDisabled
+		uc.mutation.SetDisabled(v)
 	}
 	if _, ok := uc.mutation.ID(); !ok {
 		v := user.DefaultID()

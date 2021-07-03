@@ -23,7 +23,7 @@ func (TaskGroup) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.String("Name"),
+		field.String("Name").Default("Default"),
 	}
 }
 

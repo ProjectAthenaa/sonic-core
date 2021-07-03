@@ -42,12 +42,12 @@ func connectToRedis() *redis.Client {
 	redisURL := os.Getenv("REDIS_URL")
 
 	if !redisURLRegex.MatchString(redisURL) {
-		panic(redisFormatError)
+		return nil
 	}
 
 	opts, err := redis.ParseURL(os.Getenv("REDIS_URL"))
 	if err != nil {
-		panic(err)
+		return nil
 	}
 
 	return redis.NewClient(opts)

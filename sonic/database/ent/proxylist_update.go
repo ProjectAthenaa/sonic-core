@@ -57,6 +57,14 @@ func (plu *ProxyListUpdate) SetName(s string) *ProxyListUpdate {
 	return plu
 }
 
+// SetNillableName sets the "Name" field if the given value is not nil.
+func (plu *ProxyListUpdate) SetNillableName(s *string) *ProxyListUpdate {
+	if s != nil {
+		plu.SetName(*s)
+	}
+	return plu
+}
+
 // SetType sets the "Type" field.
 func (plu *ProxyListUpdate) SetType(pr proxylist.Type) *ProxyListUpdate {
 	plu.mutation.SetType(pr)
@@ -502,6 +510,14 @@ func (pluo *ProxyListUpdateOne) SetUpdatedAt(t time.Time) *ProxyListUpdateOne {
 // SetName sets the "Name" field.
 func (pluo *ProxyListUpdateOne) SetName(s string) *ProxyListUpdateOne {
 	pluo.mutation.SetName(s)
+	return pluo
+}
+
+// SetNillableName sets the "Name" field if the given value is not nil.
+func (pluo *ProxyListUpdateOne) SetNillableName(s *string) *ProxyListUpdateOne {
+	if s != nil {
+		pluo.SetName(*s)
+	}
 	return pluo
 }
 

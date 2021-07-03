@@ -58,6 +58,14 @@ func (plc *ProxyListCreate) SetName(s string) *ProxyListCreate {
 	return plc
 }
 
+// SetNillableName sets the "Name" field if the given value is not nil.
+func (plc *ProxyListCreate) SetNillableName(s *string) *ProxyListCreate {
+	if s != nil {
+		plc.SetName(*s)
+	}
+	return plc
+}
+
 // SetType sets the "Type" field.
 func (plc *ProxyListCreate) SetType(pr proxylist.Type) *ProxyListCreate {
 	plc.mutation.SetType(pr)
@@ -174,6 +182,10 @@ func (plc *ProxyListCreate) defaults() {
 	if _, ok := plc.mutation.UpdatedAt(); !ok {
 		v := proxylist.DefaultUpdatedAt()
 		plc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := plc.mutation.Name(); !ok {
+		v := proxylist.DefaultName
+		plc.mutation.SetName(v)
 	}
 	if _, ok := plc.mutation.ID(); !ok {
 		v := proxylist.DefaultID()

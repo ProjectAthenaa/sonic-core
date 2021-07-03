@@ -74,6 +74,10 @@ func init() {
 	app.DefaultUpdatedAt = appDescUpdatedAt.Default.(func() time.Time)
 	// app.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	app.UpdateDefaultUpdatedAt = appDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// appDescFirstLogin is the schema descriptor for first_login field.
+	appDescFirstLogin := appFields[3].Descriptor()
+	// app.DefaultFirstLogin holds the default value on creation for the first_login field.
+	app.DefaultFirstLogin = appDescFirstLogin.Default.(bool)
 	// appDescID is the schema descriptor for id field.
 	appDescID := appFields[0].Descriptor()
 	// app.DefaultID holds the default value on creation for the id field.
@@ -186,6 +190,10 @@ func init() {
 	proxylist.DefaultUpdatedAt = proxylistDescUpdatedAt.Default.(func() time.Time)
 	// proxylist.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	proxylist.UpdateDefaultUpdatedAt = proxylistDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// proxylistDescName is the schema descriptor for Name field.
+	proxylistDescName := proxylistFields[3].Descriptor()
+	// proxylist.DefaultName holds the default value on creation for the Name field.
+	proxylist.DefaultName = proxylistDescName.Default.(string)
 	// proxylistDescID is the schema descriptor for id field.
 	proxylistDescID := proxylistFields[0].Descriptor()
 	// proxylist.DefaultID holds the default value on creation for the id field.
@@ -202,6 +210,22 @@ func init() {
 	settings.DefaultUpdatedAt = settingsDescUpdatedAt.Default.(func() time.Time)
 	// settings.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	settings.UpdateDefaultUpdatedAt = settingsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// settingsDescSuccessWebhook is the schema descriptor for SuccessWebhook field.
+	settingsDescSuccessWebhook := settingsFields[3].Descriptor()
+	// settings.DefaultSuccessWebhook holds the default value on creation for the SuccessWebhook field.
+	settings.DefaultSuccessWebhook = settingsDescSuccessWebhook.Default.(string)
+	// settingsDescDeclineWebhook is the schema descriptor for DeclineWebhook field.
+	settingsDescDeclineWebhook := settingsFields[4].Descriptor()
+	// settings.DefaultDeclineWebhook holds the default value on creation for the DeclineWebhook field.
+	settings.DefaultDeclineWebhook = settingsDescDeclineWebhook.Default.(string)
+	// settingsDescCheckoutDelay is the schema descriptor for CheckoutDelay field.
+	settingsDescCheckoutDelay := settingsFields[5].Descriptor()
+	// settings.DefaultCheckoutDelay holds the default value on creation for the CheckoutDelay field.
+	settings.DefaultCheckoutDelay = settingsDescCheckoutDelay.Default.(int32)
+	// settingsDescATCDelay is the schema descriptor for ATCDelay field.
+	settingsDescATCDelay := settingsFields[6].Descriptor()
+	// settings.DefaultATCDelay holds the default value on creation for the ATCDelay field.
+	settings.DefaultATCDelay = settingsDescATCDelay.Default.(int32)
 	// settingsDescID is the schema descriptor for id field.
 	settingsDescID := settingsFields[0].Descriptor()
 	// settings.DefaultID holds the default value on creation for the id field.
@@ -282,6 +306,10 @@ func init() {
 	taskgroup.DefaultUpdatedAt = taskgroupDescUpdatedAt.Default.(func() time.Time)
 	// taskgroup.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	taskgroup.UpdateDefaultUpdatedAt = taskgroupDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// taskgroupDescName is the schema descriptor for Name field.
+	taskgroupDescName := taskgroupFields[3].Descriptor()
+	// taskgroup.DefaultName holds the default value on creation for the Name field.
+	taskgroup.DefaultName = taskgroupDescName.Default.(string)
 	// taskgroupDescID is the schema descriptor for id field.
 	taskgroupDescID := taskgroupFields[0].Descriptor()
 	// taskgroup.DefaultID holds the default value on creation for the id field.
@@ -298,6 +326,10 @@ func init() {
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userDescDisabled is the schema descriptor for Disabled field.
+	userDescDisabled := userFields[3].Descriptor()
+	// user.DefaultDisabled holds the default value on creation for the Disabled field.
+	user.DefaultDisabled = userDescDisabled.Default.(bool)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.

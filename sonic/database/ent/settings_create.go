@@ -56,9 +56,25 @@ func (sc *SettingsCreate) SetSuccessWebhook(s string) *SettingsCreate {
 	return sc
 }
 
+// SetNillableSuccessWebhook sets the "SuccessWebhook" field if the given value is not nil.
+func (sc *SettingsCreate) SetNillableSuccessWebhook(s *string) *SettingsCreate {
+	if s != nil {
+		sc.SetSuccessWebhook(*s)
+	}
+	return sc
+}
+
 // SetDeclineWebhook sets the "DeclineWebhook" field.
 func (sc *SettingsCreate) SetDeclineWebhook(s string) *SettingsCreate {
 	sc.mutation.SetDeclineWebhook(s)
+	return sc
+}
+
+// SetNillableDeclineWebhook sets the "DeclineWebhook" field if the given value is not nil.
+func (sc *SettingsCreate) SetNillableDeclineWebhook(s *string) *SettingsCreate {
+	if s != nil {
+		sc.SetDeclineWebhook(*s)
+	}
 	return sc
 }
 
@@ -68,9 +84,25 @@ func (sc *SettingsCreate) SetCheckoutDelay(i int32) *SettingsCreate {
 	return sc
 }
 
+// SetNillableCheckoutDelay sets the "CheckoutDelay" field if the given value is not nil.
+func (sc *SettingsCreate) SetNillableCheckoutDelay(i *int32) *SettingsCreate {
+	if i != nil {
+		sc.SetCheckoutDelay(*i)
+	}
+	return sc
+}
+
 // SetATCDelay sets the "ATCDelay" field.
 func (sc *SettingsCreate) SetATCDelay(i int32) *SettingsCreate {
 	sc.mutation.SetATCDelay(i)
+	return sc
+}
+
+// SetNillableATCDelay sets the "ATCDelay" field if the given value is not nil.
+func (sc *SettingsCreate) SetNillableATCDelay(i *int32) *SettingsCreate {
+	if i != nil {
+		sc.SetATCDelay(*i)
+	}
 	return sc
 }
 
@@ -150,6 +182,22 @@ func (sc *SettingsCreate) defaults() {
 	if _, ok := sc.mutation.UpdatedAt(); !ok {
 		v := settings.DefaultUpdatedAt()
 		sc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := sc.mutation.SuccessWebhook(); !ok {
+		v := settings.DefaultSuccessWebhook
+		sc.mutation.SetSuccessWebhook(v)
+	}
+	if _, ok := sc.mutation.DeclineWebhook(); !ok {
+		v := settings.DefaultDeclineWebhook
+		sc.mutation.SetDeclineWebhook(v)
+	}
+	if _, ok := sc.mutation.CheckoutDelay(); !ok {
+		v := settings.DefaultCheckoutDelay
+		sc.mutation.SetCheckoutDelay(v)
+	}
+	if _, ok := sc.mutation.ATCDelay(); !ok {
+		v := settings.DefaultATCDelay
+		sc.mutation.SetATCDelay(v)
 	}
 	if _, ok := sc.mutation.ID(); !ok {
 		v := settings.DefaultID()

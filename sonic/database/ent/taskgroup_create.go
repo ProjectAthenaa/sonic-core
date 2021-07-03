@@ -57,6 +57,14 @@ func (tgc *TaskGroupCreate) SetName(s string) *TaskGroupCreate {
 	return tgc
 }
 
+// SetNillableName sets the "Name" field if the given value is not nil.
+func (tgc *TaskGroupCreate) SetNillableName(s *string) *TaskGroupCreate {
+	if s != nil {
+		tgc.SetName(*s)
+	}
+	return tgc
+}
+
 // SetID sets the "id" field.
 func (tgc *TaskGroupCreate) SetID(u uuid.UUID) *TaskGroupCreate {
 	tgc.mutation.SetID(u)
@@ -152,6 +160,10 @@ func (tgc *TaskGroupCreate) defaults() {
 	if _, ok := tgc.mutation.UpdatedAt(); !ok {
 		v := taskgroup.DefaultUpdatedAt()
 		tgc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := tgc.mutation.Name(); !ok {
+		v := taskgroup.DefaultName
+		tgc.mutation.SetName(v)
 	}
 	if _, ok := tgc.mutation.ID(); !ok {
 		v := taskgroup.DefaultID()

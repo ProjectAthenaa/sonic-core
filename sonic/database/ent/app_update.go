@@ -61,6 +61,14 @@ func (au *AppUpdate) SetFirstLogin(b bool) *AppUpdate {
 	return au
 }
 
+// SetNillableFirstLogin sets the "first_login" field if the given value is not nil.
+func (au *AppUpdate) SetNillableFirstLogin(b *bool) *AppUpdate {
+	if b != nil {
+		au.SetFirstLogin(*b)
+	}
+	return au
+}
+
 // SetUserID sets the "User" edge to the User entity by ID.
 func (au *AppUpdate) SetUserID(id uuid.UUID) *AppUpdate {
 	au.mutation.SetUserID(id)
@@ -723,6 +731,14 @@ func (auo *AppUpdateOne) SetUpdatedAt(t time.Time) *AppUpdateOne {
 // SetFirstLogin sets the "first_login" field.
 func (auo *AppUpdateOne) SetFirstLogin(b bool) *AppUpdateOne {
 	auo.mutation.SetFirstLogin(b)
+	return auo
+}
+
+// SetNillableFirstLogin sets the "first_login" field if the given value is not nil.
+func (auo *AppUpdateOne) SetNillableFirstLogin(b *bool) *AppUpdateOne {
+	if b != nil {
+		auo.SetFirstLogin(*b)
+	}
 	return auo
 }
 

@@ -56,6 +56,14 @@ func (tgu *TaskGroupUpdate) SetName(s string) *TaskGroupUpdate {
 	return tgu
 }
 
+// SetNillableName sets the "Name" field if the given value is not nil.
+func (tgu *TaskGroupUpdate) SetNillableName(s *string) *TaskGroupUpdate {
+	if s != nil {
+		tgu.SetName(*s)
+	}
+	return tgu
+}
+
 // AddAppIDs adds the "App" edge to the App entity by IDs.
 func (tgu *TaskGroupUpdate) AddAppIDs(ids ...uuid.UUID) *TaskGroupUpdate {
 	tgu.mutation.AddAppIDs(ids...)
@@ -382,6 +390,14 @@ func (tguo *TaskGroupUpdateOne) SetUpdatedAt(t time.Time) *TaskGroupUpdateOne {
 // SetName sets the "Name" field.
 func (tguo *TaskGroupUpdateOne) SetName(s string) *TaskGroupUpdateOne {
 	tguo.mutation.SetName(s)
+	return tguo
+}
+
+// SetNillableName sets the "Name" field if the given value is not nil.
+func (tguo *TaskGroupUpdateOne) SetNillableName(s *string) *TaskGroupUpdateOne {
+	if s != nil {
+		tguo.SetName(*s)
+	}
 	return tguo
 }
 

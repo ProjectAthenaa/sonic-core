@@ -61,6 +61,14 @@ func (ac *AppCreate) SetFirstLogin(b bool) *AppCreate {
 	return ac
 }
 
+// SetNillableFirstLogin sets the "first_login" field if the given value is not nil.
+func (ac *AppCreate) SetNillableFirstLogin(b *bool) *AppCreate {
+	if b != nil {
+		ac.SetFirstLogin(*b)
+	}
+	return ac
+}
+
 // SetID sets the "id" field.
 func (ac *AppCreate) SetID(u uuid.UUID) *AppCreate {
 	ac.mutation.SetID(u)
@@ -212,6 +220,10 @@ func (ac *AppCreate) defaults() {
 	if _, ok := ac.mutation.UpdatedAt(); !ok {
 		v := app.DefaultUpdatedAt()
 		ac.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := ac.mutation.FirstLogin(); !ok {
+		v := app.DefaultFirstLogin
+		ac.mutation.SetFirstLogin(v)
 	}
 	if _, ok := ac.mutation.ID(); !ok {
 		v := app.DefaultID()

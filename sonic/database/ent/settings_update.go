@@ -56,9 +56,25 @@ func (su *SettingsUpdate) SetSuccessWebhook(s string) *SettingsUpdate {
 	return su
 }
 
+// SetNillableSuccessWebhook sets the "SuccessWebhook" field if the given value is not nil.
+func (su *SettingsUpdate) SetNillableSuccessWebhook(s *string) *SettingsUpdate {
+	if s != nil {
+		su.SetSuccessWebhook(*s)
+	}
+	return su
+}
+
 // SetDeclineWebhook sets the "DeclineWebhook" field.
 func (su *SettingsUpdate) SetDeclineWebhook(s string) *SettingsUpdate {
 	su.mutation.SetDeclineWebhook(s)
+	return su
+}
+
+// SetNillableDeclineWebhook sets the "DeclineWebhook" field if the given value is not nil.
+func (su *SettingsUpdate) SetNillableDeclineWebhook(s *string) *SettingsUpdate {
+	if s != nil {
+		su.SetDeclineWebhook(*s)
+	}
 	return su
 }
 
@@ -66,6 +82,14 @@ func (su *SettingsUpdate) SetDeclineWebhook(s string) *SettingsUpdate {
 func (su *SettingsUpdate) SetCheckoutDelay(i int32) *SettingsUpdate {
 	su.mutation.ResetCheckoutDelay()
 	su.mutation.SetCheckoutDelay(i)
+	return su
+}
+
+// SetNillableCheckoutDelay sets the "CheckoutDelay" field if the given value is not nil.
+func (su *SettingsUpdate) SetNillableCheckoutDelay(i *int32) *SettingsUpdate {
+	if i != nil {
+		su.SetCheckoutDelay(*i)
+	}
 	return su
 }
 
@@ -79,6 +103,14 @@ func (su *SettingsUpdate) AddCheckoutDelay(i int32) *SettingsUpdate {
 func (su *SettingsUpdate) SetATCDelay(i int32) *SettingsUpdate {
 	su.mutation.ResetATCDelay()
 	su.mutation.SetATCDelay(i)
+	return su
+}
+
+// SetNillableATCDelay sets the "ATCDelay" field if the given value is not nil.
+func (su *SettingsUpdate) SetNillableATCDelay(i *int32) *SettingsUpdate {
+	if i != nil {
+		su.SetATCDelay(*i)
+	}
 	return su
 }
 
@@ -338,9 +370,25 @@ func (suo *SettingsUpdateOne) SetSuccessWebhook(s string) *SettingsUpdateOne {
 	return suo
 }
 
+// SetNillableSuccessWebhook sets the "SuccessWebhook" field if the given value is not nil.
+func (suo *SettingsUpdateOne) SetNillableSuccessWebhook(s *string) *SettingsUpdateOne {
+	if s != nil {
+		suo.SetSuccessWebhook(*s)
+	}
+	return suo
+}
+
 // SetDeclineWebhook sets the "DeclineWebhook" field.
 func (suo *SettingsUpdateOne) SetDeclineWebhook(s string) *SettingsUpdateOne {
 	suo.mutation.SetDeclineWebhook(s)
+	return suo
+}
+
+// SetNillableDeclineWebhook sets the "DeclineWebhook" field if the given value is not nil.
+func (suo *SettingsUpdateOne) SetNillableDeclineWebhook(s *string) *SettingsUpdateOne {
+	if s != nil {
+		suo.SetDeclineWebhook(*s)
+	}
 	return suo
 }
 
@@ -348,6 +396,14 @@ func (suo *SettingsUpdateOne) SetDeclineWebhook(s string) *SettingsUpdateOne {
 func (suo *SettingsUpdateOne) SetCheckoutDelay(i int32) *SettingsUpdateOne {
 	suo.mutation.ResetCheckoutDelay()
 	suo.mutation.SetCheckoutDelay(i)
+	return suo
+}
+
+// SetNillableCheckoutDelay sets the "CheckoutDelay" field if the given value is not nil.
+func (suo *SettingsUpdateOne) SetNillableCheckoutDelay(i *int32) *SettingsUpdateOne {
+	if i != nil {
+		suo.SetCheckoutDelay(*i)
+	}
 	return suo
 }
 
@@ -361,6 +417,14 @@ func (suo *SettingsUpdateOne) AddCheckoutDelay(i int32) *SettingsUpdateOne {
 func (suo *SettingsUpdateOne) SetATCDelay(i int32) *SettingsUpdateOne {
 	suo.mutation.ResetATCDelay()
 	suo.mutation.SetATCDelay(i)
+	return suo
+}
+
+// SetNillableATCDelay sets the "ATCDelay" field if the given value is not nil.
+func (suo *SettingsUpdateOne) SetNillableATCDelay(i *int32) *SettingsUpdateOne {
+	if i != nil {
+		suo.SetATCDelay(*i)
+	}
 	return suo
 }
 

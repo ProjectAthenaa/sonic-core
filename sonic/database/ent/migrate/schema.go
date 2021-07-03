@@ -56,7 +56,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "first_login", Type: field.TypeBool},
+		{Name: "first_login", Type: field.TypeBool, Default: false},
 		{Name: "user_app", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// AppsTable holds the schema information for the "apps" table.
@@ -207,7 +207,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Default: "Default"},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"Residential", "Datacenter", "ISP"}},
 	}
 	// ProxyListsTable holds the schema information for the "proxy_lists" table.
@@ -222,10 +222,10 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "success_webhook", Type: field.TypeString},
-		{Name: "decline_webhook", Type: field.TypeString},
-		{Name: "checkout_delay", Type: field.TypeInt32},
-		{Name: "atc_delay", Type: field.TypeInt32},
+		{Name: "success_webhook", Type: field.TypeString, Default: ""},
+		{Name: "decline_webhook", Type: field.TypeString, Default: ""},
+		{Name: "checkout_delay", Type: field.TypeInt32, Default: 0},
+		{Name: "atc_delay", Type: field.TypeInt32, Default: 0},
 		{Name: "app_settings", Type: field.TypeUUID, Nullable: true},
 	}
 	// SettingsTable holds the schema information for the "settings" table.
@@ -324,7 +324,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Default: "Default"},
 	}
 	// TaskGroupsTable holds the schema information for the "task_groups" table.
 	TaskGroupsTable = &schema.Table{
@@ -338,7 +338,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "disabled", Type: field.TypeBool},
+		{Name: "disabled", Type: field.TypeBool, Default: false},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

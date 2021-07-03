@@ -57,6 +57,14 @@ func (uu *UserUpdate) SetDisabled(b bool) *UserUpdate {
 	return uu
 }
 
+// SetNillableDisabled sets the "Disabled" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDisabled(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetDisabled(*b)
+	}
+	return uu
+}
+
 // SetLicenseID sets the "License" edge to the License entity by ID.
 func (uu *UserUpdate) SetLicenseID(id uuid.UUID) *UserUpdate {
 	uu.mutation.SetLicenseID(id)
@@ -413,6 +421,14 @@ func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
 // SetDisabled sets the "Disabled" field.
 func (uuo *UserUpdateOne) SetDisabled(b bool) *UserUpdateOne {
 	uuo.mutation.SetDisabled(b)
+	return uuo
+}
+
+// SetNillableDisabled sets the "Disabled" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDisabled(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetDisabled(*b)
+	}
 	return uuo
 }
 
