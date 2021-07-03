@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -34,10 +35,10 @@ func (App) Edges() []ent.Edge {
 			Ref("App").
 			Unique().
 			Required(),
-		edge.To("Settings", Settings.Type),
-		edge.To("ProxyLists", ProxyList.Type),
-		edge.To("ProfileGroups", ProfileGroup.Type),
-		edge.To("TaskGroups", TaskGroup.Type),
-		edge.To("AccountGroups", AccountGroup.Type),
+		edge.To("Settings", Settings.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.To("ProxyLists", ProxyList.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.To("ProfileGroups", ProfileGroup.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.To("TaskGroups", TaskGroup.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.To("AccountGroups", AccountGroup.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 	}
 }

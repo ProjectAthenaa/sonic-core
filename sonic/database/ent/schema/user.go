@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -31,9 +32,17 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("License", License.Type).
-			Unique(),
-		edge.To("Statistics", Statistic.Type),
+			Unique().
+			Annotations(
+				entsql.Annotation{
+					OnDelete: entsql.Cascade,
+				}),
+		edge.To("Statistics", Statistic.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.NoAction,
+			}),
 		edge.To("App", App.Type).
-			Unique(),
+			Unique().
+			Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 	}
 }

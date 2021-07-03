@@ -28,7 +28,7 @@ var (
 				Symbol:     "account_groups_apps_AccountGroups",
 				Columns:    []*schema.Column{AccountGroupsColumns[6]},
 				RefColumns: []*schema.Column{AppsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -69,7 +69,7 @@ var (
 				Symbol:     "apps_users_App",
 				Columns:    []*schema.Column{AppsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -112,7 +112,7 @@ var (
 				Symbol:     "licenses_users_License",
 				Columns:    []*schema.Column{LicensesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -238,7 +238,7 @@ var (
 				Symbol:     "settings_apps_Settings",
 				Columns:    []*schema.Column{SettingsColumns[7]},
 				RefColumns: []*schema.Column{AppsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
