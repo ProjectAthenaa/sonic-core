@@ -5,6 +5,7 @@ go 1.16
 require (
 	entgo.io/ent v0.8.0
 	github.com/go-redis/redis/v8 v8.11.0
+	github.com/google/uuid v1.2.0
 	github.com/lib/pq v1.10.2
 	github.com/otiai10/copy v1.6.0
 	github.com/urfave/cli v1.22.5
