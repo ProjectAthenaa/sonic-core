@@ -9,9 +9,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/license"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/stripe"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 )
 
 // LicenseCreate is the builder for creating a License entity.

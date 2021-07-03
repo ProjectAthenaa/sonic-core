@@ -10,9 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/statistic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/task"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/lib/pq"
 )
 

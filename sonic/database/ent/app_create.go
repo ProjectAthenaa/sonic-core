@@ -9,13 +9,13 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/settings"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/taskgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 )
 
 // AppCreate is the builder for creating a App entity.

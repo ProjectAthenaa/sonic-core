@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 )
 
 // AccountGroupCreate is the builder for creating a AccountGroup entity.

@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profile"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 )
 
 // Profile is the model entity for the Profile schema.

@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxy"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 )
 
 // Proxy is the model entity for the Proxy schema.

@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxy"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 )
 
 // ProxyCreate is the builder for creating a Proxy entity.

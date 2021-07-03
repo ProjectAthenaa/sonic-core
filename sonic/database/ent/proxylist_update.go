@@ -9,11 +9,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxy"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/task"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 )
 
 // ProxyListUpdate is the builder for updating ProxyList entities.

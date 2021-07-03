@@ -9,10 +9,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/license"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/statistic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/user"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 )
 
 // UserCreate is the builder for creating a User entity.

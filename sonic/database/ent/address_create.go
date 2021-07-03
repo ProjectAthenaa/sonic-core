@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/address"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/shipping"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
 )
 
 // AddressCreate is the builder for creating a Address entity.

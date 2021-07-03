@@ -10,12 +10,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/proxylist"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/task"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/taskgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
 )
 
 // TaskUpdate is the builder for updating Task entities.

@@ -8,8 +8,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/accountgroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 )
 
 // AccountGroup is the model entity for the AccountGroup schema.

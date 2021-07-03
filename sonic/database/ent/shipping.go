@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/profile"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/shipping"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
 )
 
 // Shipping is the model entity for the Shipping schema.

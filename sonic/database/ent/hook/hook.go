@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent"
 )
 
 // The AccountGroupFunc type is an adapter to allow the use of ordinary

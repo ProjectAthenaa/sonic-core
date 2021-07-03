@@ -5,7 +5,7 @@ package statistic
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/ProjectAthenaa/sonic-core/sonic/models/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
