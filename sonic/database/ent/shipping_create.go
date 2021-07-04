@@ -87,6 +87,14 @@ func (sc *ShippingCreate) SetProfileID(id uuid.UUID) *ShippingCreate {
 	return sc
 }
 
+// SetNillableProfileID sets the "Profile" edge to the Profile entity by ID if the given value is not nil.
+func (sc *ShippingCreate) SetNillableProfileID(id *uuid.UUID) *ShippingCreate {
+	if id != nil {
+		sc = sc.SetProfileID(*id)
+	}
+	return sc
+}
+
 // SetProfile sets the "Profile" edge to the Profile entity.
 func (sc *ShippingCreate) SetProfile(p *Profile) *ShippingCreate {
 	return sc.SetProfileID(p.ID)
@@ -211,9 +219,6 @@ func (sc *ShippingCreate) check() error {
 	}
 	if _, ok := sc.mutation.BillingIsShipping(); !ok {
 		return &ValidationError{Name: "BillingIsShipping", err: errors.New("ent: missing required field \"BillingIsShipping\"")}
-	}
-	if _, ok := sc.mutation.ProfileID(); !ok {
-		return &ValidationError{Name: "Profile", err: errors.New("ent: missing required edge \"Profile\"")}
 	}
 	return nil
 }

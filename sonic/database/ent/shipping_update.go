@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -78,6 +77,14 @@ func (su *ShippingUpdate) SetBillingIsShipping(b bool) *ShippingUpdate {
 // SetProfileID sets the "Profile" edge to the Profile entity by ID.
 func (su *ShippingUpdate) SetProfileID(id uuid.UUID) *ShippingUpdate {
 	su.mutation.SetProfileID(id)
+	return su
+}
+
+// SetNillableProfileID sets the "Profile" edge to the Profile entity by ID if the given value is not nil.
+func (su *ShippingUpdate) SetNillableProfileID(id *uuid.UUID) *ShippingUpdate {
+	if id != nil {
+		su = su.SetProfileID(*id)
+	}
 	return su
 }
 
@@ -166,18 +173,12 @@ func (su *ShippingUpdate) Save(ctx context.Context) (int, error) {
 	)
 	su.defaults()
 	if len(su.hooks) == 0 {
-		if err = su.check(); err != nil {
-			return 0, err
-		}
 		affected, err = su.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ShippingMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = su.check(); err != nil {
-				return 0, err
 			}
 			su.mutation = mutation
 			affected, err = su.sqlSave(ctx)
@@ -222,14 +223,6 @@ func (su *ShippingUpdate) defaults() {
 		v := shipping.UpdateDefaultUpdatedAt()
 		su.mutation.SetUpdatedAt(v)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (su *ShippingUpdate) check() error {
-	if _, ok := su.mutation.ProfileID(); su.mutation.ProfileCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"Profile\"")
-	}
-	return nil
 }
 
 func (su *ShippingUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -485,6 +478,14 @@ func (suo *ShippingUpdateOne) SetProfileID(id uuid.UUID) *ShippingUpdateOne {
 	return suo
 }
 
+// SetNillableProfileID sets the "Profile" edge to the Profile entity by ID if the given value is not nil.
+func (suo *ShippingUpdateOne) SetNillableProfileID(id *uuid.UUID) *ShippingUpdateOne {
+	if id != nil {
+		suo = suo.SetProfileID(*id)
+	}
+	return suo
+}
+
 // SetProfile sets the "Profile" edge to the Profile entity.
 func (suo *ShippingUpdateOne) SetProfile(p *Profile) *ShippingUpdateOne {
 	return suo.SetProfileID(p.ID)
@@ -577,18 +578,12 @@ func (suo *ShippingUpdateOne) Save(ctx context.Context) (*Shipping, error) {
 	)
 	suo.defaults()
 	if len(suo.hooks) == 0 {
-		if err = suo.check(); err != nil {
-			return nil, err
-		}
 		node, err = suo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ShippingMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = suo.check(); err != nil {
-				return nil, err
 			}
 			suo.mutation = mutation
 			node, err = suo.sqlSave(ctx)
@@ -633,14 +628,6 @@ func (suo *ShippingUpdateOne) defaults() {
 		v := shipping.UpdateDefaultUpdatedAt()
 		suo.mutation.SetUpdatedAt(v)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (suo *ShippingUpdateOne) check() error {
-	if _, ok := suo.mutation.ProfileID(); suo.mutation.ProfileCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"Profile\"")
-	}
-	return nil
 }
 
 func (suo *ShippingUpdateOne) sqlSave(ctx context.Context) (_node *Shipping, err error) {
