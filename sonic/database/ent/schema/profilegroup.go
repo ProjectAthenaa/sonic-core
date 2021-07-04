@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -30,7 +31,7 @@ func (ProfileGroup) Fields() []ent.Field {
 // Edges of the ProfileGroup.
 func (ProfileGroup) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("Profiles", Profile.Type),
+		edge.To("Profiles", Profile.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 		edge.From("App", App.Type).
 			Ref("ProfileGroups").
 			Required(),

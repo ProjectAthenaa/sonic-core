@@ -167,7 +167,7 @@ var (
 				Symbol:     "profiles_profile_groups_Profiles",
 				Columns:    []*schema.Column{ProfilesColumns[5]},
 				RefColumns: []*schema.Column{ProfileGroupsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -206,7 +206,7 @@ var (
 				Symbol:     "proxies_proxy_lists_Proxies",
 				Columns:    []*schema.Column{ProxiesColumns[7]},
 				RefColumns: []*schema.Column{ProxyListsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -271,7 +271,7 @@ var (
 				Symbol:     "shippings_profiles_Shipping",
 				Columns:    []*schema.Column{ShippingsColumns[7]},
 				RefColumns: []*schema.Column{ProfilesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}

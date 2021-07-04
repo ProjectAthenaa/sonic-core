@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -34,8 +35,8 @@ func (ProxyList) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("App", App.Type).
 			Ref("ProxyLists"),
-		edge.To("Proxies", Proxy.Type),
-		edge.From("Task", Task.Type).
+		edge.To("Proxies", Proxy.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.From("Task", Task.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}).
 			Ref("ProxyList"),
 	}
 }

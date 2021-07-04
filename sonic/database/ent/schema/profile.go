@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -35,7 +36,7 @@ func (Profile) Edges() []ent.Edge {
 			Ref("Profiles").
 			Unique().
 			Required(),
-		edge.To("Shipping", Shipping.Type),
-		edge.To("Billing", Billing.Type),
+		edge.To("Shipping", Shipping.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.To("Billing", Billing.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 	}
 }
