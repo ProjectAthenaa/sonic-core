@@ -62,7 +62,7 @@ func (Product) Fields() []ent.Field {
 		field.Strings("Sizes").Optional(),
 		field.Strings("Colors").Optional(),
 		field.Enum("Site").Values(Sites...),
-		field.Other("Metadata", sonic.Map{}).SchemaType(map[string]string{dialect.Postgres: "bytea"}),
+		field.Other("Metadata", sonic.Map{}).SchemaType(map[string]string{dialect.Postgres: "bytea"}).Optional().Nillable(),
 	}
 }
 
