@@ -4,6 +4,7 @@ import (
 	"context"
 	"entgo.io/ent/dialect"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent"
+	_ "github.com/lib/pq"
 )
 
 func Connect(pgURL string) *ent.Client {
