@@ -30,6 +30,31 @@ const (
 	StatusCheckout3DSError      = module.STATUS_CHECKOUT_3DS_ERROR
 )
 
+const (
+	FINISHLINE   = "FinishLine"
+	JDSPORTS     = "JD Sports"
+	YEEZYSUPPLY  = "YeezySupply"
+	SUPREME      = "Supreme"
+	EASTBAYUS    = "Eastbay US"
+	CHAMPSUS     = "Champs US"
+	FOOTACTIONUS = "Footaction US"
+	FOOTLOCKERUS = "Footlocker US"
+	BESTBUY      = "Bestbuy"
+	POKEMONCENTE = "Pokemon Center"
+	PANINIUS     = "Panini US"
+	TOPPS        = "Topss"
+	NORDSTORM    = "Nordstorm"
+	END          = "End."
+	TARGET       = "Target"
+	AMAZON       = "Amazon"
+	SOLEBOX      = "Solebox"
+	ONYGO        = "Onygo"
+	SNIPES       = "Snipes"
+	SSENSE       = "Ssense"
+	WALMART      = "Walmart"
+	HIBBET       = "Hibbet"
+)
+
 var (
 	redisURLRegex     = regexp.MustCompile(`rediss://\w+:\w+@.*:\d+`)
 	channelEmptyError = errors.New("channel_name_cannot_be_empty")
