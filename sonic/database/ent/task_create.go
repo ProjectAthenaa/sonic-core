@@ -258,7 +258,7 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: task.FieldStartTime,
 		})
-		_node.StartTime = value
+		_node.StartTime = &value
 	}
 	if nodes := tc.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
