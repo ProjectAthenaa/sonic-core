@@ -961,6 +961,20 @@ func MetadataLTE(v sonic.Map) predicate.Product {
 	})
 }
 
+// MetadataIsNil applies the IsNil predicate on the "Metadata" field.
+func MetadataIsNil() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldMetadata)))
+	})
+}
+
+// MetadataNotNil applies the NotNil predicate on the "Metadata" field.
+func MetadataNotNil() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldMetadata)))
+	})
+}
+
 // HasTask applies the HasEdge predicate on the "Task" edge.
 func HasTask() predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {

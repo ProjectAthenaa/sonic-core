@@ -4490,7 +4490,7 @@ func (m *ProductMutation) Metadata() (r sonic.Map, exists bool) {
 // OldMetadata returns the old "Metadata" field's value of the Product entity.
 // If the Product object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldMetadata(ctx context.Context) (v sonic.Map, err error) {
+func (m *ProductMutation) OldMetadata(ctx context.Context) (v *sonic.Map, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldMetadata is only allowed on UpdateOne operations")
 	}
@@ -4504,9 +4504,22 @@ func (m *ProductMutation) OldMetadata(ctx context.Context) (v sonic.Map, err err
 	return oldValue.Metadata, nil
 }
 
+// ClearMetadata clears the value of the "Metadata" field.
+func (m *ProductMutation) ClearMetadata() {
+	m._Metadata = nil
+	m.clearedFields[product.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "Metadata" field was cleared in this mutation.
+func (m *ProductMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[product.FieldMetadata]
+	return ok
+}
+
 // ResetMetadata resets all changes to the "Metadata" field.
 func (m *ProductMutation) ResetMetadata() {
 	m._Metadata = nil
+	delete(m.clearedFields, product.FieldMetadata)
 }
 
 // AddTaskIDs adds the "Task" edge to the Task entity by ids.
@@ -4901,6 +4914,9 @@ func (m *ProductMutation) ClearedFields() []string {
 	if m.FieldCleared(product.FieldColors) {
 		fields = append(fields, product.FieldColors)
 	}
+	if m.FieldCleared(product.FieldMetadata) {
+		fields = append(fields, product.FieldMetadata)
+	}
 	return fields
 }
 
@@ -4932,6 +4948,9 @@ func (m *ProductMutation) ClearField(name string) error {
 		return nil
 	case product.FieldColors:
 		m.ClearColors()
+		return nil
+	case product.FieldMetadata:
+		m.ClearMetadata()
 		return nil
 	}
 	return fmt.Errorf("unknown Product nullable field %s", name)

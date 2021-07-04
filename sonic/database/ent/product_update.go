@@ -176,6 +176,12 @@ func (pu *ProductUpdate) SetMetadata(s sonic.Map) *ProductUpdate {
 	return pu
 }
 
+// ClearMetadata clears the value of the "Metadata" field.
+func (pu *ProductUpdate) ClearMetadata() *ProductUpdate {
+	pu.mutation.ClearMetadata()
+	return pu
+}
+
 // AddTaskIDs adds the "Task" edge to the Task entity by IDs.
 func (pu *ProductUpdate) AddTaskIDs(ids ...uuid.UUID) *ProductUpdate {
 	pu.mutation.AddTaskIDs(ids...)
@@ -486,6 +492,12 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: product.FieldMetadata,
 		})
 	}
+	if pu.mutation.MetadataCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: product.FieldMetadata,
+		})
+	}
 	if pu.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -755,6 +767,12 @@ func (puo *ProductUpdateOne) SetSite(pr product.Site) *ProductUpdateOne {
 // SetMetadata sets the "Metadata" field.
 func (puo *ProductUpdateOne) SetMetadata(s sonic.Map) *ProductUpdateOne {
 	puo.mutation.SetMetadata(s)
+	return puo
+}
+
+// ClearMetadata clears the value of the "Metadata" field.
+func (puo *ProductUpdateOne) ClearMetadata() *ProductUpdateOne {
+	puo.mutation.ClearMetadata()
 	return puo
 }
 
@@ -1089,6 +1107,12 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeOther,
 			Value:  value,
+			Column: product.FieldMetadata,
+		})
+	}
+	if puo.mutation.MetadataCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
 			Column: product.FieldMetadata,
 		})
 	}

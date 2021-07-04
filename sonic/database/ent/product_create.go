@@ -266,9 +266,6 @@ func (pc *ProductCreate) check() error {
 			return &ValidationError{Name: "Site", err: fmt.Errorf("ent: validator failed for field \"Site\": %w", err)}
 		}
 	}
-	if _, ok := pc.mutation.Metadata(); !ok {
-		return &ValidationError{Name: "Metadata", err: errors.New("ent: missing required field \"Metadata\"")}
-	}
 	if len(pc.mutation.TaskIDs()) == 0 {
 		return &ValidationError{Name: "Task", err: errors.New("ent: missing required edge \"Task\"")}
 	}
@@ -403,7 +400,7 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: product.FieldMetadata,
 		})
-		_node.Metadata = value
+		_node.Metadata = &value
 	}
 	if nodes := pc.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

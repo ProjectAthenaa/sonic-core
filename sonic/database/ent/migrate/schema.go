@@ -139,7 +139,7 @@ var (
 		{Name: "sizes", Type: field.TypeJSON, Nullable: true},
 		{Name: "colors", Type: field.TypeJSON, Nullable: true},
 		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet"}},
-		{Name: "metadata", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "bytea"}},
+		{Name: "metadata", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "bytea"}},
 	}
 	// ProductsTable holds the schema information for the "products" table.
 	ProductsTable = &schema.Table{
