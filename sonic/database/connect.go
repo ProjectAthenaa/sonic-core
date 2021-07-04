@@ -4,7 +4,6 @@ import (
 	"context"
 	"entgo.io/ent/dialect"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/migrate"
 )
 
 func Connect(pgURL string) *ent.Client {
@@ -13,7 +12,7 @@ func Connect(pgURL string) *ent.Client {
 		panic(err)
 	}
 
-	err = client.Schema.Create(context.Background(), migrate.WithDropIndex(true), migrate.WithDropColumn(true))
+	err = client.Schema.Create(context.Background())
 	if err != nil {
 		panic(err)
 	}
