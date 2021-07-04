@@ -653,8 +653,7 @@ type AddressMutation struct {
 	_City                   *string
 	_ZIP                    *string
 	clearedFields           map[string]struct{}
-	_ShippingAddress        map[uuid.UUID]struct{}
-	removed_ShippingAddress map[uuid.UUID]struct{}
+	_ShippingAddress        *uuid.UUID
 	cleared_ShippingAddress bool
 	_BillingAddress         map[uuid.UUID]struct{}
 	removed_BillingAddress  map[uuid.UUID]struct{}
@@ -1050,14 +1049,9 @@ func (m *AddressMutation) ResetZIP() {
 	m._ZIP = nil
 }
 
-// AddShippingAddresIDs adds the "ShippingAddress" edge to the Shipping entity by ids.
-func (m *AddressMutation) AddShippingAddresIDs(ids ...uuid.UUID) {
-	if m._ShippingAddress == nil {
-		m._ShippingAddress = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m._ShippingAddress[ids[i]] = struct{}{}
-	}
+// SetShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by id.
+func (m *AddressMutation) SetShippingAddressID(id uuid.UUID) {
+	m._ShippingAddress = &id
 }
 
 // ClearShippingAddress clears the "ShippingAddress" edge to the Shipping entity.
@@ -1070,28 +1064,20 @@ func (m *AddressMutation) ShippingAddressCleared() bool {
 	return m.cleared_ShippingAddress
 }
 
-// RemoveShippingAddresIDs removes the "ShippingAddress" edge to the Shipping entity by IDs.
-func (m *AddressMutation) RemoveShippingAddresIDs(ids ...uuid.UUID) {
-	if m.removed_ShippingAddress == nil {
-		m.removed_ShippingAddress = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.removed_ShippingAddress[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedShippingAddress returns the removed IDs of the "ShippingAddress" edge to the Shipping entity.
-func (m *AddressMutation) RemovedShippingAddressIDs() (ids []uuid.UUID) {
-	for id := range m.removed_ShippingAddress {
-		ids = append(ids, id)
+// ShippingAddressID returns the "ShippingAddress" edge ID in the mutation.
+func (m *AddressMutation) ShippingAddressID() (id uuid.UUID, exists bool) {
+	if m._ShippingAddress != nil {
+		return *m._ShippingAddress, true
 	}
 	return
 }
 
 // ShippingAddressIDs returns the "ShippingAddress" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ShippingAddressID instead. It exists only for internal usage by the builders.
 func (m *AddressMutation) ShippingAddressIDs() (ids []uuid.UUID) {
-	for id := range m._ShippingAddress {
-		ids = append(ids, id)
+	if id := m._ShippingAddress; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -1100,7 +1086,6 @@ func (m *AddressMutation) ShippingAddressIDs() (ids []uuid.UUID) {
 func (m *AddressMutation) ResetShippingAddress() {
 	m._ShippingAddress = nil
 	m.cleared_ShippingAddress = false
-	m.removed_ShippingAddress = nil
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by ids.
@@ -1412,11 +1397,9 @@ func (m *AddressMutation) AddedEdges() []string {
 func (m *AddressMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case address.EdgeShippingAddress:
-		ids := make([]ent.Value, 0, len(m._ShippingAddress))
-		for id := range m._ShippingAddress {
-			ids = append(ids, id)
+		if id := m._ShippingAddress; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case address.EdgeBillingAddress:
 		ids := make([]ent.Value, 0, len(m._BillingAddress))
 		for id := range m._BillingAddress {
@@ -1430,9 +1413,6 @@ func (m *AddressMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AddressMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removed_ShippingAddress != nil {
-		edges = append(edges, address.EdgeShippingAddress)
-	}
 	if m.removed_BillingAddress != nil {
 		edges = append(edges, address.EdgeBillingAddress)
 	}
@@ -1443,12 +1423,6 @@ func (m *AddressMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *AddressMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case address.EdgeShippingAddress:
-		ids := make([]ent.Value, 0, len(m.removed_ShippingAddress))
-		for id := range m.removed_ShippingAddress {
-			ids = append(ids, id)
-		}
-		return ids
 	case address.EdgeBillingAddress:
 		ids := make([]ent.Value, 0, len(m.removed_BillingAddress))
 		for id := range m.removed_BillingAddress {
@@ -1487,6 +1461,9 @@ func (m *AddressMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *AddressMutation) ClearEdge(name string) error {
 	switch name {
+	case address.EdgeShippingAddress:
+		m.ClearShippingAddress()
+		return nil
 	}
 	return fmt.Errorf("unknown Address unique edge %s", name)
 }
@@ -8562,8 +8539,7 @@ type ShippingMutation struct {
 	clearedFields           map[string]struct{}
 	_Profile                *uuid.UUID
 	cleared_Profile         bool
-	_ShippingAddress        map[uuid.UUID]struct{}
-	removed_ShippingAddress map[uuid.UUID]struct{}
+	_ShippingAddress        *uuid.UUID
 	cleared_ShippingAddress bool
 	_BillingAddress         map[uuid.UUID]struct{}
 	removed_BillingAddress  map[uuid.UUID]struct{}
@@ -8913,14 +8889,9 @@ func (m *ShippingMutation) ResetProfile() {
 	m.cleared_Profile = false
 }
 
-// AddShippingAddresIDs adds the "ShippingAddress" edge to the Address entity by ids.
-func (m *ShippingMutation) AddShippingAddresIDs(ids ...uuid.UUID) {
-	if m._ShippingAddress == nil {
-		m._ShippingAddress = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m._ShippingAddress[ids[i]] = struct{}{}
-	}
+// SetShippingAddressID sets the "ShippingAddress" edge to the Address entity by id.
+func (m *ShippingMutation) SetShippingAddressID(id uuid.UUID) {
+	m._ShippingAddress = &id
 }
 
 // ClearShippingAddress clears the "ShippingAddress" edge to the Address entity.
@@ -8933,28 +8904,20 @@ func (m *ShippingMutation) ShippingAddressCleared() bool {
 	return m.cleared_ShippingAddress
 }
 
-// RemoveShippingAddresIDs removes the "ShippingAddress" edge to the Address entity by IDs.
-func (m *ShippingMutation) RemoveShippingAddresIDs(ids ...uuid.UUID) {
-	if m.removed_ShippingAddress == nil {
-		m.removed_ShippingAddress = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.removed_ShippingAddress[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedShippingAddress returns the removed IDs of the "ShippingAddress" edge to the Address entity.
-func (m *ShippingMutation) RemovedShippingAddressIDs() (ids []uuid.UUID) {
-	for id := range m.removed_ShippingAddress {
-		ids = append(ids, id)
+// ShippingAddressID returns the "ShippingAddress" edge ID in the mutation.
+func (m *ShippingMutation) ShippingAddressID() (id uuid.UUID, exists bool) {
+	if m._ShippingAddress != nil {
+		return *m._ShippingAddress, true
 	}
 	return
 }
 
 // ShippingAddressIDs returns the "ShippingAddress" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ShippingAddressID instead. It exists only for internal usage by the builders.
 func (m *ShippingMutation) ShippingAddressIDs() (ids []uuid.UUID) {
-	for id := range m._ShippingAddress {
-		ids = append(ids, id)
+	if id := m._ShippingAddress; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -8963,7 +8926,6 @@ func (m *ShippingMutation) ShippingAddressIDs() (ids []uuid.UUID) {
 func (m *ShippingMutation) ResetShippingAddress() {
 	m._ShippingAddress = nil
 	m.cleared_ShippingAddress = false
-	m.removed_ShippingAddress = nil
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Address entity by ids.
@@ -9239,11 +9201,9 @@ func (m *ShippingMutation) AddedIDs(name string) []ent.Value {
 			return []ent.Value{*id}
 		}
 	case shipping.EdgeShippingAddress:
-		ids := make([]ent.Value, 0, len(m._ShippingAddress))
-		for id := range m._ShippingAddress {
-			ids = append(ids, id)
+		if id := m._ShippingAddress; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case shipping.EdgeBillingAddress:
 		ids := make([]ent.Value, 0, len(m._BillingAddress))
 		for id := range m._BillingAddress {
@@ -9257,9 +9217,6 @@ func (m *ShippingMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ShippingMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 3)
-	if m.removed_ShippingAddress != nil {
-		edges = append(edges, shipping.EdgeShippingAddress)
-	}
 	if m.removed_BillingAddress != nil {
 		edges = append(edges, shipping.EdgeBillingAddress)
 	}
@@ -9270,12 +9227,6 @@ func (m *ShippingMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ShippingMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case shipping.EdgeShippingAddress:
-		ids := make([]ent.Value, 0, len(m.removed_ShippingAddress))
-		for id := range m.removed_ShippingAddress {
-			ids = append(ids, id)
-		}
-		return ids
 	case shipping.EdgeBillingAddress:
 		ids := make([]ent.Value, 0, len(m.removed_BillingAddress))
 		for id := range m.removed_BillingAddress {
@@ -9321,6 +9272,9 @@ func (m *ShippingMutation) ClearEdge(name string) error {
 	switch name {
 	case shipping.EdgeProfile:
 		m.ClearProfile()
+		return nil
+	case shipping.EdgeShippingAddress:
+		m.ClearShippingAddress()
 		return nil
 	}
 	return fmt.Errorf("unknown Shipping unique edge %s", name)

@@ -100,19 +100,15 @@ func (ac *AddressCreate) SetID(u uuid.UUID) *AddressCreate {
 	return ac
 }
 
-// AddShippingAddresIDs adds the "ShippingAddress" edge to the Shipping entity by IDs.
-func (ac *AddressCreate) AddShippingAddresIDs(ids ...uuid.UUID) *AddressCreate {
-	ac.mutation.AddShippingAddresIDs(ids...)
+// SetShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by ID.
+func (ac *AddressCreate) SetShippingAddressID(id uuid.UUID) *AddressCreate {
+	ac.mutation.SetShippingAddressID(id)
 	return ac
 }
 
-// AddShippingAddress adds the "ShippingAddress" edges to the Shipping entity.
-func (ac *AddressCreate) AddShippingAddress(s ...*Shipping) *AddressCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return ac.AddShippingAddresIDs(ids...)
+// SetShippingAddress sets the "ShippingAddress" edge to the Shipping entity.
+func (ac *AddressCreate) SetShippingAddress(s *Shipping) *AddressCreate {
+	return ac.SetShippingAddressID(s.ID)
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
@@ -219,7 +215,7 @@ func (ac *AddressCreate) check() error {
 	if _, ok := ac.mutation.ZIP(); !ok {
 		return &ValidationError{Name: "ZIP", err: errors.New("ent: missing required field \"ZIP\"")}
 	}
-	if len(ac.mutation.ShippingAddressIDs()) == 0 {
+	if _, ok := ac.mutation.ShippingAddressID(); !ok {
 		return &ValidationError{Name: "ShippingAddress", err: errors.New("ent: missing required edge \"ShippingAddress\"")}
 	}
 	return nil
@@ -317,10 +313,10 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 	}
 	if nodes := ac.mutation.ShippingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.ShippingAddressTable,
-			Columns: address.ShippingAddressPrimaryKey,
+			Columns: []string{address.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -332,6 +328,7 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.shipping_shipping_address = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := ac.mutation.BillingAddressIDs(); len(nodes) > 0 {

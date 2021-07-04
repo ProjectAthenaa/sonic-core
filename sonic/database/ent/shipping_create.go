@@ -92,19 +92,23 @@ func (sc *ShippingCreate) SetProfile(p *Profile) *ShippingCreate {
 	return sc.SetProfileID(p.ID)
 }
 
-// AddShippingAddresIDs adds the "ShippingAddress" edge to the Address entity by IDs.
-func (sc *ShippingCreate) AddShippingAddresIDs(ids ...uuid.UUID) *ShippingCreate {
-	sc.mutation.AddShippingAddresIDs(ids...)
+// SetShippingAddressID sets the "ShippingAddress" edge to the Address entity by ID.
+func (sc *ShippingCreate) SetShippingAddressID(id uuid.UUID) *ShippingCreate {
+	sc.mutation.SetShippingAddressID(id)
 	return sc
 }
 
-// AddShippingAddress adds the "ShippingAddress" edges to the Address entity.
-func (sc *ShippingCreate) AddShippingAddress(a ...*Address) *ShippingCreate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// SetNillableShippingAddressID sets the "ShippingAddress" edge to the Address entity by ID if the given value is not nil.
+func (sc *ShippingCreate) SetNillableShippingAddressID(id *uuid.UUID) *ShippingCreate {
+	if id != nil {
+		sc = sc.SetShippingAddressID(*id)
 	}
-	return sc.AddShippingAddresIDs(ids...)
+	return sc
+}
+
+// SetShippingAddress sets the "ShippingAddress" edge to the Address entity.
+func (sc *ShippingCreate) SetShippingAddress(a *Address) *ShippingCreate {
+	return sc.SetShippingAddressID(a.ID)
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Address entity by IDs.
@@ -310,10 +314,10 @@ func (sc *ShippingCreate) createSpec() (*Shipping, *sqlgraph.CreateSpec) {
 	}
 	if nodes := sc.mutation.ShippingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   shipping.ShippingAddressTable,
-			Columns: shipping.ShippingAddressPrimaryKey,
+			Columns: []string{shipping.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

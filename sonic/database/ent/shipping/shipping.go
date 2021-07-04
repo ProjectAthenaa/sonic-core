@@ -40,11 +40,13 @@ const (
 	ProfileInverseTable = "profiles"
 	// ProfileColumn is the table column denoting the Profile relation/edge.
 	ProfileColumn = "profile_shipping"
-	// ShippingAddressTable is the table the holds the ShippingAddress relation/edge. The primary key declared below.
-	ShippingAddressTable = "shipping_ShippingAddress"
+	// ShippingAddressTable is the table the holds the ShippingAddress relation/edge.
+	ShippingAddressTable = "addresses"
 	// ShippingAddressInverseTable is the table name for the Address entity.
 	// It exists in this package in order to avoid circular dependency with the "address" package.
 	ShippingAddressInverseTable = "addresses"
+	// ShippingAddressColumn is the table column denoting the ShippingAddress relation/edge.
+	ShippingAddressColumn = "shipping_shipping_address"
 	// BillingAddressTable is the table the holds the BillingAddress relation/edge. The primary key declared below.
 	BillingAddressTable = "shipping_BillingAddress"
 	// BillingAddressInverseTable is the table name for the Address entity.
@@ -70,9 +72,6 @@ var ForeignKeys = []string{
 }
 
 var (
-	// ShippingAddressPrimaryKey and ShippingAddressColumn2 are the table columns denoting the
-	// primary key for the ShippingAddress relation (M2M).
-	ShippingAddressPrimaryKey = []string{"shipping_id", "address_id"}
 	// BillingAddressPrimaryKey and BillingAddressColumn2 are the table columns denoting the
 	// primary key for the BillingAddress relation (M2M).
 	BillingAddressPrimaryKey = []string{"shipping_id", "address_id"}

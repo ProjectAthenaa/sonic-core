@@ -43,13 +43,21 @@ var (
 		{Name: "state", Type: field.TypeString},
 		{Name: "city", Type: field.TypeString},
 		{Name: "zip", Type: field.TypeString},
+		{Name: "shipping_shipping_address", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// AddressesTable holds the schema information for the "addresses" table.
 	AddressesTable = &schema.Table{
-		Name:        "addresses",
-		Columns:     AddressesColumns,
-		PrimaryKey:  []*schema.Column{AddressesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "addresses",
+		Columns:    AddressesColumns,
+		PrimaryKey: []*schema.Column{AddressesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "addresses_shippings_ShippingAddress",
+				Columns:    []*schema.Column{AddressesColumns[9]},
+				RefColumns: []*schema.Column{ShippingsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// AppsColumns holds the columns for the "apps" table.
 	AppsColumns = []*schema.Column{
@@ -447,31 +455,6 @@ var (
 			},
 		},
 	}
-	// ShippingShippingAddressColumns holds the columns for the "shipping_ShippingAddress" table.
-	ShippingShippingAddressColumns = []*schema.Column{
-		{Name: "shipping_id", Type: field.TypeUUID},
-		{Name: "address_id", Type: field.TypeUUID},
-	}
-	// ShippingShippingAddressTable holds the schema information for the "shipping_ShippingAddress" table.
-	ShippingShippingAddressTable = &schema.Table{
-		Name:       "shipping_ShippingAddress",
-		Columns:    ShippingShippingAddressColumns,
-		PrimaryKey: []*schema.Column{ShippingShippingAddressColumns[0], ShippingShippingAddressColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "shipping_ShippingAddress_shipping_id",
-				Columns:    []*schema.Column{ShippingShippingAddressColumns[0]},
-				RefColumns: []*schema.Column{ShippingsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "shipping_ShippingAddress_address_id",
-				Columns:    []*schema.Column{ShippingShippingAddressColumns[1]},
-				RefColumns: []*schema.Column{AddressesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// ShippingBillingAddressColumns holds the columns for the "shipping_BillingAddress" table.
 	ShippingBillingAddressColumns = []*schema.Column{
 		{Name: "shipping_id", Type: field.TypeUUID},
@@ -670,7 +653,6 @@ var (
 		AppProfileGroupsTable,
 		AppTaskGroupsTable,
 		ProfileBillingTable,
-		ShippingShippingAddressTable,
 		ShippingBillingAddressTable,
 		StatisticProductTable,
 		TaskProductTable,
@@ -683,6 +665,7 @@ var (
 
 func init() {
 	AccountGroupsTable.ForeignKeys[0].RefTable = AppsTable
+	AddressesTable.ForeignKeys[0].RefTable = ShippingsTable
 	AppsTable.ForeignKeys[0].RefTable = UsersTable
 	LicensesTable.ForeignKeys[0].RefTable = UsersTable
 	ProfilesTable.ForeignKeys[0].RefTable = ProfileGroupsTable
@@ -698,8 +681,6 @@ func init() {
 	AppTaskGroupsTable.ForeignKeys[1].RefTable = TaskGroupsTable
 	ProfileBillingTable.ForeignKeys[0].RefTable = ProfilesTable
 	ProfileBillingTable.ForeignKeys[1].RefTable = BillingsTable
-	ShippingShippingAddressTable.ForeignKeys[0].RefTable = ShippingsTable
-	ShippingShippingAddressTable.ForeignKeys[1].RefTable = AddressesTable
 	ShippingBillingAddressTable.ForeignKeys[0].RefTable = ShippingsTable
 	ShippingBillingAddressTable.ForeignKeys[1].RefTable = AddressesTable
 	StatisticProductTable.ForeignKeys[0].RefTable = StatisticsTable

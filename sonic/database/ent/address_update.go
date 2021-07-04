@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -99,19 +100,15 @@ func (au *AddressUpdate) SetZIP(s string) *AddressUpdate {
 	return au
 }
 
-// AddShippingAddresIDs adds the "ShippingAddress" edge to the Shipping entity by IDs.
-func (au *AddressUpdate) AddShippingAddresIDs(ids ...uuid.UUID) *AddressUpdate {
-	au.mutation.AddShippingAddresIDs(ids...)
+// SetShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by ID.
+func (au *AddressUpdate) SetShippingAddressID(id uuid.UUID) *AddressUpdate {
+	au.mutation.SetShippingAddressID(id)
 	return au
 }
 
-// AddShippingAddress adds the "ShippingAddress" edges to the Shipping entity.
-func (au *AddressUpdate) AddShippingAddress(s ...*Shipping) *AddressUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return au.AddShippingAddresIDs(ids...)
+// SetShippingAddress sets the "ShippingAddress" edge to the Shipping entity.
+func (au *AddressUpdate) SetShippingAddress(s *Shipping) *AddressUpdate {
+	return au.SetShippingAddressID(s.ID)
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
@@ -134,25 +131,10 @@ func (au *AddressUpdate) Mutation() *AddressMutation {
 	return au.mutation
 }
 
-// ClearShippingAddress clears all "ShippingAddress" edges to the Shipping entity.
+// ClearShippingAddress clears the "ShippingAddress" edge to the Shipping entity.
 func (au *AddressUpdate) ClearShippingAddress() *AddressUpdate {
 	au.mutation.ClearShippingAddress()
 	return au
-}
-
-// RemoveShippingAddresIDs removes the "ShippingAddress" edge to Shipping entities by IDs.
-func (au *AddressUpdate) RemoveShippingAddresIDs(ids ...uuid.UUID) *AddressUpdate {
-	au.mutation.RemoveShippingAddresIDs(ids...)
-	return au
-}
-
-// RemoveShippingAddress removes "ShippingAddress" edges to Shipping entities.
-func (au *AddressUpdate) RemoveShippingAddress(s ...*Shipping) *AddressUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return au.RemoveShippingAddresIDs(ids...)
 }
 
 // ClearBillingAddress clears all "BillingAddress" edges to the Shipping entity.
@@ -184,12 +166,18 @@ func (au *AddressUpdate) Save(ctx context.Context) (int, error) {
 	)
 	au.defaults()
 	if len(au.hooks) == 0 {
+		if err = au.check(); err != nil {
+			return 0, err
+		}
 		affected, err = au.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*AddressMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = au.check(); err != nil {
+				return 0, err
 			}
 			au.mutation = mutation
 			affected, err = au.sqlSave(ctx)
@@ -234,6 +222,14 @@ func (au *AddressUpdate) defaults() {
 		v := address.UpdateDefaultUpdatedAt()
 		au.mutation.SetUpdatedAt(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (au *AddressUpdate) check() error {
+	if _, ok := au.mutation.ShippingAddressID(); au.mutation.ShippingAddressCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"ShippingAddress\"")
+	}
+	return nil
 }
 
 func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -318,10 +314,10 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if au.mutation.ShippingAddressCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.ShippingAddressTable,
-			Columns: address.ShippingAddressPrimaryKey,
+			Columns: []string{address.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -329,34 +325,15 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 					Column: shipping.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.RemovedShippingAddressIDs(); len(nodes) > 0 && !au.mutation.ShippingAddressCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   address.ShippingAddressTable,
-			Columns: address.ShippingAddressPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: shipping.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := au.mutation.ShippingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.ShippingAddressTable,
-			Columns: address.ShippingAddressPrimaryKey,
+			Columns: []string{address.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -513,19 +490,15 @@ func (auo *AddressUpdateOne) SetZIP(s string) *AddressUpdateOne {
 	return auo
 }
 
-// AddShippingAddresIDs adds the "ShippingAddress" edge to the Shipping entity by IDs.
-func (auo *AddressUpdateOne) AddShippingAddresIDs(ids ...uuid.UUID) *AddressUpdateOne {
-	auo.mutation.AddShippingAddresIDs(ids...)
+// SetShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by ID.
+func (auo *AddressUpdateOne) SetShippingAddressID(id uuid.UUID) *AddressUpdateOne {
+	auo.mutation.SetShippingAddressID(id)
 	return auo
 }
 
-// AddShippingAddress adds the "ShippingAddress" edges to the Shipping entity.
-func (auo *AddressUpdateOne) AddShippingAddress(s ...*Shipping) *AddressUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return auo.AddShippingAddresIDs(ids...)
+// SetShippingAddress sets the "ShippingAddress" edge to the Shipping entity.
+func (auo *AddressUpdateOne) SetShippingAddress(s *Shipping) *AddressUpdateOne {
+	return auo.SetShippingAddressID(s.ID)
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
@@ -548,25 +521,10 @@ func (auo *AddressUpdateOne) Mutation() *AddressMutation {
 	return auo.mutation
 }
 
-// ClearShippingAddress clears all "ShippingAddress" edges to the Shipping entity.
+// ClearShippingAddress clears the "ShippingAddress" edge to the Shipping entity.
 func (auo *AddressUpdateOne) ClearShippingAddress() *AddressUpdateOne {
 	auo.mutation.ClearShippingAddress()
 	return auo
-}
-
-// RemoveShippingAddresIDs removes the "ShippingAddress" edge to Shipping entities by IDs.
-func (auo *AddressUpdateOne) RemoveShippingAddresIDs(ids ...uuid.UUID) *AddressUpdateOne {
-	auo.mutation.RemoveShippingAddresIDs(ids...)
-	return auo
-}
-
-// RemoveShippingAddress removes "ShippingAddress" edges to Shipping entities.
-func (auo *AddressUpdateOne) RemoveShippingAddress(s ...*Shipping) *AddressUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return auo.RemoveShippingAddresIDs(ids...)
 }
 
 // ClearBillingAddress clears all "BillingAddress" edges to the Shipping entity.
@@ -605,12 +563,18 @@ func (auo *AddressUpdateOne) Save(ctx context.Context) (*Address, error) {
 	)
 	auo.defaults()
 	if len(auo.hooks) == 0 {
+		if err = auo.check(); err != nil {
+			return nil, err
+		}
 		node, err = auo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*AddressMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = auo.check(); err != nil {
+				return nil, err
 			}
 			auo.mutation = mutation
 			node, err = auo.sqlSave(ctx)
@@ -655,6 +619,14 @@ func (auo *AddressUpdateOne) defaults() {
 		v := address.UpdateDefaultUpdatedAt()
 		auo.mutation.SetUpdatedAt(v)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (auo *AddressUpdateOne) check() error {
+	if _, ok := auo.mutation.ShippingAddressID(); auo.mutation.ShippingAddressCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"ShippingAddress\"")
+	}
+	return nil
 }
 
 func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err error) {
@@ -756,10 +728,10 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 	}
 	if auo.mutation.ShippingAddressCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.ShippingAddressTable,
-			Columns: address.ShippingAddressPrimaryKey,
+			Columns: []string{address.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -767,34 +739,15 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 					Column: shipping.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.RemovedShippingAddressIDs(); len(nodes) > 0 && !auo.mutation.ShippingAddressCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   address.ShippingAddressTable,
-			Columns: address.ShippingAddressPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: shipping.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := auo.mutation.ShippingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.ShippingAddressTable,
-			Columns: address.ShippingAddressPrimaryKey,
+			Columns: []string{address.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

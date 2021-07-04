@@ -35,11 +35,13 @@ const (
 	EdgeBillingAddress = "BillingAddress"
 	// Table holds the table name of the address in the database.
 	Table = "addresses"
-	// ShippingAddressTable is the table the holds the ShippingAddress relation/edge. The primary key declared below.
-	ShippingAddressTable = "shipping_ShippingAddress"
+	// ShippingAddressTable is the table the holds the ShippingAddress relation/edge.
+	ShippingAddressTable = "addresses"
 	// ShippingAddressInverseTable is the table name for the Shipping entity.
 	// It exists in this package in order to avoid circular dependency with the "shipping" package.
 	ShippingAddressInverseTable = "shippings"
+	// ShippingAddressColumn is the table column denoting the ShippingAddress relation/edge.
+	ShippingAddressColumn = "shipping_shipping_address"
 	// BillingAddressTable is the table the holds the BillingAddress relation/edge. The primary key declared below.
 	BillingAddressTable = "shipping_BillingAddress"
 	// BillingAddressInverseTable is the table name for the Shipping entity.
@@ -60,10 +62,13 @@ var Columns = []string{
 	FieldZIP,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "addresses"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"shipping_shipping_address",
+}
+
 var (
-	// ShippingAddressPrimaryKey and ShippingAddressColumn2 are the table columns denoting the
-	// primary key for the ShippingAddress relation (M2M).
-	ShippingAddressPrimaryKey = []string{"shipping_id", "address_id"}
 	// BillingAddressPrimaryKey and BillingAddressColumn2 are the table columns denoting the
 	// primary key for the BillingAddress relation (M2M).
 	BillingAddressPrimaryKey = []string{"shipping_id", "address_id"}
@@ -73,6 +78,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

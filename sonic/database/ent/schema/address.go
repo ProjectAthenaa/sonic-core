@@ -38,7 +38,8 @@ func (Address) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("ShippingAddress", Shipping.Type).
 			Ref("ShippingAddress").
-			Required(),
+			Required().
+			Unique(),
 		edge.From("BillingAddress", Shipping.Type).
 			Ref("BillingAddress"),
 	}

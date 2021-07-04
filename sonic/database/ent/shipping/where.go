@@ -669,7 +669,7 @@ func HasShippingAddress() predicate.Shipping {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ShippingAddressTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ShippingAddressTable, ShippingAddressPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, false, ShippingAddressTable, ShippingAddressColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -681,7 +681,7 @@ func HasShippingAddressWith(preds ...predicate.Address) predicate.Shipping {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ShippingAddressInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, ShippingAddressTable, ShippingAddressPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, false, ShippingAddressTable, ShippingAddressColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

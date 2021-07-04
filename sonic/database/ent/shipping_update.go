@@ -86,19 +86,23 @@ func (su *ShippingUpdate) SetProfile(p *Profile) *ShippingUpdate {
 	return su.SetProfileID(p.ID)
 }
 
-// AddShippingAddresIDs adds the "ShippingAddress" edge to the Address entity by IDs.
-func (su *ShippingUpdate) AddShippingAddresIDs(ids ...uuid.UUID) *ShippingUpdate {
-	su.mutation.AddShippingAddresIDs(ids...)
+// SetShippingAddressID sets the "ShippingAddress" edge to the Address entity by ID.
+func (su *ShippingUpdate) SetShippingAddressID(id uuid.UUID) *ShippingUpdate {
+	su.mutation.SetShippingAddressID(id)
 	return su
 }
 
-// AddShippingAddress adds the "ShippingAddress" edges to the Address entity.
-func (su *ShippingUpdate) AddShippingAddress(a ...*Address) *ShippingUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// SetNillableShippingAddressID sets the "ShippingAddress" edge to the Address entity by ID if the given value is not nil.
+func (su *ShippingUpdate) SetNillableShippingAddressID(id *uuid.UUID) *ShippingUpdate {
+	if id != nil {
+		su = su.SetShippingAddressID(*id)
 	}
-	return su.AddShippingAddresIDs(ids...)
+	return su
+}
+
+// SetShippingAddress sets the "ShippingAddress" edge to the Address entity.
+func (su *ShippingUpdate) SetShippingAddress(a *Address) *ShippingUpdate {
+	return su.SetShippingAddressID(a.ID)
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Address entity by IDs.
@@ -127,25 +131,10 @@ func (su *ShippingUpdate) ClearProfile() *ShippingUpdate {
 	return su
 }
 
-// ClearShippingAddress clears all "ShippingAddress" edges to the Address entity.
+// ClearShippingAddress clears the "ShippingAddress" edge to the Address entity.
 func (su *ShippingUpdate) ClearShippingAddress() *ShippingUpdate {
 	su.mutation.ClearShippingAddress()
 	return su
-}
-
-// RemoveShippingAddresIDs removes the "ShippingAddress" edge to Address entities by IDs.
-func (su *ShippingUpdate) RemoveShippingAddresIDs(ids ...uuid.UUID) *ShippingUpdate {
-	su.mutation.RemoveShippingAddresIDs(ids...)
-	return su
-}
-
-// RemoveShippingAddress removes "ShippingAddress" edges to Address entities.
-func (su *ShippingUpdate) RemoveShippingAddress(a ...*Address) *ShippingUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return su.RemoveShippingAddresIDs(ids...)
 }
 
 // ClearBillingAddress clears all "BillingAddress" edges to the Address entity.
@@ -340,10 +329,10 @@ func (su *ShippingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if su.mutation.ShippingAddressCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   shipping.ShippingAddressTable,
-			Columns: shipping.ShippingAddressPrimaryKey,
+			Columns: []string{shipping.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -351,34 +340,15 @@ func (su *ShippingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 					Column: address.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := su.mutation.RemovedShippingAddressIDs(); len(nodes) > 0 && !su.mutation.ShippingAddressCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   shipping.ShippingAddressTable,
-			Columns: shipping.ShippingAddressPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: address.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := su.mutation.ShippingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   shipping.ShippingAddressTable,
-			Columns: shipping.ShippingAddressPrimaryKey,
+			Columns: []string{shipping.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -520,19 +490,23 @@ func (suo *ShippingUpdateOne) SetProfile(p *Profile) *ShippingUpdateOne {
 	return suo.SetProfileID(p.ID)
 }
 
-// AddShippingAddresIDs adds the "ShippingAddress" edge to the Address entity by IDs.
-func (suo *ShippingUpdateOne) AddShippingAddresIDs(ids ...uuid.UUID) *ShippingUpdateOne {
-	suo.mutation.AddShippingAddresIDs(ids...)
+// SetShippingAddressID sets the "ShippingAddress" edge to the Address entity by ID.
+func (suo *ShippingUpdateOne) SetShippingAddressID(id uuid.UUID) *ShippingUpdateOne {
+	suo.mutation.SetShippingAddressID(id)
 	return suo
 }
 
-// AddShippingAddress adds the "ShippingAddress" edges to the Address entity.
-func (suo *ShippingUpdateOne) AddShippingAddress(a ...*Address) *ShippingUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+// SetNillableShippingAddressID sets the "ShippingAddress" edge to the Address entity by ID if the given value is not nil.
+func (suo *ShippingUpdateOne) SetNillableShippingAddressID(id *uuid.UUID) *ShippingUpdateOne {
+	if id != nil {
+		suo = suo.SetShippingAddressID(*id)
 	}
-	return suo.AddShippingAddresIDs(ids...)
+	return suo
+}
+
+// SetShippingAddress sets the "ShippingAddress" edge to the Address entity.
+func (suo *ShippingUpdateOne) SetShippingAddress(a *Address) *ShippingUpdateOne {
+	return suo.SetShippingAddressID(a.ID)
 }
 
 // AddBillingAddresIDs adds the "BillingAddress" edge to the Address entity by IDs.
@@ -561,25 +535,10 @@ func (suo *ShippingUpdateOne) ClearProfile() *ShippingUpdateOne {
 	return suo
 }
 
-// ClearShippingAddress clears all "ShippingAddress" edges to the Address entity.
+// ClearShippingAddress clears the "ShippingAddress" edge to the Address entity.
 func (suo *ShippingUpdateOne) ClearShippingAddress() *ShippingUpdateOne {
 	suo.mutation.ClearShippingAddress()
 	return suo
-}
-
-// RemoveShippingAddresIDs removes the "ShippingAddress" edge to Address entities by IDs.
-func (suo *ShippingUpdateOne) RemoveShippingAddresIDs(ids ...uuid.UUID) *ShippingUpdateOne {
-	suo.mutation.RemoveShippingAddresIDs(ids...)
-	return suo
-}
-
-// RemoveShippingAddress removes "ShippingAddress" edges to Address entities.
-func (suo *ShippingUpdateOne) RemoveShippingAddress(a ...*Address) *ShippingUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
-	}
-	return suo.RemoveShippingAddresIDs(ids...)
 }
 
 // ClearBillingAddress clears all "BillingAddress" edges to the Address entity.
@@ -798,10 +757,10 @@ func (suo *ShippingUpdateOne) sqlSave(ctx context.Context) (_node *Shipping, err
 	}
 	if suo.mutation.ShippingAddressCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   shipping.ShippingAddressTable,
-			Columns: shipping.ShippingAddressPrimaryKey,
+			Columns: []string{shipping.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -809,34 +768,15 @@ func (suo *ShippingUpdateOne) sqlSave(ctx context.Context) (_node *Shipping, err
 					Column: address.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := suo.mutation.RemovedShippingAddressIDs(); len(nodes) > 0 && !suo.mutation.ShippingAddressCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   shipping.ShippingAddressTable,
-			Columns: shipping.ShippingAddressPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: address.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := suo.mutation.ShippingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   shipping.ShippingAddressTable,
-			Columns: shipping.ShippingAddressPrimaryKey,
+			Columns: []string{shipping.ShippingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
