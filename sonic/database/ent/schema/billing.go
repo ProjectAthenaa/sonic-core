@@ -35,7 +35,6 @@ func (Billing) Fields() []ent.Field {
 func (Billing) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("Profile", Profile.Type).
-			Ref("Billing").
-			Required(),
+			Ref("Billing"),
 	}
 }

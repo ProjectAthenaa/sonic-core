@@ -190,9 +190,6 @@ func (bc *BillingCreate) check() error {
 	if _, ok := bc.mutation.CVV(); !ok {
 		return &ValidationError{Name: "CVV", err: errors.New("ent: missing required field \"CVV\"")}
 	}
-	if len(bc.mutation.ProfileIDs()) == 0 {
-		return &ValidationError{Name: "Profile", err: errors.New("ent: missing required edge \"Profile\"")}
-	}
 	return nil
 }
 
