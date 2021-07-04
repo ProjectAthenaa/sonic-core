@@ -81,7 +81,7 @@ func (aq *AddressQuery) QueryShippingAddress() *ShippingQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(address.Table, address.FieldID, selector),
 			sqlgraph.To(shipping.Table, shipping.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, address.ShippingAddressTable, address.ShippingAddressColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, address.ShippingAddressTable, address.ShippingAddressColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil

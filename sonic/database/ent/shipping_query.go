@@ -105,7 +105,7 @@ func (sq *ShippingQuery) QueryShippingAddress() *AddressQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(shipping.Table, shipping.FieldID, selector),
 			sqlgraph.To(address.Table, address.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, shipping.ShippingAddressTable, shipping.ShippingAddressColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, shipping.ShippingAddressTable, shipping.ShippingAddressColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -491,6 +491,7 @@ func (sq *ShippingQuery) sqlAll(ctx context.Context) ([]*Shipping, error) {
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.ShippingAddress = []*Address{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Address(func(s *sql.Selector) {
@@ -509,7 +510,7 @@ func (sq *ShippingQuery) sqlAll(ctx context.Context) ([]*Shipping, error) {
 			if !ok {
 				return nil, fmt.Errorf(`unexpected foreign-key "shipping_shipping_address" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.ShippingAddress = n
+			node.Edges.ShippingAddress = append(node.Edges.ShippingAddress, n)
 		}
 	}
 

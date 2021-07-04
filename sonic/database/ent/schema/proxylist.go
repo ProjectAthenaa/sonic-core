@@ -34,7 +34,8 @@ func (ProxyList) Fields() []ent.Field {
 func (ProxyList) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("App", App.Type).
-			Ref("ProxyLists"),
+			Ref("ProxyLists").
+			Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 		edge.To("Proxies", Proxy.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 		edge.From("Task", Task.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}).
 			Ref("ProxyList"),

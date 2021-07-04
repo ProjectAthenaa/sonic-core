@@ -434,7 +434,7 @@ func (c *AddressClient) QueryShippingAddress(a *Address) *ShippingQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(address.Table, address.FieldID, id),
 			sqlgraph.To(shipping.Table, shipping.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, address.ShippingAddressTable, address.ShippingAddressColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, address.ShippingAddressTable, address.ShippingAddressColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -1734,7 +1734,7 @@ func (c *ShippingClient) QueryShippingAddress(s *Shipping) *AddressQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(shipping.Table, shipping.FieldID, id),
 			sqlgraph.To(address.Table, address.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, shipping.ShippingAddressTable, shipping.ShippingAddressColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, shipping.ShippingAddressTable, shipping.ShippingAddressColumn),
 		)
 		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil

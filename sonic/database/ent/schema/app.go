@@ -34,7 +34,8 @@ func (App) Edges() []ent.Edge {
 		edge.From("User", User.Type).
 			Ref("App").
 			Unique().
-			Required(),
+			Required().
+			Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 		edge.To("Settings", Settings.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 		edge.To("ProxyLists", ProxyList.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 		edge.To("ProfileGroups", ProfileGroup.Type).Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),

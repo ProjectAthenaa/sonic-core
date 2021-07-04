@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
 	"github.com/google/uuid"
@@ -42,7 +41,7 @@ type ShippingEdges struct {
 	// Profile holds the value of the Profile edge.
 	Profile *Profile `json:"Profile,omitempty"`
 	// ShippingAddress holds the value of the ShippingAddress edge.
-	ShippingAddress *Address `json:"ShippingAddress,omitempty"`
+	ShippingAddress []*Address `json:"ShippingAddress,omitempty"`
 	// BillingAddress holds the value of the BillingAddress edge.
 	BillingAddress []*Address `json:"BillingAddress,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -65,14 +64,9 @@ func (e ShippingEdges) ProfileOrErr() (*Profile, error) {
 }
 
 // ShippingAddressOrErr returns the ShippingAddress value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e ShippingEdges) ShippingAddressOrErr() (*Address, error) {
+// was not loaded in eager-loading.
+func (e ShippingEdges) ShippingAddressOrErr() ([]*Address, error) {
 	if e.loadedTypes[1] {
-		if e.ShippingAddress == nil {
-			// The edge ShippingAddress was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: address.Label}
-		}
 		return e.ShippingAddress, nil
 	}
 	return nil, &NotLoadedError{edge: "ShippingAddress"}

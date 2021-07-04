@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
@@ -38,6 +39,7 @@ func (AccountGroup) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("App", App.Type).
 			Ref("AccountGroups").
-			Unique(),
+			Unique().
+			Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
 	}
 }

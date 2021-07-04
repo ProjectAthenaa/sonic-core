@@ -36,8 +36,7 @@ func (Shipping) Edges() []ent.Edge {
 		edge.From("Profile", Profile.Type).
 			Ref("Shipping").
 			Unique(),
-		edge.To("ShippingAddress", Address.Type).
-			Unique(),
+		edge.To("ShippingAddress", Address.Type),
 		edge.To("BillingAddress", Address.Type),
 	}
 }
