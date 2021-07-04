@@ -1,5 +1,6 @@
 syntax="proto3";
 
+package athena.modules.moduleName;
 
 option go_package="sonic/module";
 
