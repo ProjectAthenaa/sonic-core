@@ -58,7 +58,7 @@ func (Product) Fields() []ent.Field {
 		field.Strings("PositiveKeywords").Optional(),
 		field.Strings("NegativeKeywords").Optional(),
 		field.String("Link").Optional(),
-		field.Int32("Quantity"),
+		field.Int32("Quantity").Default(1),
 		field.Strings("Sizes").Optional(),
 		field.Strings("Colors").Optional(),
 		field.Enum("Site").Values(Sites...),

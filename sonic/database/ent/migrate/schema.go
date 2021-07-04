@@ -135,7 +135,7 @@ var (
 		{Name: "positive_keywords", Type: field.TypeJSON, Nullable: true},
 		{Name: "negative_keywords", Type: field.TypeJSON, Nullable: true},
 		{Name: "link", Type: field.TypeString, Nullable: true},
-		{Name: "quantity", Type: field.TypeInt32},
+		{Name: "quantity", Type: field.TypeInt32, Default: 1},
 		{Name: "sizes", Type: field.TypeJSON, Nullable: true},
 		{Name: "colors", Type: field.TypeJSON, Nullable: true},
 		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet"}},

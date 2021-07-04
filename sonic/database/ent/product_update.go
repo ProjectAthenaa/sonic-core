@@ -134,6 +134,14 @@ func (pu *ProductUpdate) SetQuantity(i int32) *ProductUpdate {
 	return pu
 }
 
+// SetNillableQuantity sets the "Quantity" field if the given value is not nil.
+func (pu *ProductUpdate) SetNillableQuantity(i *int32) *ProductUpdate {
+	if i != nil {
+		pu.SetQuantity(*i)
+	}
+	return pu
+}
+
 // AddQuantity adds i to the "Quantity" field.
 func (pu *ProductUpdate) AddQuantity(i int32) *ProductUpdate {
 	pu.mutation.AddQuantity(i)
@@ -725,6 +733,14 @@ func (puo *ProductUpdateOne) ClearLink() *ProductUpdateOne {
 func (puo *ProductUpdateOne) SetQuantity(i int32) *ProductUpdateOne {
 	puo.mutation.ResetQuantity()
 	puo.mutation.SetQuantity(i)
+	return puo
+}
+
+// SetNillableQuantity sets the "Quantity" field if the given value is not nil.
+func (puo *ProductUpdateOne) SetNillableQuantity(i *int32) *ProductUpdateOne {
+	if i != nil {
+		puo.SetQuantity(*i)
+	}
 	return puo
 }
 

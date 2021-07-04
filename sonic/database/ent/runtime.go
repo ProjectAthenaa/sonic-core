@@ -126,6 +126,10 @@ func init() {
 	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
 	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	product.UpdateDefaultUpdatedAt = productDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// productDescQuantity is the schema descriptor for Quantity field.
+	productDescQuantity := productFields[9].Descriptor()
+	// product.DefaultQuantity holds the default value on creation for the Quantity field.
+	product.DefaultQuantity = productDescQuantity.Default.(int32)
 	// productDescID is the schema descriptor for id field.
 	productDescID := productFields[0].Descriptor()
 	// product.DefaultID holds the default value on creation for the id field.

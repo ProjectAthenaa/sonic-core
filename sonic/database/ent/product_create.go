@@ -110,6 +110,14 @@ func (pc *ProductCreate) SetQuantity(i int32) *ProductCreate {
 	return pc
 }
 
+// SetNillableQuantity sets the "Quantity" field if the given value is not nil.
+func (pc *ProductCreate) SetNillableQuantity(i *int32) *ProductCreate {
+	if i != nil {
+		pc.SetQuantity(*i)
+	}
+	return pc
+}
+
 // SetSizes sets the "Sizes" field.
 func (pc *ProductCreate) SetSizes(s []string) *ProductCreate {
 	pc.mutation.SetSizes(s)
@@ -229,6 +237,10 @@ func (pc *ProductCreate) defaults() {
 	if _, ok := pc.mutation.UpdatedAt(); !ok {
 		v := product.DefaultUpdatedAt()
 		pc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := pc.mutation.Quantity(); !ok {
+		v := product.DefaultQuantity
+		pc.mutation.SetQuantity(v)
 	}
 	if _, ok := pc.mutation.ID(); !ok {
 		v := product.DefaultID()
