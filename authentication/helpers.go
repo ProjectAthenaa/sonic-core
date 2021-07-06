@@ -4,13 +4,17 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database"
 	"github.com/google/uuid"
 	"os"
 	"strings"
 )
 
-var client = database.Connect(os.Getenv("PG_URL"))
+var (
+	rdb    = sonic.ConnectToRedis()
+	client = database.Connect(os.Getenv("PG_URL"))
+)
 
 func extractTokens(ctx context.Context, basicToken string) (string, string, error) {
 	data, err := base64.StdEncoding.DecodeString(basicToken)
@@ -41,4 +45,9 @@ func extractTokens(ctx context.Context, basicToken string) (string, string, erro
 	}
 
 	return tokens[0], tokens[1], nil
+}
+
+type AuthUser struct {
+	ID string `json:"id"`
+
 }

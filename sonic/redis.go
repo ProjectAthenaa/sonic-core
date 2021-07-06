@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var rdb = connectToRedis()
+var rdb = ConnectToRedis()
 
 //SubscribeToChannel connects to a redis pub/sub stream and returns a pointer to a PubSub struct
 func SubscribeToChannel(channelName string) (ps *PubSub, err error) {
@@ -37,8 +37,8 @@ func (p *PubSub) Close() error {
 	return p.redisPS.Close()
 }
 
-//connectToRedis is an internal method used to create a redis client to use with pub/sub
-func connectToRedis() *redis.Client {
+//ConnectToRedis is an internal method used to create a redis client to use with pub/sub
+func ConnectToRedis() *redis.Client {
 	redisURL := os.Getenv("REDIS_URL")
 
 	if !redisURLRegex.MatchString(redisURL) {
