@@ -16,20 +16,26 @@ type Logger interface {
 
 type Log struct {
 	Config LoggerConfig
+	buffer []byte
 }
 
 type LoggerConfig struct {
 	AlwaysSubmit bool
 	PrintLogs    bool
 	Level        LogLevel
+	name         string
 }
 
-func NewLogger(config ...LoggerConfig) Log {
+func NewLogger(serviceName string, config ...LoggerConfig) *Log {
+	if len(serviceName) == 0 {
+		panic(nameCannotBeEmptyError)
+	}
 	if len(config) == 1 {
-		return Log{Config: config[0]}
+		config[0].name = serviceName
+		return &Log{Config: config[0]}
 	}
 
-	return Log{}
+	return &Log{Config: LoggerConfig{name: serviceName}}
 }
 
 func (l *Log) Println(in ...interface{}) {
