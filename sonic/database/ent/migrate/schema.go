@@ -254,6 +254,7 @@ var (
 		{Name: "device_name", Type: field.TypeString, Default: "Unknown"},
 		{Name: "os", Type: field.TypeString, Default: "Unknown"},
 		{Name: "device_type", Type: field.TypeEnum, Enums: []string{"Unknown", "Phone", "Tablet", "PC", "Laptop"}, Default: "Unknown"},
+		{Name: "ip", Type: field.TypeString, Default: "Unknown"},
 		{Name: "user_sessions", Type: field.TypeUUID, Nullable: true},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
@@ -264,7 +265,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "sessions_users_Sessions",
-				Columns:    []*schema.Column{SessionsColumns[5]},
+				Columns:    []*schema.Column{SessionsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

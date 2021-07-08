@@ -85,6 +85,20 @@ func (su *SessionUpdate) SetNillableDeviceType(st *session.DeviceType) *SessionU
 	return su
 }
 
+// SetIP sets the "IP" field.
+func (su *SessionUpdate) SetIP(s string) *SessionUpdate {
+	su.mutation.SetIP(s)
+	return su
+}
+
+// SetNillableIP sets the "IP" field if the given value is not nil.
+func (su *SessionUpdate) SetNillableIP(s *string) *SessionUpdate {
+	if s != nil {
+		su.SetIP(*s)
+	}
+	return su
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (su *SessionUpdate) SetUserID(id uuid.UUID) *SessionUpdate {
 	su.mutation.SetUserID(id)
@@ -228,6 +242,13 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: session.FieldDeviceType,
 		})
 	}
+	if value, ok := su.mutation.IP(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: session.FieldIP,
+		})
+	}
 	if su.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -334,6 +355,20 @@ func (suo *SessionUpdateOne) SetDeviceType(st session.DeviceType) *SessionUpdate
 func (suo *SessionUpdateOne) SetNillableDeviceType(st *session.DeviceType) *SessionUpdateOne {
 	if st != nil {
 		suo.SetDeviceType(*st)
+	}
+	return suo
+}
+
+// SetIP sets the "IP" field.
+func (suo *SessionUpdateOne) SetIP(s string) *SessionUpdateOne {
+	suo.mutation.SetIP(s)
+	return suo
+}
+
+// SetNillableIP sets the "IP" field if the given value is not nil.
+func (suo *SessionUpdateOne) SetNillableIP(s *string) *SessionUpdateOne {
+	if s != nil {
+		suo.SetIP(*s)
 	}
 	return suo
 }
@@ -503,6 +538,13 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: session.FieldDeviceType,
+		})
+	}
+	if value, ok := suo.mutation.IP(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: session.FieldIP,
 		})
 	}
 	if suo.mutation.UserCleared() {

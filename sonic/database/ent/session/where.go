@@ -115,6 +115,13 @@ func OS(v string) predicate.Session {
 	})
 }
 
+// IP applies equality check predicate on the "IP" field. It's identical to IPEQ.
+func IP(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIP), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
@@ -458,6 +465,117 @@ func DeviceTypeNotIn(vs ...DeviceType) predicate.Session {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldDeviceType), v...))
+	})
+}
+
+// IPEQ applies the EQ predicate on the "IP" field.
+func IPEQ(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIP), v))
+	})
+}
+
+// IPNEQ applies the NEQ predicate on the "IP" field.
+func IPNEQ(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldIP), v))
+	})
+}
+
+// IPIn applies the In predicate on the "IP" field.
+func IPIn(vs ...string) predicate.Session {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Session(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldIP), v...))
+	})
+}
+
+// IPNotIn applies the NotIn predicate on the "IP" field.
+func IPNotIn(vs ...string) predicate.Session {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Session(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldIP), v...))
+	})
+}
+
+// IPGT applies the GT predicate on the "IP" field.
+func IPGT(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldIP), v))
+	})
+}
+
+// IPGTE applies the GTE predicate on the "IP" field.
+func IPGTE(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldIP), v))
+	})
+}
+
+// IPLT applies the LT predicate on the "IP" field.
+func IPLT(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldIP), v))
+	})
+}
+
+// IPLTE applies the LTE predicate on the "IP" field.
+func IPLTE(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldIP), v))
+	})
+}
+
+// IPContains applies the Contains predicate on the "IP" field.
+func IPContains(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldIP), v))
+	})
+}
+
+// IPHasPrefix applies the HasPrefix predicate on the "IP" field.
+func IPHasPrefix(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldIP), v))
+	})
+}
+
+// IPHasSuffix applies the HasSuffix predicate on the "IP" field.
+func IPHasSuffix(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldIP), v))
+	})
+}
+
+// IPEqualFold applies the EqualFold predicate on the "IP" field.
+func IPEqualFold(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldIP), v))
+	})
+}
+
+// IPContainsFold applies the ContainsFold predicate on the "IP" field.
+func IPContainsFold(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldIP), v))
 	})
 }
 

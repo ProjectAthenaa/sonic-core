@@ -5,7 +5,6 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"regexp"
 	"time"
 )
 
@@ -28,8 +27,7 @@ func (Session) Fields() []ent.Field {
 		field.Enum("DeviceType").
 			Values("Unknown", "Phone", "Tablet", "PC", "Laptop").
 			Default("Unknown"),
-		field.String("IP").
-			Match(regexp.MustCompile(`^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$`)),
+		field.String("IP").Default("Unknown"),
 	}
 }
 

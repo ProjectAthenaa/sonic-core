@@ -8326,6 +8326,7 @@ type SessionMutation struct {
 	_DeviceName   *string
 	_OS           *string
 	_DeviceType   *session.DeviceType
+	_IP           *string
 	clearedFields map[string]struct{}
 	user          *uuid.UUID
 	cleareduser   bool
@@ -8563,6 +8564,42 @@ func (m *SessionMutation) ResetDeviceType() {
 	m._DeviceType = nil
 }
 
+// SetIP sets the "IP" field.
+func (m *SessionMutation) SetIP(s string) {
+	m._IP = &s
+}
+
+// IP returns the value of the "IP" field in the mutation.
+func (m *SessionMutation) IP() (r string, exists bool) {
+	v := m._IP
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIP returns the old "IP" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldIP(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldIP is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldIP requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIP: %w", err)
+	}
+	return oldValue.IP, nil
+}
+
+// ResetIP resets all changes to the "IP" field.
+func (m *SessionMutation) ResetIP() {
+	m._IP = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *SessionMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
@@ -8616,7 +8653,7 @@ func (m *SessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, session.FieldCreatedAt)
 	}
@@ -8628,6 +8665,9 @@ func (m *SessionMutation) Fields() []string {
 	}
 	if m._DeviceType != nil {
 		fields = append(fields, session.FieldDeviceType)
+	}
+	if m._IP != nil {
+		fields = append(fields, session.FieldIP)
 	}
 	return fields
 }
@@ -8645,6 +8685,8 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 		return m.OS()
 	case session.FieldDeviceType:
 		return m.DeviceType()
+	case session.FieldIP:
+		return m.IP()
 	}
 	return nil, false
 }
@@ -8662,6 +8704,8 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldOS(ctx)
 	case session.FieldDeviceType:
 		return m.OldDeviceType(ctx)
+	case session.FieldIP:
+		return m.OldIP(ctx)
 	}
 	return nil, fmt.Errorf("unknown Session field %s", name)
 }
@@ -8698,6 +8742,13 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeviceType(v)
+		return nil
+	case session.FieldIP:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIP(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Session field %s", name)
@@ -8759,6 +8810,9 @@ func (m *SessionMutation) ResetField(name string) error {
 		return nil
 	case session.FieldDeviceType:
 		m.ResetDeviceType()
+		return nil
+	case session.FieldIP:
+		m.ResetIP()
 		return nil
 	}
 	return fmt.Errorf("unknown Session field %s", name)

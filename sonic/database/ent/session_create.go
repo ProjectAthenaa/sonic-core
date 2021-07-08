@@ -78,6 +78,20 @@ func (sc *SessionCreate) SetNillableDeviceType(st *session.DeviceType) *SessionC
 	return sc
 }
 
+// SetIP sets the "IP" field.
+func (sc *SessionCreate) SetIP(s string) *SessionCreate {
+	sc.mutation.SetIP(s)
+	return sc
+}
+
+// SetNillableIP sets the "IP" field if the given value is not nil.
+func (sc *SessionCreate) SetNillableIP(s *string) *SessionCreate {
+	if s != nil {
+		sc.SetIP(*s)
+	}
+	return sc
+}
+
 // SetID sets the "id" field.
 func (sc *SessionCreate) SetID(u uuid.UUID) *SessionCreate {
 	sc.mutation.SetID(u)
@@ -171,6 +185,10 @@ func (sc *SessionCreate) defaults() {
 		v := session.DefaultDeviceType
 		sc.mutation.SetDeviceType(v)
 	}
+	if _, ok := sc.mutation.IP(); !ok {
+		v := session.DefaultIP
+		sc.mutation.SetIP(v)
+	}
 	if _, ok := sc.mutation.ID(); !ok {
 		v := session.DefaultID()
 		sc.mutation.SetID(v)
@@ -195,6 +213,9 @@ func (sc *SessionCreate) check() error {
 		if err := session.DeviceTypeValidator(v); err != nil {
 			return &ValidationError{Name: "DeviceType", err: fmt.Errorf("ent: validator failed for field \"DeviceType\": %w", err)}
 		}
+	}
+	if _, ok := sc.mutation.IP(); !ok {
+		return &ValidationError{Name: "IP", err: errors.New("ent: missing required field \"IP\"")}
 	}
 	return nil
 }
@@ -256,6 +277,14 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			Column: session.FieldDeviceType,
 		})
 		_node.DeviceType = value
+	}
+	if value, ok := sc.mutation.IP(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: session.FieldIP,
+		})
+		_node.IP = value
 	}
 	if nodes := sc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

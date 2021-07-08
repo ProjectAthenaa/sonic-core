@@ -22,6 +22,8 @@ const (
 	FieldOS = "os"
 	// FieldDeviceType holds the string denoting the devicetype field in the database.
 	FieldDeviceType = "device_type"
+	// FieldIP holds the string denoting the ip field in the database.
+	FieldIP = "ip"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the session in the database.
@@ -42,6 +44,7 @@ var Columns = []string{
 	FieldDeviceName,
 	FieldOS,
 	FieldDeviceType,
+	FieldIP,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "sessions"
@@ -72,6 +75,8 @@ var (
 	DefaultDeviceName string
 	// DefaultOS holds the default value on creation for the "OS" field.
 	DefaultOS string
+	// DefaultIP holds the default value on creation for the "IP" field.
+	DefaultIP string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

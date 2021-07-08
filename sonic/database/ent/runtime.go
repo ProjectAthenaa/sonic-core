@@ -234,6 +234,10 @@ func init() {
 	sessionDescOS := sessionFields[3].Descriptor()
 	// session.DefaultOS holds the default value on creation for the OS field.
 	session.DefaultOS = sessionDescOS.Default.(string)
+	// sessionDescIP is the schema descriptor for IP field.
+	sessionDescIP := sessionFields[5].Descriptor()
+	// session.DefaultIP holds the default value on creation for the IP field.
+	session.DefaultIP = sessionDescIP.Default.(string)
 	// sessionDescID is the schema descriptor for id field.
 	sessionDescID := sessionFields[0].Descriptor()
 	// session.DefaultID holds the default value on creation for the id field.

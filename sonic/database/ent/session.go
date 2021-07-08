@@ -26,6 +26,8 @@ type Session struct {
 	OS string `json:"OS,omitempty"`
 	// DeviceType holds the value of the "DeviceType" field.
 	DeviceType session.DeviceType `json:"DeviceType,omitempty"`
+	// IP holds the value of the "IP" field.
+	IP string `json:"IP,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SessionQuery when eager-loading is set.
 	Edges         SessionEdges `json:"edges"`
@@ -60,7 +62,7 @@ func (*Session) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case session.FieldDeviceName, session.FieldOS, session.FieldDeviceType:
+		case session.FieldDeviceName, session.FieldOS, session.FieldDeviceType, session.FieldIP:
 			values[i] = new(sql.NullString)
 		case session.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -113,6 +115,12 @@ func (s *Session) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				s.DeviceType = session.DeviceType(value.String)
 			}
+		case session.FieldIP:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field IP", values[i])
+			} else if value.Valid {
+				s.IP = value.String
+			}
 		case session.ForeignKeys[0]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field user_sessions", values[i])
@@ -160,6 +168,8 @@ func (s *Session) String() string {
 	builder.WriteString(s.OS)
 	builder.WriteString(", DeviceType=")
 	builder.WriteString(fmt.Sprintf("%v", s.DeviceType))
+	builder.WriteString(", IP=")
+	builder.WriteString(s.IP)
 	builder.WriteByte(')')
 	return builder.String()
 }
