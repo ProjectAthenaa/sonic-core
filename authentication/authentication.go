@@ -3,6 +3,7 @@ package authentication
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,4 +25,10 @@ func AuthenticationFunc(ctx context.Context) (context.Context, error) {
 	//newCtx = context.WithValue(newCtx, "encryptionKey", encPassword)
 
 	return newCtx, nil
+}
+
+type CachedUser struct {
+	UserID uuid.UUID `json:"user_id"`
+	Key    string `json:"key"`
+	AppID string `json:"app_id"`
 }
