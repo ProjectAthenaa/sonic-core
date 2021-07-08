@@ -31,5 +31,6 @@ type CachedUser struct {
 	UserID    uuid.UUID `json:"user_id"`
 	LicenseID uuid.UUID `json:"key"`
 	AppID     uuid.UUID `json:"app_id"`
+	SessionID uuid.UUID `json:"session_id"`
 	LoginTime int64 `json:"login_time"`
 }
