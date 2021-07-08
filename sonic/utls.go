@@ -56,3 +56,13 @@ func (m *Map) Scan(v interface{}) error {
 		return fmt.Errorf("cannot scan type %t into Map", v)
 	}
 }
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandString(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
+}
