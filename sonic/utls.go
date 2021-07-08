@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	sonic "github.com/ProjectAthenaa/sonic-core/protos"
+	"github.com/google/uuid"
 	"math/rand"
 	"unsafe"
 )
@@ -65,4 +66,10 @@ func RandString(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+
+func UUIDParser(id string) uuid.UUID {
+	parsedID, _ := uuid.Parse(id)
+	return parsedID
 }

@@ -122,6 +122,13 @@ func IP(v string) predicate.Session {
 	})
 }
 
+// Expired applies equality check predicate on the "Expired" field. It's identical to ExpiredEQ.
+func Expired(v bool) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldExpired), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
@@ -576,6 +583,20 @@ func IPEqualFold(v string) predicate.Session {
 func IPContainsFold(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldIP), v))
+	})
+}
+
+// ExpiredEQ applies the EQ predicate on the "Expired" field.
+func ExpiredEQ(v bool) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldExpired), v))
+	})
+}
+
+// ExpiredNEQ applies the NEQ predicate on the "Expired" field.
+func ExpiredNEQ(v bool) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldExpired), v))
 	})
 }
 

@@ -98,6 +98,24 @@ var (
 		PrimaryKey:  []*schema.Column{BillingsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// CalendarsColumns holds the columns for the "calendars" table.
+	CalendarsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "release_date", Type: field.TypeTime},
+		{Name: "product_image", Type: field.TypeString, Default: "placeholder_image_here"},
+		{Name: "product_name", Type: field.TypeString},
+		{Name: "hyped_release", Type: field.TypeBool},
+		{Name: "users_running", Type: field.TypeInt},
+	}
+	// CalendarsTable holds the schema information for the "calendars" table.
+	CalendarsTable = &schema.Table{
+		Name:        "calendars",
+		Columns:     CalendarsColumns,
+		PrimaryKey:  []*schema.Column{CalendarsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -162,13 +180,21 @@ var (
 		{Name: "colors", Type: field.TypeJSON, Nullable: true},
 		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet"}},
 		{Name: "metadata", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "bytea"}},
+		{Name: "calendar_quick_task", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// ProductsTable holds the schema information for the "products" table.
 	ProductsTable = &schema.Table{
-		Name:        "products",
-		Columns:     ProductsColumns,
-		PrimaryKey:  []*schema.Column{ProductsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "products",
+		Columns:    ProductsColumns,
+		PrimaryKey: []*schema.Column{ProductsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "products_calendars_QuickTask",
+				Columns:    []*schema.Column{ProductsColumns[14]},
+				RefColumns: []*schema.Column{CalendarsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// ProfilesColumns holds the columns for the "profiles" table.
 	ProfilesColumns = []*schema.Column{
@@ -255,6 +281,7 @@ var (
 		{Name: "os", Type: field.TypeString, Default: "Unknown"},
 		{Name: "device_type", Type: field.TypeEnum, Enums: []string{"Unknown", "Phone", "Tablet", "PC", "Laptop"}, Default: "Unknown"},
 		{Name: "ip", Type: field.TypeString, Default: "Unknown"},
+		{Name: "expired", Type: field.TypeBool, Default: false},
 		{Name: "user_sessions", Type: field.TypeUUID, Nullable: true},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
@@ -265,7 +292,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "sessions_users_Sessions",
-				Columns:    []*schema.Column{SessionsColumns[6]},
+				Columns:    []*schema.Column{SessionsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -682,6 +709,7 @@ var (
 		AddressesTable,
 		AppsTable,
 		BillingsTable,
+		CalendarsTable,
 		LicensesTable,
 		MetadataTable,
 		ProductsTable,
@@ -717,6 +745,7 @@ func init() {
 	AppsTable.ForeignKeys[0].RefTable = UsersTable
 	LicensesTable.ForeignKeys[0].RefTable = UsersTable
 	MetadataTable.ForeignKeys[0].RefTable = UsersTable
+	ProductsTable.ForeignKeys[0].RefTable = CalendarsTable
 	ProfilesTable.ForeignKeys[0].RefTable = ProfileGroupsTable
 	ProxiesTable.ForeignKeys[0].RefTable = ProxyListsTable
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable

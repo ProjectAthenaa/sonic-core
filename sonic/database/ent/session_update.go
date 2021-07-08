@@ -99,6 +99,20 @@ func (su *SessionUpdate) SetNillableIP(s *string) *SessionUpdate {
 	return su
 }
 
+// SetExpired sets the "Expired" field.
+func (su *SessionUpdate) SetExpired(b bool) *SessionUpdate {
+	su.mutation.SetExpired(b)
+	return su
+}
+
+// SetNillableExpired sets the "Expired" field if the given value is not nil.
+func (su *SessionUpdate) SetNillableExpired(b *bool) *SessionUpdate {
+	if b != nil {
+		su.SetExpired(*b)
+	}
+	return su
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (su *SessionUpdate) SetUserID(id uuid.UUID) *SessionUpdate {
 	su.mutation.SetUserID(id)
@@ -249,6 +263,13 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: session.FieldIP,
 		})
 	}
+	if value, ok := su.mutation.Expired(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: session.FieldExpired,
+		})
+	}
 	if su.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -369,6 +390,20 @@ func (suo *SessionUpdateOne) SetIP(s string) *SessionUpdateOne {
 func (suo *SessionUpdateOne) SetNillableIP(s *string) *SessionUpdateOne {
 	if s != nil {
 		suo.SetIP(*s)
+	}
+	return suo
+}
+
+// SetExpired sets the "Expired" field.
+func (suo *SessionUpdateOne) SetExpired(b bool) *SessionUpdateOne {
+	suo.mutation.SetExpired(b)
+	return suo
+}
+
+// SetNillableExpired sets the "Expired" field if the given value is not nil.
+func (suo *SessionUpdateOne) SetNillableExpired(b *bool) *SessionUpdateOne {
+	if b != nil {
+		suo.SetExpired(*b)
 	}
 	return suo
 }
@@ -545,6 +580,13 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			Type:   field.TypeString,
 			Value:  value,
 			Column: session.FieldIP,
+		})
+	}
+	if value, ok := suo.mutation.Expired(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: session.FieldExpired,
 		})
 	}
 	if suo.mutation.UserCleared() {

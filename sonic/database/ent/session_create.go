@@ -92,6 +92,20 @@ func (sc *SessionCreate) SetNillableIP(s *string) *SessionCreate {
 	return sc
 }
 
+// SetExpired sets the "Expired" field.
+func (sc *SessionCreate) SetExpired(b bool) *SessionCreate {
+	sc.mutation.SetExpired(b)
+	return sc
+}
+
+// SetNillableExpired sets the "Expired" field if the given value is not nil.
+func (sc *SessionCreate) SetNillableExpired(b *bool) *SessionCreate {
+	if b != nil {
+		sc.SetExpired(*b)
+	}
+	return sc
+}
+
 // SetID sets the "id" field.
 func (sc *SessionCreate) SetID(u uuid.UUID) *SessionCreate {
 	sc.mutation.SetID(u)
@@ -189,6 +203,10 @@ func (sc *SessionCreate) defaults() {
 		v := session.DefaultIP
 		sc.mutation.SetIP(v)
 	}
+	if _, ok := sc.mutation.Expired(); !ok {
+		v := session.DefaultExpired
+		sc.mutation.SetExpired(v)
+	}
 	if _, ok := sc.mutation.ID(); !ok {
 		v := session.DefaultID()
 		sc.mutation.SetID(v)
@@ -216,6 +234,9 @@ func (sc *SessionCreate) check() error {
 	}
 	if _, ok := sc.mutation.IP(); !ok {
 		return &ValidationError{Name: "IP", err: errors.New("ent: missing required field \"IP\"")}
+	}
+	if _, ok := sc.mutation.Expired(); !ok {
+		return &ValidationError{Name: "Expired", err: errors.New("ent: missing required field \"Expired\"")}
 	}
 	return nil
 }
@@ -285,6 +306,14 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			Column: session.FieldIP,
 		})
 		_node.IP = value
+	}
+	if value, ok := sc.mutation.Expired(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: session.FieldExpired,
+		})
+		_node.Expired = value
 	}
 	if nodes := sc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

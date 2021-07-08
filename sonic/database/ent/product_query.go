@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
@@ -31,6 +32,8 @@ type ProductQuery struct {
 	// eager-loading edges.
 	withTask      *TaskQuery
 	withStatistic *StatisticQuery
+	withCalendar  *CalendarQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -104,6 +107,28 @@ func (pq *ProductQuery) QueryStatistic() *StatisticQuery {
 			sqlgraph.From(product.Table, product.FieldID, selector),
 			sqlgraph.To(statistic.Table, statistic.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, product.StatisticTable, product.StatisticPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCalendar chains the current query on the "Calendar" edge.
+func (pq *ProductQuery) QueryCalendar() *CalendarQuery {
+	query := &CalendarQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(calendar.Table, calendar.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, product.CalendarTable, product.CalendarColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,6 +319,7 @@ func (pq *ProductQuery) Clone() *ProductQuery {
 		predicates:    append([]predicate.Product{}, pq.predicates...),
 		withTask:      pq.withTask.Clone(),
 		withStatistic: pq.withStatistic.Clone(),
+		withCalendar:  pq.withCalendar.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -319,6 +345,17 @@ func (pq *ProductQuery) WithStatistic(opts ...func(*StatisticQuery)) *ProductQue
 		opt(query)
 	}
 	pq.withStatistic = query
+	return pq
+}
+
+// WithCalendar tells the query-builder to eager-load the nodes that are connected to
+// the "Calendar" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProductQuery) WithCalendar(opts ...func(*CalendarQuery)) *ProductQuery {
+	query := &CalendarQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withCalendar = query
 	return pq
 }
 
@@ -386,12 +423,20 @@ func (pq *ProductQuery) prepareQuery(ctx context.Context) error {
 func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 	var (
 		nodes       = []*Product{}
+		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			pq.withTask != nil,
 			pq.withStatistic != nil,
+			pq.withCalendar != nil,
 		}
 	)
+	if pq.withCalendar != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, product.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Product{config: pq.config}
 		nodes = append(nodes, node)
@@ -538,6 +583,35 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Statistic = append(nodes[i].Edges.Statistic, n)
+			}
+		}
+	}
+
+	if query := pq.withCalendar; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Product)
+		for i := range nodes {
+			if nodes[i].calendar_quick_task == nil {
+				continue
+			}
+			fk := *nodes[i].calendar_quick_task
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(calendar.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "calendar_quick_task" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Calendar = n
 			}
 		}
 	}

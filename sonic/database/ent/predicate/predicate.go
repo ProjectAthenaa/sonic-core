@@ -18,6 +18,9 @@ type App func(*sql.Selector)
 // Billing is the predicate function for billing builders.
 type Billing func(*sql.Selector)
 
+// Calendar is the predicate function for calendar builders.
+type Calendar func(*sql.Selector)
+
 // License is the predicate function for license builders.
 type License func(*sql.Selector)
 

@@ -28,6 +28,7 @@ func (Session) Fields() []ent.Field {
 			Values("Unknown", "Phone", "Tablet", "PC", "Laptop").
 			Default("Unknown"),
 		field.String("IP").Default("Unknown"),
+		field.Bool("Expired").Default(false),
 	}
 }
 

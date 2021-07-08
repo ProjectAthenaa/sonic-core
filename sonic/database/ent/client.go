@@ -14,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
@@ -48,6 +49,8 @@ type Client struct {
 	App *AppClient
 	// Billing is the client for interacting with the Billing builders.
 	Billing *BillingClient
+	// Calendar is the client for interacting with the Calendar builders.
+	Calendar *CalendarClient
 	// License is the client for interacting with the License builders.
 	License *LicenseClient
 	// Metadata is the client for interacting with the Metadata builders.
@@ -95,6 +98,7 @@ func (c *Client) init() {
 	c.Address = NewAddressClient(c.config)
 	c.App = NewAppClient(c.config)
 	c.Billing = NewBillingClient(c.config)
+	c.Calendar = NewCalendarClient(c.config)
 	c.License = NewLicenseClient(c.config)
 	c.Metadata = NewMetadataClient(c.config)
 	c.Product = NewProductClient(c.config)
@@ -147,6 +151,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Address:      NewAddressClient(cfg),
 		App:          NewAppClient(cfg),
 		Billing:      NewBillingClient(cfg),
+		Calendar:     NewCalendarClient(cfg),
 		License:      NewLicenseClient(cfg),
 		Metadata:     NewMetadataClient(cfg),
 		Product:      NewProductClient(cfg),
@@ -184,6 +189,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Address:      NewAddressClient(cfg),
 		App:          NewAppClient(cfg),
 		Billing:      NewBillingClient(cfg),
+		Calendar:     NewCalendarClient(cfg),
 		License:      NewLicenseClient(cfg),
 		Metadata:     NewMetadataClient(cfg),
 		Product:      NewProductClient(cfg),
@@ -232,6 +238,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Address.Use(hooks...)
 	c.App.Use(hooks...)
 	c.Billing.Use(hooks...)
+	c.Calendar.Use(hooks...)
 	c.License.Use(hooks...)
 	c.Metadata.Use(hooks...)
 	c.Product.Use(hooks...)
@@ -769,6 +776,112 @@ func (c *BillingClient) Hooks() []Hook {
 	return c.hooks.Billing
 }
 
+// CalendarClient is a client for the Calendar schema.
+type CalendarClient struct {
+	config
+}
+
+// NewCalendarClient returns a client for the Calendar from the given config.
+func NewCalendarClient(c config) *CalendarClient {
+	return &CalendarClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `calendar.Hooks(f(g(h())))`.
+func (c *CalendarClient) Use(hooks ...Hook) {
+	c.hooks.Calendar = append(c.hooks.Calendar, hooks...)
+}
+
+// Create returns a create builder for Calendar.
+func (c *CalendarClient) Create() *CalendarCreate {
+	mutation := newCalendarMutation(c.config, OpCreate)
+	return &CalendarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Calendar entities.
+func (c *CalendarClient) CreateBulk(builders ...*CalendarCreate) *CalendarCreateBulk {
+	return &CalendarCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Calendar.
+func (c *CalendarClient) Update() *CalendarUpdate {
+	mutation := newCalendarMutation(c.config, OpUpdate)
+	return &CalendarUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CalendarClient) UpdateOne(ca *Calendar) *CalendarUpdateOne {
+	mutation := newCalendarMutation(c.config, OpUpdateOne, withCalendar(ca))
+	return &CalendarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CalendarClient) UpdateOneID(id uuid.UUID) *CalendarUpdateOne {
+	mutation := newCalendarMutation(c.config, OpUpdateOne, withCalendarID(id))
+	return &CalendarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Calendar.
+func (c *CalendarClient) Delete() *CalendarDelete {
+	mutation := newCalendarMutation(c.config, OpDelete)
+	return &CalendarDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *CalendarClient) DeleteOne(ca *Calendar) *CalendarDeleteOne {
+	return c.DeleteOneID(ca.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *CalendarClient) DeleteOneID(id uuid.UUID) *CalendarDeleteOne {
+	builder := c.Delete().Where(calendar.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CalendarDeleteOne{builder}
+}
+
+// Query returns a query builder for Calendar.
+func (c *CalendarClient) Query() *CalendarQuery {
+	return &CalendarQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Calendar entity by its id.
+func (c *CalendarClient) Get(ctx context.Context, id uuid.UUID) (*Calendar, error) {
+	return c.Query().Where(calendar.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CalendarClient) GetX(ctx context.Context, id uuid.UUID) *Calendar {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryQuickTask queries the QuickTask edge of a Calendar.
+func (c *CalendarClient) QueryQuickTask(ca *Calendar) *ProductQuery {
+	query := &ProductQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ca.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(calendar.Table, calendar.FieldID, id),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, calendar.QuickTaskTable, calendar.QuickTaskColumn),
+		)
+		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CalendarClient) Hooks() []Hook {
+	return c.hooks.Calendar
+}
+
 // LicenseClient is a client for the License schema.
 type LicenseClient struct {
 	config
@@ -1107,6 +1220,22 @@ func (c *ProductClient) QueryStatistic(pr *Product) *StatisticQuery {
 			sqlgraph.From(product.Table, product.FieldID, id),
 			sqlgraph.To(statistic.Table, statistic.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, product.StatisticTable, product.StatisticPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCalendar queries the Calendar edge of a Product.
+func (c *ProductClient) QueryCalendar(pr *Product) *CalendarQuery {
+	query := &CalendarQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, id),
+			sqlgraph.To(calendar.Table, calendar.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, product.CalendarTable, product.CalendarColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil

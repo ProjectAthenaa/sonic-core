@@ -2,52 +2,48 @@ package authentication
 
 import (
 	"context"
-	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
+	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"os"
-	"strings"
 )
 
 var (
-	rdb    = sonic.ConnectToRedis()
-	client = database.Connect(os.Getenv("PG_URL"))
+	rdb                 = sonic.ConnectToRedis()
+	client              = database.Connect(os.Getenv("PG_URL"))
+	sessionExpiredError = errors.New("session_expired")
 )
 
-func extractTokens(ctx context.Context, basicToken string) (string, string, error) {
-	data, err := base64.StdEncoding.DecodeString(basicToken)
-	if err != nil {
+func extractTokens(ctx context.Context, sessionID string) (string, string, error) {
+	val, err := rdb.Get(ctx, sessionID).Result()
+	if err != redis.Nil {
 		return "", "", err
 	}
 
-	tokens := strings.Split(string(data), ":")
-
-	if len(tokens) != 2 {
-		return "", "", errors.New("BAD_TOKEN")
+	if val == "" || len(val) == 0 {
+		_, err = client.Session.Update().Where(session.ID(sonic.UUIDParser(sessionID))).SetExpired(true).Save(ctx)
+		if err != nil {
+			return "", "", err
+		}
+		return "", "", sessionExpiredError
 	}
 
-	id, _ := uuid.Parse(tokens[0])
-
-	user := client.User.GetX(ctx, id)
-
-	if user.QueryLicense().FirstX(ctx).ID.String() == "" {
-		return "", "", errors.New("NO_LICENSE")
+	var user CachedUser
+	if err = json.Unmarshal([]byte(val), &user); err != nil {
+		return "", "", err
 	}
 
-	if user.Disabled {
-		return "", "", errors.New("USER_DISABLED")
-	}
-
-	if user.QueryApp().FirstX(ctx).ID.String() != tokens[1] {
-		return "", "", errors.New("BAD_TOKEN")
-	}
-
-	return tokens[0], tokens[1], nil
+	return user.UserID.String(), user.AppID.String(), nil
 }
 
-type AuthUser struct {
-	ID string `json:"id"`
-
+type CachedUser struct {
+	UserID    uuid.UUID `json:"user_id"`
+	LicenseID uuid.UUID `json:"key"`
+	AppID     uuid.UUID `json:"app_id"`
+	SessionID uuid.UUID `json:"session_id"`
+	LoginTime int64     `json:"login_time"`
 }

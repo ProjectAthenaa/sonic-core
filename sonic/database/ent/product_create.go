@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
@@ -176,6 +177,25 @@ func (pc *ProductCreate) AddStatistic(s ...*Statistic) *ProductCreate {
 		ids[i] = s[i].ID
 	}
 	return pc.AddStatisticIDs(ids...)
+}
+
+// SetCalendarID sets the "Calendar" edge to the Calendar entity by ID.
+func (pc *ProductCreate) SetCalendarID(id uuid.UUID) *ProductCreate {
+	pc.mutation.SetCalendarID(id)
+	return pc
+}
+
+// SetNillableCalendarID sets the "Calendar" edge to the Calendar entity by ID if the given value is not nil.
+func (pc *ProductCreate) SetNillableCalendarID(id *uuid.UUID) *ProductCreate {
+	if id != nil {
+		pc = pc.SetCalendarID(*id)
+	}
+	return pc
+}
+
+// SetCalendar sets the "Calendar" edge to the Calendar entity.
+func (pc *ProductCreate) SetCalendar(c *Calendar) *ProductCreate {
+	return pc.SetCalendarID(c.ID)
 }
 
 // Mutation returns the ProductMutation object of the builder.
@@ -450,6 +470,26 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.CalendarIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   product.CalendarTable,
+			Columns: []string{product.CalendarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: calendar.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.calendar_quick_task = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

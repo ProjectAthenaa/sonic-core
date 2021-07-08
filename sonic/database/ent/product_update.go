@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
@@ -220,6 +221,25 @@ func (pu *ProductUpdate) AddStatistic(s ...*Statistic) *ProductUpdate {
 	return pu.AddStatisticIDs(ids...)
 }
 
+// SetCalendarID sets the "Calendar" edge to the Calendar entity by ID.
+func (pu *ProductUpdate) SetCalendarID(id uuid.UUID) *ProductUpdate {
+	pu.mutation.SetCalendarID(id)
+	return pu
+}
+
+// SetNillableCalendarID sets the "Calendar" edge to the Calendar entity by ID if the given value is not nil.
+func (pu *ProductUpdate) SetNillableCalendarID(id *uuid.UUID) *ProductUpdate {
+	if id != nil {
+		pu = pu.SetCalendarID(*id)
+	}
+	return pu
+}
+
+// SetCalendar sets the "Calendar" edge to the Calendar entity.
+func (pu *ProductUpdate) SetCalendar(c *Calendar) *ProductUpdate {
+	return pu.SetCalendarID(c.ID)
+}
+
 // Mutation returns the ProductMutation object of the builder.
 func (pu *ProductUpdate) Mutation() *ProductMutation {
 	return pu.mutation
@@ -265,6 +285,12 @@ func (pu *ProductUpdate) RemoveStatistic(s ...*Statistic) *ProductUpdate {
 		ids[i] = s[i].ID
 	}
 	return pu.RemoveStatisticIDs(ids...)
+}
+
+// ClearCalendar clears the "Calendar" edge to the Calendar entity.
+func (pu *ProductUpdate) ClearCalendar() *ProductUpdate {
+	pu.mutation.ClearCalendar()
+	return pu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -614,6 +640,41 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pu.mutation.CalendarCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   product.CalendarTable,
+			Columns: []string{product.CalendarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: calendar.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.CalendarIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   product.CalendarTable,
+			Columns: []string{product.CalendarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: calendar.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{product.Label}
@@ -822,6 +883,25 @@ func (puo *ProductUpdateOne) AddStatistic(s ...*Statistic) *ProductUpdateOne {
 	return puo.AddStatisticIDs(ids...)
 }
 
+// SetCalendarID sets the "Calendar" edge to the Calendar entity by ID.
+func (puo *ProductUpdateOne) SetCalendarID(id uuid.UUID) *ProductUpdateOne {
+	puo.mutation.SetCalendarID(id)
+	return puo
+}
+
+// SetNillableCalendarID sets the "Calendar" edge to the Calendar entity by ID if the given value is not nil.
+func (puo *ProductUpdateOne) SetNillableCalendarID(id *uuid.UUID) *ProductUpdateOne {
+	if id != nil {
+		puo = puo.SetCalendarID(*id)
+	}
+	return puo
+}
+
+// SetCalendar sets the "Calendar" edge to the Calendar entity.
+func (puo *ProductUpdateOne) SetCalendar(c *Calendar) *ProductUpdateOne {
+	return puo.SetCalendarID(c.ID)
+}
+
 // Mutation returns the ProductMutation object of the builder.
 func (puo *ProductUpdateOne) Mutation() *ProductMutation {
 	return puo.mutation
@@ -867,6 +947,12 @@ func (puo *ProductUpdateOne) RemoveStatistic(s ...*Statistic) *ProductUpdateOne 
 		ids[i] = s[i].ID
 	}
 	return puo.RemoveStatisticIDs(ids...)
+}
+
+// ClearCalendar clears the "Calendar" edge to the Calendar entity.
+func (puo *ProductUpdateOne) ClearCalendar() *ProductUpdateOne {
+	puo.mutation.ClearCalendar()
+	return puo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1232,6 +1318,41 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: statistic.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.CalendarCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   product.CalendarTable,
+			Columns: []string{product.CalendarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: calendar.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.CalendarIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   product.CalendarTable,
+			Columns: []string{product.CalendarColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: calendar.FieldID,
 				},
 			},
 		}

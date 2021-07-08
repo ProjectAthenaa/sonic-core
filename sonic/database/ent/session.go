@@ -28,6 +28,8 @@ type Session struct {
 	DeviceType session.DeviceType `json:"DeviceType,omitempty"`
 	// IP holds the value of the "IP" field.
 	IP string `json:"IP,omitempty"`
+	// Expired holds the value of the "Expired" field.
+	Expired bool `json:"Expired,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SessionQuery when eager-loading is set.
 	Edges         SessionEdges `json:"edges"`
@@ -62,6 +64,8 @@ func (*Session) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case session.FieldExpired:
+			values[i] = new(sql.NullBool)
 		case session.FieldDeviceName, session.FieldOS, session.FieldDeviceType, session.FieldIP:
 			values[i] = new(sql.NullString)
 		case session.FieldCreatedAt:
@@ -121,6 +125,12 @@ func (s *Session) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				s.IP = value.String
 			}
+		case session.FieldExpired:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field Expired", values[i])
+			} else if value.Valid {
+				s.Expired = value.Bool
+			}
 		case session.ForeignKeys[0]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field user_sessions", values[i])
@@ -170,6 +180,8 @@ func (s *Session) String() string {
 	builder.WriteString(fmt.Sprintf("%v", s.DeviceType))
 	builder.WriteString(", IP=")
 	builder.WriteString(s.IP)
+	builder.WriteString(", Expired=")
+	builder.WriteString(fmt.Sprintf("%v", s.Expired))
 	builder.WriteByte(')')
 	return builder.String()
 }

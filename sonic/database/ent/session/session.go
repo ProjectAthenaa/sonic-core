@@ -24,6 +24,8 @@ const (
 	FieldDeviceType = "device_type"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
+	// FieldExpired holds the string denoting the expired field in the database.
+	FieldExpired = "expired"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the session in the database.
@@ -45,6 +47,7 @@ var Columns = []string{
 	FieldOS,
 	FieldDeviceType,
 	FieldIP,
+	FieldExpired,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "sessions"
@@ -77,6 +80,8 @@ var (
 	DefaultOS string
 	// DefaultIP holds the default value on creation for the "IP" field.
 	DefaultIP string
+	// DefaultExpired holds the default value on creation for the "Expired" field.
+	DefaultExpired bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

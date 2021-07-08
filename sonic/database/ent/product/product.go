@@ -44,6 +44,8 @@ const (
 	EdgeTask = "Task"
 	// EdgeStatistic holds the string denoting the statistic edge name in mutations.
 	EdgeStatistic = "Statistic"
+	// EdgeCalendar holds the string denoting the calendar edge name in mutations.
+	EdgeCalendar = "Calendar"
 	// Table holds the table name of the product in the database.
 	Table = "products"
 	// TaskTable is the table the holds the Task relation/edge. The primary key declared below.
@@ -56,6 +58,13 @@ const (
 	// StatisticInverseTable is the table name for the Statistic entity.
 	// It exists in this package in order to avoid circular dependency with the "statistic" package.
 	StatisticInverseTable = "statistics"
+	// CalendarTable is the table the holds the Calendar relation/edge.
+	CalendarTable = "products"
+	// CalendarInverseTable is the table name for the Calendar entity.
+	// It exists in this package in order to avoid circular dependency with the "calendar" package.
+	CalendarInverseTable = "calendars"
+	// CalendarColumn is the table column denoting the Calendar relation/edge.
+	CalendarColumn = "calendar_quick_task"
 )
 
 // Columns holds all SQL columns for product fields.
@@ -76,6 +85,12 @@ var Columns = []string{
 	FieldMetadata,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "products"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"calendar_quick_task",
+}
+
 var (
 	// TaskPrimaryKey and TaskColumn2 are the table columns denoting the
 	// primary key for the Task relation (M2M).
@@ -89,6 +104,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

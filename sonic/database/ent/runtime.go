@@ -9,6 +9,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
@@ -96,6 +97,26 @@ func init() {
 	billingDescID := billingFields[0].Descriptor()
 	// billing.DefaultID holds the default value on creation for the id field.
 	billing.DefaultID = billingDescID.Default.(func() uuid.UUID)
+	calendarFields := schema.Calendar{}.Fields()
+	_ = calendarFields
+	// calendarDescCreatedAt is the schema descriptor for created_at field.
+	calendarDescCreatedAt := calendarFields[1].Descriptor()
+	// calendar.DefaultCreatedAt holds the default value on creation for the created_at field.
+	calendar.DefaultCreatedAt = calendarDescCreatedAt.Default.(func() time.Time)
+	// calendarDescUpdatedAt is the schema descriptor for updated_at field.
+	calendarDescUpdatedAt := calendarFields[2].Descriptor()
+	// calendar.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	calendar.DefaultUpdatedAt = calendarDescUpdatedAt.Default.(func() time.Time)
+	// calendar.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	calendar.UpdateDefaultUpdatedAt = calendarDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// calendarDescProductImage is the schema descriptor for ProductImage field.
+	calendarDescProductImage := calendarFields[4].Descriptor()
+	// calendar.DefaultProductImage holds the default value on creation for the ProductImage field.
+	calendar.DefaultProductImage = calendarDescProductImage.Default.(string)
+	// calendarDescID is the schema descriptor for id field.
+	calendarDescID := calendarFields[0].Descriptor()
+	// calendar.DefaultID holds the default value on creation for the id field.
+	calendar.DefaultID = calendarDescID.Default.(func() uuid.UUID)
 	licenseFields := schema.License{}.Fields()
 	_ = licenseFields
 	// licenseDescCreatedAt is the schema descriptor for created_at field.
@@ -238,6 +259,10 @@ func init() {
 	sessionDescIP := sessionFields[5].Descriptor()
 	// session.DefaultIP holds the default value on creation for the IP field.
 	session.DefaultIP = sessionDescIP.Default.(string)
+	// sessionDescExpired is the schema descriptor for Expired field.
+	sessionDescExpired := sessionFields[6].Descriptor()
+	// session.DefaultExpired holds the default value on creation for the Expired field.
+	session.DefaultExpired = sessionDescExpired.Default.(bool)
 	// sessionDescID is the schema descriptor for id field.
 	sessionDescID := sessionFields[0].Descriptor()
 	// session.DefaultID holds the default value on creation for the id field.

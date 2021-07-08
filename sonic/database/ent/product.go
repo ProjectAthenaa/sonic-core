@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/google/uuid"
 )
@@ -47,7 +48,8 @@ type Product struct {
 	Metadata *sonic.Map `json:"Metadata,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProductQuery when eager-loading is set.
-	Edges ProductEdges `json:"edges"`
+	Edges               ProductEdges `json:"edges"`
+	calendar_quick_task *uuid.UUID
 }
 
 // ProductEdges holds the relations/edges for other nodes in the graph.
@@ -56,9 +58,11 @@ type ProductEdges struct {
 	Task []*Task `json:"Task,omitempty"`
 	// Statistic holds the value of the Statistic edge.
 	Statistic []*Statistic `json:"Statistic,omitempty"`
+	// Calendar holds the value of the Calendar edge.
+	Calendar *Calendar `json:"Calendar,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // TaskOrErr returns the Task value or an error if the edge
@@ -79,6 +83,20 @@ func (e ProductEdges) StatisticOrErr() ([]*Statistic, error) {
 	return nil, &NotLoadedError{edge: "Statistic"}
 }
 
+// CalendarOrErr returns the Calendar value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProductEdges) CalendarOrErr() (*Calendar, error) {
+	if e.loadedTypes[2] {
+		if e.Calendar == nil {
+			// The edge Calendar was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: calendar.Label}
+		}
+		return e.Calendar, nil
+	}
+	return nil, &NotLoadedError{edge: "Calendar"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Product) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -95,6 +113,8 @@ func (*Product) scanValues(columns []string) ([]interface{}, error) {
 		case product.FieldCreatedAt, product.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case product.FieldID:
+			values[i] = new(uuid.UUID)
+		case product.ForeignKeys[0]: // calendar_quick_task
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Product", columns[i])
@@ -207,6 +227,12 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				pr.Metadata = value
 			}
+		case product.ForeignKeys[0]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field calendar_quick_task", values[i])
+			} else if value != nil {
+				pr.calendar_quick_task = value
+			}
 		}
 	}
 	return nil
@@ -220,6 +246,11 @@ func (pr *Product) QueryTask() *TaskQuery {
 // QueryStatistic queries the "Statistic" edge of the Product entity.
 func (pr *Product) QueryStatistic() *StatisticQuery {
 	return (&ProductClient{config: pr.config}).QueryStatistic(pr)
+}
+
+// QueryCalendar queries the "Calendar" edge of the Product entity.
+func (pr *Product) QueryCalendar() *CalendarQuery {
+	return (&ProductClient{config: pr.config}).QueryCalendar(pr)
 }
 
 // Update returns a builder for updating this Product.

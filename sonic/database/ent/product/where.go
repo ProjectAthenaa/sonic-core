@@ -1031,6 +1031,34 @@ func HasStatisticWith(preds ...predicate.Statistic) predicate.Product {
 	})
 }
 
+// HasCalendar applies the HasEdge predicate on the "Calendar" edge.
+func HasCalendar() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CalendarTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, CalendarTable, CalendarColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCalendarWith applies the HasEdge predicate on the "Calendar" edge with a given conditions (other predicates).
+func HasCalendarWith(preds ...predicate.Calendar) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CalendarInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, CalendarTable, CalendarColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Product) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
