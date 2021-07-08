@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package monitor_controller;
+
+option go_package = "main/monitor_controller";
+
+service Monitor{
+  rpc NewTask(Task) returns (RedisChannel);
+  rpc Stop(Key) returns (BoolResponse);
+}
+
+
+message Keywords{
+  repeated string Positive = 1;
+  repeated string Negative = 2;
+}
+
+message Task{
+  string Site = 1;
+  oneof Lookup {
+    Keywords Keywords = 2;
+    string Link = 3;
+  }
+  map<string, string> Metadata = 4;
+}
+
+message RedisChannel{
+  string ChannelName = 1;
+  string SubscriberKey = 2;
+}
+
+message Key{
+  string Value = 1;
+}
+
+message BoolResponse{
+  bool Stopped = 1;
+  optional string Error = 2;
+}
