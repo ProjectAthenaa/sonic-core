@@ -28,7 +28,8 @@ func AuthenticationFunc(ctx context.Context) (context.Context, error) {
 }
 
 type CachedUser struct {
-	UserID uuid.UUID `json:"user_id"`
-	Key    string `json:"key"`
-	AppID string `json:"app_id"`
+	UserID    uuid.UUID `json:"user_id"`
+	LicenseID uuid.UUID `json:"key"`
+	AppID     uuid.UUID `json:"app_id"`
+	LoginTime int64 `json:"login_time"`
 }
