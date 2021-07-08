@@ -55,20 +55,6 @@ func (au *AppUpdate) SetUpdatedAt(t time.Time) *AppUpdate {
 	return au
 }
 
-// SetFirstLogin sets the "first_login" field.
-func (au *AppUpdate) SetFirstLogin(b bool) *AppUpdate {
-	au.mutation.SetFirstLogin(b)
-	return au
-}
-
-// SetNillableFirstLogin sets the "first_login" field if the given value is not nil.
-func (au *AppUpdate) SetNillableFirstLogin(b *bool) *AppUpdate {
-	if b != nil {
-		au.SetFirstLogin(*b)
-	}
-	return au
-}
-
 // SetUserID sets the "User" edge to the User entity by ID.
 func (au *AppUpdate) SetUserID(id uuid.UUID) *AppUpdate {
 	au.mutation.SetUserID(id)
@@ -375,13 +361,6 @@ func (au *AppUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: app.FieldUpdatedAt,
-		})
-	}
-	if value, ok := au.mutation.FirstLogin(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: app.FieldFirstLogin,
 		})
 	}
 	if au.mutation.UserCleared() {
@@ -728,20 +707,6 @@ func (auo *AppUpdateOne) SetUpdatedAt(t time.Time) *AppUpdateOne {
 	return auo
 }
 
-// SetFirstLogin sets the "first_login" field.
-func (auo *AppUpdateOne) SetFirstLogin(b bool) *AppUpdateOne {
-	auo.mutation.SetFirstLogin(b)
-	return auo
-}
-
-// SetNillableFirstLogin sets the "first_login" field if the given value is not nil.
-func (auo *AppUpdateOne) SetNillableFirstLogin(b *bool) *AppUpdateOne {
-	if b != nil {
-		auo.SetFirstLogin(*b)
-	}
-	return auo
-}
-
 // SetUserID sets the "User" edge to the User entity by ID.
 func (auo *AppUpdateOne) SetUserID(id uuid.UUID) *AppUpdateOne {
 	auo.mutation.SetUserID(id)
@@ -1072,13 +1037,6 @@ func (auo *AppUpdateOne) sqlSave(ctx context.Context) (_node *App, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: app.FieldUpdatedAt,
-		})
-	}
-	if value, ok := auo.mutation.FirstLogin(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: app.FieldFirstLogin,
 		})
 	}
 	if auo.mutation.UserCleared() {

@@ -22,6 +22,8 @@ type Tx struct {
 	Billing *BillingClient
 	// License is the client for interacting with the License builders.
 	License *LicenseClient
+	// Metadata is the client for interacting with the Metadata builders.
+	Metadata *MetadataClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
 	// Profile is the client for interacting with the Profile builders.
@@ -32,6 +34,8 @@ type Tx struct {
 	Proxy *ProxyClient
 	// ProxyList is the client for interacting with the ProxyList builders.
 	ProxyList *ProxyListClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// Settings is the client for interacting with the Settings builders.
 	Settings *SettingsClient
 	// Shipping is the client for interacting with the Shipping builders.
@@ -186,11 +190,13 @@ func (tx *Tx) init() {
 	tx.App = NewAppClient(tx.config)
 	tx.Billing = NewBillingClient(tx.config)
 	tx.License = NewLicenseClient(tx.config)
+	tx.Metadata = NewMetadataClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
 	tx.ProfileGroup = NewProfileGroupClient(tx.config)
 	tx.Proxy = NewProxyClient(tx.config)
 	tx.ProxyList = NewProxyListClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
 	tx.Settings = NewSettingsClient(tx.config)
 	tx.Shipping = NewShippingClient(tx.config)
 	tx.Statistic = NewStatisticClient(tx.config)

@@ -15,11 +15,13 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
@@ -48,6 +50,8 @@ type Client struct {
 	Billing *BillingClient
 	// License is the client for interacting with the License builders.
 	License *LicenseClient
+	// Metadata is the client for interacting with the Metadata builders.
+	Metadata *MetadataClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
 	// Profile is the client for interacting with the Profile builders.
@@ -58,6 +62,8 @@ type Client struct {
 	Proxy *ProxyClient
 	// ProxyList is the client for interacting with the ProxyList builders.
 	ProxyList *ProxyListClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// Settings is the client for interacting with the Settings builders.
 	Settings *SettingsClient
 	// Shipping is the client for interacting with the Shipping builders.
@@ -90,11 +96,13 @@ func (c *Client) init() {
 	c.App = NewAppClient(c.config)
 	c.Billing = NewBillingClient(c.config)
 	c.License = NewLicenseClient(c.config)
+	c.Metadata = NewMetadataClient(c.config)
 	c.Product = NewProductClient(c.config)
 	c.Profile = NewProfileClient(c.config)
 	c.ProfileGroup = NewProfileGroupClient(c.config)
 	c.Proxy = NewProxyClient(c.config)
 	c.ProxyList = NewProxyListClient(c.config)
+	c.Session = NewSessionClient(c.config)
 	c.Settings = NewSettingsClient(c.config)
 	c.Shipping = NewShippingClient(c.config)
 	c.Statistic = NewStatisticClient(c.config)
@@ -140,11 +148,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		App:          NewAppClient(cfg),
 		Billing:      NewBillingClient(cfg),
 		License:      NewLicenseClient(cfg),
+		Metadata:     NewMetadataClient(cfg),
 		Product:      NewProductClient(cfg),
 		Profile:      NewProfileClient(cfg),
 		ProfileGroup: NewProfileGroupClient(cfg),
 		Proxy:        NewProxyClient(cfg),
 		ProxyList:    NewProxyListClient(cfg),
+		Session:      NewSessionClient(cfg),
 		Settings:     NewSettingsClient(cfg),
 		Shipping:     NewShippingClient(cfg),
 		Statistic:    NewStatisticClient(cfg),
@@ -175,11 +185,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		App:          NewAppClient(cfg),
 		Billing:      NewBillingClient(cfg),
 		License:      NewLicenseClient(cfg),
+		Metadata:     NewMetadataClient(cfg),
 		Product:      NewProductClient(cfg),
 		Profile:      NewProfileClient(cfg),
 		ProfileGroup: NewProfileGroupClient(cfg),
 		Proxy:        NewProxyClient(cfg),
 		ProxyList:    NewProxyListClient(cfg),
+		Session:      NewSessionClient(cfg),
 		Settings:     NewSettingsClient(cfg),
 		Shipping:     NewShippingClient(cfg),
 		Statistic:    NewStatisticClient(cfg),
@@ -221,11 +233,13 @@ func (c *Client) Use(hooks ...Hook) {
 	c.App.Use(hooks...)
 	c.Billing.Use(hooks...)
 	c.License.Use(hooks...)
+	c.Metadata.Use(hooks...)
 	c.Product.Use(hooks...)
 	c.Profile.Use(hooks...)
 	c.ProfileGroup.Use(hooks...)
 	c.Proxy.Use(hooks...)
 	c.ProxyList.Use(hooks...)
+	c.Session.Use(hooks...)
 	c.Settings.Use(hooks...)
 	c.Shipping.Use(hooks...)
 	c.Statistic.Use(hooks...)
@@ -877,6 +891,112 @@ func (c *LicenseClient) Hooks() []Hook {
 	return c.hooks.License
 }
 
+// MetadataClient is a client for the Metadata schema.
+type MetadataClient struct {
+	config
+}
+
+// NewMetadataClient returns a client for the Metadata from the given config.
+func NewMetadataClient(c config) *MetadataClient {
+	return &MetadataClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `metadata.Hooks(f(g(h())))`.
+func (c *MetadataClient) Use(hooks ...Hook) {
+	c.hooks.Metadata = append(c.hooks.Metadata, hooks...)
+}
+
+// Create returns a create builder for Metadata.
+func (c *MetadataClient) Create() *MetadataCreate {
+	mutation := newMetadataMutation(c.config, OpCreate)
+	return &MetadataCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Metadata entities.
+func (c *MetadataClient) CreateBulk(builders ...*MetadataCreate) *MetadataCreateBulk {
+	return &MetadataCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Metadata.
+func (c *MetadataClient) Update() *MetadataUpdate {
+	mutation := newMetadataMutation(c.config, OpUpdate)
+	return &MetadataUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MetadataClient) UpdateOne(m *Metadata) *MetadataUpdateOne {
+	mutation := newMetadataMutation(c.config, OpUpdateOne, withMetadata(m))
+	return &MetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MetadataClient) UpdateOneID(id uuid.UUID) *MetadataUpdateOne {
+	mutation := newMetadataMutation(c.config, OpUpdateOne, withMetadataID(id))
+	return &MetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Metadata.
+func (c *MetadataClient) Delete() *MetadataDelete {
+	mutation := newMetadataMutation(c.config, OpDelete)
+	return &MetadataDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MetadataClient) DeleteOne(m *Metadata) *MetadataDeleteOne {
+	return c.DeleteOneID(m.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MetadataClient) DeleteOneID(id uuid.UUID) *MetadataDeleteOne {
+	builder := c.Delete().Where(metadata.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MetadataDeleteOne{builder}
+}
+
+// Query returns a query builder for Metadata.
+func (c *MetadataClient) Query() *MetadataQuery {
+	return &MetadataQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Metadata entity by its id.
+func (c *MetadataClient) Get(ctx context.Context, id uuid.UUID) (*Metadata, error) {
+	return c.Query().Where(metadata.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MetadataClient) GetX(ctx context.Context, id uuid.UUID) *Metadata {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Metadata.
+func (c *MetadataClient) QueryUser(m *Metadata) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(metadata.Table, metadata.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, metadata.UserTable, metadata.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MetadataClient) Hooks() []Hook {
+	return c.hooks.Metadata
+}
+
 // ProductClient is a client for the Product schema.
 type ProductClient struct {
 	config
@@ -1517,6 +1637,112 @@ func (c *ProxyListClient) QueryTask(pl *ProxyList) *TaskQuery {
 // Hooks returns the client hooks.
 func (c *ProxyListClient) Hooks() []Hook {
 	return c.hooks.ProxyList
+}
+
+// SessionClient is a client for the Session schema.
+type SessionClient struct {
+	config
+}
+
+// NewSessionClient returns a client for the Session from the given config.
+func NewSessionClient(c config) *SessionClient {
+	return &SessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `session.Hooks(f(g(h())))`.
+func (c *SessionClient) Use(hooks ...Hook) {
+	c.hooks.Session = append(c.hooks.Session, hooks...)
+}
+
+// Create returns a create builder for Session.
+func (c *SessionClient) Create() *SessionCreate {
+	mutation := newSessionMutation(c.config, OpCreate)
+	return &SessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Session entities.
+func (c *SessionClient) CreateBulk(builders ...*SessionCreate) *SessionCreateBulk {
+	return &SessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Session.
+func (c *SessionClient) Update() *SessionUpdate {
+	mutation := newSessionMutation(c.config, OpUpdate)
+	return &SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SessionClient) UpdateOne(s *Session) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(s))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SessionClient) UpdateOneID(id uuid.UUID) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Session.
+func (c *SessionClient) Delete() *SessionDelete {
+	mutation := newSessionMutation(c.config, OpDelete)
+	return &SessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *SessionClient) DeleteOne(s *Session) *SessionDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *SessionClient) DeleteOneID(id uuid.UUID) *SessionDeleteOne {
+	builder := c.Delete().Where(session.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SessionDeleteOne{builder}
+}
+
+// Query returns a query builder for Session.
+func (c *SessionClient) Query() *SessionQuery {
+	return &SessionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Session entity by its id.
+func (c *SessionClient) Get(ctx context.Context, id uuid.UUID) (*Session, error) {
+	return c.Query().Where(session.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SessionClient) GetX(ctx context.Context, id uuid.UUID) *Session {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Session.
+func (c *SessionClient) QueryUser(s *Session) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SessionClient) Hooks() []Hook {
+	return c.hooks.Session
 }
 
 // SettingsClient is a client for the Settings schema.
@@ -2393,6 +2619,38 @@ func (c *UserClient) QueryApp(u *User) *AppQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(app.Table, app.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.AppTable, user.AppColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMetadata queries the Metadata edge of a User.
+func (c *UserClient) QueryMetadata(u *User) *MetadataQuery {
+	query := &MetadataQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.MetadataTable, user.MetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySessions queries the Sessions edge of a User.
+func (c *UserClient) QuerySessions(u *User) *SessionQuery {
+	query := &SessionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

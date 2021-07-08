@@ -17,8 +17,6 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldFirstLogin holds the string denoting the first_login field in the database.
-	FieldFirstLogin = "first_login"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "User"
 	// EdgeSettings holds the string denoting the settings edge name in mutations.
@@ -76,7 +74,6 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldFirstLogin,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "apps"
@@ -119,8 +116,6 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// DefaultFirstLogin holds the default value on creation for the "first_login" field.
-	DefaultFirstLogin bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

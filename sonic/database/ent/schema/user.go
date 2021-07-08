@@ -44,5 +44,8 @@ func (User) Edges() []ent.Edge {
 		edge.To("App", App.Type).
 			Unique().
 			Annotations(entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.To("Metadata", Metadata.Type).
+			Unique(),
+		edge.To("Sessions", Session.Type),
 	}
 }

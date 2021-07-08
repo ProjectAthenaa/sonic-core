@@ -108,13 +108,6 @@ func UpdatedAt(v time.Time) predicate.App {
 	})
 }
 
-// FirstLogin applies equality check predicate on the "first_login" field. It's identical to FirstLoginEQ.
-func FirstLogin(v bool) predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFirstLogin), v))
-	})
-}
-
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
@@ -264,20 +257,6 @@ func UpdatedAtLT(v time.Time) predicate.App {
 func UpdatedAtLTE(v time.Time) predicate.App {
 	return predicate.App(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
-	})
-}
-
-// FirstLoginEQ applies the EQ predicate on the "first_login" field.
-func FirstLoginEQ(v bool) predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFirstLogin), v))
-	})
-}
-
-// FirstLoginNEQ applies the NEQ predicate on the "first_login" field.
-func FirstLoginNEQ(v bool) predicate.App {
-	return predicate.App(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldFirstLogin), v))
 	})
 }
 

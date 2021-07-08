@@ -55,20 +55,6 @@ func (ac *AppCreate) SetNillableUpdatedAt(t *time.Time) *AppCreate {
 	return ac
 }
 
-// SetFirstLogin sets the "first_login" field.
-func (ac *AppCreate) SetFirstLogin(b bool) *AppCreate {
-	ac.mutation.SetFirstLogin(b)
-	return ac
-}
-
-// SetNillableFirstLogin sets the "first_login" field if the given value is not nil.
-func (ac *AppCreate) SetNillableFirstLogin(b *bool) *AppCreate {
-	if b != nil {
-		ac.SetFirstLogin(*b)
-	}
-	return ac
-}
-
 // SetID sets the "id" field.
 func (ac *AppCreate) SetID(u uuid.UUID) *AppCreate {
 	ac.mutation.SetID(u)
@@ -221,10 +207,6 @@ func (ac *AppCreate) defaults() {
 		v := app.DefaultUpdatedAt()
 		ac.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := ac.mutation.FirstLogin(); !ok {
-		v := app.DefaultFirstLogin
-		ac.mutation.SetFirstLogin(v)
-	}
 	if _, ok := ac.mutation.ID(); !ok {
 		v := app.DefaultID()
 		ac.mutation.SetID(v)
@@ -238,9 +220,6 @@ func (ac *AppCreate) check() error {
 	}
 	if _, ok := ac.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
-	if _, ok := ac.mutation.FirstLogin(); !ok {
-		return &ValidationError{Name: "first_login", err: errors.New("ent: missing required field \"first_login\"")}
 	}
 	if _, ok := ac.mutation.UserID(); !ok {
 		return &ValidationError{Name: "User", err: errors.New("ent: missing required edge \"User\"")}
@@ -289,14 +268,6 @@ func (ac *AppCreate) createSpec() (*App, *sqlgraph.CreateSpec) {
 			Column: app.FieldUpdatedAt,
 		})
 		_node.UpdatedAt = value
-	}
-	if value, ok := ac.mutation.FirstLogin(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: app.FieldFirstLogin,
-		})
-		_node.FirstLogin = value
 	}
 	if nodes := ac.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

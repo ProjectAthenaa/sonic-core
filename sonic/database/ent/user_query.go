@@ -14,7 +14,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
@@ -33,6 +35,8 @@ type UserQuery struct {
 	withLicense    *LicenseQuery
 	withStatistics *StatisticQuery
 	withApp        *AppQuery
+	withMetadata   *MetadataQuery
+	withSessions   *SessionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -128,6 +132,50 @@ func (uq *UserQuery) QueryApp() *AppQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(app.Table, app.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.AppTable, user.AppColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMetadata chains the current query on the "Metadata" edge.
+func (uq *UserQuery) QueryMetadata() *MetadataQuery {
+	query := &MetadataQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.MetadataTable, user.MetadataColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySessions chains the current query on the "Sessions" edge.
+func (uq *UserQuery) QuerySessions() *SessionQuery {
+	query := &SessionQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -319,6 +367,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withLicense:    uq.withLicense.Clone(),
 		withStatistics: uq.withStatistics.Clone(),
 		withApp:        uq.withApp.Clone(),
+		withMetadata:   uq.withMetadata.Clone(),
+		withSessions:   uq.withSessions.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -355,6 +405,28 @@ func (uq *UserQuery) WithApp(opts ...func(*AppQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withApp = query
+	return uq
+}
+
+// WithMetadata tells the query-builder to eager-load the nodes that are connected to
+// the "Metadata" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithMetadata(opts ...func(*MetadataQuery)) *UserQuery {
+	query := &MetadataQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withMetadata = query
+	return uq
+}
+
+// WithSessions tells the query-builder to eager-load the nodes that are connected to
+// the "Sessions" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
+	query := &SessionQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withSessions = query
 	return uq
 }
 
@@ -423,10 +495,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [5]bool{
 			uq.withLicense != nil,
 			uq.withStatistics != nil,
 			uq.withApp != nil,
+			uq.withMetadata != nil,
+			uq.withSessions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -567,6 +641,63 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_app" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.App = n
+		}
+	}
+
+	if query := uq.withMetadata; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Metadata(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.MetadataColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_metadata
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_metadata" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_metadata" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Metadata = n
+		}
+	}
+
+	if query := uq.withSessions; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Sessions = []*Session{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Session(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.SessionsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_sessions
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_sessions" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_sessions" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Sessions = append(node.Edges.Sessions, n)
 		}
 	}
 

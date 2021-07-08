@@ -15,11 +15,13 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
@@ -52,11 +54,13 @@ func columnChecker(table string) func(string) error {
 		app.Table:          app.ValidColumn,
 		billing.Table:      billing.ValidColumn,
 		license.Table:      license.ValidColumn,
+		metadata.Table:     metadata.ValidColumn,
 		product.Table:      product.ValidColumn,
 		profile.Table:      profile.ValidColumn,
 		profilegroup.Table: profilegroup.ValidColumn,
 		proxy.Table:        proxy.ValidColumn,
 		proxylist.Table:    proxylist.ValidColumn,
+		session.Table:      session.ValidColumn,
 		settings.Table:     settings.ValidColumn,
 		shipping.Table:     shipping.ValidColumn,
 		statistic.Table:    statistic.ValidColumn,

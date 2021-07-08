@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
 )
@@ -38,9 +39,13 @@ type UserEdges struct {
 	Statistics []*Statistic `json:"Statistics,omitempty"`
 	// App holds the value of the App edge.
 	App *App `json:"App,omitempty"`
+	// Metadata holds the value of the Metadata edge.
+	Metadata *Metadata `json:"Metadata,omitempty"`
+	// Sessions holds the value of the Sessions edge.
+	Sessions []*Session `json:"Sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // LicenseOrErr returns the License value or an error if the edge
@@ -78,6 +83,29 @@ func (e UserEdges) AppOrErr() (*App, error) {
 		return e.App, nil
 	}
 	return nil, &NotLoadedError{edge: "App"}
+}
+
+// MetadataOrErr returns the Metadata value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) MetadataOrErr() (*Metadata, error) {
+	if e.loadedTypes[3] {
+		if e.Metadata == nil {
+			// The edge Metadata was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: metadata.Label}
+		}
+		return e.Metadata, nil
+	}
+	return nil, &NotLoadedError{edge: "Metadata"}
+}
+
+// SessionsOrErr returns the Sessions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SessionsOrErr() ([]*Session, error) {
+	if e.loadedTypes[4] {
+		return e.Sessions, nil
+	}
+	return nil, &NotLoadedError{edge: "Sessions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -148,6 +176,16 @@ func (u *User) QueryStatistics() *StatisticQuery {
 // QueryApp queries the "App" edge of the User entity.
 func (u *User) QueryApp() *AppQuery {
 	return (&UserClient{config: u.config}).QueryApp(u)
+}
+
+// QueryMetadata queries the "Metadata" edge of the User entity.
+func (u *User) QueryMetadata() *MetadataQuery {
+	return (&UserClient{config: u.config}).QueryMetadata(u)
+}
+
+// QuerySessions queries the "Sessions" edge of the User entity.
+func (u *User) QuerySessions() *SessionQuery {
+	return (&UserClient{config: u.config}).QuerySessions(u)
 }
 
 // Update returns a builder for updating this User.

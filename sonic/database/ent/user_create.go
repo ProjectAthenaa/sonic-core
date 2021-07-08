@@ -12,6 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
@@ -123,6 +125,40 @@ func (uc *UserCreate) SetNillableAppID(id *uuid.UUID) *UserCreate {
 // SetApp sets the "App" edge to the App entity.
 func (uc *UserCreate) SetApp(a *App) *UserCreate {
 	return uc.SetAppID(a.ID)
+}
+
+// SetMetadataID sets the "Metadata" edge to the Metadata entity by ID.
+func (uc *UserCreate) SetMetadataID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetMetadataID(id)
+	return uc
+}
+
+// SetNillableMetadataID sets the "Metadata" edge to the Metadata entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableMetadataID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetMetadataID(*id)
+	}
+	return uc
+}
+
+// SetMetadata sets the "Metadata" edge to the Metadata entity.
+func (uc *UserCreate) SetMetadata(m *Metadata) *UserCreate {
+	return uc.SetMetadataID(m.ID)
+}
+
+// AddSessionIDs adds the "Sessions" edge to the Session entity by IDs.
+func (uc *UserCreate) AddSessionIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddSessionIDs(ids...)
+	return uc
+}
+
+// AddSessions adds the "Sessions" edges to the Session entity.
+func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
+	ids := make([]uuid.UUID, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uc.AddSessionIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -308,6 +344,44 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: app.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.MetadataIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.MetadataTable,
+			Columns: []string{user.MetadataColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.SessionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: session.FieldID,
 				},
 			},
 		}

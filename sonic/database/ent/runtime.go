@@ -10,12 +10,14 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profile"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/schema"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
@@ -74,10 +76,6 @@ func init() {
 	app.DefaultUpdatedAt = appDescUpdatedAt.Default.(func() time.Time)
 	// app.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	app.UpdateDefaultUpdatedAt = appDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// appDescFirstLogin is the schema descriptor for first_login field.
-	appDescFirstLogin := appFields[3].Descriptor()
-	// app.DefaultFirstLogin holds the default value on creation for the first_login field.
-	app.DefaultFirstLogin = appDescFirstLogin.Default.(bool)
 	// appDescID is the schema descriptor for id field.
 	appDescID := appFields[0].Descriptor()
 	// app.DefaultID holds the default value on creation for the id field.
@@ -114,6 +112,26 @@ func init() {
 	licenseDescID := licenseFields[0].Descriptor()
 	// license.DefaultID holds the default value on creation for the id field.
 	license.DefaultID = licenseDescID.Default.(func() uuid.UUID)
+	metadataFields := schema.Metadata{}.Fields()
+	_ = metadataFields
+	// metadataDescCreatedAt is the schema descriptor for created_at field.
+	metadataDescCreatedAt := metadataFields[1].Descriptor()
+	// metadata.DefaultCreatedAt holds the default value on creation for the created_at field.
+	metadata.DefaultCreatedAt = metadataDescCreatedAt.Default.(func() time.Time)
+	// metadataDescUpdatedAt is the schema descriptor for updated_at field.
+	metadataDescUpdatedAt := metadataFields[2].Descriptor()
+	// metadata.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	metadata.DefaultUpdatedAt = metadataDescUpdatedAt.Default.(func() time.Time)
+	// metadata.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	metadata.UpdateDefaultUpdatedAt = metadataDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// metadataDescFirstLogin is the schema descriptor for FirstLogin field.
+	metadataDescFirstLogin := metadataFields[3].Descriptor()
+	// metadata.DefaultFirstLogin holds the default value on creation for the FirstLogin field.
+	metadata.DefaultFirstLogin = metadataDescFirstLogin.Default.(bool)
+	// metadataDescID is the schema descriptor for id field.
+	metadataDescID := metadataFields[0].Descriptor()
+	// metadata.DefaultID holds the default value on creation for the id field.
+	metadata.DefaultID = metadataDescID.Default.(func() uuid.UUID)
 	productFields := schema.Product{}.Fields()
 	_ = productFields
 	// productDescCreatedAt is the schema descriptor for created_at field.
@@ -202,6 +220,24 @@ func init() {
 	proxylistDescID := proxylistFields[0].Descriptor()
 	// proxylist.DefaultID holds the default value on creation for the id field.
 	proxylist.DefaultID = proxylistDescID.Default.(func() uuid.UUID)
+	sessionFields := schema.Session{}.Fields()
+	_ = sessionFields
+	// sessionDescCreatedAt is the schema descriptor for created_at field.
+	sessionDescCreatedAt := sessionFields[1].Descriptor()
+	// session.DefaultCreatedAt holds the default value on creation for the created_at field.
+	session.DefaultCreatedAt = sessionDescCreatedAt.Default.(func() time.Time)
+	// sessionDescDeviceName is the schema descriptor for DeviceName field.
+	sessionDescDeviceName := sessionFields[2].Descriptor()
+	// session.DefaultDeviceName holds the default value on creation for the DeviceName field.
+	session.DefaultDeviceName = sessionDescDeviceName.Default.(string)
+	// sessionDescOS is the schema descriptor for OS field.
+	sessionDescOS := sessionFields[3].Descriptor()
+	// session.DefaultOS holds the default value on creation for the OS field.
+	session.DefaultOS = sessionDescOS.Default.(string)
+	// sessionDescID is the schema descriptor for id field.
+	sessionDescID := sessionFields[0].Descriptor()
+	// session.DefaultID holds the default value on creation for the id field.
+	session.DefaultID = sessionDescID.Default.(func() uuid.UUID)
 	settingsFields := schema.Settings{}.Fields()
 	_ = settingsFields
 	// settingsDescCreatedAt is the schema descriptor for created_at field.

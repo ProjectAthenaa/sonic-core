@@ -74,6 +74,19 @@ func (f LicenseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The MetadataFunc type is an adapter to allow the use of ordinary
+// function as Metadata mutator.
+type MetadataFunc func(context.Context, *ent.MetadataMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MetadataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.MetadataMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MetadataMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ProductFunc type is an adapter to allow the use of ordinary
 // function as Product mutator.
 type ProductFunc func(context.Context, *ent.ProductMutation) (ent.Value, error)
@@ -135,6 +148,19 @@ func (f ProxyListFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	mv, ok := m.(*ent.ProxyListMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProxyListMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SessionFunc type is an adapter to allow the use of ordinary
+// function as Session mutator.
+type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SessionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
 	}
 	return f(ctx, mv)
 }

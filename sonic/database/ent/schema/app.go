@@ -24,7 +24,6 @@ func (App) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Bool("first_login").Default(false),
 	}
 }
 

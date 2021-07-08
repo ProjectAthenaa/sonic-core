@@ -25,6 +25,10 @@ const (
 	EdgeStatistics = "Statistics"
 	// EdgeApp holds the string denoting the app edge name in mutations.
 	EdgeApp = "App"
+	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
+	EdgeMetadata = "Metadata"
+	// EdgeSessions holds the string denoting the sessions edge name in mutations.
+	EdgeSessions = "Sessions"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// LicenseTable is the table the holds the License relation/edge.
@@ -46,6 +50,20 @@ const (
 	AppInverseTable = "apps"
 	// AppColumn is the table column denoting the App relation/edge.
 	AppColumn = "user_app"
+	// MetadataTable is the table the holds the Metadata relation/edge.
+	MetadataTable = "metadata"
+	// MetadataInverseTable is the table name for the Metadata entity.
+	// It exists in this package in order to avoid circular dependency with the "metadata" package.
+	MetadataInverseTable = "metadata"
+	// MetadataColumn is the table column denoting the Metadata relation/edge.
+	MetadataColumn = "user_metadata"
+	// SessionsTable is the table the holds the Sessions relation/edge.
+	SessionsTable = "sessions"
+	// SessionsInverseTable is the table name for the Session entity.
+	// It exists in this package in order to avoid circular dependency with the "session" package.
+	SessionsInverseTable = "sessions"
+	// SessionsColumn is the table column denoting the Sessions relation/edge.
+	SessionsColumn = "user_sessions"
 )
 
 // Columns holds all SQL columns for user fields.

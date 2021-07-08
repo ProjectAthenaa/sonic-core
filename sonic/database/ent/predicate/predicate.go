@@ -21,6 +21,9 @@ type Billing func(*sql.Selector)
 // License is the predicate function for license builders.
 type License func(*sql.Selector)
 
+// Metadata is the predicate function for metadata builders.
+type Metadata func(*sql.Selector)
+
 // Product is the predicate function for product builders.
 type Product func(*sql.Selector)
 
@@ -35,6 +38,9 @@ type Proxy func(*sql.Selector)
 
 // ProxyList is the predicate function for proxylist builders.
 type ProxyList func(*sql.Selector)
+
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
 
 // Settings is the predicate function for settings builders.
 type Settings func(*sql.Selector)

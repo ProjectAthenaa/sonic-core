@@ -64,7 +64,6 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "first_login", Type: field.TypeBool, Default: false},
 		{Name: "user_app", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// AppsTable holds the schema information for the "apps" table.
@@ -75,7 +74,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "apps_users_App",
-				Columns:    []*schema.Column{AppsColumns[4]},
+				Columns:    []*schema.Column{AppsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -121,6 +120,29 @@ var (
 				Columns:    []*schema.Column{LicensesColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// MetadataColumns holds the columns for the "metadata" table.
+	MetadataColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "first_login", Type: field.TypeBool, Default: true},
+		{Name: "theme", Type: field.TypeEnum, Enums: []string{"Variation1", "Variation2", "Variation3", "Variation4"}, Default: "Variation1"},
+		{Name: "user_metadata", Type: field.TypeUUID, Unique: true, Nullable: true},
+	}
+	// MetadataTable holds the schema information for the "metadata" table.
+	MetadataTable = &schema.Table{
+		Name:       "metadata",
+		Columns:    MetadataColumns,
+		PrimaryKey: []*schema.Column{MetadataColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "metadata_users_Metadata",
+				Columns:    []*schema.Column{MetadataColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -224,6 +246,29 @@ var (
 		Columns:     ProxyListsColumns,
 		PrimaryKey:  []*schema.Column{ProxyListsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// SessionsColumns holds the columns for the "sessions" table.
+	SessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "device_name", Type: field.TypeString, Default: "Unknown"},
+		{Name: "os", Type: field.TypeString, Default: "Unknown"},
+		{Name: "device_type", Type: field.TypeEnum, Enums: []string{"Unknown", "Phone", "Tablet", "PC", "Laptop"}, Default: "Unknown"},
+		{Name: "user_sessions", Type: field.TypeUUID, Nullable: true},
+	}
+	// SessionsTable holds the schema information for the "sessions" table.
+	SessionsTable = &schema.Table{
+		Name:       "sessions",
+		Columns:    SessionsColumns,
+		PrimaryKey: []*schema.Column{SessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "sessions_users_Sessions",
+				Columns:    []*schema.Column{SessionsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// SettingsColumns holds the columns for the "settings" table.
 	SettingsColumns = []*schema.Column{
@@ -637,11 +682,13 @@ var (
 		AppsTable,
 		BillingsTable,
 		LicensesTable,
+		MetadataTable,
 		ProductsTable,
 		ProfilesTable,
 		ProfileGroupsTable,
 		ProxiesTable,
 		ProxyListsTable,
+		SessionsTable,
 		SettingsTable,
 		ShippingsTable,
 		StatisticsTable,
@@ -668,8 +715,10 @@ func init() {
 	AddressesTable.ForeignKeys[0].RefTable = ShippingsTable
 	AppsTable.ForeignKeys[0].RefTable = UsersTable
 	LicensesTable.ForeignKeys[0].RefTable = UsersTable
+	MetadataTable.ForeignKeys[0].RefTable = UsersTable
 	ProfilesTable.ForeignKeys[0].RefTable = ProfileGroupsTable
 	ProxiesTable.ForeignKeys[0].RefTable = ProxyListsTable
+	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 	SettingsTable.ForeignKeys[0].RefTable = AppsTable
 	ShippingsTable.ForeignKeys[0].RefTable = ProfilesTable
 	StripesTable.ForeignKeys[0].RefTable = LicensesTable

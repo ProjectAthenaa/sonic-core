@@ -29,11 +29,13 @@ type hooks struct {
 	App          []ent.Hook
 	Billing      []ent.Hook
 	License      []ent.Hook
+	Metadata     []ent.Hook
 	Product      []ent.Hook
 	Profile      []ent.Hook
 	ProfileGroup []ent.Hook
 	Proxy        []ent.Hook
 	ProxyList    []ent.Hook
+	Session      []ent.Hook
 	Settings     []ent.Hook
 	Shipping     []ent.Hook
 	Statistic    []ent.Hook
