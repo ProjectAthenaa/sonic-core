@@ -13,6 +13,13 @@ type Statistic struct {
 	ent.Schema
 }
 
+type Axis string
+
+const (
+	X Axis = "X"
+	Y Axis = "Y"
+)
+
 // Fields of the Statistic.
 func (Statistic) Fields() []ent.Field {
 	return []ent.Field{
@@ -23,7 +30,12 @@ func (Statistic) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Enum("Type").Values("Checkout", "Decline"),
+		field.Enum("Type").Values("Checkout", "Decline", "Errors", "Failed", "CookiesGens", "RecaptchaUsage", "TasksRunning", "MoneySpent"),
+		field.Int("PotentialProfit").
+			Optional().
+			Nillable(),
+		field.JSON("Axis", map[Axis]string{}),
+		field.Int("Value").Optional(),
 	}
 }
 

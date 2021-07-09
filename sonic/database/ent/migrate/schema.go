@@ -353,7 +353,10 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"Checkout", "Decline"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"Checkout", "Decline", "Errors", "Failed", "CookiesGens", "RecaptchaUsage", "TasksRunning", "MoneySpent"}},
+		{Name: "potential_profit", Type: field.TypeInt, Nullable: true},
+		{Name: "axis", Type: field.TypeJSON},
+		{Name: "value", Type: field.TypeInt, Nullable: true},
 	}
 	// StatisticsTable holds the schema information for the "statistics" table.
 	StatisticsTable = &schema.Table{

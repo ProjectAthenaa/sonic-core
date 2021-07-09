@@ -20,6 +20,12 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldPotentialProfit holds the string denoting the potentialprofit field in the database.
+	FieldPotentialProfit = "potential_profit"
+	// FieldAxis holds the string denoting the axis field in the database.
+	FieldAxis = "axis"
+	// FieldValue holds the string denoting the value field in the database.
+	FieldValue = "value"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "User"
 	// EdgeProduct holds the string denoting the product edge name in mutations.
@@ -44,6 +50,9 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldType,
+	FieldPotentialProfit,
+	FieldAxis,
+	FieldValue,
 }
 
 var (
@@ -81,8 +90,14 @@ type Type string
 
 // Type values.
 const (
-	TypeCheckout Type = "Checkout"
-	TypeDecline  Type = "Decline"
+	TypeCheckout       Type = "Checkout"
+	TypeDecline        Type = "Decline"
+	TypeErrors         Type = "Errors"
+	TypeFailed         Type = "Failed"
+	TypeCookiesGens    Type = "CookiesGens"
+	TypeRecaptchaUsage Type = "RecaptchaUsage"
+	TypeTasksRunning   Type = "TasksRunning"
+	TypeMoneySpent     Type = "MoneySpent"
 )
 
 func (_type Type) String() string {
@@ -92,7 +107,7 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "Type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeCheckout, TypeDecline:
+	case TypeCheckout, TypeDecline, TypeErrors, TypeFailed, TypeCookiesGens, TypeRecaptchaUsage, TypeTasksRunning, TypeMoneySpent:
 		return nil
 	default:
 		return fmt.Errorf("statistic: invalid enum value for Type field: %q", _type)

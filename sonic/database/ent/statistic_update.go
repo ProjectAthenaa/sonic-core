@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/schema"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
@@ -53,6 +54,66 @@ func (su *StatisticUpdate) SetUpdatedAt(t time.Time) *StatisticUpdate {
 // SetType sets the "Type" field.
 func (su *StatisticUpdate) SetType(s statistic.Type) *StatisticUpdate {
 	su.mutation.SetType(s)
+	return su
+}
+
+// SetPotentialProfit sets the "PotentialProfit" field.
+func (su *StatisticUpdate) SetPotentialProfit(i int) *StatisticUpdate {
+	su.mutation.ResetPotentialProfit()
+	su.mutation.SetPotentialProfit(i)
+	return su
+}
+
+// SetNillablePotentialProfit sets the "PotentialProfit" field if the given value is not nil.
+func (su *StatisticUpdate) SetNillablePotentialProfit(i *int) *StatisticUpdate {
+	if i != nil {
+		su.SetPotentialProfit(*i)
+	}
+	return su
+}
+
+// AddPotentialProfit adds i to the "PotentialProfit" field.
+func (su *StatisticUpdate) AddPotentialProfit(i int) *StatisticUpdate {
+	su.mutation.AddPotentialProfit(i)
+	return su
+}
+
+// ClearPotentialProfit clears the value of the "PotentialProfit" field.
+func (su *StatisticUpdate) ClearPotentialProfit() *StatisticUpdate {
+	su.mutation.ClearPotentialProfit()
+	return su
+}
+
+// SetAxis sets the "Axis" field.
+func (su *StatisticUpdate) SetAxis(m map[schema.Axis]string) *StatisticUpdate {
+	su.mutation.SetAxis(m)
+	return su
+}
+
+// SetValue sets the "Value" field.
+func (su *StatisticUpdate) SetValue(i int) *StatisticUpdate {
+	su.mutation.ResetValue()
+	su.mutation.SetValue(i)
+	return su
+}
+
+// SetNillableValue sets the "Value" field if the given value is not nil.
+func (su *StatisticUpdate) SetNillableValue(i *int) *StatisticUpdate {
+	if i != nil {
+		su.SetValue(*i)
+	}
+	return su
+}
+
+// AddValue adds i to the "Value" field.
+func (su *StatisticUpdate) AddValue(i int) *StatisticUpdate {
+	su.mutation.AddValue(i)
+	return su
+}
+
+// ClearValue clears the value of the "Value" field.
+func (su *StatisticUpdate) ClearValue() *StatisticUpdate {
+	su.mutation.ClearValue()
 	return su
 }
 
@@ -248,6 +309,53 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: statistic.FieldType,
 		})
 	}
+	if value, ok := su.mutation.PotentialProfit(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldPotentialProfit,
+		})
+	}
+	if value, ok := su.mutation.AddedPotentialProfit(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldPotentialProfit,
+		})
+	}
+	if su.mutation.PotentialProfitCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: statistic.FieldPotentialProfit,
+		})
+	}
+	if value, ok := su.mutation.Axis(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: statistic.FieldAxis,
+		})
+	}
+	if value, ok := su.mutation.Value(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldValue,
+		})
+	}
+	if value, ok := su.mutation.AddedValue(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldValue,
+		})
+	}
+	if su.mutation.ValueCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: statistic.FieldValue,
+		})
+	}
 	if su.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -398,6 +506,66 @@ func (suo *StatisticUpdateOne) SetUpdatedAt(t time.Time) *StatisticUpdateOne {
 // SetType sets the "Type" field.
 func (suo *StatisticUpdateOne) SetType(s statistic.Type) *StatisticUpdateOne {
 	suo.mutation.SetType(s)
+	return suo
+}
+
+// SetPotentialProfit sets the "PotentialProfit" field.
+func (suo *StatisticUpdateOne) SetPotentialProfit(i int) *StatisticUpdateOne {
+	suo.mutation.ResetPotentialProfit()
+	suo.mutation.SetPotentialProfit(i)
+	return suo
+}
+
+// SetNillablePotentialProfit sets the "PotentialProfit" field if the given value is not nil.
+func (suo *StatisticUpdateOne) SetNillablePotentialProfit(i *int) *StatisticUpdateOne {
+	if i != nil {
+		suo.SetPotentialProfit(*i)
+	}
+	return suo
+}
+
+// AddPotentialProfit adds i to the "PotentialProfit" field.
+func (suo *StatisticUpdateOne) AddPotentialProfit(i int) *StatisticUpdateOne {
+	suo.mutation.AddPotentialProfit(i)
+	return suo
+}
+
+// ClearPotentialProfit clears the value of the "PotentialProfit" field.
+func (suo *StatisticUpdateOne) ClearPotentialProfit() *StatisticUpdateOne {
+	suo.mutation.ClearPotentialProfit()
+	return suo
+}
+
+// SetAxis sets the "Axis" field.
+func (suo *StatisticUpdateOne) SetAxis(m map[schema.Axis]string) *StatisticUpdateOne {
+	suo.mutation.SetAxis(m)
+	return suo
+}
+
+// SetValue sets the "Value" field.
+func (suo *StatisticUpdateOne) SetValue(i int) *StatisticUpdateOne {
+	suo.mutation.ResetValue()
+	suo.mutation.SetValue(i)
+	return suo
+}
+
+// SetNillableValue sets the "Value" field if the given value is not nil.
+func (suo *StatisticUpdateOne) SetNillableValue(i *int) *StatisticUpdateOne {
+	if i != nil {
+		suo.SetValue(*i)
+	}
+	return suo
+}
+
+// AddValue adds i to the "Value" field.
+func (suo *StatisticUpdateOne) AddValue(i int) *StatisticUpdateOne {
+	suo.mutation.AddValue(i)
+	return suo
+}
+
+// ClearValue clears the value of the "Value" field.
+func (suo *StatisticUpdateOne) ClearValue() *StatisticUpdateOne {
+	suo.mutation.ClearValue()
 	return suo
 }
 
@@ -615,6 +783,53 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: statistic.FieldType,
+		})
+	}
+	if value, ok := suo.mutation.PotentialProfit(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldPotentialProfit,
+		})
+	}
+	if value, ok := suo.mutation.AddedPotentialProfit(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldPotentialProfit,
+		})
+	}
+	if suo.mutation.PotentialProfitCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: statistic.FieldPotentialProfit,
+		})
+	}
+	if value, ok := suo.mutation.Axis(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: statistic.FieldAxis,
+		})
+	}
+	if value, ok := suo.mutation.Value(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldValue,
+		})
+	}
+	if value, ok := suo.mutation.AddedValue(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldValue,
+		})
+	}
+	if suo.mutation.ValueCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: statistic.FieldValue,
 		})
 	}
 	if suo.mutation.UserCleared() {

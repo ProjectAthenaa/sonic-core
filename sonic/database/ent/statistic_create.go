@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/schema"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
@@ -54,6 +55,40 @@ func (sc *StatisticCreate) SetNillableUpdatedAt(t *time.Time) *StatisticCreate {
 // SetType sets the "Type" field.
 func (sc *StatisticCreate) SetType(s statistic.Type) *StatisticCreate {
 	sc.mutation.SetType(s)
+	return sc
+}
+
+// SetPotentialProfit sets the "PotentialProfit" field.
+func (sc *StatisticCreate) SetPotentialProfit(i int) *StatisticCreate {
+	sc.mutation.SetPotentialProfit(i)
+	return sc
+}
+
+// SetNillablePotentialProfit sets the "PotentialProfit" field if the given value is not nil.
+func (sc *StatisticCreate) SetNillablePotentialProfit(i *int) *StatisticCreate {
+	if i != nil {
+		sc.SetPotentialProfit(*i)
+	}
+	return sc
+}
+
+// SetAxis sets the "Axis" field.
+func (sc *StatisticCreate) SetAxis(m map[schema.Axis]string) *StatisticCreate {
+	sc.mutation.SetAxis(m)
+	return sc
+}
+
+// SetValue sets the "Value" field.
+func (sc *StatisticCreate) SetValue(i int) *StatisticCreate {
+	sc.mutation.SetValue(i)
+	return sc
+}
+
+// SetNillableValue sets the "Value" field if the given value is not nil.
+func (sc *StatisticCreate) SetNillableValue(i *int) *StatisticCreate {
+	if i != nil {
+		sc.SetValue(*i)
+	}
 	return sc
 }
 
@@ -175,6 +210,9 @@ func (sc *StatisticCreate) check() error {
 			return &ValidationError{Name: "Type", err: fmt.Errorf("ent: validator failed for field \"Type\": %w", err)}
 		}
 	}
+	if _, ok := sc.mutation.Axis(); !ok {
+		return &ValidationError{Name: "Axis", err: errors.New("ent: missing required field \"Axis\"")}
+	}
 	return nil
 }
 
@@ -227,6 +265,30 @@ func (sc *StatisticCreate) createSpec() (*Statistic, *sqlgraph.CreateSpec) {
 			Column: statistic.FieldType,
 		})
 		_node.Type = value
+	}
+	if value, ok := sc.mutation.PotentialProfit(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldPotentialProfit,
+		})
+		_node.PotentialProfit = &value
+	}
+	if value, ok := sc.mutation.Axis(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: statistic.FieldAxis,
+		})
+		_node.Axis = value
+	}
+	if value, ok := sc.mutation.Value(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: statistic.FieldValue,
+		})
+		_node.Value = value
 	}
 	if nodes := sc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -3,11 +3,13 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/schema"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/google/uuid"
 )
@@ -23,6 +25,12 @@ type Statistic struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Type holds the value of the "Type" field.
 	Type statistic.Type `json:"Type,omitempty"`
+	// PotentialProfit holds the value of the "PotentialProfit" field.
+	PotentialProfit *int `json:"PotentialProfit,omitempty"`
+	// Axis holds the value of the "Axis" field.
+	Axis map[schema.Axis]string `json:"Axis,omitempty"`
+	// Value holds the value of the "Value" field.
+	Value int `json:"Value,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the StatisticQuery when eager-loading is set.
 	Edges StatisticEdges `json:"edges"`
@@ -62,6 +70,10 @@ func (*Statistic) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case statistic.FieldAxis:
+			values[i] = new([]byte)
+		case statistic.FieldPotentialProfit, statistic.FieldValue:
+			values[i] = new(sql.NullInt64)
 		case statistic.FieldType:
 			values[i] = new(sql.NullString)
 		case statistic.FieldCreatedAt, statistic.FieldUpdatedAt:
@@ -107,6 +119,28 @@ func (s *Statistic) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				s.Type = statistic.Type(value.String)
 			}
+		case statistic.FieldPotentialProfit:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field PotentialProfit", values[i])
+			} else if value.Valid {
+				s.PotentialProfit = new(int)
+				*s.PotentialProfit = int(value.Int64)
+			}
+		case statistic.FieldAxis:
+
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field Axis", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &s.Axis); err != nil {
+					return fmt.Errorf("unmarshal field Axis: %w", err)
+				}
+			}
+		case statistic.FieldValue:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field Value", values[i])
+			} else if value.Valid {
+				s.Value = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -151,6 +185,14 @@ func (s *Statistic) String() string {
 	builder.WriteString(s.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Type=")
 	builder.WriteString(fmt.Sprintf("%v", s.Type))
+	if v := s.PotentialProfit; v != nil {
+		builder.WriteString(", PotentialProfit=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", Axis=")
+	builder.WriteString(fmt.Sprintf("%v", s.Axis))
+	builder.WriteString(", Value=")
+	builder.WriteString(fmt.Sprintf("%v", s.Value))
 	builder.WriteByte(')')
 	return builder.String()
 }

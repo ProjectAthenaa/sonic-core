@@ -108,6 +108,20 @@ func UpdatedAt(v time.Time) predicate.Statistic {
 	})
 }
 
+// PotentialProfit applies equality check predicate on the "PotentialProfit" field. It's identical to PotentialProfitEQ.
+func PotentialProfit(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPotentialProfit), v))
+	})
+}
+
+// Value applies equality check predicate on the "Value" field. It's identical to ValueEQ.
+func Value(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValue), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Statistic {
 	return predicate.Statistic(func(s *sql.Selector) {
@@ -305,6 +319,186 @@ func TypeNotIn(vs ...Type) predicate.Statistic {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldType), v...))
+	})
+}
+
+// PotentialProfitEQ applies the EQ predicate on the "PotentialProfit" field.
+func PotentialProfitEQ(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPotentialProfit), v))
+	})
+}
+
+// PotentialProfitNEQ applies the NEQ predicate on the "PotentialProfit" field.
+func PotentialProfitNEQ(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPotentialProfit), v))
+	})
+}
+
+// PotentialProfitIn applies the In predicate on the "PotentialProfit" field.
+func PotentialProfitIn(vs ...int) predicate.Statistic {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Statistic(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPotentialProfit), v...))
+	})
+}
+
+// PotentialProfitNotIn applies the NotIn predicate on the "PotentialProfit" field.
+func PotentialProfitNotIn(vs ...int) predicate.Statistic {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Statistic(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPotentialProfit), v...))
+	})
+}
+
+// PotentialProfitGT applies the GT predicate on the "PotentialProfit" field.
+func PotentialProfitGT(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPotentialProfit), v))
+	})
+}
+
+// PotentialProfitGTE applies the GTE predicate on the "PotentialProfit" field.
+func PotentialProfitGTE(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPotentialProfit), v))
+	})
+}
+
+// PotentialProfitLT applies the LT predicate on the "PotentialProfit" field.
+func PotentialProfitLT(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPotentialProfit), v))
+	})
+}
+
+// PotentialProfitLTE applies the LTE predicate on the "PotentialProfit" field.
+func PotentialProfitLTE(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPotentialProfit), v))
+	})
+}
+
+// PotentialProfitIsNil applies the IsNil predicate on the "PotentialProfit" field.
+func PotentialProfitIsNil() predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPotentialProfit)))
+	})
+}
+
+// PotentialProfitNotNil applies the NotNil predicate on the "PotentialProfit" field.
+func PotentialProfitNotNil() predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPotentialProfit)))
+	})
+}
+
+// ValueEQ applies the EQ predicate on the "Value" field.
+func ValueEQ(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldValue), v))
+	})
+}
+
+// ValueNEQ applies the NEQ predicate on the "Value" field.
+func ValueNEQ(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldValue), v))
+	})
+}
+
+// ValueIn applies the In predicate on the "Value" field.
+func ValueIn(vs ...int) predicate.Statistic {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Statistic(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldValue), v...))
+	})
+}
+
+// ValueNotIn applies the NotIn predicate on the "Value" field.
+func ValueNotIn(vs ...int) predicate.Statistic {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Statistic(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldValue), v...))
+	})
+}
+
+// ValueGT applies the GT predicate on the "Value" field.
+func ValueGT(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldValue), v))
+	})
+}
+
+// ValueGTE applies the GTE predicate on the "Value" field.
+func ValueGTE(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldValue), v))
+	})
+}
+
+// ValueLT applies the LT predicate on the "Value" field.
+func ValueLT(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldValue), v))
+	})
+}
+
+// ValueLTE applies the LTE predicate on the "Value" field.
+func ValueLTE(v int) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldValue), v))
+	})
+}
+
+// ValueIsNil applies the IsNil predicate on the "Value" field.
+func ValueIsNil() predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldValue)))
+	})
+}
+
+// ValueNotNil applies the NotNil predicate on the "Value" field.
+func ValueNotNil() predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldValue)))
 	})
 }
 

@@ -22,6 +22,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/schema"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
@@ -11208,22 +11209,27 @@ func (m *ShippingMutation) ResetEdge(name string) error {
 // StatisticMutation represents an operation that mutates the Statistic nodes in the graph.
 type StatisticMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *uuid.UUID
-	created_at      *time.Time
-	updated_at      *time.Time
-	_Type           *statistic.Type
-	clearedFields   map[string]struct{}
-	_User           map[uuid.UUID]struct{}
-	removed_User    map[uuid.UUID]struct{}
-	cleared_User    bool
-	_Product        map[uuid.UUID]struct{}
-	removed_Product map[uuid.UUID]struct{}
-	cleared_Product bool
-	done            bool
-	oldValue        func(context.Context) (*Statistic, error)
-	predicates      []predicate.Statistic
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	created_at          *time.Time
+	updated_at          *time.Time
+	_Type               *statistic.Type
+	_PotentialProfit    *int
+	add_PotentialProfit *int
+	_Axis               *map[schema.Axis]string
+	_Value              *int
+	add_Value           *int
+	clearedFields       map[string]struct{}
+	_User               map[uuid.UUID]struct{}
+	removed_User        map[uuid.UUID]struct{}
+	cleared_User        bool
+	_Product            map[uuid.UUID]struct{}
+	removed_Product     map[uuid.UUID]struct{}
+	cleared_Product     bool
+	done                bool
+	oldValue            func(context.Context) (*Statistic, error)
+	predicates          []predicate.Statistic
 }
 
 var _ ent.Mutation = (*StatisticMutation)(nil)
@@ -11419,6 +11425,182 @@ func (m *StatisticMutation) ResetType() {
 	m._Type = nil
 }
 
+// SetPotentialProfit sets the "PotentialProfit" field.
+func (m *StatisticMutation) SetPotentialProfit(i int) {
+	m._PotentialProfit = &i
+	m.add_PotentialProfit = nil
+}
+
+// PotentialProfit returns the value of the "PotentialProfit" field in the mutation.
+func (m *StatisticMutation) PotentialProfit() (r int, exists bool) {
+	v := m._PotentialProfit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPotentialProfit returns the old "PotentialProfit" field's value of the Statistic entity.
+// If the Statistic object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StatisticMutation) OldPotentialProfit(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPotentialProfit is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPotentialProfit requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPotentialProfit: %w", err)
+	}
+	return oldValue.PotentialProfit, nil
+}
+
+// AddPotentialProfit adds i to the "PotentialProfit" field.
+func (m *StatisticMutation) AddPotentialProfit(i int) {
+	if m.add_PotentialProfit != nil {
+		*m.add_PotentialProfit += i
+	} else {
+		m.add_PotentialProfit = &i
+	}
+}
+
+// AddedPotentialProfit returns the value that was added to the "PotentialProfit" field in this mutation.
+func (m *StatisticMutation) AddedPotentialProfit() (r int, exists bool) {
+	v := m.add_PotentialProfit
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPotentialProfit clears the value of the "PotentialProfit" field.
+func (m *StatisticMutation) ClearPotentialProfit() {
+	m._PotentialProfit = nil
+	m.add_PotentialProfit = nil
+	m.clearedFields[statistic.FieldPotentialProfit] = struct{}{}
+}
+
+// PotentialProfitCleared returns if the "PotentialProfit" field was cleared in this mutation.
+func (m *StatisticMutation) PotentialProfitCleared() bool {
+	_, ok := m.clearedFields[statistic.FieldPotentialProfit]
+	return ok
+}
+
+// ResetPotentialProfit resets all changes to the "PotentialProfit" field.
+func (m *StatisticMutation) ResetPotentialProfit() {
+	m._PotentialProfit = nil
+	m.add_PotentialProfit = nil
+	delete(m.clearedFields, statistic.FieldPotentialProfit)
+}
+
+// SetAxis sets the "Axis" field.
+func (m *StatisticMutation) SetAxis(value map[schema.Axis]string) {
+	m._Axis = &value
+}
+
+// Axis returns the value of the "Axis" field in the mutation.
+func (m *StatisticMutation) Axis() (r map[schema.Axis]string, exists bool) {
+	v := m._Axis
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAxis returns the old "Axis" field's value of the Statistic entity.
+// If the Statistic object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StatisticMutation) OldAxis(ctx context.Context) (v map[schema.Axis]string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldAxis is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldAxis requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAxis: %w", err)
+	}
+	return oldValue.Axis, nil
+}
+
+// ResetAxis resets all changes to the "Axis" field.
+func (m *StatisticMutation) ResetAxis() {
+	m._Axis = nil
+}
+
+// SetValue sets the "Value" field.
+func (m *StatisticMutation) SetValue(i int) {
+	m._Value = &i
+	m.add_Value = nil
+}
+
+// Value returns the value of the "Value" field in the mutation.
+func (m *StatisticMutation) Value() (r int, exists bool) {
+	v := m._Value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValue returns the old "Value" field's value of the Statistic entity.
+// If the Statistic object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StatisticMutation) OldValue(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
+}
+
+// AddValue adds i to the "Value" field.
+func (m *StatisticMutation) AddValue(i int) {
+	if m.add_Value != nil {
+		*m.add_Value += i
+	} else {
+		m.add_Value = &i
+	}
+}
+
+// AddedValue returns the value that was added to the "Value" field in this mutation.
+func (m *StatisticMutation) AddedValue() (r int, exists bool) {
+	v := m.add_Value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearValue clears the value of the "Value" field.
+func (m *StatisticMutation) ClearValue() {
+	m._Value = nil
+	m.add_Value = nil
+	m.clearedFields[statistic.FieldValue] = struct{}{}
+}
+
+// ValueCleared returns if the "Value" field was cleared in this mutation.
+func (m *StatisticMutation) ValueCleared() bool {
+	_, ok := m.clearedFields[statistic.FieldValue]
+	return ok
+}
+
+// ResetValue resets all changes to the "Value" field.
+func (m *StatisticMutation) ResetValue() {
+	m._Value = nil
+	m.add_Value = nil
+	delete(m.clearedFields, statistic.FieldValue)
+}
+
 // AddUserIDs adds the "User" edge to the User entity by ids.
 func (m *StatisticMutation) AddUserIDs(ids ...uuid.UUID) {
 	if m._User == nil {
@@ -11539,7 +11721,7 @@ func (m *StatisticMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StatisticMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, statistic.FieldCreatedAt)
 	}
@@ -11548,6 +11730,15 @@ func (m *StatisticMutation) Fields() []string {
 	}
 	if m._Type != nil {
 		fields = append(fields, statistic.FieldType)
+	}
+	if m._PotentialProfit != nil {
+		fields = append(fields, statistic.FieldPotentialProfit)
+	}
+	if m._Axis != nil {
+		fields = append(fields, statistic.FieldAxis)
+	}
+	if m._Value != nil {
+		fields = append(fields, statistic.FieldValue)
 	}
 	return fields
 }
@@ -11563,6 +11754,12 @@ func (m *StatisticMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case statistic.FieldType:
 		return m.GetType()
+	case statistic.FieldPotentialProfit:
+		return m.PotentialProfit()
+	case statistic.FieldAxis:
+		return m.Axis()
+	case statistic.FieldValue:
+		return m.Value()
 	}
 	return nil, false
 }
@@ -11578,6 +11775,12 @@ func (m *StatisticMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldUpdatedAt(ctx)
 	case statistic.FieldType:
 		return m.OldType(ctx)
+	case statistic.FieldPotentialProfit:
+		return m.OldPotentialProfit(ctx)
+	case statistic.FieldAxis:
+		return m.OldAxis(ctx)
+	case statistic.FieldValue:
+		return m.OldValue(ctx)
 	}
 	return nil, fmt.Errorf("unknown Statistic field %s", name)
 }
@@ -11608,6 +11811,27 @@ func (m *StatisticMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetType(v)
 		return nil
+	case statistic.FieldPotentialProfit:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPotentialProfit(v)
+		return nil
+	case statistic.FieldAxis:
+		v, ok := value.(map[schema.Axis]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAxis(v)
+		return nil
+	case statistic.FieldValue:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValue(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Statistic field %s", name)
 }
@@ -11615,13 +11839,26 @@ func (m *StatisticMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *StatisticMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.add_PotentialProfit != nil {
+		fields = append(fields, statistic.FieldPotentialProfit)
+	}
+	if m.add_Value != nil {
+		fields = append(fields, statistic.FieldValue)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *StatisticMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case statistic.FieldPotentialProfit:
+		return m.AddedPotentialProfit()
+	case statistic.FieldValue:
+		return m.AddedValue()
+	}
 	return nil, false
 }
 
@@ -11630,6 +11867,20 @@ func (m *StatisticMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *StatisticMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case statistic.FieldPotentialProfit:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPotentialProfit(v)
+		return nil
+	case statistic.FieldValue:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddValue(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Statistic numeric field %s", name)
 }
@@ -11637,7 +11888,14 @@ func (m *StatisticMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *StatisticMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(statistic.FieldPotentialProfit) {
+		fields = append(fields, statistic.FieldPotentialProfit)
+	}
+	if m.FieldCleared(statistic.FieldValue) {
+		fields = append(fields, statistic.FieldValue)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -11650,6 +11908,14 @@ func (m *StatisticMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *StatisticMutation) ClearField(name string) error {
+	switch name {
+	case statistic.FieldPotentialProfit:
+		m.ClearPotentialProfit()
+		return nil
+	case statistic.FieldValue:
+		m.ClearValue()
+		return nil
+	}
 	return fmt.Errorf("unknown Statistic nullable field %s", name)
 }
 
@@ -11665,6 +11931,15 @@ func (m *StatisticMutation) ResetField(name string) error {
 		return nil
 	case statistic.FieldType:
 		m.ResetType()
+		return nil
+	case statistic.FieldPotentialProfit:
+		m.ResetPotentialProfit()
+		return nil
+	case statistic.FieldAxis:
+		m.ResetAxis()
+		return nil
+	case statistic.FieldValue:
+		m.ResetValue()
 		return nil
 	}
 	return fmt.Errorf("unknown Statistic field %s", name)
