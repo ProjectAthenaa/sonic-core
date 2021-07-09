@@ -7,6 +7,7 @@ import (
 	sonic "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/google/uuid"
 	"math/rand"
+	"strings"
 	"unsafe"
 )
 
@@ -68,8 +69,11 @@ func RandString(n int) string {
 	return string(b)
 }
 
-
 func UUIDParser(id string) uuid.UUID {
 	parsedID, _ := uuid.Parse(id)
 	return parsedID
+}
+
+func ErrorContains(err error, substring string) bool {
+	return strings.Contains(fmt.Sprint(err), substring)
 }
