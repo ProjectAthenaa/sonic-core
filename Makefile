@@ -9,3 +9,6 @@ compileEnt:
 
 monitorControllerCompile:
 	protoc --go_out=./monitor_controller --go_opt=paths=source_relative --go-grpc_out=./monitor_controller --go-grpc_opt=paths=source_relative ./MonitorController.proto
+
+authCompile:
+		protoc --go_out=./authentication/protos --go_opt=paths=source_relative --go-grpc_out=./authentication/protos --go-grpc_opt=paths=source_relative ./Authentication.proto
