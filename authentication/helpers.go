@@ -20,7 +20,7 @@ var (
 
 func extractTokens(ctx context.Context, sessionID string) (string, string, error) {
 	val, err := rdb.Get(ctx, sessionID).Result()
-	if err != redis.Nil {
+	if err != redis.Nil && err != nil {
 		return "", "", err
 	}
 
