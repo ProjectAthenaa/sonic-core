@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	gql "github.com/ProjectAthenaa/sonic-core/stats-graph/model"
 	"github.com/google/uuid"
 	"time"
 )
@@ -30,7 +31,16 @@ func (Statistic) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Enum("Type").Values("Checkout", "Decline", "Errors", "Failed", "CookiesGens", "RecaptchaUsage", "TasksRunning", "MoneySpent"),
+		field.Enum("Type").Values(
+			string(gql.StatTypeCheckouts),
+			string(gql.StatTypeDeclines),
+			string(gql.StatTypeErrors),
+			string(gql.StatTypeFailed),
+			string(gql.StatTypeCookieGens),
+			string(gql.StatTypeRecaptchaUsage),
+			string(gql.StatTypeTasksRunning),
+			string(gql.StatTypeMoneySpent),
+		),
 		field.Int("PotentialProfit").
 			Optional().
 			Nillable(),

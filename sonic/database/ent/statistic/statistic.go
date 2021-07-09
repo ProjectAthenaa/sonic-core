@@ -90,14 +90,14 @@ type Type string
 
 // Type values.
 const (
-	TypeCheckout       Type = "Checkout"
-	TypeDecline        Type = "Decline"
-	TypeErrors         Type = "Errors"
-	TypeFailed         Type = "Failed"
-	TypeCookiesGens    Type = "CookiesGens"
-	TypeRecaptchaUsage Type = "RecaptchaUsage"
-	TypeTasksRunning   Type = "TasksRunning"
-	TypeMoneySpent     Type = "MoneySpent"
+	TypeCHECKOUTS       Type = "CHECKOUTS"
+	TypeDECLINES        Type = "DECLINES"
+	TypeERRORS          Type = "ERRORS"
+	TypeFAILED          Type = "FAILED"
+	TypeCOOKIE_GENS     Type = "COOKIE_GENS"
+	TypeRECAPTCHA_USAGE Type = "RECAPTCHA_USAGE"
+	TypeTASKS_RUNNING   Type = "TASKS_RUNNING"
+	TypeMONEY_SPENT     Type = "MONEY_SPENT"
 )
 
 func (_type Type) String() string {
@@ -107,7 +107,7 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "Type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeCheckout, TypeDecline, TypeErrors, TypeFailed, TypeCookiesGens, TypeRecaptchaUsage, TypeTasksRunning, TypeMoneySpent:
+	case TypeCHECKOUTS, TypeDECLINES, TypeERRORS, TypeFAILED, TypeCOOKIE_GENS, TypeRECAPTCHA_USAGE, TypeTASKS_RUNNING, TypeMONEY_SPENT:
 		return nil
 	default:
 		return fmt.Errorf("statistic: invalid enum value for Type field: %q", _type)

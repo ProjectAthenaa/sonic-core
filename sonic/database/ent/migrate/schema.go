@@ -353,7 +353,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"Checkout", "Decline", "Errors", "Failed", "CookiesGens", "RecaptchaUsage", "TasksRunning", "MoneySpent"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"CHECKOUTS", "DECLINES", "ERRORS", "FAILED", "COOKIE_GENS", "RECAPTCHA_USAGE", "TASKS_RUNNING", "MONEY_SPENT"}},
 		{Name: "potential_profit", Type: field.TypeInt, Nullable: true},
 		{Name: "axis", Type: field.TypeJSON},
 		{Name: "value", Type: field.TypeInt, Nullable: true},
