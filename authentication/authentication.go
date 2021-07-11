@@ -10,7 +10,7 @@ import (
 )
 
 func AuthenticationFunc(ctx context.Context) (context.Context, error) {
-	span := sentry.StartSpan(ctx, "Authentication")
+	span := sentry.StartSpan(ctx, "Authentication", sentry.TransactionName("Authentication"))
 	defer span.Finish()
 	token, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
