@@ -7,8 +7,10 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/peer"
 	"os"
 )
 
@@ -21,6 +23,13 @@ var (
 func extractTokens(ctx context.Context, sessionID string) (string, string, error) {
 	val, err := rdb.Get(ctx, sessionID).Result()
 	if err != redis.Nil && err != nil {
+		p, _ := peer.FromContext(ctx)
+		sentry.WithScope(func(scope *sentry.Scope) {
+			scope.SetContext("Context", map[string]interface{}{
+				"IP":        p.Addr.String(),
+				"SessionID": sessionID,
+			})
+		})
 		return "", "", err
 	}
 

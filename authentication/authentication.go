@@ -3,12 +3,15 @@ package authentication
 import (
 	"context"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func AuthenticationFunc(ctx context.Context) (context.Context, error) {
+	span := sentry.StartSpan(ctx, "Authentication")
+	defer span.Finish()
 	token, err := grpc_auth.AuthFromMD(ctx, "bearer")
 	if err != nil {
 		return nil, err
@@ -25,4 +28,3 @@ func AuthenticationFunc(ctx context.Context) (context.Context, error) {
 
 	return newCtx, nil
 }
-
