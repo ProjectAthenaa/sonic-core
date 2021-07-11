@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"os"
 )
 
 func AuthenticationFunc(ctx context.Context) (context.Context, error) {
@@ -27,9 +28,11 @@ func AuthenticationFunc(ctx context.Context) (context.Context, error) {
 	newCtx = context.WithValue(newCtx, "appID", appID)
 	//newCtx = context.WithValue(newCtx, "encryptionKey", encPassword)
 
-	md, ok := metadata.FromIncomingContext(ctx)
-	if ok {
-		newCtx = context.WithValue(newCtx, "IP", md.Get("x-real-ip")[0])
+	if os.Getenv("ENVIRONMENT") == "Production" {
+		md, ok := metadata.FromIncomingContext(ctx)
+		if ok {
+			newCtx = context.WithValue(newCtx, "IP", md.Get("x-real-ip")[0])
+		}
 	}
 	return newCtx, nil
 }
