@@ -1,8 +1,8 @@
-syntax="proto3";
+syntax = "proto3";
 
 package modules.moduleName;
 
-option go_package="sonic/module";
+option go_package = "sonic/module";
 
 service Module{
   rpc Task(stream Controller) returns (stream Status);
@@ -40,7 +40,7 @@ enum STATUS{
 message Status{
   STATUS Status = 1;
   optional string Error = 2;
-  optional string Information = 3;
+  map<string, string> Information = 3;
 }
 
 message Controller{

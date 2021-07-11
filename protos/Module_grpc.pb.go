@@ -30,7 +30,7 @@ func NewModuleClient(cc grpc.ClientConnInterface) ModuleClient {
 }
 
 func (c *moduleClient) Task(ctx context.Context, opts ...grpc.CallOption) (Module_TaskClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Module_ServiceDesc.Streams[0], "/Module/Task", opts...)
+	stream, err := c.cc.NewStream(ctx, &Module_ServiceDesc.Streams[0], "/modules.moduleName.Module/Task", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (x *moduleTaskServer) Recv() (*Controller, error) {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Module_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Module",
+	ServiceName: "modules.moduleName.Module",
 	HandlerType: (*ModuleServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
