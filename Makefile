@@ -12,3 +12,6 @@ monitorControllerCompile:
 
 authCompile:
 		protoc --go_out=./authentication/protos --go_opt=paths=source_relative --go-grpc_out=./authentication/protos --go-grpc_opt=paths=source_relative ./Authentication.proto
+
+webhookCompile:
+		protoc --go_out=./webhooks --go_opt=paths=source_relative --go-grpc_out=./webhooks --go-grpc_opt=paths=source_relative ./Webhooks.proto
