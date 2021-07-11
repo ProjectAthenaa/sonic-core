@@ -6,6 +6,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -26,5 +27,9 @@ func AuthenticationFunc(ctx context.Context) (context.Context, error) {
 	newCtx = context.WithValue(newCtx, "appID", appID)
 	//newCtx = context.WithValue(newCtx, "encryptionKey", encPassword)
 
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		newCtx = context.WithValue(newCtx, "IP", md.Get("x-real-ip")[0])
+	}
 	return newCtx, nil
 }
