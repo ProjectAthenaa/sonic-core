@@ -11544,6 +11544,8 @@ type StatisticMutation struct {
 	_Axis               *map[schema.Axis]string
 	_Value              *int
 	add_Value           *int
+	_Spent              *float64
+	add_Spent           *float64
 	clearedFields       map[string]struct{}
 	_User               map[uuid.UUID]struct{}
 	removed_User        map[uuid.UUID]struct{}
@@ -11925,6 +11927,76 @@ func (m *StatisticMutation) ResetValue() {
 	delete(m.clearedFields, statistic.FieldValue)
 }
 
+// SetSpent sets the "Spent" field.
+func (m *StatisticMutation) SetSpent(f float64) {
+	m._Spent = &f
+	m.add_Spent = nil
+}
+
+// Spent returns the value of the "Spent" field in the mutation.
+func (m *StatisticMutation) Spent() (r float64, exists bool) {
+	v := m._Spent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpent returns the old "Spent" field's value of the Statistic entity.
+// If the Statistic object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StatisticMutation) OldSpent(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSpent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSpent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpent: %w", err)
+	}
+	return oldValue.Spent, nil
+}
+
+// AddSpent adds f to the "Spent" field.
+func (m *StatisticMutation) AddSpent(f float64) {
+	if m.add_Spent != nil {
+		*m.add_Spent += f
+	} else {
+		m.add_Spent = &f
+	}
+}
+
+// AddedSpent returns the value that was added to the "Spent" field in this mutation.
+func (m *StatisticMutation) AddedSpent() (r float64, exists bool) {
+	v := m.add_Spent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearSpent clears the value of the "Spent" field.
+func (m *StatisticMutation) ClearSpent() {
+	m._Spent = nil
+	m.add_Spent = nil
+	m.clearedFields[statistic.FieldSpent] = struct{}{}
+}
+
+// SpentCleared returns if the "Spent" field was cleared in this mutation.
+func (m *StatisticMutation) SpentCleared() bool {
+	_, ok := m.clearedFields[statistic.FieldSpent]
+	return ok
+}
+
+// ResetSpent resets all changes to the "Spent" field.
+func (m *StatisticMutation) ResetSpent() {
+	m._Spent = nil
+	m.add_Spent = nil
+	delete(m.clearedFields, statistic.FieldSpent)
+}
+
 // AddUserIDs adds the "User" edge to the User entity by ids.
 func (m *StatisticMutation) AddUserIDs(ids ...uuid.UUID) {
 	if m._User == nil {
@@ -12045,7 +12117,7 @@ func (m *StatisticMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StatisticMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, statistic.FieldCreatedAt)
 	}
@@ -12063,6 +12135,9 @@ func (m *StatisticMutation) Fields() []string {
 	}
 	if m._Value != nil {
 		fields = append(fields, statistic.FieldValue)
+	}
+	if m._Spent != nil {
+		fields = append(fields, statistic.FieldSpent)
 	}
 	return fields
 }
@@ -12084,6 +12159,8 @@ func (m *StatisticMutation) Field(name string) (ent.Value, bool) {
 		return m.Axis()
 	case statistic.FieldValue:
 		return m.Value()
+	case statistic.FieldSpent:
+		return m.Spent()
 	}
 	return nil, false
 }
@@ -12105,6 +12182,8 @@ func (m *StatisticMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldAxis(ctx)
 	case statistic.FieldValue:
 		return m.OldValue(ctx)
+	case statistic.FieldSpent:
+		return m.OldSpent(ctx)
 	}
 	return nil, fmt.Errorf("unknown Statistic field %s", name)
 }
@@ -12156,6 +12235,13 @@ func (m *StatisticMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetValue(v)
 		return nil
+	case statistic.FieldSpent:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpent(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Statistic field %s", name)
 }
@@ -12170,6 +12256,9 @@ func (m *StatisticMutation) AddedFields() []string {
 	if m.add_Value != nil {
 		fields = append(fields, statistic.FieldValue)
 	}
+	if m.add_Spent != nil {
+		fields = append(fields, statistic.FieldSpent)
+	}
 	return fields
 }
 
@@ -12182,6 +12271,8 @@ func (m *StatisticMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedPotentialProfit()
 	case statistic.FieldValue:
 		return m.AddedValue()
+	case statistic.FieldSpent:
+		return m.AddedSpent()
 	}
 	return nil, false
 }
@@ -12205,6 +12296,13 @@ func (m *StatisticMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddValue(v)
 		return nil
+	case statistic.FieldSpent:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSpent(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Statistic numeric field %s", name)
 }
@@ -12218,6 +12316,9 @@ func (m *StatisticMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(statistic.FieldValue) {
 		fields = append(fields, statistic.FieldValue)
+	}
+	if m.FieldCleared(statistic.FieldSpent) {
+		fields = append(fields, statistic.FieldSpent)
 	}
 	return fields
 }
@@ -12238,6 +12339,9 @@ func (m *StatisticMutation) ClearField(name string) error {
 		return nil
 	case statistic.FieldValue:
 		m.ClearValue()
+		return nil
+	case statistic.FieldSpent:
+		m.ClearSpent()
 		return nil
 	}
 	return fmt.Errorf("unknown Statistic nullable field %s", name)
@@ -12264,6 +12368,9 @@ func (m *StatisticMutation) ResetField(name string) error {
 		return nil
 	case statistic.FieldValue:
 		m.ResetValue()
+		return nil
+	case statistic.FieldSpent:
+		m.ResetSpent()
 		return nil
 	}
 	return fmt.Errorf("unknown Statistic field %s", name)

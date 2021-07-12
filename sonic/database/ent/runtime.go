@@ -343,6 +343,10 @@ func init() {
 	statistic.DefaultUpdatedAt = statisticDescUpdatedAt.Default.(func() time.Time)
 	// statistic.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	statistic.UpdateDefaultUpdatedAt = statisticDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// statisticDescSpent is the schema descriptor for Spent field.
+	statisticDescSpent := statisticFields[7].Descriptor()
+	// statistic.DefaultSpent holds the default value on creation for the Spent field.
+	statistic.DefaultSpent = statisticDescSpent.Default.(float64)
 	// statisticDescID is the schema descriptor for id field.
 	statisticDescID := statisticFields[0].Descriptor()
 	// statistic.DefaultID holds the default value on creation for the id field.

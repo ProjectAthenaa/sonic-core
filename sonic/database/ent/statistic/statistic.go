@@ -26,6 +26,8 @@ const (
 	FieldAxis = "axis"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
+	// FieldSpent holds the string denoting the spent field in the database.
+	FieldSpent = "spent"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "User"
 	// EdgeProduct holds the string denoting the product edge name in mutations.
@@ -53,6 +55,7 @@ var Columns = []string{
 	FieldPotentialProfit,
 	FieldAxis,
 	FieldValue,
+	FieldSpent,
 }
 
 var (
@@ -81,6 +84,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultSpent holds the default value on creation for the "Spent" field.
+	DefaultSpent float64
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

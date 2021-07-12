@@ -363,6 +363,7 @@ var (
 		{Name: "potential_profit", Type: field.TypeInt, Nullable: true},
 		{Name: "axis", Type: field.TypeJSON},
 		{Name: "value", Type: field.TypeInt, Nullable: true},
+		{Name: "spent", Type: field.TypeFloat64, Nullable: true, Default: 0},
 	}
 	// StatisticsTable holds the schema information for the "statistics" table.
 	StatisticsTable = &schema.Table{

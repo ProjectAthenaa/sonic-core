@@ -46,6 +46,9 @@ func (Statistic) Fields() []ent.Field {
 			Nillable(),
 		field.JSON("Axis", map[Axis]string{}),
 		field.Int("Value").Optional(),
+		field.Float("Spent").
+			Default(0).
+			Optional(),
 	}
 }
 

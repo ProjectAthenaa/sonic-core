@@ -31,6 +31,8 @@ type Statistic struct {
 	Axis map[schema.Axis]string `json:"Axis,omitempty"`
 	// Value holds the value of the "Value" field.
 	Value int `json:"Value,omitempty"`
+	// Spent holds the value of the "Spent" field.
+	Spent float64 `json:"Spent,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the StatisticQuery when eager-loading is set.
 	Edges StatisticEdges `json:"edges"`
@@ -72,6 +74,8 @@ func (*Statistic) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case statistic.FieldAxis:
 			values[i] = new([]byte)
+		case statistic.FieldSpent:
+			values[i] = new(sql.NullFloat64)
 		case statistic.FieldPotentialProfit, statistic.FieldValue:
 			values[i] = new(sql.NullInt64)
 		case statistic.FieldType:
@@ -141,6 +145,12 @@ func (s *Statistic) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				s.Value = int(value.Int64)
 			}
+		case statistic.FieldSpent:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field Spent", values[i])
+			} else if value.Valid {
+				s.Spent = value.Float64
+			}
 		}
 	}
 	return nil
@@ -193,6 +203,8 @@ func (s *Statistic) String() string {
 	builder.WriteString(fmt.Sprintf("%v", s.Axis))
 	builder.WriteString(", Value=")
 	builder.WriteString(fmt.Sprintf("%v", s.Value))
+	builder.WriteString(", Spent=")
+	builder.WriteString(fmt.Sprintf("%v", s.Spent))
 	builder.WriteByte(')')
 	return builder.String()
 }

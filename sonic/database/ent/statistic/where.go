@@ -122,6 +122,13 @@ func Value(v int) predicate.Statistic {
 	})
 }
 
+// Spent applies equality check predicate on the "Spent" field. It's identical to SpentEQ.
+func Spent(v float64) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSpent), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Statistic {
 	return predicate.Statistic(func(s *sql.Selector) {
@@ -499,6 +506,96 @@ func ValueIsNil() predicate.Statistic {
 func ValueNotNil() predicate.Statistic {
 	return predicate.Statistic(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldValue)))
+	})
+}
+
+// SpentEQ applies the EQ predicate on the "Spent" field.
+func SpentEQ(v float64) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSpent), v))
+	})
+}
+
+// SpentNEQ applies the NEQ predicate on the "Spent" field.
+func SpentNEQ(v float64) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSpent), v))
+	})
+}
+
+// SpentIn applies the In predicate on the "Spent" field.
+func SpentIn(vs ...float64) predicate.Statistic {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Statistic(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSpent), v...))
+	})
+}
+
+// SpentNotIn applies the NotIn predicate on the "Spent" field.
+func SpentNotIn(vs ...float64) predicate.Statistic {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Statistic(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSpent), v...))
+	})
+}
+
+// SpentGT applies the GT predicate on the "Spent" field.
+func SpentGT(v float64) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSpent), v))
+	})
+}
+
+// SpentGTE applies the GTE predicate on the "Spent" field.
+func SpentGTE(v float64) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSpent), v))
+	})
+}
+
+// SpentLT applies the LT predicate on the "Spent" field.
+func SpentLT(v float64) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSpent), v))
+	})
+}
+
+// SpentLTE applies the LTE predicate on the "Spent" field.
+func SpentLTE(v float64) predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSpent), v))
+	})
+}
+
+// SpentIsNil applies the IsNil predicate on the "Spent" field.
+func SpentIsNil() predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSpent)))
+	})
+}
+
+// SpentNotNil applies the NotNil predicate on the "Spent" field.
+func SpentNotNil() predicate.Statistic {
+	return predicate.Statistic(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSpent)))
 	})
 }
 

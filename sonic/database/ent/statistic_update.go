@@ -117,6 +117,33 @@ func (su *StatisticUpdate) ClearValue() *StatisticUpdate {
 	return su
 }
 
+// SetSpent sets the "Spent" field.
+func (su *StatisticUpdate) SetSpent(f float64) *StatisticUpdate {
+	su.mutation.ResetSpent()
+	su.mutation.SetSpent(f)
+	return su
+}
+
+// SetNillableSpent sets the "Spent" field if the given value is not nil.
+func (su *StatisticUpdate) SetNillableSpent(f *float64) *StatisticUpdate {
+	if f != nil {
+		su.SetSpent(*f)
+	}
+	return su
+}
+
+// AddSpent adds f to the "Spent" field.
+func (su *StatisticUpdate) AddSpent(f float64) *StatisticUpdate {
+	su.mutation.AddSpent(f)
+	return su
+}
+
+// ClearSpent clears the value of the "Spent" field.
+func (su *StatisticUpdate) ClearSpent() *StatisticUpdate {
+	su.mutation.ClearSpent()
+	return su
+}
+
 // AddUserIDs adds the "User" edge to the User entity by IDs.
 func (su *StatisticUpdate) AddUserIDs(ids ...uuid.UUID) *StatisticUpdate {
 	su.mutation.AddUserIDs(ids...)
@@ -356,6 +383,26 @@ func (su *StatisticUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: statistic.FieldValue,
 		})
 	}
+	if value, ok := su.mutation.Spent(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: statistic.FieldSpent,
+		})
+	}
+	if value, ok := su.mutation.AddedSpent(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: statistic.FieldSpent,
+		})
+	}
+	if su.mutation.SpentCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: statistic.FieldSpent,
+		})
+	}
 	if su.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -566,6 +613,33 @@ func (suo *StatisticUpdateOne) AddValue(i int) *StatisticUpdateOne {
 // ClearValue clears the value of the "Value" field.
 func (suo *StatisticUpdateOne) ClearValue() *StatisticUpdateOne {
 	suo.mutation.ClearValue()
+	return suo
+}
+
+// SetSpent sets the "Spent" field.
+func (suo *StatisticUpdateOne) SetSpent(f float64) *StatisticUpdateOne {
+	suo.mutation.ResetSpent()
+	suo.mutation.SetSpent(f)
+	return suo
+}
+
+// SetNillableSpent sets the "Spent" field if the given value is not nil.
+func (suo *StatisticUpdateOne) SetNillableSpent(f *float64) *StatisticUpdateOne {
+	if f != nil {
+		suo.SetSpent(*f)
+	}
+	return suo
+}
+
+// AddSpent adds f to the "Spent" field.
+func (suo *StatisticUpdateOne) AddSpent(f float64) *StatisticUpdateOne {
+	suo.mutation.AddSpent(f)
+	return suo
+}
+
+// ClearSpent clears the value of the "Spent" field.
+func (suo *StatisticUpdateOne) ClearSpent() *StatisticUpdateOne {
+	suo.mutation.ClearSpent()
 	return suo
 }
 
@@ -830,6 +904,26 @@ func (suo *StatisticUpdateOne) sqlSave(ctx context.Context) (_node *Statistic, e
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: statistic.FieldValue,
+		})
+	}
+	if value, ok := suo.mutation.Spent(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: statistic.FieldSpent,
+		})
+	}
+	if value, ok := suo.mutation.AddedSpent(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: statistic.FieldSpent,
+		})
+	}
+	if suo.mutation.SpentCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: statistic.FieldSpent,
 		})
 	}
 	if suo.mutation.UserCleared() {

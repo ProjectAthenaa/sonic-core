@@ -92,6 +92,20 @@ func (sc *StatisticCreate) SetNillableValue(i *int) *StatisticCreate {
 	return sc
 }
 
+// SetSpent sets the "Spent" field.
+func (sc *StatisticCreate) SetSpent(f float64) *StatisticCreate {
+	sc.mutation.SetSpent(f)
+	return sc
+}
+
+// SetNillableSpent sets the "Spent" field if the given value is not nil.
+func (sc *StatisticCreate) SetNillableSpent(f *float64) *StatisticCreate {
+	if f != nil {
+		sc.SetSpent(*f)
+	}
+	return sc
+}
+
 // SetID sets the "id" field.
 func (sc *StatisticCreate) SetID(u uuid.UUID) *StatisticCreate {
 	sc.mutation.SetID(u)
@@ -187,6 +201,10 @@ func (sc *StatisticCreate) defaults() {
 	if _, ok := sc.mutation.UpdatedAt(); !ok {
 		v := statistic.DefaultUpdatedAt()
 		sc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := sc.mutation.Spent(); !ok {
+		v := statistic.DefaultSpent
+		sc.mutation.SetSpent(v)
 	}
 	if _, ok := sc.mutation.ID(); !ok {
 		v := statistic.DefaultID()
@@ -289,6 +307,14 @@ func (sc *StatisticCreate) createSpec() (*Statistic, *sqlgraph.CreateSpec) {
 			Column: statistic.FieldValue,
 		})
 		_node.Value = value
+	}
+	if value, ok := sc.mutation.Spent(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: statistic.FieldSpent,
+		})
+		_node.Spent = value
 	}
 	if nodes := sc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
