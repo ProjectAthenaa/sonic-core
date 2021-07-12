@@ -1,11 +1,14 @@
 package sonic
 
 import (
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	sonic "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/google/uuid"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
 	"math/rand"
 	"strings"
 	"unsafe"
@@ -76,4 +79,18 @@ func UUIDParser(id string) uuid.UUID {
 
 func ErrorContains(err error, substring string) bool {
 	return strings.Contains(fmt.Sprint(err), substring)
+}
+
+func IPFromContext(ctx context.Context) (ip string) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		return md.Get("x-real-ip")[0]
+	}
+
+	p, _ := peer.FromContext(ctx)
+	if p != nil {
+		return p.Addr.String()
+	}
+
+	return "Unknown"
 }

@@ -3,10 +3,10 @@ package authentication
 import (
 	"context"
 	"fmt"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/getsentry/sentry-go"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"os"
 )
@@ -29,10 +29,7 @@ func AuthenticationFunc(ctx context.Context) (context.Context, error) {
 	//newCtx = context.WithValue(newCtx, "encryptionKey", encPassword)
 
 	if os.Getenv("ENVIRONMENT") == "Production" {
-		md, ok := metadata.FromIncomingContext(ctx)
-		if ok {
-			newCtx = context.WithValue(newCtx, "IP", md.Get("x-real-ip")[0])
-		}
+		newCtx = context.WithValue(newCtx, "IP", sonic.IPFromContext(ctx))
 	}
 	return newCtx, nil
 }
