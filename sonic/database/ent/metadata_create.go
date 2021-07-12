@@ -120,6 +120,32 @@ func (mc *MetadataCreate) SetNillableDiscordRefreshToken(s *string) *MetadataCre
 	return mc
 }
 
+// SetDiscordUsername sets the "DiscordUsername" field.
+func (mc *MetadataCreate) SetDiscordUsername(s string) *MetadataCreate {
+	mc.mutation.SetDiscordUsername(s)
+	return mc
+}
+
+// SetDiscordAvatar sets the "DiscordAvatar" field.
+func (mc *MetadataCreate) SetDiscordAvatar(s string) *MetadataCreate {
+	mc.mutation.SetDiscordAvatar(s)
+	return mc
+}
+
+// SetNillableDiscordAvatar sets the "DiscordAvatar" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableDiscordAvatar(s *string) *MetadataCreate {
+	if s != nil {
+		mc.SetDiscordAvatar(*s)
+	}
+	return mc
+}
+
+// SetDiscordDiscriminator sets the "DiscordDiscriminator" field.
+func (mc *MetadataCreate) SetDiscordDiscriminator(s string) *MetadataCreate {
+	mc.mutation.SetDiscordDiscriminator(s)
+	return mc
+}
+
 // SetID sets the "id" field.
 func (mc *MetadataCreate) SetID(u uuid.UUID) *MetadataCreate {
 	mc.mutation.SetID(u)
@@ -217,6 +243,10 @@ func (mc *MetadataCreate) defaults() {
 		v := metadata.DefaultDiscordRefreshToken
 		mc.mutation.SetDiscordRefreshToken(v)
 	}
+	if _, ok := mc.mutation.DiscordAvatar(); !ok {
+		v := metadata.DefaultDiscordAvatar
+		mc.mutation.SetDiscordAvatar(v)
+	}
 	if _, ok := mc.mutation.ID(); !ok {
 		v := metadata.DefaultID()
 		mc.mutation.SetID(v)
@@ -250,6 +280,15 @@ func (mc *MetadataCreate) check() error {
 	}
 	if _, ok := mc.mutation.DiscordRefreshToken(); !ok {
 		return &ValidationError{Name: "DiscordRefreshToken", err: errors.New("ent: missing required field \"DiscordRefreshToken\"")}
+	}
+	if _, ok := mc.mutation.DiscordUsername(); !ok {
+		return &ValidationError{Name: "DiscordUsername", err: errors.New("ent: missing required field \"DiscordUsername\"")}
+	}
+	if _, ok := mc.mutation.DiscordAvatar(); !ok {
+		return &ValidationError{Name: "DiscordAvatar", err: errors.New("ent: missing required field \"DiscordAvatar\"")}
+	}
+	if _, ok := mc.mutation.DiscordDiscriminator(); !ok {
+		return &ValidationError{Name: "DiscordDiscriminator", err: errors.New("ent: missing required field \"DiscordDiscriminator\"")}
 	}
 	if _, ok := mc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
@@ -338,6 +377,30 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 			Column: metadata.FieldDiscordRefreshToken,
 		})
 		_node.DiscordRefreshToken = value
+	}
+	if value, ok := mc.mutation.DiscordUsername(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordUsername,
+		})
+		_node.DiscordUsername = value
+	}
+	if value, ok := mc.mutation.DiscordAvatar(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordAvatar,
+		})
+		_node.DiscordAvatar = value
+	}
+	if value, ok := mc.mutation.DiscordDiscriminator(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordDiscriminator,
+		})
+		_node.DiscordDiscriminator = value
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

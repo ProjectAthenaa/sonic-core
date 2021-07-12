@@ -120,6 +120,32 @@ func (mu *MetadataUpdate) SetNillableDiscordRefreshToken(s *string) *MetadataUpd
 	return mu
 }
 
+// SetDiscordUsername sets the "DiscordUsername" field.
+func (mu *MetadataUpdate) SetDiscordUsername(s string) *MetadataUpdate {
+	mu.mutation.SetDiscordUsername(s)
+	return mu
+}
+
+// SetDiscordAvatar sets the "DiscordAvatar" field.
+func (mu *MetadataUpdate) SetDiscordAvatar(s string) *MetadataUpdate {
+	mu.mutation.SetDiscordAvatar(s)
+	return mu
+}
+
+// SetNillableDiscordAvatar sets the "DiscordAvatar" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableDiscordAvatar(s *string) *MetadataUpdate {
+	if s != nil {
+		mu.SetDiscordAvatar(*s)
+	}
+	return mu
+}
+
+// SetDiscordDiscriminator sets the "DiscordDiscriminator" field.
+func (mu *MetadataUpdate) SetDiscordDiscriminator(s string) *MetadataUpdate {
+	mu.mutation.SetDiscordDiscriminator(s)
+	return mu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (mu *MetadataUpdate) SetUserID(id uuid.UUID) *MetadataUpdate {
 	mu.mutation.SetUserID(id)
@@ -288,6 +314,27 @@ func (mu *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: metadata.FieldDiscordRefreshToken,
 		})
 	}
+	if value, ok := mu.mutation.DiscordUsername(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordUsername,
+		})
+	}
+	if value, ok := mu.mutation.DiscordAvatar(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordAvatar,
+		})
+	}
+	if value, ok := mu.mutation.DiscordDiscriminator(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordDiscriminator,
+		})
+	}
 	if mu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -429,6 +476,32 @@ func (muo *MetadataUpdateOne) SetNillableDiscordRefreshToken(s *string) *Metadat
 	if s != nil {
 		muo.SetDiscordRefreshToken(*s)
 	}
+	return muo
+}
+
+// SetDiscordUsername sets the "DiscordUsername" field.
+func (muo *MetadataUpdateOne) SetDiscordUsername(s string) *MetadataUpdateOne {
+	muo.mutation.SetDiscordUsername(s)
+	return muo
+}
+
+// SetDiscordAvatar sets the "DiscordAvatar" field.
+func (muo *MetadataUpdateOne) SetDiscordAvatar(s string) *MetadataUpdateOne {
+	muo.mutation.SetDiscordAvatar(s)
+	return muo
+}
+
+// SetNillableDiscordAvatar sets the "DiscordAvatar" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableDiscordAvatar(s *string) *MetadataUpdateOne {
+	if s != nil {
+		muo.SetDiscordAvatar(*s)
+	}
+	return muo
+}
+
+// SetDiscordDiscriminator sets the "DiscordDiscriminator" field.
+func (muo *MetadataUpdateOne) SetDiscordDiscriminator(s string) *MetadataUpdateOne {
+	muo.mutation.SetDiscordDiscriminator(s)
 	return muo
 }
 
@@ -622,6 +695,27 @@ func (muo *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err
 			Type:   field.TypeString,
 			Value:  value,
 			Column: metadata.FieldDiscordRefreshToken,
+		})
+	}
+	if value, ok := muo.mutation.DiscordUsername(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordUsername,
+		})
+	}
+	if value, ok := muo.mutation.DiscordAvatar(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordAvatar,
+		})
+	}
+	if value, ok := muo.mutation.DiscordDiscriminator(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordDiscriminator,
 		})
 	}
 	if muo.mutation.UserCleared() {

@@ -151,6 +151,9 @@ var (
 		{Name: "discord_id", Type: field.TypeString, Default: ""},
 		{Name: "discord_access_token", Type: field.TypeString, Default: ""},
 		{Name: "discord_refresh_token", Type: field.TypeString, Default: ""},
+		{Name: "discord_username", Type: field.TypeString},
+		{Name: "discord_avatar", Type: field.TypeString, Default: "https://cdn.athenabot.com/default_avatar.png"},
+		{Name: "discord_discriminator", Type: field.TypeString},
 		{Name: "user_metadata", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// MetadataTable holds the schema information for the "metadata" table.
@@ -161,7 +164,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "metadata_users_Metadata",
-				Columns:    []*schema.Column{MetadataColumns[8]},
+				Columns:    []*schema.Column{MetadataColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

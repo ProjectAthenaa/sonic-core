@@ -136,6 +136,27 @@ func DiscordRefreshToken(v string) predicate.Metadata {
 	})
 }
 
+// DiscordUsername applies equality check predicate on the "DiscordUsername" field. It's identical to DiscordUsernameEQ.
+func DiscordUsername(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordAvatar applies equality check predicate on the "DiscordAvatar" field. It's identical to DiscordAvatarEQ.
+func DiscordAvatar(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordDiscriminator applies equality check predicate on the "DiscordDiscriminator" field. It's identical to DiscordDiscriminatorEQ.
+func DiscordDiscriminator(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
@@ -680,6 +701,339 @@ func DiscordRefreshTokenEqualFold(v string) predicate.Metadata {
 func DiscordRefreshTokenContainsFold(v string) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordUsernameEQ applies the EQ predicate on the "DiscordUsername" field.
+func DiscordUsernameEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameNEQ applies the NEQ predicate on the "DiscordUsername" field.
+func DiscordUsernameNEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameIn applies the In predicate on the "DiscordUsername" field.
+func DiscordUsernameIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDiscordUsername), v...))
+	})
+}
+
+// DiscordUsernameNotIn applies the NotIn predicate on the "DiscordUsername" field.
+func DiscordUsernameNotIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDiscordUsername), v...))
+	})
+}
+
+// DiscordUsernameGT applies the GT predicate on the "DiscordUsername" field.
+func DiscordUsernameGT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameGTE applies the GTE predicate on the "DiscordUsername" field.
+func DiscordUsernameGTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameLT applies the LT predicate on the "DiscordUsername" field.
+func DiscordUsernameLT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameLTE applies the LTE predicate on the "DiscordUsername" field.
+func DiscordUsernameLTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameContains applies the Contains predicate on the "DiscordUsername" field.
+func DiscordUsernameContains(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameHasPrefix applies the HasPrefix predicate on the "DiscordUsername" field.
+func DiscordUsernameHasPrefix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameHasSuffix applies the HasSuffix predicate on the "DiscordUsername" field.
+func DiscordUsernameHasSuffix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameEqualFold applies the EqualFold predicate on the "DiscordUsername" field.
+func DiscordUsernameEqualFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordUsernameContainsFold applies the ContainsFold predicate on the "DiscordUsername" field.
+func DiscordUsernameContainsFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDiscordUsername), v))
+	})
+}
+
+// DiscordAvatarEQ applies the EQ predicate on the "DiscordAvatar" field.
+func DiscordAvatarEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarNEQ applies the NEQ predicate on the "DiscordAvatar" field.
+func DiscordAvatarNEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarIn applies the In predicate on the "DiscordAvatar" field.
+func DiscordAvatarIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDiscordAvatar), v...))
+	})
+}
+
+// DiscordAvatarNotIn applies the NotIn predicate on the "DiscordAvatar" field.
+func DiscordAvatarNotIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDiscordAvatar), v...))
+	})
+}
+
+// DiscordAvatarGT applies the GT predicate on the "DiscordAvatar" field.
+func DiscordAvatarGT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarGTE applies the GTE predicate on the "DiscordAvatar" field.
+func DiscordAvatarGTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarLT applies the LT predicate on the "DiscordAvatar" field.
+func DiscordAvatarLT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarLTE applies the LTE predicate on the "DiscordAvatar" field.
+func DiscordAvatarLTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarContains applies the Contains predicate on the "DiscordAvatar" field.
+func DiscordAvatarContains(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarHasPrefix applies the HasPrefix predicate on the "DiscordAvatar" field.
+func DiscordAvatarHasPrefix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarHasSuffix applies the HasSuffix predicate on the "DiscordAvatar" field.
+func DiscordAvatarHasSuffix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarEqualFold applies the EqualFold predicate on the "DiscordAvatar" field.
+func DiscordAvatarEqualFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordAvatarContainsFold applies the ContainsFold predicate on the "DiscordAvatar" field.
+func DiscordAvatarContainsFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDiscordAvatar), v))
+	})
+}
+
+// DiscordDiscriminatorEQ applies the EQ predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorNEQ applies the NEQ predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorNEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorIn applies the In predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDiscordDiscriminator), v...))
+	})
+}
+
+// DiscordDiscriminatorNotIn applies the NotIn predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorNotIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDiscordDiscriminator), v...))
+	})
+}
+
+// DiscordDiscriminatorGT applies the GT predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorGT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorGTE applies the GTE predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorGTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorLT applies the LT predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorLT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorLTE applies the LTE predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorLTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorContains applies the Contains predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorContains(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorHasPrefix applies the HasPrefix predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorHasPrefix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorHasSuffix applies the HasSuffix predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorHasSuffix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorEqualFold applies the EqualFold predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorEqualFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordDiscriminatorContainsFold applies the ContainsFold predicate on the "DiscordDiscriminator" field.
+func DiscordDiscriminatorContainsFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDiscordDiscriminator), v))
 	})
 }
 

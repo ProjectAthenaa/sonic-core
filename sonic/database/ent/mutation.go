@@ -4504,22 +4504,25 @@ func (m *LicenseMutation) ResetEdge(name string) error {
 // MetadataMutation represents an operation that mutates the Metadata nodes in the graph.
 type MetadataMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *uuid.UUID
-	created_at           *time.Time
-	updated_at           *time.Time
-	_FirstLogin          *bool
-	_Theme               *metadata.Theme
-	_DiscordID           *string
-	_DiscordAccessToken  *string
-	_DiscordRefreshToken *string
-	clearedFields        map[string]struct{}
-	user                 *uuid.UUID
-	cleareduser          bool
-	done                 bool
-	oldValue             func(context.Context) (*Metadata, error)
-	predicates           []predicate.Metadata
+	op                    Op
+	typ                   string
+	id                    *uuid.UUID
+	created_at            *time.Time
+	updated_at            *time.Time
+	_FirstLogin           *bool
+	_Theme                *metadata.Theme
+	_DiscordID            *string
+	_DiscordAccessToken   *string
+	_DiscordRefreshToken  *string
+	_DiscordUsername      *string
+	_DiscordAvatar        *string
+	_DiscordDiscriminator *string
+	clearedFields         map[string]struct{}
+	user                  *uuid.UUID
+	cleareduser           bool
+	done                  bool
+	oldValue              func(context.Context) (*Metadata, error)
+	predicates            []predicate.Metadata
 }
 
 var _ ent.Mutation = (*MetadataMutation)(nil)
@@ -4859,6 +4862,114 @@ func (m *MetadataMutation) ResetDiscordRefreshToken() {
 	m._DiscordRefreshToken = nil
 }
 
+// SetDiscordUsername sets the "DiscordUsername" field.
+func (m *MetadataMutation) SetDiscordUsername(s string) {
+	m._DiscordUsername = &s
+}
+
+// DiscordUsername returns the value of the "DiscordUsername" field in the mutation.
+func (m *MetadataMutation) DiscordUsername() (r string, exists bool) {
+	v := m._DiscordUsername
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscordUsername returns the old "DiscordUsername" field's value of the Metadata entity.
+// If the Metadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetadataMutation) OldDiscordUsername(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDiscordUsername is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDiscordUsername requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscordUsername: %w", err)
+	}
+	return oldValue.DiscordUsername, nil
+}
+
+// ResetDiscordUsername resets all changes to the "DiscordUsername" field.
+func (m *MetadataMutation) ResetDiscordUsername() {
+	m._DiscordUsername = nil
+}
+
+// SetDiscordAvatar sets the "DiscordAvatar" field.
+func (m *MetadataMutation) SetDiscordAvatar(s string) {
+	m._DiscordAvatar = &s
+}
+
+// DiscordAvatar returns the value of the "DiscordAvatar" field in the mutation.
+func (m *MetadataMutation) DiscordAvatar() (r string, exists bool) {
+	v := m._DiscordAvatar
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscordAvatar returns the old "DiscordAvatar" field's value of the Metadata entity.
+// If the Metadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetadataMutation) OldDiscordAvatar(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDiscordAvatar is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDiscordAvatar requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscordAvatar: %w", err)
+	}
+	return oldValue.DiscordAvatar, nil
+}
+
+// ResetDiscordAvatar resets all changes to the "DiscordAvatar" field.
+func (m *MetadataMutation) ResetDiscordAvatar() {
+	m._DiscordAvatar = nil
+}
+
+// SetDiscordDiscriminator sets the "DiscordDiscriminator" field.
+func (m *MetadataMutation) SetDiscordDiscriminator(s string) {
+	m._DiscordDiscriminator = &s
+}
+
+// DiscordDiscriminator returns the value of the "DiscordDiscriminator" field in the mutation.
+func (m *MetadataMutation) DiscordDiscriminator() (r string, exists bool) {
+	v := m._DiscordDiscriminator
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscordDiscriminator returns the old "DiscordDiscriminator" field's value of the Metadata entity.
+// If the Metadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetadataMutation) OldDiscordDiscriminator(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDiscordDiscriminator is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDiscordDiscriminator requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscordDiscriminator: %w", err)
+	}
+	return oldValue.DiscordDiscriminator, nil
+}
+
+// ResetDiscordDiscriminator resets all changes to the "DiscordDiscriminator" field.
+func (m *MetadataMutation) ResetDiscordDiscriminator() {
+	m._DiscordDiscriminator = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *MetadataMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
@@ -4912,7 +5023,7 @@ func (m *MetadataMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MetadataMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, metadata.FieldCreatedAt)
 	}
@@ -4933,6 +5044,15 @@ func (m *MetadataMutation) Fields() []string {
 	}
 	if m._DiscordRefreshToken != nil {
 		fields = append(fields, metadata.FieldDiscordRefreshToken)
+	}
+	if m._DiscordUsername != nil {
+		fields = append(fields, metadata.FieldDiscordUsername)
+	}
+	if m._DiscordAvatar != nil {
+		fields = append(fields, metadata.FieldDiscordAvatar)
+	}
+	if m._DiscordDiscriminator != nil {
+		fields = append(fields, metadata.FieldDiscordDiscriminator)
 	}
 	return fields
 }
@@ -4956,6 +5076,12 @@ func (m *MetadataMutation) Field(name string) (ent.Value, bool) {
 		return m.DiscordAccessToken()
 	case metadata.FieldDiscordRefreshToken:
 		return m.DiscordRefreshToken()
+	case metadata.FieldDiscordUsername:
+		return m.DiscordUsername()
+	case metadata.FieldDiscordAvatar:
+		return m.DiscordAvatar()
+	case metadata.FieldDiscordDiscriminator:
+		return m.DiscordDiscriminator()
 	}
 	return nil, false
 }
@@ -4979,6 +5105,12 @@ func (m *MetadataMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDiscordAccessToken(ctx)
 	case metadata.FieldDiscordRefreshToken:
 		return m.OldDiscordRefreshToken(ctx)
+	case metadata.FieldDiscordUsername:
+		return m.OldDiscordUsername(ctx)
+	case metadata.FieldDiscordAvatar:
+		return m.OldDiscordAvatar(ctx)
+	case metadata.FieldDiscordDiscriminator:
+		return m.OldDiscordDiscriminator(ctx)
 	}
 	return nil, fmt.Errorf("unknown Metadata field %s", name)
 }
@@ -5036,6 +5168,27 @@ func (m *MetadataMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDiscordRefreshToken(v)
+		return nil
+	case metadata.FieldDiscordUsername:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscordUsername(v)
+		return nil
+	case metadata.FieldDiscordAvatar:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscordAvatar(v)
+		return nil
+	case metadata.FieldDiscordDiscriminator:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscordDiscriminator(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Metadata field %s", name)
@@ -5106,6 +5259,15 @@ func (m *MetadataMutation) ResetField(name string) error {
 		return nil
 	case metadata.FieldDiscordRefreshToken:
 		m.ResetDiscordRefreshToken()
+		return nil
+	case metadata.FieldDiscordUsername:
+		m.ResetDiscordUsername()
+		return nil
+	case metadata.FieldDiscordAvatar:
+		m.ResetDiscordAvatar()
+		return nil
+	case metadata.FieldDiscordDiscriminator:
+		m.ResetDiscordDiscriminator()
 		return nil
 	}
 	return fmt.Errorf("unknown Metadata field %s", name)

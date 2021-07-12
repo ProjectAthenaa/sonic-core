@@ -31,6 +31,9 @@ func (Metadata) Fields() []ent.Field {
 		field.String("DiscordID").Default(""),
 		field.String("DiscordAccessToken").Default(""),
 		field.String("DiscordRefreshToken").Default(""),
+		field.String("DiscordUsername"),
+		field.String("DiscordAvatar").Default("https://cdn.athenabot.com/default_avatar.png"),
+		field.String("DiscordDiscriminator"),
 	}
 }
 

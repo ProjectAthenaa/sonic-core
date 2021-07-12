@@ -28,6 +28,12 @@ const (
 	FieldDiscordAccessToken = "discord_access_token"
 	// FieldDiscordRefreshToken holds the string denoting the discordrefreshtoken field in the database.
 	FieldDiscordRefreshToken = "discord_refresh_token"
+	// FieldDiscordUsername holds the string denoting the discordusername field in the database.
+	FieldDiscordUsername = "discord_username"
+	// FieldDiscordAvatar holds the string denoting the discordavatar field in the database.
+	FieldDiscordAvatar = "discord_avatar"
+	// FieldDiscordDiscriminator holds the string denoting the discorddiscriminator field in the database.
+	FieldDiscordDiscriminator = "discord_discriminator"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the metadata in the database.
@@ -51,6 +57,9 @@ var Columns = []string{
 	FieldDiscordID,
 	FieldDiscordAccessToken,
 	FieldDiscordRefreshToken,
+	FieldDiscordUsername,
+	FieldDiscordAvatar,
+	FieldDiscordDiscriminator,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "metadata"
@@ -89,6 +98,8 @@ var (
 	DefaultDiscordAccessToken string
 	// DefaultDiscordRefreshToken holds the default value on creation for the "DiscordRefreshToken" field.
 	DefaultDiscordRefreshToken string
+	// DefaultDiscordAvatar holds the default value on creation for the "DiscordAvatar" field.
+	DefaultDiscordAvatar string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
