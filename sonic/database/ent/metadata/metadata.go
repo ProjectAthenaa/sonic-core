@@ -98,8 +98,12 @@ var (
 	DefaultDiscordAccessToken string
 	// DefaultDiscordRefreshToken holds the default value on creation for the "DiscordRefreshToken" field.
 	DefaultDiscordRefreshToken string
+	// DefaultDiscordUsername holds the default value on creation for the "DiscordUsername" field.
+	DefaultDiscordUsername string
 	// DefaultDiscordAvatar holds the default value on creation for the "DiscordAvatar" field.
 	DefaultDiscordAvatar string
+	// DefaultDiscordDiscriminator holds the default value on creation for the "DiscordDiscriminator" field.
+	DefaultDiscordDiscriminator string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

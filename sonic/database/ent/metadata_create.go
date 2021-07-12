@@ -126,6 +126,14 @@ func (mc *MetadataCreate) SetDiscordUsername(s string) *MetadataCreate {
 	return mc
 }
 
+// SetNillableDiscordUsername sets the "DiscordUsername" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableDiscordUsername(s *string) *MetadataCreate {
+	if s != nil {
+		mc.SetDiscordUsername(*s)
+	}
+	return mc
+}
+
 // SetDiscordAvatar sets the "DiscordAvatar" field.
 func (mc *MetadataCreate) SetDiscordAvatar(s string) *MetadataCreate {
 	mc.mutation.SetDiscordAvatar(s)
@@ -143,6 +151,14 @@ func (mc *MetadataCreate) SetNillableDiscordAvatar(s *string) *MetadataCreate {
 // SetDiscordDiscriminator sets the "DiscordDiscriminator" field.
 func (mc *MetadataCreate) SetDiscordDiscriminator(s string) *MetadataCreate {
 	mc.mutation.SetDiscordDiscriminator(s)
+	return mc
+}
+
+// SetNillableDiscordDiscriminator sets the "DiscordDiscriminator" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableDiscordDiscriminator(s *string) *MetadataCreate {
+	if s != nil {
+		mc.SetDiscordDiscriminator(*s)
+	}
 	return mc
 }
 
@@ -243,9 +259,17 @@ func (mc *MetadataCreate) defaults() {
 		v := metadata.DefaultDiscordRefreshToken
 		mc.mutation.SetDiscordRefreshToken(v)
 	}
+	if _, ok := mc.mutation.DiscordUsername(); !ok {
+		v := metadata.DefaultDiscordUsername
+		mc.mutation.SetDiscordUsername(v)
+	}
 	if _, ok := mc.mutation.DiscordAvatar(); !ok {
 		v := metadata.DefaultDiscordAvatar
 		mc.mutation.SetDiscordAvatar(v)
+	}
+	if _, ok := mc.mutation.DiscordDiscriminator(); !ok {
+		v := metadata.DefaultDiscordDiscriminator
+		mc.mutation.SetDiscordDiscriminator(v)
 	}
 	if _, ok := mc.mutation.ID(); !ok {
 		v := metadata.DefaultID()

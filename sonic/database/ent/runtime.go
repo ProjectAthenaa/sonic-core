@@ -161,10 +161,18 @@ func init() {
 	metadataDescDiscordRefreshToken := metadataFields[7].Descriptor()
 	// metadata.DefaultDiscordRefreshToken holds the default value on creation for the DiscordRefreshToken field.
 	metadata.DefaultDiscordRefreshToken = metadataDescDiscordRefreshToken.Default.(string)
+	// metadataDescDiscordUsername is the schema descriptor for DiscordUsername field.
+	metadataDescDiscordUsername := metadataFields[8].Descriptor()
+	// metadata.DefaultDiscordUsername holds the default value on creation for the DiscordUsername field.
+	metadata.DefaultDiscordUsername = metadataDescDiscordUsername.Default.(string)
 	// metadataDescDiscordAvatar is the schema descriptor for DiscordAvatar field.
 	metadataDescDiscordAvatar := metadataFields[9].Descriptor()
 	// metadata.DefaultDiscordAvatar holds the default value on creation for the DiscordAvatar field.
 	metadata.DefaultDiscordAvatar = metadataDescDiscordAvatar.Default.(string)
+	// metadataDescDiscordDiscriminator is the schema descriptor for DiscordDiscriminator field.
+	metadataDescDiscordDiscriminator := metadataFields[10].Descriptor()
+	// metadata.DefaultDiscordDiscriminator holds the default value on creation for the DiscordDiscriminator field.
+	metadata.DefaultDiscordDiscriminator = metadataDescDiscordDiscriminator.Default.(string)
 	// metadataDescID is the schema descriptor for id field.
 	metadataDescID := metadataFields[0].Descriptor()
 	// metadata.DefaultID holds the default value on creation for the id field.

@@ -151,9 +151,9 @@ var (
 		{Name: "discord_id", Type: field.TypeString, Default: ""},
 		{Name: "discord_access_token", Type: field.TypeString, Default: ""},
 		{Name: "discord_refresh_token", Type: field.TypeString, Default: ""},
-		{Name: "discord_username", Type: field.TypeString},
+		{Name: "discord_username", Type: field.TypeString, Default: ""},
 		{Name: "discord_avatar", Type: field.TypeString, Default: "https://cdn.athenabot.com/default_avatar.png"},
-		{Name: "discord_discriminator", Type: field.TypeString},
+		{Name: "discord_discriminator", Type: field.TypeString, Default: ""},
 		{Name: "user_metadata", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// MetadataTable holds the schema information for the "metadata" table.

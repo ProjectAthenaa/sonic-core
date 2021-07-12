@@ -126,6 +126,14 @@ func (mu *MetadataUpdate) SetDiscordUsername(s string) *MetadataUpdate {
 	return mu
 }
 
+// SetNillableDiscordUsername sets the "DiscordUsername" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableDiscordUsername(s *string) *MetadataUpdate {
+	if s != nil {
+		mu.SetDiscordUsername(*s)
+	}
+	return mu
+}
+
 // SetDiscordAvatar sets the "DiscordAvatar" field.
 func (mu *MetadataUpdate) SetDiscordAvatar(s string) *MetadataUpdate {
 	mu.mutation.SetDiscordAvatar(s)
@@ -143,6 +151,14 @@ func (mu *MetadataUpdate) SetNillableDiscordAvatar(s *string) *MetadataUpdate {
 // SetDiscordDiscriminator sets the "DiscordDiscriminator" field.
 func (mu *MetadataUpdate) SetDiscordDiscriminator(s string) *MetadataUpdate {
 	mu.mutation.SetDiscordDiscriminator(s)
+	return mu
+}
+
+// SetNillableDiscordDiscriminator sets the "DiscordDiscriminator" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableDiscordDiscriminator(s *string) *MetadataUpdate {
+	if s != nil {
+		mu.SetDiscordDiscriminator(*s)
+	}
 	return mu
 }
 
@@ -485,6 +501,14 @@ func (muo *MetadataUpdateOne) SetDiscordUsername(s string) *MetadataUpdateOne {
 	return muo
 }
 
+// SetNillableDiscordUsername sets the "DiscordUsername" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableDiscordUsername(s *string) *MetadataUpdateOne {
+	if s != nil {
+		muo.SetDiscordUsername(*s)
+	}
+	return muo
+}
+
 // SetDiscordAvatar sets the "DiscordAvatar" field.
 func (muo *MetadataUpdateOne) SetDiscordAvatar(s string) *MetadataUpdateOne {
 	muo.mutation.SetDiscordAvatar(s)
@@ -502,6 +526,14 @@ func (muo *MetadataUpdateOne) SetNillableDiscordAvatar(s *string) *MetadataUpdat
 // SetDiscordDiscriminator sets the "DiscordDiscriminator" field.
 func (muo *MetadataUpdateOne) SetDiscordDiscriminator(s string) *MetadataUpdateOne {
 	muo.mutation.SetDiscordDiscriminator(s)
+	return muo
+}
+
+// SetNillableDiscordDiscriminator sets the "DiscordDiscriminator" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableDiscordDiscriminator(s *string) *MetadataUpdateOne {
+	if s != nil {
+		muo.SetDiscordDiscriminator(*s)
+	}
 	return muo
 }
 
