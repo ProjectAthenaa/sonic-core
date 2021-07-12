@@ -78,6 +78,48 @@ func (mu *MetadataUpdate) SetNillableTheme(m *metadata.Theme) *MetadataUpdate {
 	return mu
 }
 
+// SetDiscordID sets the "DiscordID" field.
+func (mu *MetadataUpdate) SetDiscordID(s string) *MetadataUpdate {
+	mu.mutation.SetDiscordID(s)
+	return mu
+}
+
+// SetNillableDiscordID sets the "DiscordID" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableDiscordID(s *string) *MetadataUpdate {
+	if s != nil {
+		mu.SetDiscordID(*s)
+	}
+	return mu
+}
+
+// SetDiscordAccessToken sets the "DiscordAccessToken" field.
+func (mu *MetadataUpdate) SetDiscordAccessToken(s string) *MetadataUpdate {
+	mu.mutation.SetDiscordAccessToken(s)
+	return mu
+}
+
+// SetNillableDiscordAccessToken sets the "DiscordAccessToken" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableDiscordAccessToken(s *string) *MetadataUpdate {
+	if s != nil {
+		mu.SetDiscordAccessToken(*s)
+	}
+	return mu
+}
+
+// SetDiscordRefreshToken sets the "DiscordRefreshToken" field.
+func (mu *MetadataUpdate) SetDiscordRefreshToken(s string) *MetadataUpdate {
+	mu.mutation.SetDiscordRefreshToken(s)
+	return mu
+}
+
+// SetNillableDiscordRefreshToken sets the "DiscordRefreshToken" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableDiscordRefreshToken(s *string) *MetadataUpdate {
+	if s != nil {
+		mu.SetDiscordRefreshToken(*s)
+	}
+	return mu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (mu *MetadataUpdate) SetUserID(id uuid.UUID) *MetadataUpdate {
 	mu.mutation.SetUserID(id)
@@ -225,6 +267,27 @@ func (mu *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: metadata.FieldTheme,
 		})
 	}
+	if value, ok := mu.mutation.DiscordID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordID,
+		})
+	}
+	if value, ok := mu.mutation.DiscordAccessToken(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordAccessToken,
+		})
+	}
+	if value, ok := mu.mutation.DiscordRefreshToken(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordRefreshToken,
+		})
+	}
 	if mu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -323,6 +386,48 @@ func (muo *MetadataUpdateOne) SetTheme(m metadata.Theme) *MetadataUpdateOne {
 func (muo *MetadataUpdateOne) SetNillableTheme(m *metadata.Theme) *MetadataUpdateOne {
 	if m != nil {
 		muo.SetTheme(*m)
+	}
+	return muo
+}
+
+// SetDiscordID sets the "DiscordID" field.
+func (muo *MetadataUpdateOne) SetDiscordID(s string) *MetadataUpdateOne {
+	muo.mutation.SetDiscordID(s)
+	return muo
+}
+
+// SetNillableDiscordID sets the "DiscordID" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableDiscordID(s *string) *MetadataUpdateOne {
+	if s != nil {
+		muo.SetDiscordID(*s)
+	}
+	return muo
+}
+
+// SetDiscordAccessToken sets the "DiscordAccessToken" field.
+func (muo *MetadataUpdateOne) SetDiscordAccessToken(s string) *MetadataUpdateOne {
+	muo.mutation.SetDiscordAccessToken(s)
+	return muo
+}
+
+// SetNillableDiscordAccessToken sets the "DiscordAccessToken" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableDiscordAccessToken(s *string) *MetadataUpdateOne {
+	if s != nil {
+		muo.SetDiscordAccessToken(*s)
+	}
+	return muo
+}
+
+// SetDiscordRefreshToken sets the "DiscordRefreshToken" field.
+func (muo *MetadataUpdateOne) SetDiscordRefreshToken(s string) *MetadataUpdateOne {
+	muo.mutation.SetDiscordRefreshToken(s)
+	return muo
+}
+
+// SetNillableDiscordRefreshToken sets the "DiscordRefreshToken" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableDiscordRefreshToken(s *string) *MetadataUpdateOne {
+	if s != nil {
+		muo.SetDiscordRefreshToken(*s)
 	}
 	return muo
 }
@@ -496,6 +601,27 @@ func (muo *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: metadata.FieldTheme,
+		})
+	}
+	if value, ok := muo.mutation.DiscordID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordID,
+		})
+	}
+	if value, ok := muo.mutation.DiscordAccessToken(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordAccessToken,
+		})
+	}
+	if value, ok := muo.mutation.DiscordRefreshToken(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordRefreshToken,
 		})
 	}
 	if muo.mutation.UserCleared() {

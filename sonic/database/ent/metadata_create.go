@@ -78,6 +78,48 @@ func (mc *MetadataCreate) SetNillableTheme(m *metadata.Theme) *MetadataCreate {
 	return mc
 }
 
+// SetDiscordID sets the "DiscordID" field.
+func (mc *MetadataCreate) SetDiscordID(s string) *MetadataCreate {
+	mc.mutation.SetDiscordID(s)
+	return mc
+}
+
+// SetNillableDiscordID sets the "DiscordID" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableDiscordID(s *string) *MetadataCreate {
+	if s != nil {
+		mc.SetDiscordID(*s)
+	}
+	return mc
+}
+
+// SetDiscordAccessToken sets the "DiscordAccessToken" field.
+func (mc *MetadataCreate) SetDiscordAccessToken(s string) *MetadataCreate {
+	mc.mutation.SetDiscordAccessToken(s)
+	return mc
+}
+
+// SetNillableDiscordAccessToken sets the "DiscordAccessToken" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableDiscordAccessToken(s *string) *MetadataCreate {
+	if s != nil {
+		mc.SetDiscordAccessToken(*s)
+	}
+	return mc
+}
+
+// SetDiscordRefreshToken sets the "DiscordRefreshToken" field.
+func (mc *MetadataCreate) SetDiscordRefreshToken(s string) *MetadataCreate {
+	mc.mutation.SetDiscordRefreshToken(s)
+	return mc
+}
+
+// SetNillableDiscordRefreshToken sets the "DiscordRefreshToken" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableDiscordRefreshToken(s *string) *MetadataCreate {
+	if s != nil {
+		mc.SetDiscordRefreshToken(*s)
+	}
+	return mc
+}
+
 // SetID sets the "id" field.
 func (mc *MetadataCreate) SetID(u uuid.UUID) *MetadataCreate {
 	mc.mutation.SetID(u)
@@ -163,6 +205,18 @@ func (mc *MetadataCreate) defaults() {
 		v := metadata.DefaultTheme
 		mc.mutation.SetTheme(v)
 	}
+	if _, ok := mc.mutation.DiscordID(); !ok {
+		v := metadata.DefaultDiscordID
+		mc.mutation.SetDiscordID(v)
+	}
+	if _, ok := mc.mutation.DiscordAccessToken(); !ok {
+		v := metadata.DefaultDiscordAccessToken
+		mc.mutation.SetDiscordAccessToken(v)
+	}
+	if _, ok := mc.mutation.DiscordRefreshToken(); !ok {
+		v := metadata.DefaultDiscordRefreshToken
+		mc.mutation.SetDiscordRefreshToken(v)
+	}
 	if _, ok := mc.mutation.ID(); !ok {
 		v := metadata.DefaultID()
 		mc.mutation.SetID(v)
@@ -187,6 +241,15 @@ func (mc *MetadataCreate) check() error {
 		if err := metadata.ThemeValidator(v); err != nil {
 			return &ValidationError{Name: "Theme", err: fmt.Errorf("ent: validator failed for field \"Theme\": %w", err)}
 		}
+	}
+	if _, ok := mc.mutation.DiscordID(); !ok {
+		return &ValidationError{Name: "DiscordID", err: errors.New("ent: missing required field \"DiscordID\"")}
+	}
+	if _, ok := mc.mutation.DiscordAccessToken(); !ok {
+		return &ValidationError{Name: "DiscordAccessToken", err: errors.New("ent: missing required field \"DiscordAccessToken\"")}
+	}
+	if _, ok := mc.mutation.DiscordRefreshToken(); !ok {
+		return &ValidationError{Name: "DiscordRefreshToken", err: errors.New("ent: missing required field \"DiscordRefreshToken\"")}
 	}
 	if _, ok := mc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
@@ -251,6 +314,30 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 			Column: metadata.FieldTheme,
 		})
 		_node.Theme = value
+	}
+	if value, ok := mc.mutation.DiscordID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordID,
+		})
+		_node.DiscordID = value
+	}
+	if value, ok := mc.mutation.DiscordAccessToken(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordAccessToken,
+		})
+		_node.DiscordAccessToken = value
+	}
+	if value, ok := mc.mutation.DiscordRefreshToken(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metadata.FieldDiscordRefreshToken,
+		})
+		_node.DiscordRefreshToken = value
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

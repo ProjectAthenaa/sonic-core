@@ -22,6 +22,12 @@ const (
 	FieldFirstLogin = "first_login"
 	// FieldTheme holds the string denoting the theme field in the database.
 	FieldTheme = "theme"
+	// FieldDiscordID holds the string denoting the discordid field in the database.
+	FieldDiscordID = "discord_id"
+	// FieldDiscordAccessToken holds the string denoting the discordaccesstoken field in the database.
+	FieldDiscordAccessToken = "discord_access_token"
+	// FieldDiscordRefreshToken holds the string denoting the discordrefreshtoken field in the database.
+	FieldDiscordRefreshToken = "discord_refresh_token"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the metadata in the database.
@@ -42,6 +48,9 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldFirstLogin,
 	FieldTheme,
+	FieldDiscordID,
+	FieldDiscordAccessToken,
+	FieldDiscordRefreshToken,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "metadata"
@@ -74,6 +83,12 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultFirstLogin holds the default value on creation for the "FirstLogin" field.
 	DefaultFirstLogin bool
+	// DefaultDiscordID holds the default value on creation for the "DiscordID" field.
+	DefaultDiscordID string
+	// DefaultDiscordAccessToken holds the default value on creation for the "DiscordAccessToken" field.
+	DefaultDiscordAccessToken string
+	// DefaultDiscordRefreshToken holds the default value on creation for the "DiscordRefreshToken" field.
+	DefaultDiscordRefreshToken string
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

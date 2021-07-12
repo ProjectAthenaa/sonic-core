@@ -26,6 +26,12 @@ type Metadata struct {
 	FirstLogin bool `json:"FirstLogin,omitempty"`
 	// Theme holds the value of the "Theme" field.
 	Theme metadata.Theme `json:"Theme,omitempty"`
+	// DiscordID holds the value of the "DiscordID" field.
+	DiscordID string `json:"DiscordID,omitempty"`
+	// DiscordAccessToken holds the value of the "DiscordAccessToken" field.
+	DiscordAccessToken string `json:"DiscordAccessToken,omitempty"`
+	// DiscordRefreshToken holds the value of the "DiscordRefreshToken" field.
+	DiscordRefreshToken string `json:"DiscordRefreshToken,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MetadataQuery when eager-loading is set.
 	Edges         MetadataEdges `json:"edges"`
@@ -62,7 +68,7 @@ func (*Metadata) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case metadata.FieldFirstLogin:
 			values[i] = new(sql.NullBool)
-		case metadata.FieldTheme:
+		case metadata.FieldTheme, metadata.FieldDiscordID, metadata.FieldDiscordAccessToken, metadata.FieldDiscordRefreshToken:
 			values[i] = new(sql.NullString)
 		case metadata.FieldCreatedAt, metadata.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -115,6 +121,24 @@ func (m *Metadata) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				m.Theme = metadata.Theme(value.String)
 			}
+		case metadata.FieldDiscordID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field DiscordID", values[i])
+			} else if value.Valid {
+				m.DiscordID = value.String
+			}
+		case metadata.FieldDiscordAccessToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field DiscordAccessToken", values[i])
+			} else if value.Valid {
+				m.DiscordAccessToken = value.String
+			}
+		case metadata.FieldDiscordRefreshToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field DiscordRefreshToken", values[i])
+			} else if value.Valid {
+				m.DiscordRefreshToken = value.String
+			}
 		case metadata.ForeignKeys[0]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field user_metadata", values[i])
@@ -162,6 +186,12 @@ func (m *Metadata) String() string {
 	builder.WriteString(fmt.Sprintf("%v", m.FirstLogin))
 	builder.WriteString(", Theme=")
 	builder.WriteString(fmt.Sprintf("%v", m.Theme))
+	builder.WriteString(", DiscordID=")
+	builder.WriteString(m.DiscordID)
+	builder.WriteString(", DiscordAccessToken=")
+	builder.WriteString(m.DiscordAccessToken)
+	builder.WriteString(", DiscordRefreshToken=")
+	builder.WriteString(m.DiscordRefreshToken)
 	builder.WriteByte(')')
 	return builder.String()
 }

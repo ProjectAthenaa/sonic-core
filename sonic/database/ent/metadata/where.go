@@ -115,6 +115,27 @@ func FirstLogin(v bool) predicate.Metadata {
 	})
 }
 
+// DiscordID applies equality check predicate on the "DiscordID" field. It's identical to DiscordIDEQ.
+func DiscordID(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordAccessToken applies equality check predicate on the "DiscordAccessToken" field. It's identical to DiscordAccessTokenEQ.
+func DiscordAccessToken(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordRefreshToken applies equality check predicate on the "DiscordRefreshToken" field. It's identical to DiscordRefreshTokenEQ.
+func DiscordRefreshToken(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
@@ -326,6 +347,339 @@ func ThemeNotIn(vs ...Theme) predicate.Metadata {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldTheme), v...))
+	})
+}
+
+// DiscordIDEQ applies the EQ predicate on the "DiscordID" field.
+func DiscordIDEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDNEQ applies the NEQ predicate on the "DiscordID" field.
+func DiscordIDNEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDIn applies the In predicate on the "DiscordID" field.
+func DiscordIDIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDiscordID), v...))
+	})
+}
+
+// DiscordIDNotIn applies the NotIn predicate on the "DiscordID" field.
+func DiscordIDNotIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDiscordID), v...))
+	})
+}
+
+// DiscordIDGT applies the GT predicate on the "DiscordID" field.
+func DiscordIDGT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDGTE applies the GTE predicate on the "DiscordID" field.
+func DiscordIDGTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDLT applies the LT predicate on the "DiscordID" field.
+func DiscordIDLT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDLTE applies the LTE predicate on the "DiscordID" field.
+func DiscordIDLTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDContains applies the Contains predicate on the "DiscordID" field.
+func DiscordIDContains(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDHasPrefix applies the HasPrefix predicate on the "DiscordID" field.
+func DiscordIDHasPrefix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDHasSuffix applies the HasSuffix predicate on the "DiscordID" field.
+func DiscordIDHasSuffix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDEqualFold applies the EqualFold predicate on the "DiscordID" field.
+func DiscordIDEqualFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordIDContainsFold applies the ContainsFold predicate on the "DiscordID" field.
+func DiscordIDContainsFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDiscordID), v))
+	})
+}
+
+// DiscordAccessTokenEQ applies the EQ predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenNEQ applies the NEQ predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenNEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenIn applies the In predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDiscordAccessToken), v...))
+	})
+}
+
+// DiscordAccessTokenNotIn applies the NotIn predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenNotIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDiscordAccessToken), v...))
+	})
+}
+
+// DiscordAccessTokenGT applies the GT predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenGT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenGTE applies the GTE predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenGTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenLT applies the LT predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenLT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenLTE applies the LTE predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenLTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenContains applies the Contains predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenContains(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenHasPrefix applies the HasPrefix predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenHasPrefix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenHasSuffix applies the HasSuffix predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenHasSuffix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenEqualFold applies the EqualFold predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenEqualFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordAccessTokenContainsFold applies the ContainsFold predicate on the "DiscordAccessToken" field.
+func DiscordAccessTokenContainsFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDiscordAccessToken), v))
+	})
+}
+
+// DiscordRefreshTokenEQ applies the EQ predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenNEQ applies the NEQ predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenNEQ(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenIn applies the In predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDiscordRefreshToken), v...))
+	})
+}
+
+// DiscordRefreshTokenNotIn applies the NotIn predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenNotIn(vs ...string) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDiscordRefreshToken), v...))
+	})
+}
+
+// DiscordRefreshTokenGT applies the GT predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenGT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenGTE applies the GTE predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenGTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenLT applies the LT predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenLT(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenLTE applies the LTE predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenLTE(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenContains applies the Contains predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenContains(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenHasPrefix applies the HasPrefix predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenHasPrefix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenHasSuffix applies the HasSuffix predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenHasSuffix(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenEqualFold applies the EqualFold predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenEqualFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDiscordRefreshToken), v))
+	})
+}
+
+// DiscordRefreshTokenContainsFold applies the ContainsFold predicate on the "DiscordRefreshToken" field.
+func DiscordRefreshTokenContainsFold(v string) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDiscordRefreshToken), v))
 	})
 }
 

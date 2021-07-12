@@ -28,6 +28,9 @@ func (Metadata) Fields() []ent.Field {
 		field.Enum("Theme").
 			Values("Variation1", "Variation2", "Variation3", "Variation4").
 			Default("Variation1"),
+		field.String("DiscordID").Default(""),
+		field.String("DiscordAccessToken").Default(""),
+		field.String("DiscordRefreshToken").Default(""),
 	}
 }
 

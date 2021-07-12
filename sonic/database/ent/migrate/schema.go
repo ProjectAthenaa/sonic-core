@@ -148,6 +148,9 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "first_login", Type: field.TypeBool, Default: true},
 		{Name: "theme", Type: field.TypeEnum, Enums: []string{"Variation1", "Variation2", "Variation3", "Variation4"}, Default: "Variation1"},
+		{Name: "discord_id", Type: field.TypeString, Default: ""},
+		{Name: "discord_access_token", Type: field.TypeString, Default: ""},
+		{Name: "discord_refresh_token", Type: field.TypeString, Default: ""},
 		{Name: "user_metadata", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// MetadataTable holds the schema information for the "metadata" table.
@@ -158,7 +161,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "metadata_users_Metadata",
-				Columns:    []*schema.Column{MetadataColumns[5]},
+				Columns:    []*schema.Column{MetadataColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
