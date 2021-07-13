@@ -173,6 +173,10 @@ func init() {
 	metadataDescDiscordDiscriminator := metadataFields[10].Descriptor()
 	// metadata.DefaultDiscordDiscriminator holds the default value on creation for the DiscordDiscriminator field.
 	metadata.DefaultDiscordDiscriminator = metadataDescDiscordDiscriminator.Default.(string)
+	// metadataDescDiscordExpiryTime is the schema descriptor for DiscordExpiryTime field.
+	metadataDescDiscordExpiryTime := metadataFields[11].Descriptor()
+	// metadata.DefaultDiscordExpiryTime holds the default value on creation for the DiscordExpiryTime field.
+	metadata.DefaultDiscordExpiryTime = metadataDescDiscordExpiryTime.Default.(func() time.Time)
 	// metadataDescID is the schema descriptor for id field.
 	metadataDescID := metadataFields[0].Descriptor()
 	// metadata.DefaultID holds the default value on creation for the id field.

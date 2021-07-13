@@ -157,6 +157,13 @@ func DiscordDiscriminator(v string) predicate.Metadata {
 	})
 }
 
+// DiscordExpiryTime applies equality check predicate on the "DiscordExpiryTime" field. It's identical to DiscordExpiryTimeEQ.
+func DiscordExpiryTime(v time.Time) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordExpiryTime), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
@@ -1034,6 +1041,82 @@ func DiscordDiscriminatorEqualFold(v string) predicate.Metadata {
 func DiscordDiscriminatorContainsFold(v string) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldDiscordDiscriminator), v))
+	})
+}
+
+// DiscordExpiryTimeEQ applies the EQ predicate on the "DiscordExpiryTime" field.
+func DiscordExpiryTimeEQ(v time.Time) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDiscordExpiryTime), v))
+	})
+}
+
+// DiscordExpiryTimeNEQ applies the NEQ predicate on the "DiscordExpiryTime" field.
+func DiscordExpiryTimeNEQ(v time.Time) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDiscordExpiryTime), v))
+	})
+}
+
+// DiscordExpiryTimeIn applies the In predicate on the "DiscordExpiryTime" field.
+func DiscordExpiryTimeIn(vs ...time.Time) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDiscordExpiryTime), v...))
+	})
+}
+
+// DiscordExpiryTimeNotIn applies the NotIn predicate on the "DiscordExpiryTime" field.
+func DiscordExpiryTimeNotIn(vs ...time.Time) predicate.Metadata {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metadata(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDiscordExpiryTime), v...))
+	})
+}
+
+// DiscordExpiryTimeGT applies the GT predicate on the "DiscordExpiryTime" field.
+func DiscordExpiryTimeGT(v time.Time) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDiscordExpiryTime), v))
+	})
+}
+
+// DiscordExpiryTimeGTE applies the GTE predicate on the "DiscordExpiryTime" field.
+func DiscordExpiryTimeGTE(v time.Time) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDiscordExpiryTime), v))
+	})
+}
+
+// DiscordExpiryTimeLT applies the LT predicate on the "DiscordExpiryTime" field.
+func DiscordExpiryTimeLT(v time.Time) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDiscordExpiryTime), v))
+	})
+}
+
+// DiscordExpiryTimeLTE applies the LTE predicate on the "DiscordExpiryTime" field.
+func DiscordExpiryTimeLTE(v time.Time) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDiscordExpiryTime), v))
 	})
 }
 

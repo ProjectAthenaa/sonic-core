@@ -38,6 +38,8 @@ type Metadata struct {
 	DiscordAvatar string `json:"DiscordAvatar,omitempty"`
 	// DiscordDiscriminator holds the value of the "DiscordDiscriminator" field.
 	DiscordDiscriminator string `json:"DiscordDiscriminator,omitempty"`
+	// DiscordExpiryTime holds the value of the "DiscordExpiryTime" field.
+	DiscordExpiryTime time.Time `json:"DiscordExpiryTime,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MetadataQuery when eager-loading is set.
 	Edges         MetadataEdges `json:"edges"`
@@ -76,7 +78,7 @@ func (*Metadata) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case metadata.FieldTheme, metadata.FieldDiscordID, metadata.FieldDiscordAccessToken, metadata.FieldDiscordRefreshToken, metadata.FieldDiscordUsername, metadata.FieldDiscordAvatar, metadata.FieldDiscordDiscriminator:
 			values[i] = new(sql.NullString)
-		case metadata.FieldCreatedAt, metadata.FieldUpdatedAt:
+		case metadata.FieldCreatedAt, metadata.FieldUpdatedAt, metadata.FieldDiscordExpiryTime:
 			values[i] = new(sql.NullTime)
 		case metadata.FieldID:
 			values[i] = new(uuid.UUID)
@@ -163,6 +165,12 @@ func (m *Metadata) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				m.DiscordDiscriminator = value.String
 			}
+		case metadata.FieldDiscordExpiryTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field DiscordExpiryTime", values[i])
+			} else if value.Valid {
+				m.DiscordExpiryTime = value.Time
+			}
 		case metadata.ForeignKeys[0]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field user_metadata", values[i])
@@ -222,6 +230,8 @@ func (m *Metadata) String() string {
 	builder.WriteString(m.DiscordAvatar)
 	builder.WriteString(", DiscordDiscriminator=")
 	builder.WriteString(m.DiscordDiscriminator)
+	builder.WriteString(", DiscordExpiryTime=")
+	builder.WriteString(m.DiscordExpiryTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

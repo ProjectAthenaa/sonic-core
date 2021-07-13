@@ -4517,6 +4517,7 @@ type MetadataMutation struct {
 	_DiscordUsername      *string
 	_DiscordAvatar        *string
 	_DiscordDiscriminator *string
+	_DiscordExpiryTime    *time.Time
 	clearedFields         map[string]struct{}
 	user                  *uuid.UUID
 	cleareduser           bool
@@ -4970,6 +4971,42 @@ func (m *MetadataMutation) ResetDiscordDiscriminator() {
 	m._DiscordDiscriminator = nil
 }
 
+// SetDiscordExpiryTime sets the "DiscordExpiryTime" field.
+func (m *MetadataMutation) SetDiscordExpiryTime(t time.Time) {
+	m._DiscordExpiryTime = &t
+}
+
+// DiscordExpiryTime returns the value of the "DiscordExpiryTime" field in the mutation.
+func (m *MetadataMutation) DiscordExpiryTime() (r time.Time, exists bool) {
+	v := m._DiscordExpiryTime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscordExpiryTime returns the old "DiscordExpiryTime" field's value of the Metadata entity.
+// If the Metadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetadataMutation) OldDiscordExpiryTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDiscordExpiryTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDiscordExpiryTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscordExpiryTime: %w", err)
+	}
+	return oldValue.DiscordExpiryTime, nil
+}
+
+// ResetDiscordExpiryTime resets all changes to the "DiscordExpiryTime" field.
+func (m *MetadataMutation) ResetDiscordExpiryTime() {
+	m._DiscordExpiryTime = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *MetadataMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
@@ -5023,7 +5060,7 @@ func (m *MetadataMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MetadataMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, metadata.FieldCreatedAt)
 	}
@@ -5054,6 +5091,9 @@ func (m *MetadataMutation) Fields() []string {
 	if m._DiscordDiscriminator != nil {
 		fields = append(fields, metadata.FieldDiscordDiscriminator)
 	}
+	if m._DiscordExpiryTime != nil {
+		fields = append(fields, metadata.FieldDiscordExpiryTime)
+	}
 	return fields
 }
 
@@ -5082,6 +5122,8 @@ func (m *MetadataMutation) Field(name string) (ent.Value, bool) {
 		return m.DiscordAvatar()
 	case metadata.FieldDiscordDiscriminator:
 		return m.DiscordDiscriminator()
+	case metadata.FieldDiscordExpiryTime:
+		return m.DiscordExpiryTime()
 	}
 	return nil, false
 }
@@ -5111,6 +5153,8 @@ func (m *MetadataMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDiscordAvatar(ctx)
 	case metadata.FieldDiscordDiscriminator:
 		return m.OldDiscordDiscriminator(ctx)
+	case metadata.FieldDiscordExpiryTime:
+		return m.OldDiscordExpiryTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown Metadata field %s", name)
 }
@@ -5190,6 +5234,13 @@ func (m *MetadataMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDiscordDiscriminator(v)
 		return nil
+	case metadata.FieldDiscordExpiryTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscordExpiryTime(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Metadata field %s", name)
 }
@@ -5268,6 +5319,9 @@ func (m *MetadataMutation) ResetField(name string) error {
 		return nil
 	case metadata.FieldDiscordDiscriminator:
 		m.ResetDiscordDiscriminator()
+		return nil
+	case metadata.FieldDiscordExpiryTime:
+		m.ResetDiscordExpiryTime()
 		return nil
 	}
 	return fmt.Errorf("unknown Metadata field %s", name)

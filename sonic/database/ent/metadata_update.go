@@ -162,6 +162,20 @@ func (mu *MetadataUpdate) SetNillableDiscordDiscriminator(s *string) *MetadataUp
 	return mu
 }
 
+// SetDiscordExpiryTime sets the "DiscordExpiryTime" field.
+func (mu *MetadataUpdate) SetDiscordExpiryTime(t time.Time) *MetadataUpdate {
+	mu.mutation.SetDiscordExpiryTime(t)
+	return mu
+}
+
+// SetNillableDiscordExpiryTime sets the "DiscordExpiryTime" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableDiscordExpiryTime(t *time.Time) *MetadataUpdate {
+	if t != nil {
+		mu.SetDiscordExpiryTime(*t)
+	}
+	return mu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (mu *MetadataUpdate) SetUserID(id uuid.UUID) *MetadataUpdate {
 	mu.mutation.SetUserID(id)
@@ -351,6 +365,13 @@ func (mu *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: metadata.FieldDiscordDiscriminator,
 		})
 	}
+	if value, ok := mu.mutation.DiscordExpiryTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metadata.FieldDiscordExpiryTime,
+		})
+	}
 	if mu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -533,6 +554,20 @@ func (muo *MetadataUpdateOne) SetDiscordDiscriminator(s string) *MetadataUpdateO
 func (muo *MetadataUpdateOne) SetNillableDiscordDiscriminator(s *string) *MetadataUpdateOne {
 	if s != nil {
 		muo.SetDiscordDiscriminator(*s)
+	}
+	return muo
+}
+
+// SetDiscordExpiryTime sets the "DiscordExpiryTime" field.
+func (muo *MetadataUpdateOne) SetDiscordExpiryTime(t time.Time) *MetadataUpdateOne {
+	muo.mutation.SetDiscordExpiryTime(t)
+	return muo
+}
+
+// SetNillableDiscordExpiryTime sets the "DiscordExpiryTime" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableDiscordExpiryTime(t *time.Time) *MetadataUpdateOne {
+	if t != nil {
+		muo.SetDiscordExpiryTime(*t)
 	}
 	return muo
 }
@@ -748,6 +783,13 @@ func (muo *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err
 			Type:   field.TypeString,
 			Value:  value,
 			Column: metadata.FieldDiscordDiscriminator,
+		})
+	}
+	if value, ok := muo.mutation.DiscordExpiryTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metadata.FieldDiscordExpiryTime,
 		})
 	}
 	if muo.mutation.UserCleared() {

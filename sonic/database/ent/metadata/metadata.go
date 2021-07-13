@@ -34,6 +34,8 @@ const (
 	FieldDiscordAvatar = "discord_avatar"
 	// FieldDiscordDiscriminator holds the string denoting the discorddiscriminator field in the database.
 	FieldDiscordDiscriminator = "discord_discriminator"
+	// FieldDiscordExpiryTime holds the string denoting the discordexpirytime field in the database.
+	FieldDiscordExpiryTime = "discord_expiry_time"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the metadata in the database.
@@ -60,6 +62,7 @@ var Columns = []string{
 	FieldDiscordUsername,
 	FieldDiscordAvatar,
 	FieldDiscordDiscriminator,
+	FieldDiscordExpiryTime,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "metadata"
@@ -104,6 +107,8 @@ var (
 	DefaultDiscordAvatar string
 	// DefaultDiscordDiscriminator holds the default value on creation for the "DiscordDiscriminator" field.
 	DefaultDiscordDiscriminator string
+	// DefaultDiscordExpiryTime holds the default value on creation for the "DiscordExpiryTime" field.
+	DefaultDiscordExpiryTime func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

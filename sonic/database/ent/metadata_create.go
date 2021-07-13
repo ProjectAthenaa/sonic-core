@@ -162,6 +162,20 @@ func (mc *MetadataCreate) SetNillableDiscordDiscriminator(s *string) *MetadataCr
 	return mc
 }
 
+// SetDiscordExpiryTime sets the "DiscordExpiryTime" field.
+func (mc *MetadataCreate) SetDiscordExpiryTime(t time.Time) *MetadataCreate {
+	mc.mutation.SetDiscordExpiryTime(t)
+	return mc
+}
+
+// SetNillableDiscordExpiryTime sets the "DiscordExpiryTime" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableDiscordExpiryTime(t *time.Time) *MetadataCreate {
+	if t != nil {
+		mc.SetDiscordExpiryTime(*t)
+	}
+	return mc
+}
+
 // SetID sets the "id" field.
 func (mc *MetadataCreate) SetID(u uuid.UUID) *MetadataCreate {
 	mc.mutation.SetID(u)
@@ -271,6 +285,10 @@ func (mc *MetadataCreate) defaults() {
 		v := metadata.DefaultDiscordDiscriminator
 		mc.mutation.SetDiscordDiscriminator(v)
 	}
+	if _, ok := mc.mutation.DiscordExpiryTime(); !ok {
+		v := metadata.DefaultDiscordExpiryTime()
+		mc.mutation.SetDiscordExpiryTime(v)
+	}
 	if _, ok := mc.mutation.ID(); !ok {
 		v := metadata.DefaultID()
 		mc.mutation.SetID(v)
@@ -313,6 +331,9 @@ func (mc *MetadataCreate) check() error {
 	}
 	if _, ok := mc.mutation.DiscordDiscriminator(); !ok {
 		return &ValidationError{Name: "DiscordDiscriminator", err: errors.New("ent: missing required field \"DiscordDiscriminator\"")}
+	}
+	if _, ok := mc.mutation.DiscordExpiryTime(); !ok {
+		return &ValidationError{Name: "DiscordExpiryTime", err: errors.New("ent: missing required field \"DiscordExpiryTime\"")}
 	}
 	if _, ok := mc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
@@ -425,6 +446,14 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 			Column: metadata.FieldDiscordDiscriminator,
 		})
 		_node.DiscordDiscriminator = value
+	}
+	if value, ok := mc.mutation.DiscordExpiryTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metadata.FieldDiscordExpiryTime,
+		})
+		_node.DiscordExpiryTime = value
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
