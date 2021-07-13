@@ -54,5 +54,6 @@ type CachedUser struct {
 	LicenseID uuid.UUID `json:"key"`
 	AppID     uuid.UUID `json:"app_id"`
 	SessionID uuid.UUID `json:"session_id"`
+	DiscordID string    `json:"discord_id"`
 	LoginTime int64     `json:"login_time"`
 }
