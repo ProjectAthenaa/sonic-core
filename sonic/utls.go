@@ -1,6 +1,7 @@
 package sonic
 
 import (
+	"bytes"
 	"context"
 	"database/sql/driver"
 	"encoding/json"
@@ -9,6 +10,8 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
+	"io"
+	"io/ioutil"
 	"math/rand"
 	"strings"
 	"unsafe"
@@ -93,4 +96,9 @@ func IPFromContext(ctx context.Context) (ip string) {
 	}
 
 	return "Unknown"
+}
+
+func NopCloserBody(b io.ReadCloser) (io.ReadCloser, []byte) {
+	body, _ := ioutil.ReadAll(b)
+	return ioutil.NopCloser(bytes.NewBuffer(body)), body
 }
