@@ -47,7 +47,6 @@ message DeclineRequest{
   string Size = 5;
   Proxy Proxy = 6;
   string ProductPrice = 7;
-  string OrderNumber = 8;
   string Email = 9;
   string ProfileName = 10;
   string Color = 11;
