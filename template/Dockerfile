@@ -5,7 +5,7 @@ ARG GH_TOKEN
 RUN apk add build-base git
 RUN git config --global url."https://${GH_TOKEN}:x-oauth-basic@github.com/ProjectAthenaa".insteadOf "https://github.com/ProjectAthenaa"
 RUN mkdir /app
-ADD ./src /app
+ADD src /app
 WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache/go-build
 RUN go mod download

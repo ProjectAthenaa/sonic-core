@@ -2,9 +2,7 @@ package sonic
 
 import (
 	"encoding/json"
-	"errors"
 	module "github.com/ProjectAthenaa/sonic-core/protos"
-	"regexp"
 )
 
 //All gRPC acceptable statuses redefined as simple variables instead of unreadable capitalized variables
@@ -56,10 +54,7 @@ const (
 )
 
 var (
-	redisURLRegex     = regexp.MustCompile(`rediss://\w+:\w+@.*:\d+`)
-	channelEmptyError = errors.New("channel_name_cannot_be_empty")
-	redisFormatError  = errors.New("redis address needs to have correct format")
-	userAgents        = parseUserAgents()
+	userAgents = parseUserAgents()
 )
 
 func parseUserAgents() []string {

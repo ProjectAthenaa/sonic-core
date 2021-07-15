@@ -1,4 +1,4 @@
-package sonic
+package frame
 
 import (
 	"context"
@@ -6,10 +6,8 @@ import (
 	"os"
 )
 
-var rdb = ConnectToRedis()
-
 //SubscribeToChannel connects to a redis pub/sub stream and returns a pointer to a PubSub struct
-func SubscribeToChannel(channelName string) (ps *PubSub, err error) {
+func SubscribeToChannel(rdb *redis.Client, channelName string) (ps *PubSub, err error) {
 	if len(channelName) == 0 {
 		return nil, channelEmptyError
 	}
@@ -19,7 +17,6 @@ func SubscribeToChannel(channelName string) (ps *PubSub, err error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &PubSub{
 		Channel: pubsub.Channel(),
 		redisPS: pubsub,
@@ -50,5 +47,16 @@ func ConnectToRedis() *redis.Client {
 		return nil
 	}
 
+	return redis.NewClient(opts)
+}
+
+func ConnectRedis(dsn string) *redis.Client {
+	if !redisURLRegex.MatchString(dsn) {
+		return nil
+	}
+	opts, err := redis.ParseURL(dsn)
+	if err != nil {
+		return nil
+	}
 	return redis.NewClient(opts)
 }

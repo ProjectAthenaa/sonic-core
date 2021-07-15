@@ -5,23 +5,20 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
+	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/peer"
-	"os"
 )
 
 var (
-	rdb                 = sonic.ConnectToRedis()
-	client              = database.Connect(os.Getenv("PG_URL"))
 	sessionExpiredError = errors.New("session_expired")
 )
 
-func extractTokens(ctx context.Context, sessionID string) (string, string, error) {
-	val, err := rdb.Get(ctx, sessionID).Result()
+func extractTokens(base face.ICoreContext, ctx context.Context, sessionID string) (string, string, error) {
+	val, err := base.GetRedis("default").Get(ctx, sessionID).Result()
 	if err != redis.Nil && err != nil {
 		p, _ := peer.FromContext(ctx)
 		sentry.WithScope(func(scope *sentry.Scope) {
@@ -34,7 +31,7 @@ func extractTokens(ctx context.Context, sessionID string) (string, string, error
 	}
 
 	if val == "" || len(val) == 0 {
-		_, err = client.Session.Update().Where(session.ID(sonic.UUIDParser(sessionID))).SetExpired(true).Save(ctx)
+		_, err = base.GetPg("default").Session.Update().Where(session.ID(sonic.UUIDParser(sessionID))).SetExpired(true).Save(ctx)
 		if err != nil {
 			return "", "", err
 		}
