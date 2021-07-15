@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package shape;
+
+option go_package = "main/shape";
+
+service Shape{
+  rpc GenHeaders(Site) returns (Headers);
+}
+
+enum SITE{
+  END = 0;
+  TARGET = 1;
+  NORDSTORM = 2;
+}
+
+message Site{
+  SITE Value = 1;
+}
+
+message Headers{
+  map<string, string> Values = 1;
+}

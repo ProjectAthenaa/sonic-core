@@ -15,3 +15,6 @@ authCompile:
 
 webhookCompile:
 	protoc --go_out=./webhooks --go_opt=paths=source_relative --go-grpc_out=./webhooks --go-grpc_opt=paths=source_relative ./Webhooks.proto
+
+shapeCompile:
+	cd sonic/antibots/shape && protoc --go_out=./ --go_opt=paths=source_relative --go-grpc_out=./ --go-grpc_opt=paths=source_relative ./Shape.proto
