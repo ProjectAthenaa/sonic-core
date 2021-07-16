@@ -107,14 +107,14 @@ func (ru *ReleaseUpdate) SetNillableType(r *release.Type) *ReleaseUpdate {
 }
 
 // SetOneTimeFeeAmount sets the "OneTimeFeeAmount" field.
-func (ru *ReleaseUpdate) SetOneTimeFeeAmount(i int32) *ReleaseUpdate {
+func (ru *ReleaseUpdate) SetOneTimeFeeAmount(i int64) *ReleaseUpdate {
 	ru.mutation.ResetOneTimeFeeAmount()
 	ru.mutation.SetOneTimeFeeAmount(i)
 	return ru
 }
 
 // SetNillableOneTimeFeeAmount sets the "OneTimeFeeAmount" field if the given value is not nil.
-func (ru *ReleaseUpdate) SetNillableOneTimeFeeAmount(i *int32) *ReleaseUpdate {
+func (ru *ReleaseUpdate) SetNillableOneTimeFeeAmount(i *int64) *ReleaseUpdate {
 	if i != nil {
 		ru.SetOneTimeFeeAmount(*i)
 	}
@@ -122,20 +122,20 @@ func (ru *ReleaseUpdate) SetNillableOneTimeFeeAmount(i *int32) *ReleaseUpdate {
 }
 
 // AddOneTimeFeeAmount adds i to the "OneTimeFeeAmount" field.
-func (ru *ReleaseUpdate) AddOneTimeFeeAmount(i int32) *ReleaseUpdate {
+func (ru *ReleaseUpdate) AddOneTimeFeeAmount(i int64) *ReleaseUpdate {
 	ru.mutation.AddOneTimeFeeAmount(i)
 	return ru
 }
 
 // SetSubscriptionFee sets the "SubscriptionFee" field.
-func (ru *ReleaseUpdate) SetSubscriptionFee(i int32) *ReleaseUpdate {
+func (ru *ReleaseUpdate) SetSubscriptionFee(i int64) *ReleaseUpdate {
 	ru.mutation.ResetSubscriptionFee()
 	ru.mutation.SetSubscriptionFee(i)
 	return ru
 }
 
 // SetNillableSubscriptionFee sets the "SubscriptionFee" field if the given value is not nil.
-func (ru *ReleaseUpdate) SetNillableSubscriptionFee(i *int32) *ReleaseUpdate {
+func (ru *ReleaseUpdate) SetNillableSubscriptionFee(i *int64) *ReleaseUpdate {
 	if i != nil {
 		ru.SetSubscriptionFee(*i)
 	}
@@ -143,7 +143,7 @@ func (ru *ReleaseUpdate) SetNillableSubscriptionFee(i *int32) *ReleaseUpdate {
 }
 
 // AddSubscriptionFee adds i to the "SubscriptionFee" field.
-func (ru *ReleaseUpdate) AddSubscriptionFee(i int32) *ReleaseUpdate {
+func (ru *ReleaseUpdate) AddSubscriptionFee(i int64) *ReleaseUpdate {
 	ru.mutation.AddSubscriptionFee(i)
 	return ru
 }
@@ -344,35 +344,35 @@ func (ru *ReleaseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := ru.mutation.OneTimeFeeAmount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldOneTimeFeeAmount,
 		})
 	}
 	if value, ok := ru.mutation.AddedOneTimeFeeAmount(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldOneTimeFeeAmount,
 		})
 	}
 	if value, ok := ru.mutation.SubscriptionFee(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldSubscriptionFee,
 		})
 	}
 	if value, ok := ru.mutation.AddedSubscriptionFee(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldSubscriptionFee,
 		})
 	}
 	if ru.mutation.SubscriptionFeeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Column: release.FieldSubscriptionFee,
 		})
 	}
@@ -540,14 +540,14 @@ func (ruo *ReleaseUpdateOne) SetNillableType(r *release.Type) *ReleaseUpdateOne 
 }
 
 // SetOneTimeFeeAmount sets the "OneTimeFeeAmount" field.
-func (ruo *ReleaseUpdateOne) SetOneTimeFeeAmount(i int32) *ReleaseUpdateOne {
+func (ruo *ReleaseUpdateOne) SetOneTimeFeeAmount(i int64) *ReleaseUpdateOne {
 	ruo.mutation.ResetOneTimeFeeAmount()
 	ruo.mutation.SetOneTimeFeeAmount(i)
 	return ruo
 }
 
 // SetNillableOneTimeFeeAmount sets the "OneTimeFeeAmount" field if the given value is not nil.
-func (ruo *ReleaseUpdateOne) SetNillableOneTimeFeeAmount(i *int32) *ReleaseUpdateOne {
+func (ruo *ReleaseUpdateOne) SetNillableOneTimeFeeAmount(i *int64) *ReleaseUpdateOne {
 	if i != nil {
 		ruo.SetOneTimeFeeAmount(*i)
 	}
@@ -555,20 +555,20 @@ func (ruo *ReleaseUpdateOne) SetNillableOneTimeFeeAmount(i *int32) *ReleaseUpdat
 }
 
 // AddOneTimeFeeAmount adds i to the "OneTimeFeeAmount" field.
-func (ruo *ReleaseUpdateOne) AddOneTimeFeeAmount(i int32) *ReleaseUpdateOne {
+func (ruo *ReleaseUpdateOne) AddOneTimeFeeAmount(i int64) *ReleaseUpdateOne {
 	ruo.mutation.AddOneTimeFeeAmount(i)
 	return ruo
 }
 
 // SetSubscriptionFee sets the "SubscriptionFee" field.
-func (ruo *ReleaseUpdateOne) SetSubscriptionFee(i int32) *ReleaseUpdateOne {
+func (ruo *ReleaseUpdateOne) SetSubscriptionFee(i int64) *ReleaseUpdateOne {
 	ruo.mutation.ResetSubscriptionFee()
 	ruo.mutation.SetSubscriptionFee(i)
 	return ruo
 }
 
 // SetNillableSubscriptionFee sets the "SubscriptionFee" field if the given value is not nil.
-func (ruo *ReleaseUpdateOne) SetNillableSubscriptionFee(i *int32) *ReleaseUpdateOne {
+func (ruo *ReleaseUpdateOne) SetNillableSubscriptionFee(i *int64) *ReleaseUpdateOne {
 	if i != nil {
 		ruo.SetSubscriptionFee(*i)
 	}
@@ -576,7 +576,7 @@ func (ruo *ReleaseUpdateOne) SetNillableSubscriptionFee(i *int32) *ReleaseUpdate
 }
 
 // AddSubscriptionFee adds i to the "SubscriptionFee" field.
-func (ruo *ReleaseUpdateOne) AddSubscriptionFee(i int32) *ReleaseUpdateOne {
+func (ruo *ReleaseUpdateOne) AddSubscriptionFee(i int64) *ReleaseUpdateOne {
 	ruo.mutation.AddSubscriptionFee(i)
 	return ruo
 }
@@ -801,35 +801,35 @@ func (ruo *ReleaseUpdateOne) sqlSave(ctx context.Context) (_node *Release, err e
 	}
 	if value, ok := ruo.mutation.OneTimeFeeAmount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldOneTimeFeeAmount,
 		})
 	}
 	if value, ok := ruo.mutation.AddedOneTimeFeeAmount(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldOneTimeFeeAmount,
 		})
 	}
 	if value, ok := ruo.mutation.SubscriptionFee(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldSubscriptionFee,
 		})
 	}
 	if value, ok := ruo.mutation.AddedSubscriptionFee(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldSubscriptionFee,
 		})
 	}
 	if ruo.mutation.SubscriptionFeeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Column: release.FieldSubscriptionFee,
 		})
 	}

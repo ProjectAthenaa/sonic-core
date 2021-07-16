@@ -76,9 +76,9 @@ var (
 	// DefaultCode holds the default value on creation for the "Code" field.
 	DefaultCode string
 	// DefaultOneTimeFeeAmount holds the default value on creation for the "OneTimeFeeAmount" field.
-	DefaultOneTimeFeeAmount int32
+	DefaultOneTimeFeeAmount int64
 	// DefaultSubscriptionFee holds the default value on creation for the "SubscriptionFee" field.
-	DefaultSubscriptionFee int32
+	DefaultSubscriptionFee int64
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

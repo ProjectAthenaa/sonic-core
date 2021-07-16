@@ -28,9 +28,9 @@ type Release struct {
 	// Type holds the value of the "Type" field.
 	Type release.Type `json:"Type,omitempty"`
 	// OneTimeFeeAmount holds the value of the "OneTimeFeeAmount" field.
-	OneTimeFeeAmount int32 `json:"OneTimeFeeAmount,omitempty"`
+	OneTimeFeeAmount int64 `json:"OneTimeFeeAmount,omitempty"`
 	// SubscriptionFee holds the value of the "SubscriptionFee" field.
-	SubscriptionFee *int32 `json:"SubscriptionFee,omitempty"`
+	SubscriptionFee *int64 `json:"SubscriptionFee,omitempty"`
 	// PriceID holds the value of the "PriceID" field.
 	PriceID *string `json:"PriceID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -124,14 +124,14 @@ func (r *Release) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field OneTimeFeeAmount", values[i])
 			} else if value.Valid {
-				r.OneTimeFeeAmount = int32(value.Int64)
+				r.OneTimeFeeAmount = value.Int64
 			}
 		case release.FieldSubscriptionFee:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field SubscriptionFee", values[i])
 			} else if value.Valid {
-				r.SubscriptionFee = new(int32)
-				*r.SubscriptionFee = int32(value.Int64)
+				r.SubscriptionFee = new(int64)
+				*r.SubscriptionFee = value.Int64
 			}
 		case release.FieldPriceID:
 			if value, ok := values[i].(*sql.NullString); !ok {

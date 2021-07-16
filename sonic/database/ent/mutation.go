@@ -9492,10 +9492,10 @@ type ReleaseMutation struct {
 	add_StockLevel       *int32
 	_Code                *string
 	_Type                *release.Type
-	_OneTimeFeeAmount    *int32
-	add_OneTimeFeeAmount *int32
-	_SubscriptionFee     *int32
-	add_SubscriptionFee  *int32
+	_OneTimeFeeAmount    *int64
+	add_OneTimeFeeAmount *int64
+	_SubscriptionFee     *int64
+	add_SubscriptionFee  *int64
 	_PriceID             *string
 	clearedFields        map[string]struct{}
 	_Customers           map[uuid.UUID]struct{}
@@ -9792,13 +9792,13 @@ func (m *ReleaseMutation) ResetType() {
 }
 
 // SetOneTimeFeeAmount sets the "OneTimeFeeAmount" field.
-func (m *ReleaseMutation) SetOneTimeFeeAmount(i int32) {
+func (m *ReleaseMutation) SetOneTimeFeeAmount(i int64) {
 	m._OneTimeFeeAmount = &i
 	m.add_OneTimeFeeAmount = nil
 }
 
 // OneTimeFeeAmount returns the value of the "OneTimeFeeAmount" field in the mutation.
-func (m *ReleaseMutation) OneTimeFeeAmount() (r int32, exists bool) {
+func (m *ReleaseMutation) OneTimeFeeAmount() (r int64, exists bool) {
 	v := m._OneTimeFeeAmount
 	if v == nil {
 		return
@@ -9809,7 +9809,7 @@ func (m *ReleaseMutation) OneTimeFeeAmount() (r int32, exists bool) {
 // OldOneTimeFeeAmount returns the old "OneTimeFeeAmount" field's value of the Release entity.
 // If the Release object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ReleaseMutation) OldOneTimeFeeAmount(ctx context.Context) (v int32, err error) {
+func (m *ReleaseMutation) OldOneTimeFeeAmount(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldOneTimeFeeAmount is only allowed on UpdateOne operations")
 	}
@@ -9824,7 +9824,7 @@ func (m *ReleaseMutation) OldOneTimeFeeAmount(ctx context.Context) (v int32, err
 }
 
 // AddOneTimeFeeAmount adds i to the "OneTimeFeeAmount" field.
-func (m *ReleaseMutation) AddOneTimeFeeAmount(i int32) {
+func (m *ReleaseMutation) AddOneTimeFeeAmount(i int64) {
 	if m.add_OneTimeFeeAmount != nil {
 		*m.add_OneTimeFeeAmount += i
 	} else {
@@ -9833,7 +9833,7 @@ func (m *ReleaseMutation) AddOneTimeFeeAmount(i int32) {
 }
 
 // AddedOneTimeFeeAmount returns the value that was added to the "OneTimeFeeAmount" field in this mutation.
-func (m *ReleaseMutation) AddedOneTimeFeeAmount() (r int32, exists bool) {
+func (m *ReleaseMutation) AddedOneTimeFeeAmount() (r int64, exists bool) {
 	v := m.add_OneTimeFeeAmount
 	if v == nil {
 		return
@@ -9848,13 +9848,13 @@ func (m *ReleaseMutation) ResetOneTimeFeeAmount() {
 }
 
 // SetSubscriptionFee sets the "SubscriptionFee" field.
-func (m *ReleaseMutation) SetSubscriptionFee(i int32) {
+func (m *ReleaseMutation) SetSubscriptionFee(i int64) {
 	m._SubscriptionFee = &i
 	m.add_SubscriptionFee = nil
 }
 
 // SubscriptionFee returns the value of the "SubscriptionFee" field in the mutation.
-func (m *ReleaseMutation) SubscriptionFee() (r int32, exists bool) {
+func (m *ReleaseMutation) SubscriptionFee() (r int64, exists bool) {
 	v := m._SubscriptionFee
 	if v == nil {
 		return
@@ -9865,7 +9865,7 @@ func (m *ReleaseMutation) SubscriptionFee() (r int32, exists bool) {
 // OldSubscriptionFee returns the old "SubscriptionFee" field's value of the Release entity.
 // If the Release object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ReleaseMutation) OldSubscriptionFee(ctx context.Context) (v *int32, err error) {
+func (m *ReleaseMutation) OldSubscriptionFee(ctx context.Context) (v *int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldSubscriptionFee is only allowed on UpdateOne operations")
 	}
@@ -9880,7 +9880,7 @@ func (m *ReleaseMutation) OldSubscriptionFee(ctx context.Context) (v *int32, err
 }
 
 // AddSubscriptionFee adds i to the "SubscriptionFee" field.
-func (m *ReleaseMutation) AddSubscriptionFee(i int32) {
+func (m *ReleaseMutation) AddSubscriptionFee(i int64) {
 	if m.add_SubscriptionFee != nil {
 		*m.add_SubscriptionFee += i
 	} else {
@@ -9889,7 +9889,7 @@ func (m *ReleaseMutation) AddSubscriptionFee(i int32) {
 }
 
 // AddedSubscriptionFee returns the value that was added to the "SubscriptionFee" field in this mutation.
-func (m *ReleaseMutation) AddedSubscriptionFee() (r int32, exists bool) {
+func (m *ReleaseMutation) AddedSubscriptionFee() (r int64, exists bool) {
 	v := m.add_SubscriptionFee
 	if v == nil {
 		return
@@ -10152,14 +10152,14 @@ func (m *ReleaseMutation) SetField(name string, value ent.Value) error {
 		m.SetType(v)
 		return nil
 	case release.FieldOneTimeFeeAmount:
-		v, ok := value.(int32)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOneTimeFeeAmount(v)
 		return nil
 	case release.FieldSubscriptionFee:
-		v, ok := value.(int32)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -10220,14 +10220,14 @@ func (m *ReleaseMutation) AddField(name string, value ent.Value) error {
 		m.AddStockLevel(v)
 		return nil
 	case release.FieldOneTimeFeeAmount:
-		v, ok := value.(int32)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddOneTimeFeeAmount(v)
 		return nil
 	case release.FieldSubscriptionFee:
-		v, ok := value.(int32)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

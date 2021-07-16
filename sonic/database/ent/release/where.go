@@ -123,14 +123,14 @@ func Code(v string) predicate.Release {
 }
 
 // OneTimeFeeAmount applies equality check predicate on the "OneTimeFeeAmount" field. It's identical to OneTimeFeeAmountEQ.
-func OneTimeFeeAmount(v int32) predicate.Release {
+func OneTimeFeeAmount(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOneTimeFeeAmount), v))
 	})
 }
 
 // SubscriptionFee applies equality check predicate on the "SubscriptionFee" field. It's identical to SubscriptionFeeEQ.
-func SubscriptionFee(v int32) predicate.Release {
+func SubscriptionFee(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldSubscriptionFee), v))
 	})
@@ -531,21 +531,21 @@ func TypeNotIn(vs ...Type) predicate.Release {
 }
 
 // OneTimeFeeAmountEQ applies the EQ predicate on the "OneTimeFeeAmount" field.
-func OneTimeFeeAmountEQ(v int32) predicate.Release {
+func OneTimeFeeAmountEQ(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldOneTimeFeeAmount), v))
 	})
 }
 
 // OneTimeFeeAmountNEQ applies the NEQ predicate on the "OneTimeFeeAmount" field.
-func OneTimeFeeAmountNEQ(v int32) predicate.Release {
+func OneTimeFeeAmountNEQ(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldOneTimeFeeAmount), v))
 	})
 }
 
 // OneTimeFeeAmountIn applies the In predicate on the "OneTimeFeeAmount" field.
-func OneTimeFeeAmountIn(vs ...int32) predicate.Release {
+func OneTimeFeeAmountIn(vs ...int64) predicate.Release {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -562,7 +562,7 @@ func OneTimeFeeAmountIn(vs ...int32) predicate.Release {
 }
 
 // OneTimeFeeAmountNotIn applies the NotIn predicate on the "OneTimeFeeAmount" field.
-func OneTimeFeeAmountNotIn(vs ...int32) predicate.Release {
+func OneTimeFeeAmountNotIn(vs ...int64) predicate.Release {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -579,49 +579,49 @@ func OneTimeFeeAmountNotIn(vs ...int32) predicate.Release {
 }
 
 // OneTimeFeeAmountGT applies the GT predicate on the "OneTimeFeeAmount" field.
-func OneTimeFeeAmountGT(v int32) predicate.Release {
+func OneTimeFeeAmountGT(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldOneTimeFeeAmount), v))
 	})
 }
 
 // OneTimeFeeAmountGTE applies the GTE predicate on the "OneTimeFeeAmount" field.
-func OneTimeFeeAmountGTE(v int32) predicate.Release {
+func OneTimeFeeAmountGTE(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldOneTimeFeeAmount), v))
 	})
 }
 
 // OneTimeFeeAmountLT applies the LT predicate on the "OneTimeFeeAmount" field.
-func OneTimeFeeAmountLT(v int32) predicate.Release {
+func OneTimeFeeAmountLT(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldOneTimeFeeAmount), v))
 	})
 }
 
 // OneTimeFeeAmountLTE applies the LTE predicate on the "OneTimeFeeAmount" field.
-func OneTimeFeeAmountLTE(v int32) predicate.Release {
+func OneTimeFeeAmountLTE(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldOneTimeFeeAmount), v))
 	})
 }
 
 // SubscriptionFeeEQ applies the EQ predicate on the "SubscriptionFee" field.
-func SubscriptionFeeEQ(v int32) predicate.Release {
+func SubscriptionFeeEQ(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldSubscriptionFee), v))
 	})
 }
 
 // SubscriptionFeeNEQ applies the NEQ predicate on the "SubscriptionFee" field.
-func SubscriptionFeeNEQ(v int32) predicate.Release {
+func SubscriptionFeeNEQ(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldSubscriptionFee), v))
 	})
 }
 
 // SubscriptionFeeIn applies the In predicate on the "SubscriptionFee" field.
-func SubscriptionFeeIn(vs ...int32) predicate.Release {
+func SubscriptionFeeIn(vs ...int64) predicate.Release {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -638,7 +638,7 @@ func SubscriptionFeeIn(vs ...int32) predicate.Release {
 }
 
 // SubscriptionFeeNotIn applies the NotIn predicate on the "SubscriptionFee" field.
-func SubscriptionFeeNotIn(vs ...int32) predicate.Release {
+func SubscriptionFeeNotIn(vs ...int64) predicate.Release {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -655,28 +655,28 @@ func SubscriptionFeeNotIn(vs ...int32) predicate.Release {
 }
 
 // SubscriptionFeeGT applies the GT predicate on the "SubscriptionFee" field.
-func SubscriptionFeeGT(v int32) predicate.Release {
+func SubscriptionFeeGT(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldSubscriptionFee), v))
 	})
 }
 
 // SubscriptionFeeGTE applies the GTE predicate on the "SubscriptionFee" field.
-func SubscriptionFeeGTE(v int32) predicate.Release {
+func SubscriptionFeeGTE(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldSubscriptionFee), v))
 	})
 }
 
 // SubscriptionFeeLT applies the LT predicate on the "SubscriptionFee" field.
-func SubscriptionFeeLT(v int32) predicate.Release {
+func SubscriptionFeeLT(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldSubscriptionFee), v))
 	})
 }
 
 // SubscriptionFeeLTE applies the LTE predicate on the "SubscriptionFee" field.
-func SubscriptionFeeLTE(v int32) predicate.Release {
+func SubscriptionFeeLTE(v int64) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldSubscriptionFee), v))
 	})

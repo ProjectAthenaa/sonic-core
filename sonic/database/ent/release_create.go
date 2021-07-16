@@ -93,13 +93,13 @@ func (rc *ReleaseCreate) SetNillableType(r *release.Type) *ReleaseCreate {
 }
 
 // SetOneTimeFeeAmount sets the "OneTimeFeeAmount" field.
-func (rc *ReleaseCreate) SetOneTimeFeeAmount(i int32) *ReleaseCreate {
+func (rc *ReleaseCreate) SetOneTimeFeeAmount(i int64) *ReleaseCreate {
 	rc.mutation.SetOneTimeFeeAmount(i)
 	return rc
 }
 
 // SetNillableOneTimeFeeAmount sets the "OneTimeFeeAmount" field if the given value is not nil.
-func (rc *ReleaseCreate) SetNillableOneTimeFeeAmount(i *int32) *ReleaseCreate {
+func (rc *ReleaseCreate) SetNillableOneTimeFeeAmount(i *int64) *ReleaseCreate {
 	if i != nil {
 		rc.SetOneTimeFeeAmount(*i)
 	}
@@ -107,13 +107,13 @@ func (rc *ReleaseCreate) SetNillableOneTimeFeeAmount(i *int32) *ReleaseCreate {
 }
 
 // SetSubscriptionFee sets the "SubscriptionFee" field.
-func (rc *ReleaseCreate) SetSubscriptionFee(i int32) *ReleaseCreate {
+func (rc *ReleaseCreate) SetSubscriptionFee(i int64) *ReleaseCreate {
 	rc.mutation.SetSubscriptionFee(i)
 	return rc
 }
 
 // SetNillableSubscriptionFee sets the "SubscriptionFee" field if the given value is not nil.
-func (rc *ReleaseCreate) SetNillableSubscriptionFee(i *int32) *ReleaseCreate {
+func (rc *ReleaseCreate) SetNillableSubscriptionFee(i *int64) *ReleaseCreate {
 	if i != nil {
 		rc.SetSubscriptionFee(*i)
 	}
@@ -337,7 +337,7 @@ func (rc *ReleaseCreate) createSpec() (*Release, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := rc.mutation.OneTimeFeeAmount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldOneTimeFeeAmount,
 		})
@@ -345,7 +345,7 @@ func (rc *ReleaseCreate) createSpec() (*Release, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := rc.mutation.SubscriptionFee(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt32,
+			Type:   field.TypeInt64,
 			Value:  value,
 			Column: release.FieldSubscriptionFee,
 		})
