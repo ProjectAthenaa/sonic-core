@@ -31,9 +31,9 @@ func (Release) Fields() []ent.Field {
 			Values(LicenseTypes...).
 			Default("Renewal"),
 		field.Int32("OneTimeFeeAmount").
-			Default(600),
+			Default(60000),
 		field.Int32("SubscriptionFee").
-			Default(100).
+			Default(10000).
 			Optional().
 			Nillable(),
 		field.String("PriceID").
