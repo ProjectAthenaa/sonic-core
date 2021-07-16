@@ -22,6 +22,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
@@ -62,6 +63,7 @@ func columnChecker(table string) func(string) error {
 		profilegroup.Table: profilegroup.ValidColumn,
 		proxy.Table:        proxy.ValidColumn,
 		proxylist.Table:    proxylist.ValidColumn,
+		release.Table:      release.ValidColumn,
 		session.Table:      session.ValidColumn,
 		settings.Table:     settings.ValidColumn,
 		shipping.Table:     shipping.ValidColumn,

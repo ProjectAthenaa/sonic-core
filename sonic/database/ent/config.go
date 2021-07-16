@@ -36,6 +36,7 @@ type hooks struct {
 	ProfileGroup []ent.Hook
 	Proxy        []ent.Hook
 	ProxyList    []ent.Hook
+	Release      []ent.Hook
 	Session      []ent.Hook
 	Settings     []ent.Hook
 	Shipping     []ent.Hook

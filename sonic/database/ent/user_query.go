@@ -16,6 +16,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
@@ -37,6 +38,8 @@ type UserQuery struct {
 	withApp        *AppQuery
 	withMetadata   *MetadataQuery
 	withSessions   *SessionQuery
+	withRelease    *ReleaseQuery
+	withFKs        bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -176,6 +179,28 @@ func (uq *UserQuery) QuerySessions() *SessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRelease chains the current query on the "Release" edge.
+func (uq *UserQuery) QueryRelease() *ReleaseQuery {
+	query := &ReleaseQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(release.Table, release.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ReleaseTable, user.ReleaseColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -369,6 +394,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withApp:        uq.withApp.Clone(),
 		withMetadata:   uq.withMetadata.Clone(),
 		withSessions:   uq.withSessions.Clone(),
+		withRelease:    uq.withRelease.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -427,6 +453,17 @@ func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withSessions = query
+	return uq
+}
+
+// WithRelease tells the query-builder to eager-load the nodes that are connected to
+// the "Release" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRelease(opts ...func(*ReleaseQuery)) *UserQuery {
+	query := &ReleaseQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRelease = query
 	return uq
 }
 
@@ -494,15 +531,23 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
+		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			uq.withLicense != nil,
 			uq.withStatistics != nil,
 			uq.withApp != nil,
 			uq.withMetadata != nil,
 			uq.withSessions != nil,
+			uq.withRelease != nil,
 		}
 	)
+	if uq.withRelease != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
@@ -698,6 +743,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_sessions" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Sessions = append(node.Edges.Sessions, n)
+		}
+	}
+
+	if query := uq.withRelease; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*User)
+		for i := range nodes {
+			if nodes[i].release_customers == nil {
+				continue
+			}
+			fk := *nodes[i].release_customers
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(release.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "release_customers" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Release = n
+			}
 		}
 	}
 

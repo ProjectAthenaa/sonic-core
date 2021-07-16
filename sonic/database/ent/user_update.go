@@ -14,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
@@ -154,6 +155,25 @@ func (uu *UserUpdate) AddSessions(s ...*Session) *UserUpdate {
 	return uu.AddSessionIDs(ids...)
 }
 
+// SetReleaseID sets the "Release" edge to the Release entity by ID.
+func (uu *UserUpdate) SetReleaseID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetReleaseID(id)
+	return uu
+}
+
+// SetNillableReleaseID sets the "Release" edge to the Release entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableReleaseID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetReleaseID(*id)
+	}
+	return uu
+}
+
+// SetRelease sets the "Release" edge to the Release entity.
+func (uu *UserUpdate) SetRelease(r *Release) *UserUpdate {
+	return uu.SetReleaseID(r.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -217,6 +237,12 @@ func (uu *UserUpdate) RemoveSessions(s ...*Session) *UserUpdate {
 		ids[i] = s[i].ID
 	}
 	return uu.RemoveSessionIDs(ids...)
+}
+
+// ClearRelease clears the "Release" edge to the Release entity.
+func (uu *UserUpdate) ClearRelease() *UserUpdate {
+	uu.mutation.ClearRelease()
+	return uu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -531,6 +557,41 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.ReleaseCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ReleaseTable,
+			Columns: []string{user.ReleaseColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: release.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.ReleaseIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ReleaseTable,
+			Columns: []string{user.ReleaseColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: release.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -671,6 +732,25 @@ func (uuo *UserUpdateOne) AddSessions(s ...*Session) *UserUpdateOne {
 	return uuo.AddSessionIDs(ids...)
 }
 
+// SetReleaseID sets the "Release" edge to the Release entity by ID.
+func (uuo *UserUpdateOne) SetReleaseID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetReleaseID(id)
+	return uuo
+}
+
+// SetNillableReleaseID sets the "Release" edge to the Release entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableReleaseID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetReleaseID(*id)
+	}
+	return uuo
+}
+
+// SetRelease sets the "Release" edge to the Release entity.
+func (uuo *UserUpdateOne) SetRelease(r *Release) *UserUpdateOne {
+	return uuo.SetReleaseID(r.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -734,6 +814,12 @@ func (uuo *UserUpdateOne) RemoveSessions(s ...*Session) *UserUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return uuo.RemoveSessionIDs(ids...)
+}
+
+// ClearRelease clears the "Release" edge to the Release entity.
+func (uuo *UserUpdateOne) ClearRelease() *UserUpdateOne {
+	uuo.mutation.ClearRelease()
+	return uuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1064,6 +1150,41 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: session.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.ReleaseCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ReleaseTable,
+			Columns: []string{user.ReleaseColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: release.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.ReleaseIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ReleaseTable,
+			Columns: []string{user.ReleaseColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: release.FieldID,
 				},
 			},
 		}

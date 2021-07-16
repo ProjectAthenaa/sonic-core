@@ -421,6 +421,34 @@ func HasSessionsWith(preds ...predicate.Session) predicate.User {
 	})
 }
 
+// HasRelease applies the HasEdge predicate on the "Release" edge.
+func HasRelease() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ReleaseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ReleaseTable, ReleaseColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasReleaseWith applies the HasEdge predicate on the "Release" edge with a given conditions (other predicates).
+func HasReleaseWith(preds ...predicate.Release) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ReleaseInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ReleaseTable, ReleaseColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
