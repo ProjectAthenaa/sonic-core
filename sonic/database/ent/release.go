@@ -27,6 +27,12 @@ type Release struct {
 	Code string `json:"Code,omitempty"`
 	// Type holds the value of the "Type" field.
 	Type release.Type `json:"Type,omitempty"`
+	// OneTimeFeeAmount holds the value of the "OneTimeFeeAmount" field.
+	OneTimeFeeAmount int32 `json:"OneTimeFeeAmount,omitempty"`
+	// SubscriptionFee holds the value of the "SubscriptionFee" field.
+	SubscriptionFee *int32 `json:"SubscriptionFee,omitempty"`
+	// PriceID holds the value of the "PriceID" field.
+	PriceID *string `json:"PriceID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ReleaseQuery when eager-loading is set.
 	Edges ReleaseEdges `json:"edges"`
@@ -55,9 +61,9 @@ func (*Release) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case release.FieldStockLevel:
+		case release.FieldStockLevel, release.FieldOneTimeFeeAmount, release.FieldSubscriptionFee:
 			values[i] = new(sql.NullInt64)
-		case release.FieldCode, release.FieldType:
+		case release.FieldCode, release.FieldType, release.FieldPriceID:
 			values[i] = new(sql.NullString)
 		case release.FieldCreatedAt, release.FieldReleaseDate:
 			values[i] = new(sql.NullTime)
@@ -114,6 +120,26 @@ func (r *Release) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				r.Type = release.Type(value.String)
 			}
+		case release.FieldOneTimeFeeAmount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field OneTimeFeeAmount", values[i])
+			} else if value.Valid {
+				r.OneTimeFeeAmount = int32(value.Int64)
+			}
+		case release.FieldSubscriptionFee:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field SubscriptionFee", values[i])
+			} else if value.Valid {
+				r.SubscriptionFee = new(int32)
+				*r.SubscriptionFee = int32(value.Int64)
+			}
+		case release.FieldPriceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field PriceID", values[i])
+			} else if value.Valid {
+				r.PriceID = new(string)
+				*r.PriceID = value.String
+			}
 		}
 	}
 	return nil
@@ -157,6 +183,16 @@ func (r *Release) String() string {
 	builder.WriteString(r.Code)
 	builder.WriteString(", Type=")
 	builder.WriteString(fmt.Sprintf("%v", r.Type))
+	builder.WriteString(", OneTimeFeeAmount=")
+	builder.WriteString(fmt.Sprintf("%v", r.OneTimeFeeAmount))
+	if v := r.SubscriptionFee; v != nil {
+		builder.WriteString(", SubscriptionFee=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	if v := r.PriceID; v != nil {
+		builder.WriteString(", PriceID=")
+		builder.WriteString(*v)
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

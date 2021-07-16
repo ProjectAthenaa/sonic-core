@@ -288,6 +288,9 @@ var (
 		{Name: "stock_level", Type: field.TypeInt32, Default: 0},
 		{Name: "code", Type: field.TypeString, Default: "BpLnfgDsc2"},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"Lifetime", "Renewal", "Beta", "Weekly", "FNF"}, Default: "Renewal"},
+		{Name: "one_time_fee_amount", Type: field.TypeInt32, Default: 600},
+		{Name: "subscription_fee", Type: field.TypeInt32, Nullable: true, Default: 100},
+		{Name: "price_id", Type: field.TypeString, Nullable: true},
 	}
 	// ReleasesTable holds the schema information for the "releases" table.
 	ReleasesTable = &schema.Table{

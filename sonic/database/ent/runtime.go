@@ -288,6 +288,14 @@ func init() {
 	releaseDescCode := releaseFields[4].Descriptor()
 	// release.DefaultCode holds the default value on creation for the Code field.
 	release.DefaultCode = releaseDescCode.Default.(string)
+	// releaseDescOneTimeFeeAmount is the schema descriptor for OneTimeFeeAmount field.
+	releaseDescOneTimeFeeAmount := releaseFields[6].Descriptor()
+	// release.DefaultOneTimeFeeAmount holds the default value on creation for the OneTimeFeeAmount field.
+	release.DefaultOneTimeFeeAmount = releaseDescOneTimeFeeAmount.Default.(int32)
+	// releaseDescSubscriptionFee is the schema descriptor for SubscriptionFee field.
+	releaseDescSubscriptionFee := releaseFields[7].Descriptor()
+	// release.DefaultSubscriptionFee holds the default value on creation for the SubscriptionFee field.
+	release.DefaultSubscriptionFee = releaseDescSubscriptionFee.Default.(int32)
 	// releaseDescID is the schema descriptor for id field.
 	releaseDescID := releaseFields[0].Descriptor()
 	// release.DefaultID holds the default value on creation for the id field.

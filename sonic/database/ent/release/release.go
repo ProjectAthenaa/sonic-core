@@ -24,6 +24,12 @@ const (
 	FieldCode = "code"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldOneTimeFeeAmount holds the string denoting the onetimefeeamount field in the database.
+	FieldOneTimeFeeAmount = "one_time_fee_amount"
+	// FieldSubscriptionFee holds the string denoting the subscriptionfee field in the database.
+	FieldSubscriptionFee = "subscription_fee"
+	// FieldPriceID holds the string denoting the priceid field in the database.
+	FieldPriceID = "price_id"
 	// EdgeCustomers holds the string denoting the customers edge name in mutations.
 	EdgeCustomers = "Customers"
 	// Table holds the table name of the release in the database.
@@ -45,6 +51,9 @@ var Columns = []string{
 	FieldStockLevel,
 	FieldCode,
 	FieldType,
+	FieldOneTimeFeeAmount,
+	FieldSubscriptionFee,
+	FieldPriceID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -66,6 +75,10 @@ var (
 	DefaultStockLevel int32
 	// DefaultCode holds the default value on creation for the "Code" field.
 	DefaultCode string
+	// DefaultOneTimeFeeAmount holds the default value on creation for the "OneTimeFeeAmount" field.
+	DefaultOneTimeFeeAmount int32
+	// DefaultSubscriptionFee holds the default value on creation for the "SubscriptionFee" field.
+	DefaultSubscriptionFee int32
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

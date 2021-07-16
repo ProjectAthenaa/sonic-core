@@ -92,6 +92,48 @@ func (rc *ReleaseCreate) SetNillableType(r *release.Type) *ReleaseCreate {
 	return rc
 }
 
+// SetOneTimeFeeAmount sets the "OneTimeFeeAmount" field.
+func (rc *ReleaseCreate) SetOneTimeFeeAmount(i int32) *ReleaseCreate {
+	rc.mutation.SetOneTimeFeeAmount(i)
+	return rc
+}
+
+// SetNillableOneTimeFeeAmount sets the "OneTimeFeeAmount" field if the given value is not nil.
+func (rc *ReleaseCreate) SetNillableOneTimeFeeAmount(i *int32) *ReleaseCreate {
+	if i != nil {
+		rc.SetOneTimeFeeAmount(*i)
+	}
+	return rc
+}
+
+// SetSubscriptionFee sets the "SubscriptionFee" field.
+func (rc *ReleaseCreate) SetSubscriptionFee(i int32) *ReleaseCreate {
+	rc.mutation.SetSubscriptionFee(i)
+	return rc
+}
+
+// SetNillableSubscriptionFee sets the "SubscriptionFee" field if the given value is not nil.
+func (rc *ReleaseCreate) SetNillableSubscriptionFee(i *int32) *ReleaseCreate {
+	if i != nil {
+		rc.SetSubscriptionFee(*i)
+	}
+	return rc
+}
+
+// SetPriceID sets the "PriceID" field.
+func (rc *ReleaseCreate) SetPriceID(s string) *ReleaseCreate {
+	rc.mutation.SetPriceID(s)
+	return rc
+}
+
+// SetNillablePriceID sets the "PriceID" field if the given value is not nil.
+func (rc *ReleaseCreate) SetNillablePriceID(s *string) *ReleaseCreate {
+	if s != nil {
+		rc.SetPriceID(*s)
+	}
+	return rc
+}
+
 // SetID sets the "id" field.
 func (rc *ReleaseCreate) SetID(u uuid.UUID) *ReleaseCreate {
 	rc.mutation.SetID(u)
@@ -185,6 +227,14 @@ func (rc *ReleaseCreate) defaults() {
 		v := release.DefaultType
 		rc.mutation.SetType(v)
 	}
+	if _, ok := rc.mutation.OneTimeFeeAmount(); !ok {
+		v := release.DefaultOneTimeFeeAmount
+		rc.mutation.SetOneTimeFeeAmount(v)
+	}
+	if _, ok := rc.mutation.SubscriptionFee(); !ok {
+		v := release.DefaultSubscriptionFee
+		rc.mutation.SetSubscriptionFee(v)
+	}
 	if _, ok := rc.mutation.ID(); !ok {
 		v := release.DefaultID()
 		rc.mutation.SetID(v)
@@ -212,6 +262,9 @@ func (rc *ReleaseCreate) check() error {
 		if err := release.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "Type", err: fmt.Errorf("ent: validator failed for field \"Type\": %w", err)}
 		}
+	}
+	if _, ok := rc.mutation.OneTimeFeeAmount(); !ok {
+		return &ValidationError{Name: "OneTimeFeeAmount", err: errors.New("ent: missing required field \"OneTimeFeeAmount\"")}
 	}
 	return nil
 }
@@ -281,6 +334,30 @@ func (rc *ReleaseCreate) createSpec() (*Release, *sqlgraph.CreateSpec) {
 			Column: release.FieldType,
 		})
 		_node.Type = value
+	}
+	if value, ok := rc.mutation.OneTimeFeeAmount(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldOneTimeFeeAmount,
+		})
+		_node.OneTimeFeeAmount = value
+	}
+	if value, ok := rc.mutation.SubscriptionFee(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldSubscriptionFee,
+		})
+		_node.SubscriptionFee = &value
+	}
+	if value, ok := rc.mutation.PriceID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: release.FieldPriceID,
+		})
+		_node.PriceID = &value
 	}
 	if nodes := rc.mutation.CustomersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -106,6 +106,74 @@ func (ru *ReleaseUpdate) SetNillableType(r *release.Type) *ReleaseUpdate {
 	return ru
 }
 
+// SetOneTimeFeeAmount sets the "OneTimeFeeAmount" field.
+func (ru *ReleaseUpdate) SetOneTimeFeeAmount(i int32) *ReleaseUpdate {
+	ru.mutation.ResetOneTimeFeeAmount()
+	ru.mutation.SetOneTimeFeeAmount(i)
+	return ru
+}
+
+// SetNillableOneTimeFeeAmount sets the "OneTimeFeeAmount" field if the given value is not nil.
+func (ru *ReleaseUpdate) SetNillableOneTimeFeeAmount(i *int32) *ReleaseUpdate {
+	if i != nil {
+		ru.SetOneTimeFeeAmount(*i)
+	}
+	return ru
+}
+
+// AddOneTimeFeeAmount adds i to the "OneTimeFeeAmount" field.
+func (ru *ReleaseUpdate) AddOneTimeFeeAmount(i int32) *ReleaseUpdate {
+	ru.mutation.AddOneTimeFeeAmount(i)
+	return ru
+}
+
+// SetSubscriptionFee sets the "SubscriptionFee" field.
+func (ru *ReleaseUpdate) SetSubscriptionFee(i int32) *ReleaseUpdate {
+	ru.mutation.ResetSubscriptionFee()
+	ru.mutation.SetSubscriptionFee(i)
+	return ru
+}
+
+// SetNillableSubscriptionFee sets the "SubscriptionFee" field if the given value is not nil.
+func (ru *ReleaseUpdate) SetNillableSubscriptionFee(i *int32) *ReleaseUpdate {
+	if i != nil {
+		ru.SetSubscriptionFee(*i)
+	}
+	return ru
+}
+
+// AddSubscriptionFee adds i to the "SubscriptionFee" field.
+func (ru *ReleaseUpdate) AddSubscriptionFee(i int32) *ReleaseUpdate {
+	ru.mutation.AddSubscriptionFee(i)
+	return ru
+}
+
+// ClearSubscriptionFee clears the value of the "SubscriptionFee" field.
+func (ru *ReleaseUpdate) ClearSubscriptionFee() *ReleaseUpdate {
+	ru.mutation.ClearSubscriptionFee()
+	return ru
+}
+
+// SetPriceID sets the "PriceID" field.
+func (ru *ReleaseUpdate) SetPriceID(s string) *ReleaseUpdate {
+	ru.mutation.SetPriceID(s)
+	return ru
+}
+
+// SetNillablePriceID sets the "PriceID" field if the given value is not nil.
+func (ru *ReleaseUpdate) SetNillablePriceID(s *string) *ReleaseUpdate {
+	if s != nil {
+		ru.SetPriceID(*s)
+	}
+	return ru
+}
+
+// ClearPriceID clears the value of the "PriceID" field.
+func (ru *ReleaseUpdate) ClearPriceID() *ReleaseUpdate {
+	ru.mutation.ClearPriceID()
+	return ru
+}
+
 // AddCustomerIDs adds the "Customers" edge to the User entity by IDs.
 func (ru *ReleaseUpdate) AddCustomerIDs(ids ...uuid.UUID) *ReleaseUpdate {
 	ru.mutation.AddCustomerIDs(ids...)
@@ -274,6 +342,53 @@ func (ru *ReleaseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: release.FieldType,
 		})
 	}
+	if value, ok := ru.mutation.OneTimeFeeAmount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldOneTimeFeeAmount,
+		})
+	}
+	if value, ok := ru.mutation.AddedOneTimeFeeAmount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldOneTimeFeeAmount,
+		})
+	}
+	if value, ok := ru.mutation.SubscriptionFee(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldSubscriptionFee,
+		})
+	}
+	if value, ok := ru.mutation.AddedSubscriptionFee(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldSubscriptionFee,
+		})
+	}
+	if ru.mutation.SubscriptionFeeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Column: release.FieldSubscriptionFee,
+		})
+	}
+	if value, ok := ru.mutation.PriceID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: release.FieldPriceID,
+		})
+	}
+	if ru.mutation.PriceIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: release.FieldPriceID,
+		})
+	}
 	if ru.mutation.CustomersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -421,6 +536,74 @@ func (ruo *ReleaseUpdateOne) SetNillableType(r *release.Type) *ReleaseUpdateOne 
 	if r != nil {
 		ruo.SetType(*r)
 	}
+	return ruo
+}
+
+// SetOneTimeFeeAmount sets the "OneTimeFeeAmount" field.
+func (ruo *ReleaseUpdateOne) SetOneTimeFeeAmount(i int32) *ReleaseUpdateOne {
+	ruo.mutation.ResetOneTimeFeeAmount()
+	ruo.mutation.SetOneTimeFeeAmount(i)
+	return ruo
+}
+
+// SetNillableOneTimeFeeAmount sets the "OneTimeFeeAmount" field if the given value is not nil.
+func (ruo *ReleaseUpdateOne) SetNillableOneTimeFeeAmount(i *int32) *ReleaseUpdateOne {
+	if i != nil {
+		ruo.SetOneTimeFeeAmount(*i)
+	}
+	return ruo
+}
+
+// AddOneTimeFeeAmount adds i to the "OneTimeFeeAmount" field.
+func (ruo *ReleaseUpdateOne) AddOneTimeFeeAmount(i int32) *ReleaseUpdateOne {
+	ruo.mutation.AddOneTimeFeeAmount(i)
+	return ruo
+}
+
+// SetSubscriptionFee sets the "SubscriptionFee" field.
+func (ruo *ReleaseUpdateOne) SetSubscriptionFee(i int32) *ReleaseUpdateOne {
+	ruo.mutation.ResetSubscriptionFee()
+	ruo.mutation.SetSubscriptionFee(i)
+	return ruo
+}
+
+// SetNillableSubscriptionFee sets the "SubscriptionFee" field if the given value is not nil.
+func (ruo *ReleaseUpdateOne) SetNillableSubscriptionFee(i *int32) *ReleaseUpdateOne {
+	if i != nil {
+		ruo.SetSubscriptionFee(*i)
+	}
+	return ruo
+}
+
+// AddSubscriptionFee adds i to the "SubscriptionFee" field.
+func (ruo *ReleaseUpdateOne) AddSubscriptionFee(i int32) *ReleaseUpdateOne {
+	ruo.mutation.AddSubscriptionFee(i)
+	return ruo
+}
+
+// ClearSubscriptionFee clears the value of the "SubscriptionFee" field.
+func (ruo *ReleaseUpdateOne) ClearSubscriptionFee() *ReleaseUpdateOne {
+	ruo.mutation.ClearSubscriptionFee()
+	return ruo
+}
+
+// SetPriceID sets the "PriceID" field.
+func (ruo *ReleaseUpdateOne) SetPriceID(s string) *ReleaseUpdateOne {
+	ruo.mutation.SetPriceID(s)
+	return ruo
+}
+
+// SetNillablePriceID sets the "PriceID" field if the given value is not nil.
+func (ruo *ReleaseUpdateOne) SetNillablePriceID(s *string) *ReleaseUpdateOne {
+	if s != nil {
+		ruo.SetPriceID(*s)
+	}
+	return ruo
+}
+
+// ClearPriceID clears the value of the "PriceID" field.
+func (ruo *ReleaseUpdateOne) ClearPriceID() *ReleaseUpdateOne {
+	ruo.mutation.ClearPriceID()
 	return ruo
 }
 
@@ -614,6 +797,53 @@ func (ruo *ReleaseUpdateOne) sqlSave(ctx context.Context) (_node *Release, err e
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: release.FieldType,
+		})
+	}
+	if value, ok := ruo.mutation.OneTimeFeeAmount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldOneTimeFeeAmount,
+		})
+	}
+	if value, ok := ruo.mutation.AddedOneTimeFeeAmount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldOneTimeFeeAmount,
+		})
+	}
+	if value, ok := ruo.mutation.SubscriptionFee(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldSubscriptionFee,
+		})
+	}
+	if value, ok := ruo.mutation.AddedSubscriptionFee(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Value:  value,
+			Column: release.FieldSubscriptionFee,
+		})
+	}
+	if ruo.mutation.SubscriptionFeeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt32,
+			Column: release.FieldSubscriptionFee,
+		})
+	}
+	if value, ok := ruo.mutation.PriceID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: release.FieldPriceID,
+		})
+	}
+	if ruo.mutation.PriceIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: release.FieldPriceID,
 		})
 	}
 	if ruo.mutation.CustomersCleared() {

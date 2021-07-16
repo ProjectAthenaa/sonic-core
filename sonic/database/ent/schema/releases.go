@@ -21,10 +21,24 @@ func (Release) Fields() []ent.Field {
 			Default(uuid.New),
 		field.Time("created_at").
 			Default(time.Now),
-		field.Time("ReleaseDate").Default(time.Now),
-		field.Int32("StockLevel").Default(0),
-		field.String("Code").Default(funk.RandomString(10)),
-		field.Enum("Type").Values(LicenseTypes...).Default("Renewal"),
+		field.Time("ReleaseDate").
+			Default(time.Now),
+		field.Int32("StockLevel").
+			Default(0),
+		field.String("Code").
+			Default(funk.RandomString(10)),
+		field.Enum("Type").
+			Values(LicenseTypes...).
+			Default("Renewal"),
+		field.Int32("OneTimeFeeAmount").
+			Default(600),
+		field.Int32("SubscriptionFee").
+			Default(100).
+			Optional().
+			Nillable(),
+		field.String("PriceID").
+			Optional().
+			Nillable(),
 	}
 }
 
