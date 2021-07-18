@@ -120,16 +120,22 @@ func (rc *ReleaseCreate) SetNillableSubscriptionFee(i *int64) *ReleaseCreate {
 	return rc
 }
 
-// SetPriceID sets the "PriceID" field.
-func (rc *ReleaseCreate) SetPriceID(s string) *ReleaseCreate {
-	rc.mutation.SetPriceID(s)
+// SetProductPriceID sets the "ProductPriceID" field.
+func (rc *ReleaseCreate) SetProductPriceID(s string) *ReleaseCreate {
+	rc.mutation.SetProductPriceID(s)
 	return rc
 }
 
-// SetNillablePriceID sets the "PriceID" field if the given value is not nil.
-func (rc *ReleaseCreate) SetNillablePriceID(s *string) *ReleaseCreate {
+// SetSubscriptionPriceID sets the "SubscriptionPriceID" field.
+func (rc *ReleaseCreate) SetSubscriptionPriceID(s string) *ReleaseCreate {
+	rc.mutation.SetSubscriptionPriceID(s)
+	return rc
+}
+
+// SetNillableSubscriptionPriceID sets the "SubscriptionPriceID" field if the given value is not nil.
+func (rc *ReleaseCreate) SetNillableSubscriptionPriceID(s *string) *ReleaseCreate {
 	if s != nil {
-		rc.SetPriceID(*s)
+		rc.SetSubscriptionPriceID(*s)
 	}
 	return rc
 }
@@ -266,6 +272,9 @@ func (rc *ReleaseCreate) check() error {
 	if _, ok := rc.mutation.OneTimeFeeAmount(); !ok {
 		return &ValidationError{Name: "OneTimeFeeAmount", err: errors.New("ent: missing required field \"OneTimeFeeAmount\"")}
 	}
+	if _, ok := rc.mutation.ProductPriceID(); !ok {
+		return &ValidationError{Name: "ProductPriceID", err: errors.New("ent: missing required field \"ProductPriceID\"")}
+	}
 	return nil
 }
 
@@ -351,13 +360,21 @@ func (rc *ReleaseCreate) createSpec() (*Release, *sqlgraph.CreateSpec) {
 		})
 		_node.SubscriptionFee = &value
 	}
-	if value, ok := rc.mutation.PriceID(); ok {
+	if value, ok := rc.mutation.ProductPriceID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: release.FieldPriceID,
+			Column: release.FieldProductPriceID,
 		})
-		_node.PriceID = &value
+		_node.ProductPriceID = value
+	}
+	if value, ok := rc.mutation.SubscriptionPriceID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: release.FieldSubscriptionPriceID,
+		})
+		_node.SubscriptionPriceID = &value
 	}
 	if nodes := rc.mutation.CustomersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

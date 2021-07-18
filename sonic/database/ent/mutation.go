@@ -9496,7 +9496,8 @@ type ReleaseMutation struct {
 	add_OneTimeFeeAmount *int64
 	_SubscriptionFee     *int64
 	add_SubscriptionFee  *int64
-	_PriceID             *string
+	_ProductPriceID      *string
+	_SubscriptionPriceID *string
 	clearedFields        map[string]struct{}
 	_Customers           map[uuid.UUID]struct{}
 	removed_Customers    map[uuid.UUID]struct{}
@@ -9917,53 +9918,89 @@ func (m *ReleaseMutation) ResetSubscriptionFee() {
 	delete(m.clearedFields, release.FieldSubscriptionFee)
 }
 
-// SetPriceID sets the "PriceID" field.
-func (m *ReleaseMutation) SetPriceID(s string) {
-	m._PriceID = &s
+// SetProductPriceID sets the "ProductPriceID" field.
+func (m *ReleaseMutation) SetProductPriceID(s string) {
+	m._ProductPriceID = &s
 }
 
-// PriceID returns the value of the "PriceID" field in the mutation.
-func (m *ReleaseMutation) PriceID() (r string, exists bool) {
-	v := m._PriceID
+// ProductPriceID returns the value of the "ProductPriceID" field in the mutation.
+func (m *ReleaseMutation) ProductPriceID() (r string, exists bool) {
+	v := m._ProductPriceID
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPriceID returns the old "PriceID" field's value of the Release entity.
+// OldProductPriceID returns the old "ProductPriceID" field's value of the Release entity.
 // If the Release object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ReleaseMutation) OldPriceID(ctx context.Context) (v *string, err error) {
+func (m *ReleaseMutation) OldProductPriceID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldPriceID is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldProductPriceID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldPriceID requires an ID field in the mutation")
+		return v, fmt.Errorf("OldProductPriceID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPriceID: %w", err)
+		return v, fmt.Errorf("querying old value for OldProductPriceID: %w", err)
 	}
-	return oldValue.PriceID, nil
+	return oldValue.ProductPriceID, nil
 }
 
-// ClearPriceID clears the value of the "PriceID" field.
-func (m *ReleaseMutation) ClearPriceID() {
-	m._PriceID = nil
-	m.clearedFields[release.FieldPriceID] = struct{}{}
+// ResetProductPriceID resets all changes to the "ProductPriceID" field.
+func (m *ReleaseMutation) ResetProductPriceID() {
+	m._ProductPriceID = nil
 }
 
-// PriceIDCleared returns if the "PriceID" field was cleared in this mutation.
-func (m *ReleaseMutation) PriceIDCleared() bool {
-	_, ok := m.clearedFields[release.FieldPriceID]
+// SetSubscriptionPriceID sets the "SubscriptionPriceID" field.
+func (m *ReleaseMutation) SetSubscriptionPriceID(s string) {
+	m._SubscriptionPriceID = &s
+}
+
+// SubscriptionPriceID returns the value of the "SubscriptionPriceID" field in the mutation.
+func (m *ReleaseMutation) SubscriptionPriceID() (r string, exists bool) {
+	v := m._SubscriptionPriceID
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSubscriptionPriceID returns the old "SubscriptionPriceID" field's value of the Release entity.
+// If the Release object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ReleaseMutation) OldSubscriptionPriceID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSubscriptionPriceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSubscriptionPriceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSubscriptionPriceID: %w", err)
+	}
+	return oldValue.SubscriptionPriceID, nil
+}
+
+// ClearSubscriptionPriceID clears the value of the "SubscriptionPriceID" field.
+func (m *ReleaseMutation) ClearSubscriptionPriceID() {
+	m._SubscriptionPriceID = nil
+	m.clearedFields[release.FieldSubscriptionPriceID] = struct{}{}
+}
+
+// SubscriptionPriceIDCleared returns if the "SubscriptionPriceID" field was cleared in this mutation.
+func (m *ReleaseMutation) SubscriptionPriceIDCleared() bool {
+	_, ok := m.clearedFields[release.FieldSubscriptionPriceID]
 	return ok
 }
 
-// ResetPriceID resets all changes to the "PriceID" field.
-func (m *ReleaseMutation) ResetPriceID() {
-	m._PriceID = nil
-	delete(m.clearedFields, release.FieldPriceID)
+// ResetSubscriptionPriceID resets all changes to the "SubscriptionPriceID" field.
+func (m *ReleaseMutation) ResetSubscriptionPriceID() {
+	m._SubscriptionPriceID = nil
+	delete(m.clearedFields, release.FieldSubscriptionPriceID)
 }
 
 // AddCustomerIDs adds the "Customers" edge to the User entity by ids.
@@ -10033,7 +10070,7 @@ func (m *ReleaseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ReleaseMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, release.FieldCreatedAt)
 	}
@@ -10055,8 +10092,11 @@ func (m *ReleaseMutation) Fields() []string {
 	if m._SubscriptionFee != nil {
 		fields = append(fields, release.FieldSubscriptionFee)
 	}
-	if m._PriceID != nil {
-		fields = append(fields, release.FieldPriceID)
+	if m._ProductPriceID != nil {
+		fields = append(fields, release.FieldProductPriceID)
+	}
+	if m._SubscriptionPriceID != nil {
+		fields = append(fields, release.FieldSubscriptionPriceID)
 	}
 	return fields
 }
@@ -10080,8 +10120,10 @@ func (m *ReleaseMutation) Field(name string) (ent.Value, bool) {
 		return m.OneTimeFeeAmount()
 	case release.FieldSubscriptionFee:
 		return m.SubscriptionFee()
-	case release.FieldPriceID:
-		return m.PriceID()
+	case release.FieldProductPriceID:
+		return m.ProductPriceID()
+	case release.FieldSubscriptionPriceID:
+		return m.SubscriptionPriceID()
 	}
 	return nil, false
 }
@@ -10105,8 +10147,10 @@ func (m *ReleaseMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldOneTimeFeeAmount(ctx)
 	case release.FieldSubscriptionFee:
 		return m.OldSubscriptionFee(ctx)
-	case release.FieldPriceID:
-		return m.OldPriceID(ctx)
+	case release.FieldProductPriceID:
+		return m.OldProductPriceID(ctx)
+	case release.FieldSubscriptionPriceID:
+		return m.OldSubscriptionPriceID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Release field %s", name)
 }
@@ -10165,12 +10209,19 @@ func (m *ReleaseMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSubscriptionFee(v)
 		return nil
-	case release.FieldPriceID:
+	case release.FieldProductPriceID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPriceID(v)
+		m.SetProductPriceID(v)
+		return nil
+	case release.FieldSubscriptionPriceID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSubscriptionPriceID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Release field %s", name)
@@ -10244,8 +10295,8 @@ func (m *ReleaseMutation) ClearedFields() []string {
 	if m.FieldCleared(release.FieldSubscriptionFee) {
 		fields = append(fields, release.FieldSubscriptionFee)
 	}
-	if m.FieldCleared(release.FieldPriceID) {
-		fields = append(fields, release.FieldPriceID)
+	if m.FieldCleared(release.FieldSubscriptionPriceID) {
+		fields = append(fields, release.FieldSubscriptionPriceID)
 	}
 	return fields
 }
@@ -10264,8 +10315,8 @@ func (m *ReleaseMutation) ClearField(name string) error {
 	case release.FieldSubscriptionFee:
 		m.ClearSubscriptionFee()
 		return nil
-	case release.FieldPriceID:
-		m.ClearPriceID()
+	case release.FieldSubscriptionPriceID:
+		m.ClearSubscriptionPriceID()
 		return nil
 	}
 	return fmt.Errorf("unknown Release nullable field %s", name)
@@ -10296,8 +10347,11 @@ func (m *ReleaseMutation) ResetField(name string) error {
 	case release.FieldSubscriptionFee:
 		m.ResetSubscriptionFee()
 		return nil
-	case release.FieldPriceID:
-		m.ResetPriceID()
+	case release.FieldProductPriceID:
+		m.ResetProductPriceID()
+		return nil
+	case release.FieldSubscriptionPriceID:
+		m.ResetSubscriptionPriceID()
 		return nil
 	}
 	return fmt.Errorf("unknown Release field %s", name)

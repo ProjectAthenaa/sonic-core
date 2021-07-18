@@ -36,7 +36,8 @@ func (Release) Fields() []ent.Field {
 			Default(10000).
 			Optional().
 			Nillable(),
-		field.String("PriceID").
+		field.String("ProductPriceID"),
+		field.String("SubscriptionPriceID").
 			Optional().
 			Nillable(),
 	}

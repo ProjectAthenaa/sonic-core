@@ -31,8 +31,10 @@ type Release struct {
 	OneTimeFeeAmount int64 `json:"OneTimeFeeAmount,omitempty"`
 	// SubscriptionFee holds the value of the "SubscriptionFee" field.
 	SubscriptionFee *int64 `json:"SubscriptionFee,omitempty"`
-	// PriceID holds the value of the "PriceID" field.
-	PriceID *string `json:"PriceID,omitempty"`
+	// ProductPriceID holds the value of the "ProductPriceID" field.
+	ProductPriceID string `json:"ProductPriceID,omitempty"`
+	// SubscriptionPriceID holds the value of the "SubscriptionPriceID" field.
+	SubscriptionPriceID *string `json:"SubscriptionPriceID,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ReleaseQuery when eager-loading is set.
 	Edges ReleaseEdges `json:"edges"`
@@ -63,7 +65,7 @@ func (*Release) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case release.FieldStockLevel, release.FieldOneTimeFeeAmount, release.FieldSubscriptionFee:
 			values[i] = new(sql.NullInt64)
-		case release.FieldCode, release.FieldType, release.FieldPriceID:
+		case release.FieldCode, release.FieldType, release.FieldProductPriceID, release.FieldSubscriptionPriceID:
 			values[i] = new(sql.NullString)
 		case release.FieldCreatedAt, release.FieldReleaseDate:
 			values[i] = new(sql.NullTime)
@@ -133,12 +135,18 @@ func (r *Release) assignValues(columns []string, values []interface{}) error {
 				r.SubscriptionFee = new(int64)
 				*r.SubscriptionFee = value.Int64
 			}
-		case release.FieldPriceID:
+		case release.FieldProductPriceID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field PriceID", values[i])
+				return fmt.Errorf("unexpected type %T for field ProductPriceID", values[i])
 			} else if value.Valid {
-				r.PriceID = new(string)
-				*r.PriceID = value.String
+				r.ProductPriceID = value.String
+			}
+		case release.FieldSubscriptionPriceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field SubscriptionPriceID", values[i])
+			} else if value.Valid {
+				r.SubscriptionPriceID = new(string)
+				*r.SubscriptionPriceID = value.String
 			}
 		}
 	}
@@ -189,8 +197,10 @@ func (r *Release) String() string {
 		builder.WriteString(", SubscriptionFee=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
-	if v := r.PriceID; v != nil {
-		builder.WriteString(", PriceID=")
+	builder.WriteString(", ProductPriceID=")
+	builder.WriteString(r.ProductPriceID)
+	if v := r.SubscriptionPriceID; v != nil {
+		builder.WriteString(", SubscriptionPriceID=")
 		builder.WriteString(*v)
 	}
 	builder.WriteByte(')')

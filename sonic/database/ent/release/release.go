@@ -28,8 +28,10 @@ const (
 	FieldOneTimeFeeAmount = "one_time_fee_amount"
 	// FieldSubscriptionFee holds the string denoting the subscriptionfee field in the database.
 	FieldSubscriptionFee = "subscription_fee"
-	// FieldPriceID holds the string denoting the priceid field in the database.
-	FieldPriceID = "price_id"
+	// FieldProductPriceID holds the string denoting the productpriceid field in the database.
+	FieldProductPriceID = "product_price_id"
+	// FieldSubscriptionPriceID holds the string denoting the subscriptionpriceid field in the database.
+	FieldSubscriptionPriceID = "subscription_price_id"
 	// EdgeCustomers holds the string denoting the customers edge name in mutations.
 	EdgeCustomers = "Customers"
 	// Table holds the table name of the release in the database.
@@ -53,7 +55,8 @@ var Columns = []string{
 	FieldType,
 	FieldOneTimeFeeAmount,
 	FieldSubscriptionFee,
-	FieldPriceID,
+	FieldProductPriceID,
+	FieldSubscriptionPriceID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

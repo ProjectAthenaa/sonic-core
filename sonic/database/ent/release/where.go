@@ -136,10 +136,17 @@ func SubscriptionFee(v int64) predicate.Release {
 	})
 }
 
-// PriceID applies equality check predicate on the "PriceID" field. It's identical to PriceIDEQ.
-func PriceID(v string) predicate.Release {
+// ProductPriceID applies equality check predicate on the "ProductPriceID" field. It's identical to ProductPriceIDEQ.
+func ProductPriceID(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPriceID), v))
+		s.Where(sql.EQ(s.C(FieldProductPriceID), v))
+	})
+}
+
+// SubscriptionPriceID applies equality check predicate on the "SubscriptionPriceID" field. It's identical to SubscriptionPriceIDEQ.
+func SubscriptionPriceID(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSubscriptionPriceID), v))
 	})
 }
 
@@ -696,22 +703,22 @@ func SubscriptionFeeNotNil() predicate.Release {
 	})
 }
 
-// PriceIDEQ applies the EQ predicate on the "PriceID" field.
-func PriceIDEQ(v string) predicate.Release {
+// ProductPriceIDEQ applies the EQ predicate on the "ProductPriceID" field.
+func ProductPriceIDEQ(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPriceID), v))
+		s.Where(sql.EQ(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDNEQ applies the NEQ predicate on the "PriceID" field.
-func PriceIDNEQ(v string) predicate.Release {
+// ProductPriceIDNEQ applies the NEQ predicate on the "ProductPriceID" field.
+func ProductPriceIDNEQ(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPriceID), v))
+		s.Where(sql.NEQ(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDIn applies the In predicate on the "PriceID" field.
-func PriceIDIn(vs ...string) predicate.Release {
+// ProductPriceIDIn applies the In predicate on the "ProductPriceID" field.
+func ProductPriceIDIn(vs ...string) predicate.Release {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -723,12 +730,12 @@ func PriceIDIn(vs ...string) predicate.Release {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldPriceID), v...))
+		s.Where(sql.In(s.C(FieldProductPriceID), v...))
 	})
 }
 
-// PriceIDNotIn applies the NotIn predicate on the "PriceID" field.
-func PriceIDNotIn(vs ...string) predicate.Release {
+// ProductPriceIDNotIn applies the NotIn predicate on the "ProductPriceID" field.
+func ProductPriceIDNotIn(vs ...string) predicate.Release {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -740,84 +747,195 @@ func PriceIDNotIn(vs ...string) predicate.Release {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldPriceID), v...))
+		s.Where(sql.NotIn(s.C(FieldProductPriceID), v...))
 	})
 }
 
-// PriceIDGT applies the GT predicate on the "PriceID" field.
-func PriceIDGT(v string) predicate.Release {
+// ProductPriceIDGT applies the GT predicate on the "ProductPriceID" field.
+func ProductPriceIDGT(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPriceID), v))
+		s.Where(sql.GT(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDGTE applies the GTE predicate on the "PriceID" field.
-func PriceIDGTE(v string) predicate.Release {
+// ProductPriceIDGTE applies the GTE predicate on the "ProductPriceID" field.
+func ProductPriceIDGTE(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPriceID), v))
+		s.Where(sql.GTE(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDLT applies the LT predicate on the "PriceID" field.
-func PriceIDLT(v string) predicate.Release {
+// ProductPriceIDLT applies the LT predicate on the "ProductPriceID" field.
+func ProductPriceIDLT(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPriceID), v))
+		s.Where(sql.LT(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDLTE applies the LTE predicate on the "PriceID" field.
-func PriceIDLTE(v string) predicate.Release {
+// ProductPriceIDLTE applies the LTE predicate on the "ProductPriceID" field.
+func ProductPriceIDLTE(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPriceID), v))
+		s.Where(sql.LTE(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDContains applies the Contains predicate on the "PriceID" field.
-func PriceIDContains(v string) predicate.Release {
+// ProductPriceIDContains applies the Contains predicate on the "ProductPriceID" field.
+func ProductPriceIDContains(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldPriceID), v))
+		s.Where(sql.Contains(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDHasPrefix applies the HasPrefix predicate on the "PriceID" field.
-func PriceIDHasPrefix(v string) predicate.Release {
+// ProductPriceIDHasPrefix applies the HasPrefix predicate on the "ProductPriceID" field.
+func ProductPriceIDHasPrefix(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldPriceID), v))
+		s.Where(sql.HasPrefix(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDHasSuffix applies the HasSuffix predicate on the "PriceID" field.
-func PriceIDHasSuffix(v string) predicate.Release {
+// ProductPriceIDHasSuffix applies the HasSuffix predicate on the "ProductPriceID" field.
+func ProductPriceIDHasSuffix(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldPriceID), v))
+		s.Where(sql.HasSuffix(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDIsNil applies the IsNil predicate on the "PriceID" field.
-func PriceIDIsNil() predicate.Release {
+// ProductPriceIDEqualFold applies the EqualFold predicate on the "ProductPriceID" field.
+func ProductPriceIDEqualFold(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPriceID)))
+		s.Where(sql.EqualFold(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDNotNil applies the NotNil predicate on the "PriceID" field.
-func PriceIDNotNil() predicate.Release {
+// ProductPriceIDContainsFold applies the ContainsFold predicate on the "ProductPriceID" field.
+func ProductPriceIDContainsFold(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPriceID)))
+		s.Where(sql.ContainsFold(s.C(FieldProductPriceID), v))
 	})
 }
 
-// PriceIDEqualFold applies the EqualFold predicate on the "PriceID" field.
-func PriceIDEqualFold(v string) predicate.Release {
+// SubscriptionPriceIDEQ applies the EQ predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDEQ(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldPriceID), v))
+		s.Where(sql.EQ(s.C(FieldSubscriptionPriceID), v))
 	})
 }
 
-// PriceIDContainsFold applies the ContainsFold predicate on the "PriceID" field.
-func PriceIDContainsFold(v string) predicate.Release {
+// SubscriptionPriceIDNEQ applies the NEQ predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDNEQ(v string) predicate.Release {
 	return predicate.Release(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldPriceID), v))
+		s.Where(sql.NEQ(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDIn applies the In predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDIn(vs ...string) predicate.Release {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Release(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSubscriptionPriceID), v...))
+	})
+}
+
+// SubscriptionPriceIDNotIn applies the NotIn predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDNotIn(vs ...string) predicate.Release {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Release(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSubscriptionPriceID), v...))
+	})
+}
+
+// SubscriptionPriceIDGT applies the GT predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDGT(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDGTE applies the GTE predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDGTE(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDLT applies the LT predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDLT(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDLTE applies the LTE predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDLTE(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDContains applies the Contains predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDContains(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDHasPrefix applies the HasPrefix predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDHasPrefix(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDHasSuffix applies the HasSuffix predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDHasSuffix(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDIsNil applies the IsNil predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDIsNil() predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSubscriptionPriceID)))
+	})
+}
+
+// SubscriptionPriceIDNotNil applies the NotNil predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDNotNil() predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSubscriptionPriceID)))
+	})
+}
+
+// SubscriptionPriceIDEqualFold applies the EqualFold predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDEqualFold(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldSubscriptionPriceID), v))
+	})
+}
+
+// SubscriptionPriceIDContainsFold applies the ContainsFold predicate on the "SubscriptionPriceID" field.
+func SubscriptionPriceIDContainsFold(v string) predicate.Release {
+	return predicate.Release(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldSubscriptionPriceID), v))
 	})
 }
 

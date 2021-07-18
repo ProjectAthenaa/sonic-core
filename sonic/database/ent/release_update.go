@@ -154,23 +154,29 @@ func (ru *ReleaseUpdate) ClearSubscriptionFee() *ReleaseUpdate {
 	return ru
 }
 
-// SetPriceID sets the "PriceID" field.
-func (ru *ReleaseUpdate) SetPriceID(s string) *ReleaseUpdate {
-	ru.mutation.SetPriceID(s)
+// SetProductPriceID sets the "ProductPriceID" field.
+func (ru *ReleaseUpdate) SetProductPriceID(s string) *ReleaseUpdate {
+	ru.mutation.SetProductPriceID(s)
 	return ru
 }
 
-// SetNillablePriceID sets the "PriceID" field if the given value is not nil.
-func (ru *ReleaseUpdate) SetNillablePriceID(s *string) *ReleaseUpdate {
+// SetSubscriptionPriceID sets the "SubscriptionPriceID" field.
+func (ru *ReleaseUpdate) SetSubscriptionPriceID(s string) *ReleaseUpdate {
+	ru.mutation.SetSubscriptionPriceID(s)
+	return ru
+}
+
+// SetNillableSubscriptionPriceID sets the "SubscriptionPriceID" field if the given value is not nil.
+func (ru *ReleaseUpdate) SetNillableSubscriptionPriceID(s *string) *ReleaseUpdate {
 	if s != nil {
-		ru.SetPriceID(*s)
+		ru.SetSubscriptionPriceID(*s)
 	}
 	return ru
 }
 
-// ClearPriceID clears the value of the "PriceID" field.
-func (ru *ReleaseUpdate) ClearPriceID() *ReleaseUpdate {
-	ru.mutation.ClearPriceID()
+// ClearSubscriptionPriceID clears the value of the "SubscriptionPriceID" field.
+func (ru *ReleaseUpdate) ClearSubscriptionPriceID() *ReleaseUpdate {
+	ru.mutation.ClearSubscriptionPriceID()
 	return ru
 }
 
@@ -376,17 +382,24 @@ func (ru *ReleaseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: release.FieldSubscriptionFee,
 		})
 	}
-	if value, ok := ru.mutation.PriceID(); ok {
+	if value, ok := ru.mutation.ProductPriceID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: release.FieldPriceID,
+			Column: release.FieldProductPriceID,
 		})
 	}
-	if ru.mutation.PriceIDCleared() {
+	if value, ok := ru.mutation.SubscriptionPriceID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: release.FieldSubscriptionPriceID,
+		})
+	}
+	if ru.mutation.SubscriptionPriceIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: release.FieldPriceID,
+			Column: release.FieldSubscriptionPriceID,
 		})
 	}
 	if ru.mutation.CustomersCleared() {
@@ -587,23 +600,29 @@ func (ruo *ReleaseUpdateOne) ClearSubscriptionFee() *ReleaseUpdateOne {
 	return ruo
 }
 
-// SetPriceID sets the "PriceID" field.
-func (ruo *ReleaseUpdateOne) SetPriceID(s string) *ReleaseUpdateOne {
-	ruo.mutation.SetPriceID(s)
+// SetProductPriceID sets the "ProductPriceID" field.
+func (ruo *ReleaseUpdateOne) SetProductPriceID(s string) *ReleaseUpdateOne {
+	ruo.mutation.SetProductPriceID(s)
 	return ruo
 }
 
-// SetNillablePriceID sets the "PriceID" field if the given value is not nil.
-func (ruo *ReleaseUpdateOne) SetNillablePriceID(s *string) *ReleaseUpdateOne {
+// SetSubscriptionPriceID sets the "SubscriptionPriceID" field.
+func (ruo *ReleaseUpdateOne) SetSubscriptionPriceID(s string) *ReleaseUpdateOne {
+	ruo.mutation.SetSubscriptionPriceID(s)
+	return ruo
+}
+
+// SetNillableSubscriptionPriceID sets the "SubscriptionPriceID" field if the given value is not nil.
+func (ruo *ReleaseUpdateOne) SetNillableSubscriptionPriceID(s *string) *ReleaseUpdateOne {
 	if s != nil {
-		ruo.SetPriceID(*s)
+		ruo.SetSubscriptionPriceID(*s)
 	}
 	return ruo
 }
 
-// ClearPriceID clears the value of the "PriceID" field.
-func (ruo *ReleaseUpdateOne) ClearPriceID() *ReleaseUpdateOne {
-	ruo.mutation.ClearPriceID()
+// ClearSubscriptionPriceID clears the value of the "SubscriptionPriceID" field.
+func (ruo *ReleaseUpdateOne) ClearSubscriptionPriceID() *ReleaseUpdateOne {
+	ruo.mutation.ClearSubscriptionPriceID()
 	return ruo
 }
 
@@ -833,17 +852,24 @@ func (ruo *ReleaseUpdateOne) sqlSave(ctx context.Context) (_node *Release, err e
 			Column: release.FieldSubscriptionFee,
 		})
 	}
-	if value, ok := ruo.mutation.PriceID(); ok {
+	if value, ok := ruo.mutation.ProductPriceID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: release.FieldPriceID,
+			Column: release.FieldProductPriceID,
 		})
 	}
-	if ruo.mutation.PriceIDCleared() {
+	if value, ok := ruo.mutation.SubscriptionPriceID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: release.FieldSubscriptionPriceID,
+		})
+	}
+	if ruo.mutation.SubscriptionPriceIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: release.FieldPriceID,
+			Column: release.FieldSubscriptionPriceID,
 		})
 	}
 	if ruo.mutation.CustomersCleared() {
