@@ -10,6 +10,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/lib/pq v1.10.2
 	github.com/otiai10/copy v1.6.0
+	github.com/prometheus/common v0.4.0
 	github.com/thoas/go-funk v0.9.0
 	github.com/urfave/cli v1.22.5
 	golang.org/x/net v0.0.0-20210610132358-84b48f89b13b // indirect

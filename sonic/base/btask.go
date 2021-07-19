@@ -7,7 +7,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/prometheus/common/log"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -70,7 +69,6 @@ func (tk *BTask) Start(data *module.Data) error {
 	go tk.Callback.OnStarting()
 
 	tk.running = true
-	atomic.AddInt32(&Statics.Running, 1)
 
 	tk.quitChan = make(chan int32)
 	tk.Process()
@@ -90,7 +88,6 @@ func (tk BTask) Stop() error {
 	close(tk.quitChan) //close quit chan
 
 	tk.running = false
-	atomic.AddInt32(&Statics.Running, -1)
 
 	tk.Process()
 	tk.Callback.OnStopped()
