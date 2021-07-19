@@ -9,10 +9,11 @@ service Module{
 }
 
 enum COMMAND{
-  STOP = 0;
-  START = 1;
-  PAUSE = 2;
-  CONTINUE = 3;
+  INIT = 0; //update data
+  STOP = 2;
+  START = 3;
+  PAUSE = 4;
+  CONTINUE = 5;
 }
 
 enum STATUS{
@@ -49,12 +50,17 @@ message Controller{
 }
 
 message Data{
-  Profile Profile = 1;
-  Proxy Proxy = 2;
-  string MonitorChannel = 3;
-  TaskData TaskData = 4;
+  string TaskID = 1;
+  Profile Profile = 2;
+  Proxy Proxy = 3;
+  string MonitorChannel = 4;
+  TaskData TaskData = 5;
+  map<string, ParamValue> Params = 6;
 }
-
+message ParamValue {
+  //  string  Key = 1;
+  repeated string Value = 1;
+}
 message TaskData{
   bool RandomSize = 1;
   bool RandomColor = 2;
