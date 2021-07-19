@@ -109,6 +109,7 @@ func (tk *BTask) Process() {
 	}
 }
 
+//TODO make task status
 func (tk *BTask) GetStatus() *module.Status {
 	return &module.Status{
 		Status: module.STATUS_MONITORING,
