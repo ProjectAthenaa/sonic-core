@@ -3,8 +3,6 @@ package sonic
 import (
 	"bytes"
 	"context"
-	"database/sql/driver"
-	"encoding/json"
 	"fmt"
 	sonic "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/google/uuid"
@@ -43,26 +41,6 @@ func ErrString(err error) *string {
 //UnsafeString returns a pointer to the byte slice with 0 allocations
 func UnsafeString(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
-}
-
-type Map map[string]string
-
-func (m Map) Value() (driver.Value, error) {
-	return json.Marshal(&m)
-}
-
-func (m *Map) Scan(v interface{}) error {
-	if v == nil {
-		return nil
-	}
-	switch data := v.(type) {
-	case string:
-		return json.Unmarshal([]byte(data), &m)
-	case []byte:
-		return json.Unmarshal(data, &m)
-	default:
-		return fmt.Errorf("cannot scan type %t into Map", v)
-	}
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
