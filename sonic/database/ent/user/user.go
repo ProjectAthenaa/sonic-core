@@ -29,6 +29,8 @@ const (
 	EdgeMetadata = "Metadata"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
 	EdgeSessions = "Sessions"
+	// EdgeRelease holds the string denoting the release edge name in mutations.
+	EdgeRelease = "Release"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// LicenseTable is the table the holds the License relation/edge.
@@ -64,6 +66,13 @@ const (
 	SessionsInverseTable = "sessions"
 	// SessionsColumn is the table column denoting the Sessions relation/edge.
 	SessionsColumn = "user_sessions"
+	// ReleaseTable is the table the holds the Release relation/edge.
+	ReleaseTable = "users"
+	// ReleaseInverseTable is the table name for the Release entity.
+	// It exists in this package in order to avoid circular dependency with the "release" package.
+	ReleaseInverseTable = "releases"
+	// ReleaseColumn is the table column denoting the Release relation/edge.
+	ReleaseColumn = "release_customers"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -72,6 +81,12 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDisabled,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"release_customers",
 }
 
 var (
@@ -84,6 +99,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

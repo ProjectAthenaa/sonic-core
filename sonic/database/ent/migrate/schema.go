@@ -280,6 +280,26 @@ var (
 		PrimaryKey:  []*schema.Column{ProxyListsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// ReleasesColumns holds the columns for the "releases" table.
+	ReleasesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "release_date", Type: field.TypeTime},
+		{Name: "stock_level", Type: field.TypeInt32, Default: 0},
+		{Name: "code", Type: field.TypeString, Default: "BpLnfgDsc2"},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"Lifetime", "Renewal", "Beta", "Weekly", "FNF"}, Default: "Renewal"},
+		{Name: "one_time_fee_amount", Type: field.TypeInt64, Default: 60000},
+		{Name: "subscription_fee", Type: field.TypeInt64, Nullable: true, Default: 10000},
+		{Name: "product_price_id", Type: field.TypeString},
+		{Name: "subscription_price_id", Type: field.TypeString, Nullable: true},
+	}
+	// ReleasesTable holds the schema information for the "releases" table.
+	ReleasesTable = &schema.Table{
+		Name:        "releases",
+		Columns:     ReleasesColumns,
+		PrimaryKey:  []*schema.Column{ReleasesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -431,13 +451,21 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
+		{Name: "release_customers", Type: field.TypeUUID, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_releases_Customers",
+				Columns:    []*schema.Column{UsersColumns[4]},
+				RefColumns: []*schema.Column{ReleasesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// AppProxyListsColumns holds the columns for the "app_ProxyLists" table.
 	AppProxyListsColumns = []*schema.Column{
@@ -728,6 +756,7 @@ var (
 		ProfileGroupsTable,
 		ProxiesTable,
 		ProxyListsTable,
+		ReleasesTable,
 		SessionsTable,
 		SettingsTable,
 		ShippingsTable,
@@ -763,6 +792,7 @@ func init() {
 	SettingsTable.ForeignKeys[0].RefTable = AppsTable
 	ShippingsTable.ForeignKeys[0].RefTable = ProfilesTable
 	StripesTable.ForeignKeys[0].RefTable = LicensesTable
+	UsersTable.ForeignKeys[0].RefTable = ReleasesTable
 	AppProxyListsTable.ForeignKeys[0].RefTable = AppsTable
 	AppProxyListsTable.ForeignKeys[1].RefTable = ProxyListsTable
 	AppProfileGroupsTable.ForeignKeys[0].RefTable = AppsTable

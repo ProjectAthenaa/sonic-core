@@ -17,6 +17,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/schema"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
@@ -269,6 +270,36 @@ func init() {
 	proxylistDescID := proxylistFields[0].Descriptor()
 	// proxylist.DefaultID holds the default value on creation for the id field.
 	proxylist.DefaultID = proxylistDescID.Default.(func() uuid.UUID)
+	releaseFields := schema.Release{}.Fields()
+	_ = releaseFields
+	// releaseDescCreatedAt is the schema descriptor for created_at field.
+	releaseDescCreatedAt := releaseFields[1].Descriptor()
+	// release.DefaultCreatedAt holds the default value on creation for the created_at field.
+	release.DefaultCreatedAt = releaseDescCreatedAt.Default.(func() time.Time)
+	// releaseDescReleaseDate is the schema descriptor for ReleaseDate field.
+	releaseDescReleaseDate := releaseFields[2].Descriptor()
+	// release.DefaultReleaseDate holds the default value on creation for the ReleaseDate field.
+	release.DefaultReleaseDate = releaseDescReleaseDate.Default.(func() time.Time)
+	// releaseDescStockLevel is the schema descriptor for StockLevel field.
+	releaseDescStockLevel := releaseFields[3].Descriptor()
+	// release.DefaultStockLevel holds the default value on creation for the StockLevel field.
+	release.DefaultStockLevel = releaseDescStockLevel.Default.(int32)
+	// releaseDescCode is the schema descriptor for Code field.
+	releaseDescCode := releaseFields[4].Descriptor()
+	// release.DefaultCode holds the default value on creation for the Code field.
+	release.DefaultCode = releaseDescCode.Default.(string)
+	// releaseDescOneTimeFeeAmount is the schema descriptor for OneTimeFeeAmount field.
+	releaseDescOneTimeFeeAmount := releaseFields[6].Descriptor()
+	// release.DefaultOneTimeFeeAmount holds the default value on creation for the OneTimeFeeAmount field.
+	release.DefaultOneTimeFeeAmount = releaseDescOneTimeFeeAmount.Default.(int64)
+	// releaseDescSubscriptionFee is the schema descriptor for SubscriptionFee field.
+	releaseDescSubscriptionFee := releaseFields[7].Descriptor()
+	// release.DefaultSubscriptionFee holds the default value on creation for the SubscriptionFee field.
+	release.DefaultSubscriptionFee = releaseDescSubscriptionFee.Default.(int64)
+	// releaseDescID is the schema descriptor for id field.
+	releaseDescID := releaseFields[0].Descriptor()
+	// release.DefaultID holds the default value on creation for the id field.
+	release.DefaultID = releaseDescID.Default.(func() uuid.UUID)
 	sessionFields := schema.Session{}.Fields()
 	_ = sessionFields
 	// sessionDescCreatedAt is the schema descriptor for created_at field.

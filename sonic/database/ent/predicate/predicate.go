@@ -42,6 +42,9 @@ type Proxy func(*sql.Selector)
 // ProxyList is the predicate function for proxylist builders.
 type ProxyList func(*sql.Selector)
 
+// Release is the predicate function for release builders.
+type Release func(*sql.Selector)
+
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
 

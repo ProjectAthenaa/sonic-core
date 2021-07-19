@@ -36,6 +36,8 @@ type Tx struct {
 	Proxy *ProxyClient
 	// ProxyList is the client for interacting with the ProxyList builders.
 	ProxyList *ProxyListClient
+	// Release is the client for interacting with the Release builders.
+	Release *ReleaseClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// Settings is the client for interacting with the Settings builders.
@@ -199,6 +201,7 @@ func (tx *Tx) init() {
 	tx.ProfileGroup = NewProfileGroupClient(tx.config)
 	tx.Proxy = NewProxyClient(tx.config)
 	tx.ProxyList = NewProxyListClient(tx.config)
+	tx.Release = NewReleaseClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.Settings = NewSettingsClient(tx.config)
 	tx.Shipping = NewShippingClient(tx.config)

@@ -47,5 +47,8 @@ func (User) Edges() []ent.Edge {
 		edge.To("Metadata", Metadata.Type).
 			Unique(),
 		edge.To("Sessions", Session.Type),
+		edge.From("Release", Release.Type).
+			Ref("Customers").
+			Unique(),
 	}
 }

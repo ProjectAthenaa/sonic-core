@@ -13,6 +13,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
@@ -159,6 +160,25 @@ func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
 		ids[i] = s[i].ID
 	}
 	return uc.AddSessionIDs(ids...)
+}
+
+// SetReleaseID sets the "Release" edge to the Release entity by ID.
+func (uc *UserCreate) SetReleaseID(id uuid.UUID) *UserCreate {
+	uc.mutation.SetReleaseID(id)
+	return uc
+}
+
+// SetNillableReleaseID sets the "Release" edge to the Release entity by ID if the given value is not nil.
+func (uc *UserCreate) SetNillableReleaseID(id *uuid.UUID) *UserCreate {
+	if id != nil {
+		uc = uc.SetReleaseID(*id)
+	}
+	return uc
+}
+
+// SetRelease sets the "Release" edge to the Release entity.
+func (uc *UserCreate) SetRelease(r *Release) *UserCreate {
+	return uc.SetReleaseID(r.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -388,6 +408,26 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.ReleaseIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.ReleaseTable,
+			Columns: []string{user.ReleaseColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: release.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.release_customers = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

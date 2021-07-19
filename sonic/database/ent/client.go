@@ -22,6 +22,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxy"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
@@ -65,6 +66,8 @@ type Client struct {
 	Proxy *ProxyClient
 	// ProxyList is the client for interacting with the ProxyList builders.
 	ProxyList *ProxyListClient
+	// Release is the client for interacting with the Release builders.
+	Release *ReleaseClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// Settings is the client for interacting with the Settings builders.
@@ -106,6 +109,7 @@ func (c *Client) init() {
 	c.ProfileGroup = NewProfileGroupClient(c.config)
 	c.Proxy = NewProxyClient(c.config)
 	c.ProxyList = NewProxyListClient(c.config)
+	c.Release = NewReleaseClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.Settings = NewSettingsClient(c.config)
 	c.Shipping = NewShippingClient(c.config)
@@ -159,6 +163,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ProfileGroup: NewProfileGroupClient(cfg),
 		Proxy:        NewProxyClient(cfg),
 		ProxyList:    NewProxyListClient(cfg),
+		Release:      NewReleaseClient(cfg),
 		Session:      NewSessionClient(cfg),
 		Settings:     NewSettingsClient(cfg),
 		Shipping:     NewShippingClient(cfg),
@@ -197,6 +202,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ProfileGroup: NewProfileGroupClient(cfg),
 		Proxy:        NewProxyClient(cfg),
 		ProxyList:    NewProxyListClient(cfg),
+		Release:      NewReleaseClient(cfg),
 		Session:      NewSessionClient(cfg),
 		Settings:     NewSettingsClient(cfg),
 		Shipping:     NewShippingClient(cfg),
@@ -246,6 +252,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.ProfileGroup.Use(hooks...)
 	c.Proxy.Use(hooks...)
 	c.ProxyList.Use(hooks...)
+	c.Release.Use(hooks...)
 	c.Session.Use(hooks...)
 	c.Settings.Use(hooks...)
 	c.Shipping.Use(hooks...)
@@ -1768,6 +1775,112 @@ func (c *ProxyListClient) Hooks() []Hook {
 	return c.hooks.ProxyList
 }
 
+// ReleaseClient is a client for the Release schema.
+type ReleaseClient struct {
+	config
+}
+
+// NewReleaseClient returns a client for the Release from the given config.
+func NewReleaseClient(c config) *ReleaseClient {
+	return &ReleaseClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `release.Hooks(f(g(h())))`.
+func (c *ReleaseClient) Use(hooks ...Hook) {
+	c.hooks.Release = append(c.hooks.Release, hooks...)
+}
+
+// Create returns a create builder for Release.
+func (c *ReleaseClient) Create() *ReleaseCreate {
+	mutation := newReleaseMutation(c.config, OpCreate)
+	return &ReleaseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Release entities.
+func (c *ReleaseClient) CreateBulk(builders ...*ReleaseCreate) *ReleaseCreateBulk {
+	return &ReleaseCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Release.
+func (c *ReleaseClient) Update() *ReleaseUpdate {
+	mutation := newReleaseMutation(c.config, OpUpdate)
+	return &ReleaseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ReleaseClient) UpdateOne(r *Release) *ReleaseUpdateOne {
+	mutation := newReleaseMutation(c.config, OpUpdateOne, withRelease(r))
+	return &ReleaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ReleaseClient) UpdateOneID(id uuid.UUID) *ReleaseUpdateOne {
+	mutation := newReleaseMutation(c.config, OpUpdateOne, withReleaseID(id))
+	return &ReleaseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Release.
+func (c *ReleaseClient) Delete() *ReleaseDelete {
+	mutation := newReleaseMutation(c.config, OpDelete)
+	return &ReleaseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ReleaseClient) DeleteOne(r *Release) *ReleaseDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ReleaseClient) DeleteOneID(id uuid.UUID) *ReleaseDeleteOne {
+	builder := c.Delete().Where(release.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ReleaseDeleteOne{builder}
+}
+
+// Query returns a query builder for Release.
+func (c *ReleaseClient) Query() *ReleaseQuery {
+	return &ReleaseQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Release entity by its id.
+func (c *ReleaseClient) Get(ctx context.Context, id uuid.UUID) (*Release, error) {
+	return c.Query().Where(release.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ReleaseClient) GetX(ctx context.Context, id uuid.UUID) *Release {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCustomers queries the Customers edge of a Release.
+func (c *ReleaseClient) QueryCustomers(r *Release) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(release.Table, release.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, release.CustomersTable, release.CustomersColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ReleaseClient) Hooks() []Hook {
+	return c.hooks.Release
+}
+
 // SessionClient is a client for the Session schema.
 type SessionClient struct {
 	config
@@ -2780,6 +2893,22 @@ func (c *UserClient) QuerySessions(u *User) *SessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRelease queries the Release edge of a User.
+func (c *UserClient) QueryRelease(u *User) *ReleaseQuery {
+	query := &ReleaseQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(release.Table, release.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ReleaseTable, user.ReleaseColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

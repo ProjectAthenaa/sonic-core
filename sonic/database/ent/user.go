@@ -11,6 +11,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
 )
@@ -28,7 +29,8 @@ type User struct {
 	Disabled bool `json:"Disabled,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
+	Edges             UserEdges `json:"edges"`
+	release_customers *uuid.UUID
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -43,9 +45,11 @@ type UserEdges struct {
 	Metadata *Metadata `json:"Metadata,omitempty"`
 	// Sessions holds the value of the Sessions edge.
 	Sessions []*Session `json:"Sessions,omitempty"`
+	// Release holds the value of the Release edge.
+	Release *Release `json:"Release,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // LicenseOrErr returns the License value or an error if the edge
@@ -108,6 +112,20 @@ func (e UserEdges) SessionsOrErr() ([]*Session, error) {
 	return nil, &NotLoadedError{edge: "Sessions"}
 }
 
+// ReleaseOrErr returns the Release value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) ReleaseOrErr() (*Release, error) {
+	if e.loadedTypes[5] {
+		if e.Release == nil {
+			// The edge Release was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: release.Label}
+		}
+		return e.Release, nil
+	}
+	return nil, &NotLoadedError{edge: "Release"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -118,6 +136,8 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
+			values[i] = new(uuid.UUID)
+		case user.ForeignKeys[0]: // release_customers
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -158,6 +178,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Disabled = value.Bool
 			}
+		case user.ForeignKeys[0]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field release_customers", values[i])
+			} else if value != nil {
+				u.release_customers = value
+			}
 		}
 	}
 	return nil
@@ -186,6 +212,11 @@ func (u *User) QueryMetadata() *MetadataQuery {
 // QuerySessions queries the "Sessions" edge of the User entity.
 func (u *User) QuerySessions() *SessionQuery {
 	return (&UserClient{config: u.config}).QuerySessions(u)
+}
+
+// QueryRelease queries the "Release" edge of the User entity.
+func (u *User) QueryRelease() *ReleaseQuery {
+	return (&UserClient{config: u.config}).QueryRelease(u)
 }
 
 // Update returns a builder for updating this User.
