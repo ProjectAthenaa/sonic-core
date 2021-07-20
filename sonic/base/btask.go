@@ -87,6 +87,7 @@ func (tk *BTask) commandListener() chan *module.Controller {
 			cmd, err := tk.Frontend.Recv()
 			if err != nil {
 				log.Error("task listen err: ", tk.ID)
+				break
 			}
 			updates <- cmd
 		}
