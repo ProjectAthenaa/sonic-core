@@ -8,6 +8,12 @@ import (
 var Base = &frame.CoreContext{}
 
 func init() {
-	_, _ = Base.NewPg("default", os.Getenv("PG_URL"))
-	_, _ = Base.NewRedis("default", os.Getenv("REDIS_URL"))
+	_, err := Base.NewPg("pg", os.Getenv("PG_URL"))
+	if err != nil{
+		panic(err)
+	}
+	_, err = Base.NewRedis("default", os.Getenv("REDIS_URL"))
+	if err != nil{
+		panic(err)
+	}
 }
