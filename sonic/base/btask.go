@@ -83,6 +83,7 @@ func (tk *BTask) Listen() error {
 func (tk *BTask) commandListener() chan *module.Controller {
 	updates := make(chan *module.Controller)
 	go func() {
+		defer close(updates)
 		for {
 			cmd, err := tk.Frontend.Recv()
 			if err != nil {
