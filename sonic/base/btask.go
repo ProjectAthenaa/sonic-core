@@ -7,6 +7,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/prometheus/common/log"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -18,10 +19,12 @@ type BTask struct {
 	Data     *module.Data
 	Callback face.ICallback
 
-	//logs
-	locker   sync.Mutex
-	quitChan chan int32
+	//prv
+	_locker      sync.Mutex
+	_runningChan chan int32 //for stop command
 
+	//props
+	quitChan chan int32
 	running  bool
 	stopping bool
 	state    module.STATUS //tag state
@@ -43,42 +46,63 @@ func (tk *BTask) Init(server module.Module_TaskServer) {
 
 func (tk *BTask) Listen() error {
 	defer func() {
-		log.Error("task listen broken: ", tk.ID)
+		log.Info("task listen broken: ", tk.ID)
 	}()
+	updates := tk.commandListener()
 	for {
 		select {
+		case <-tk._runningChan:
+			return tk.Stop()
 		case <-tk.Ctx.Done():
-			return nil
-		default:
+			return tk.Stop()
+		case cmd, ok := <-updates:
+			if !ok {
+				return tk.Stop()
+			}
+			var err error
+			log.Info("task recv command:", tk.ID, cmd, err)
+			if err != nil {
+				//connection break need to stop task
+				return tk.Stop()
+			}
+			if cmd.Command == module.COMMAND_STOP {
+				return tk.Stop()
+			}
+
+			if cmd.Command == module.COMMAND_PAUSE {
+				err = tk.Pause()
+			}
+
+			if cmd.Command == module.COMMAND_CONTINUE {
+				err = tk.Continue(cmd.Data)
+			}
+
+			if err != nil {
+
+			}
 			break
-		}
-		cmd, err := tk.Frontend.Recv()
-		log.Info("task recv command:", tk.ID, cmd, err)
-		if err != nil {
-			//connection break need to stop task
-			return tk.Stop()
-		}
-		if cmd.Command == module.COMMAND_STOP {
-			return tk.Stop()
-		}
-
-		if cmd.Command == module.COMMAND_PAUSE {
-			err = tk.Pause()
-		}
-
-		if cmd.Command == module.COMMAND_CONTINUE {
-			err = tk.Continue(cmd.Data)
-		}
-
-		if err != nil {
-
 		}
 	}
 }
+func (tk *BTask) commandListener() chan *module.Controller {
+	updates := make(chan *module.Controller)
+	go func() {
+		defer close(updates)
+		for {
+			cmd, err := tk.Frontend.Recv()
+			if err != nil {
+				log.Error("task listen err: ", tk.ID)
+				break
+			}
+			updates <- cmd
+		}
+	}()
+	return updates
+}
 
 func (tk *BTask) Start(data *module.Data) error {
-	tk.locker.Lock()
-	defer tk.locker.Unlock()
+	tk._locker.Lock()
+	defer tk._locker.Unlock()
 
 	if tk.running {
 		return face.ErrTaskIsRunning
@@ -90,34 +114,40 @@ func (tk *BTask) Start(data *module.Data) error {
 	tk.UpdateData(data)
 
 	tk.running = true
+	tk._runningChan = make(chan int32)
 	tk.quitChan = make(chan int32)
 
 	go tk.Callback.OnStarting()
 	tk.SetStatus(module.STATUS_STARTING, "")
 
+	atomic.AddInt32(&Statics.Running, 1)
 	return nil
 }
 
 //if stop invoke, need stop task and close connection
 func (tk *BTask) Stop() error {
-	tk.locker.Lock()
-	defer tk.locker.Unlock()
+	tk._locker.Lock()
+	defer tk._locker.Unlock()
 	if !tk.running {
 		return face.ErrTaskIsNotRunning
 	}
+
+	close(tk._runningChan) //stop
+
 	close(tk.quitChan) //close quit chan
 	tk.running = false
 
 	tk.Callback.OnStopping()
 	tk.SetStatus(module.STATUS_STOPPED, "")
 
+	atomic.AddInt32(&Statics.Running, -1)
 	return nil
 }
 
 //keep connect
 func (tk *BTask) Pause() error {
-	tk.locker.Lock()
-	defer tk.locker.Unlock()
+	tk._locker.Lock()
+	defer tk._locker.Unlock()
 	if !tk.running {
 		return face.ErrTaskIsNotRunning
 	}
@@ -129,8 +159,8 @@ func (tk *BTask) Pause() error {
 	return nil
 }
 func (tk *BTask) Continue(data *module.Data) error {
-	tk.locker.Lock()
-	defer tk.locker.Unlock()
+	tk._locker.Lock()
+	defer tk._locker.Unlock()
 	if tk.running {
 		return face.ErrTaskIsRunning
 	}
@@ -151,10 +181,7 @@ func (tk *BTask) UpdateData(data *module.Data) {
 
 //TODO  add notice state bounce to limit request
 func (tk *BTask) Process() {
-	err := tk.Frontend.Send(tk.GetStatus())
-	if err != nil {
-		log.Error("frontend update status fail:", err)
-	}
+	tk.Frontend.Send(tk.GetStatus())
 }
 
 //TODO make task status
