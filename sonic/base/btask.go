@@ -45,35 +45,53 @@ func (tk *BTask) Listen() error {
 	defer func() {
 		log.Error("task listen broken: ", tk.ID)
 	}()
+	updates := tk.commandListener()
 	for {
 		select {
 		case <-tk.Ctx.Done():
 			return nil
+		case cmd := <-updates:
+			var err error
+			log.Info("task recv command:", tk.ID, cmd, err)
+			if err != nil {
+				//connection break need to stop task
+				return tk.Stop()
+			}
+			if cmd.Command == module.COMMAND_STOP {
+				return tk.Stop()
+			}
+
+			if cmd.Command == module.COMMAND_PAUSE {
+				err = tk.Pause()
+			}
+
+			if cmd.Command == module.COMMAND_CONTINUE {
+				err = tk.Continue(cmd.Data)
+			}
+
+			if err != nil {
+
+			}
+
 		default:
 			break
 		}
-		cmd, err := tk.Frontend.Recv()
-		log.Info("task recv command:", tk.ID, cmd, err)
-		if err != nil {
-			//connection break need to stop task
-			return tk.Stop()
-		}
-		if cmd.Command == module.COMMAND_STOP {
-			return tk.Stop()
-		}
 
-		if cmd.Command == module.COMMAND_PAUSE {
-			err = tk.Pause()
-		}
-
-		if cmd.Command == module.COMMAND_CONTINUE {
-			err = tk.Continue(cmd.Data)
-		}
-
-		if err != nil {
-
-		}
 	}
+}
+
+func (tk *BTask) commandListener() chan *module.Controller {
+	updates := make(chan *module.Controller)
+	go func() {
+		for {
+			cmd, err := tk.Frontend.Recv()
+			if err != nil {
+				log.Error("task listen err: ", tk.ID)
+			}
+			updates <- cmd
+		}
+	}()
+	return updates
 }
 
 func (tk *BTask) Start(data *module.Data) error {
