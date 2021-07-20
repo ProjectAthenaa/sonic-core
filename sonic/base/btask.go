@@ -50,7 +50,10 @@ func (tk *BTask) Listen() error {
 		select {
 		case <-tk.Ctx.Done():
 			return nil
-		case cmd := <-updates:
+		case cmd, ok := <-updates:
+			if !ok{
+				return nil
+			}
 			var err error
 			log.Info("task recv command:", tk.ID, cmd, err)
 			if err != nil {
