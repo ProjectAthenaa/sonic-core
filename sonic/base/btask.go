@@ -46,6 +46,7 @@ func (tk *BTask) Listen() error {
 		log.Error("task listen broken: ", tk.ID)
 	}()
 	updates := tk.commandListener()
+	var err error
 	for {
 		select {
 		case <-tk.Ctx.Done():
@@ -54,7 +55,6 @@ func (tk *BTask) Listen() error {
 			if !ok{
 				return nil
 			}
-			var err error
 			log.Info("task recv command:", tk.ID, cmd, err)
 			if err != nil {
 				//connection break need to stop task
