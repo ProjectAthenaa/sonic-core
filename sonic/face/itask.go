@@ -8,7 +8,6 @@ type ICallback interface {
 	OnStarting()
 	OnPause() error
 	OnStopping()
-	OnStopped() //all stopped
 }
 
 type ITask interface {
