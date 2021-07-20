@@ -13,10 +13,16 @@ type CoreContext struct {
 	store  sync.Map
 }
 
-var errNotConnect = errors.New("rdb connect fail")
+var (
+	errKeyExists = errors.New("key already exists")
+	errNotConnect = errors.New("rdb connect fail")
+)
 
 func (c *CoreContext) NewRedis(name string, dsn string) (redis.UniversalClient, error) {
 	c.locker.Lock()
+	if _, ok := c.store.Load(name); ok{
+		return nil, errKeyExists
+	}
 	defer c.locker.Unlock()
 	rds := ConnectRedis(dsn)
 	if rds == nil {
@@ -34,6 +40,9 @@ func (c *CoreContext) GetRedis(name string) redis.UniversalClient {
 
 func (c *CoreContext) NewPg(name string, dsn string) (*ent.Client, error) {
 	c.locker.Lock()
+	if _, ok := c.store.Load(name); ok{
+		return nil, errKeyExists
+	}
 	defer c.locker.Unlock()
 	conn := database.Connect(dsn)
 	if conn == nil {
