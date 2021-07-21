@@ -22,6 +22,8 @@ type Tx struct {
 	Billing *BillingClient
 	// Calendar is the client for interacting with the Calendar builders.
 	Calendar *CalendarClient
+	// Device is the client for interacting with the Device builders.
+	Device *DeviceClient
 	// License is the client for interacting with the License builders.
 	License *LicenseClient
 	// Metadata is the client for interacting with the Metadata builders.
@@ -194,6 +196,7 @@ func (tx *Tx) init() {
 	tx.App = NewAppClient(tx.config)
 	tx.Billing = NewBillingClient(tx.config)
 	tx.Calendar = NewCalendarClient(tx.config)
+	tx.Device = NewDeviceClient(tx.config)
 	tx.License = NewLicenseClient(tx.config)
 	tx.Metadata = NewMetadataClient(tx.config)
 	tx.Product = NewProductClient(tx.config)

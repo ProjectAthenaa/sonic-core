@@ -10,6 +10,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/device"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
@@ -118,6 +119,12 @@ func init() {
 	calendarDescID := calendarFields[0].Descriptor()
 	// calendar.DefaultID holds the default value on creation for the id field.
 	calendar.DefaultID = calendarDescID.Default.(func() uuid.UUID)
+	deviceFields := schema.Device{}.Fields()
+	_ = deviceFields
+	// deviceDescID is the schema descriptor for id field.
+	deviceDescID := deviceFields[0].Descriptor()
+	// device.DefaultID holds the default value on creation for the id field.
+	device.DefaultID = deviceDescID.Default.(func() uuid.UUID)
 	licenseFields := schema.License{}.Fields()
 	_ = licenseFields
 	// licenseDescCreatedAt is the schema descriptor for created_at field.
