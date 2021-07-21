@@ -29,6 +29,7 @@ type hooks struct {
 	App          []ent.Hook
 	Billing      []ent.Hook
 	Calendar     []ent.Hook
+	Device       []ent.Hook
 	License      []ent.Hook
 	Metadata     []ent.Hook
 	Product      []ent.Hook

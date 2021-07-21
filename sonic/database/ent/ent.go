@@ -15,6 +15,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/device"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
@@ -56,6 +57,7 @@ func columnChecker(table string) func(string) error {
 		app.Table:          app.ValidColumn,
 		billing.Table:      billing.ValidColumn,
 		calendar.Table:     calendar.ValidColumn,
+		device.Table:       device.ValidColumn,
 		license.Table:      license.ValidColumn,
 		metadata.Table:     metadata.ValidColumn,
 		product.Table:      product.ValidColumn,

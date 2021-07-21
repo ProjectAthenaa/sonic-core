@@ -116,6 +116,20 @@ var (
 		PrimaryKey:  []*schema.Column{CalendarsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// DevicesColumns holds the columns for the "devices" table.
+	DevicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "gpu_vendor", Type: field.TypeString},
+		{Name: "plugins", Type: field.TypeJSON},
+		{Name: "adevice", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "bytea"}},
+	}
+	// DevicesTable holds the schema information for the "devices" table.
+	DevicesTable = &schema.Table{
+		Name:        "devices",
+		Columns:     DevicesColumns,
+		PrimaryKey:  []*schema.Column{DevicesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -749,6 +763,7 @@ var (
 		AppsTable,
 		BillingsTable,
 		CalendarsTable,
+		DevicesTable,
 		LicensesTable,
 		MetadataTable,
 		ProductsTable,

@@ -15,6 +15,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/device"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
@@ -52,6 +53,8 @@ type Client struct {
 	Billing *BillingClient
 	// Calendar is the client for interacting with the Calendar builders.
 	Calendar *CalendarClient
+	// Device is the client for interacting with the Device builders.
+	Device *DeviceClient
 	// License is the client for interacting with the License builders.
 	License *LicenseClient
 	// Metadata is the client for interacting with the Metadata builders.
@@ -102,6 +105,7 @@ func (c *Client) init() {
 	c.App = NewAppClient(c.config)
 	c.Billing = NewBillingClient(c.config)
 	c.Calendar = NewCalendarClient(c.config)
+	c.Device = NewDeviceClient(c.config)
 	c.License = NewLicenseClient(c.config)
 	c.Metadata = NewMetadataClient(c.config)
 	c.Product = NewProductClient(c.config)
@@ -156,6 +160,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		App:          NewAppClient(cfg),
 		Billing:      NewBillingClient(cfg),
 		Calendar:     NewCalendarClient(cfg),
+		Device:       NewDeviceClient(cfg),
 		License:      NewLicenseClient(cfg),
 		Metadata:     NewMetadataClient(cfg),
 		Product:      NewProductClient(cfg),
@@ -195,6 +200,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		App:          NewAppClient(cfg),
 		Billing:      NewBillingClient(cfg),
 		Calendar:     NewCalendarClient(cfg),
+		Device:       NewDeviceClient(cfg),
 		License:      NewLicenseClient(cfg),
 		Metadata:     NewMetadataClient(cfg),
 		Product:      NewProductClient(cfg),
@@ -245,6 +251,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.App.Use(hooks...)
 	c.Billing.Use(hooks...)
 	c.Calendar.Use(hooks...)
+	c.Device.Use(hooks...)
 	c.License.Use(hooks...)
 	c.Metadata.Use(hooks...)
 	c.Product.Use(hooks...)
@@ -887,6 +894,96 @@ func (c *CalendarClient) QueryQuickTask(ca *Calendar) *ProductQuery {
 // Hooks returns the client hooks.
 func (c *CalendarClient) Hooks() []Hook {
 	return c.hooks.Calendar
+}
+
+// DeviceClient is a client for the Device schema.
+type DeviceClient struct {
+	config
+}
+
+// NewDeviceClient returns a client for the Device from the given config.
+func NewDeviceClient(c config) *DeviceClient {
+	return &DeviceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `device.Hooks(f(g(h())))`.
+func (c *DeviceClient) Use(hooks ...Hook) {
+	c.hooks.Device = append(c.hooks.Device, hooks...)
+}
+
+// Create returns a create builder for Device.
+func (c *DeviceClient) Create() *DeviceCreate {
+	mutation := newDeviceMutation(c.config, OpCreate)
+	return &DeviceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Device entities.
+func (c *DeviceClient) CreateBulk(builders ...*DeviceCreate) *DeviceCreateBulk {
+	return &DeviceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Device.
+func (c *DeviceClient) Update() *DeviceUpdate {
+	mutation := newDeviceMutation(c.config, OpUpdate)
+	return &DeviceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DeviceClient) UpdateOne(d *Device) *DeviceUpdateOne {
+	mutation := newDeviceMutation(c.config, OpUpdateOne, withDevice(d))
+	return &DeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DeviceClient) UpdateOneID(id uuid.UUID) *DeviceUpdateOne {
+	mutation := newDeviceMutation(c.config, OpUpdateOne, withDeviceID(id))
+	return &DeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Device.
+func (c *DeviceClient) Delete() *DeviceDelete {
+	mutation := newDeviceMutation(c.config, OpDelete)
+	return &DeviceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DeviceClient) DeleteOne(d *Device) *DeviceDeleteOne {
+	return c.DeleteOneID(d.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DeviceClient) DeleteOneID(id uuid.UUID) *DeviceDeleteOne {
+	builder := c.Delete().Where(device.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DeviceDeleteOne{builder}
+}
+
+// Query returns a query builder for Device.
+func (c *DeviceClient) Query() *DeviceQuery {
+	return &DeviceQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Device entity by its id.
+func (c *DeviceClient) Get(ctx context.Context, id uuid.UUID) (*Device, error) {
+	return c.Query().Where(device.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DeviceClient) GetX(ctx context.Context, id uuid.UUID) *Device {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DeviceClient) Hooks() []Hook {
+	return c.hooks.Device
 }
 
 // LicenseClient is a client for the License schema.
