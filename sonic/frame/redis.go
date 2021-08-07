@@ -7,7 +7,7 @@ import (
 )
 
 //SubscribeToChannel connects to a redis pub/sub stream and returns a pointer to a PubSub struct
-func SubscribeToChannel(rdb *redis.Client, channelName string) (ps *PubSub, err error) {
+func SubscribeToChannel(rdb redis.UniversalClient, channelName string) (ps *PubSub, err error) {
 	if len(channelName) == 0 {
 		return nil, channelEmptyError
 	}

@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+
 type BTask struct {
 	ID       string
 	Frontend module.Module_TaskServer
@@ -84,6 +85,7 @@ func (tk *BTask) Listen() error {
 		}
 	}
 }
+
 func (tk *BTask) commandListener() chan *module.Controller {
 	updates := make(chan *module.Controller)
 	go func() {
@@ -188,7 +190,9 @@ func (tk *BTask) UpdateData(data *module.Data) {
 
 //TODO  add notice state bounce to limit request
 func (tk *BTask) Process() {
-	tk.Frontend.Send(tk.GetStatus())
+	if err := tk.Frontend.Send(tk.GetStatus()); err != nil {
+		log.Error("err sending status to frontend: ", err)
+	}
 }
 
 //TODO make task status
