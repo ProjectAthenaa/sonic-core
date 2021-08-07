@@ -2,12 +2,21 @@ package frame
 
 import (
 	"context"
+	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/go-redis/redis/v8"
 	"os"
 )
 
+func init(){
+	_, err := core.Base.NewRedis("monitors", os.Getenv("REDIS_URL"))
+	if err != nil{
+		panic(err)
+	}
+}
+
 //SubscribeToChannel connects to a redis pub/sub stream and returns a pointer to a PubSub struct
-func SubscribeToChannel(rdb redis.UniversalClient, channelName string) (ps *PubSub, err error) {
+func SubscribeToChannel(channelName string) (ps *PubSub, err error) {
+	rdb := core.Base.GetRedis("monitors")
 	if len(channelName) == 0 {
 		return nil, channelEmptyError
 	}
