@@ -42,7 +42,7 @@ func ConnectRedis(dsn string) *redis.Client {
 	}
 	opts, err := redis.ParseURL(dsn)
 	if err != nil {
-		return nil
+		panic(err)
 	}
 	return redis.NewClient(opts)
 }
