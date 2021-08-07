@@ -182,8 +182,8 @@ func (tk *BTask) Continue(data *module.Data) error {
 }
 
 func (tk *BTask) UpdateData(data *module.Data) {
-	tk._locker.Lock()
-	defer tk._locker.Unlock()
+	//tk._locker.Lock()
+	//defer tk._locker.Unlock()
 	//new data should have old data with updated data
 	tk.Data = data
 }
