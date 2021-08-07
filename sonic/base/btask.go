@@ -78,7 +78,7 @@ func (tk *BTask) Listen() error {
 			}
 
 			if err != nil {
-
+				log.Error("error processing command: ", err)
 			}
 			break
 		}
@@ -92,7 +92,7 @@ func (tk *BTask) commandListener() chan *module.Controller {
 			cmd, err := tk.Frontend.Recv()
 			if err != nil {
 				log.Error("task listen err: ", tk.ID)
-				if tk.Stop() != nil{
+				if tk.Stop() != nil {
 					log.Error("task stop err: ", tk.ID)
 				}
 				break
