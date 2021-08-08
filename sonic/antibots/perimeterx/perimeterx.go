@@ -15,7 +15,6 @@ func NewClient(svcURL ...string) (PerimeterXClient, error) {
 		} else {
 			return nil, antibots.ExactlyOneArgumentError
 		}
-	} else {
 	}
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
