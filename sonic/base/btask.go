@@ -22,7 +22,7 @@ type BTask struct {
 	//prv
 	_locker            sync.Mutex
 	_runningChan       chan int32 //for stop command
-	_pauseContinueChan chan int32
+	_pauseContinueChan chan int32 //for pause/continue command
 
 	//props
 	quitChan chan int32
@@ -196,6 +196,8 @@ func (tk *BTask) Continue() error {
 	return nil
 }
 
+//EnsureResumed is blocking if the task needs to be paused and then unblocks if context has timed out or if the task needs
+//to be continued, if there is not pause then it returns immediately
 func (tk *BTask) EnsureResumed() error {
 	select {
 	case <-tk._pauseContinueChan:
