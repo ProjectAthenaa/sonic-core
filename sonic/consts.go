@@ -51,6 +51,7 @@ const (
 	SSENSE        = "Ssense"
 	WALMART       = "Walmart"
 	HIBBET        = "Hibbet"
+	NEWBALANCE    = "NewBalance"
 )
 
 var (

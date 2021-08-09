@@ -15,7 +15,6 @@ func NewClient(svcURL ...string) (ShapeClient, error) {
 		} else {
 			return nil, antibots.ExactlyOneArgumentError
 		}
-	} else {
 	}
 
 	conn, err := grpc.Dial(address, grpc.WithInsecure())

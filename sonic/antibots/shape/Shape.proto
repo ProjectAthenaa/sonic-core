@@ -12,6 +12,7 @@ enum SITE{
   END = 0;
   TARGET = 1;
   NORDSTORM = 2;
+  NEWBALANCE = 3;
 }
 
 message Site{
