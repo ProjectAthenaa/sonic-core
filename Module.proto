@@ -104,6 +104,7 @@ message Address{
   string State = 5;
   string City = 6;
   string ZIP = 7;
+  string StateCode = 8;
 }
 
 message Billing{
