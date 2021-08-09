@@ -93,6 +93,6 @@ func GetMonitorProxy(site Site) (proxy *url.URL, authorization string, err error
 	return url, base64.StdEncoding.EncodeToString([]byte("KJND3:5Z6GNXPD")), nil
 }
 
-func GrabValueFromHTMLName(name string, html *string) string {
-	return strings.ReplaceAll(strings.Split(strings.Split(strings.Split(*html, "csrf_token")[1], "/>")[0], "value=")[1], "\"", "")
+func GrabValueFromHTMLName(name string, html *[]byte) string {
+	return strings.ReplaceAll(strings.Split(strings.Split(strings.Split(string(*html), "csrf_token")[1], "/>")[0], "value=")[1], "\"", "")
 }
