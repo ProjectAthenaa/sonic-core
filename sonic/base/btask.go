@@ -27,6 +27,7 @@ type BTask struct {
 	//props
 	quitChan chan int32
 	running  bool
+	paused   bool
 	stopping bool
 	state    module.STATUS //tag state
 	message  string        //tag more message
@@ -164,6 +165,10 @@ func (tk *BTask) Pause() error {
 		return face.ErrTaskIsNotRunning
 	}
 
+	if tk.paused {
+		return face.ErrTaskIsPaused
+	}
+
 	close(tk.quitChan)
 	tk.running = false
 	tk.SetStatus(module.STATUS_PAUSING, "")
@@ -176,6 +181,10 @@ func (tk *BTask) Continue() error {
 	defer tk._locker.Unlock()
 	if tk.running {
 		return face.ErrTaskIsRunning
+	}
+
+	if !tk.paused {
+		return face.ErrTaskIsNotPaused
 	}
 
 	tk.running = true
