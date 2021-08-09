@@ -3,6 +3,7 @@ package sonic
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	sonic "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/google/uuid"
@@ -11,6 +12,7 @@ import (
 	"io"
 	"io/ioutil"
 	"math/rand"
+	"net/url"
 	"strings"
 	"unsafe"
 )
@@ -79,4 +81,14 @@ func IPFromContext(ctx context.Context) (ip string) {
 func NopCloserBody(b io.ReadCloser) (io.ReadCloser, []byte) {
 	body, _ := ioutil.ReadAll(b)
 	return ioutil.NopCloser(bytes.NewBuffer(body)), body
+}
+
+func GetMonitorProxy(site Site) (proxy *url.URL, authorization string, err error) {
+	//45.84.101.178:7249:KJND3:5Z6GNXPD
+	url, err := url.Parse("http://KJND3:5Z6GNXPD@45.84.101.178:7249")
+	if err != nil {
+		return nil, "", err
+	}
+
+	return url, base64.StdEncoding.EncodeToString([]byte("KJND3:5Z6GNXPD")), nil
 }

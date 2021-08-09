@@ -22,7 +22,7 @@ type BTask struct {
 	//prv
 	_locker            sync.Mutex
 	_runningChan       chan int32 //for stop command
-	_pauseContinueChan chan int32 //for pause/continue command
+	_pauseContinueChan chan int8 //for pause/continue command
 
 	//props
 	quitChan chan int32
@@ -122,7 +122,7 @@ func (tk *BTask) Start(data *module.Data) error {
 
 	tk.running = true
 	tk._runningChan = make(chan int32)
-	tk._pauseContinueChan = make(chan int32)
+	tk._pauseContinueChan = make(chan int8)
 	tk.quitChan = make(chan int32)
 
 	go tk.Callback.OnStarting()
