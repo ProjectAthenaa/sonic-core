@@ -41,6 +41,9 @@ enum STATUS{
   //need set this status to client
   STOPPED = 20;
   PAUSING = 21;
+  PAUSED = 22;
+  CONTINUING = 23;
+  CONTINUED = 24;
 }
 
 message Status{

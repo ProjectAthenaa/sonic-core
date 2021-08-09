@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-
 type BTask struct {
 	ID       string
 	Frontend module.Module_TaskServer
@@ -21,8 +20,9 @@ type BTask struct {
 	Callback face.ICallback
 
 	//prv
-	_locker      sync.Mutex
-	_runningChan chan int32 //for stop command
+	_locker            sync.Mutex
+	_runningChan       chan int32 //for stop command
+	_pauseContinueChan chan int32
 
 	//props
 	quitChan chan int32
@@ -35,7 +35,8 @@ type BTask struct {
 func (tk *BTask) Init(server module.Module_TaskServer) {
 	tk.ID = tk.Data.TaskID
 	tk.Frontend = server
-	tk.Ctx = server.Context()
+	//add 2 hour timeout, a task cannot consume resources for more than an hour
+	tk.Ctx, _ = context.WithDeadline(server.Context(), time.Now().Add(time.Hour))
 
 	//default padding
 	tk.SetStatus(module.STATUS_PADDING, "")
@@ -75,7 +76,7 @@ func (tk *BTask) Listen() error {
 			}
 
 			if cmd.Command == module.COMMAND_CONTINUE {
-				err = tk.Continue(cmd.Data)
+				err = tk.Continue()
 			}
 
 			if err != nil {
@@ -120,6 +121,7 @@ func (tk *BTask) Start(data *module.Data) error {
 
 	tk.running = true
 	tk._runningChan = make(chan int32)
+	tk._pauseContinueChan = make(chan int32)
 	tk.quitChan = make(chan int32)
 
 	go tk.Callback.OnStarting()
@@ -136,6 +138,11 @@ func (tk *BTask) Stop() error {
 	if !tk.running {
 		return face.ErrTaskIsNotRunning
 	}
+
+	var cancel context.CancelFunc
+
+	tk.Ctx, cancel = context.WithDeadline(tk.Ctx, time.Now())
+	defer cancel()
 
 	close(tk._runningChan) //stop
 
@@ -160,25 +167,43 @@ func (tk *BTask) Pause() error {
 	close(tk.quitChan)
 	tk.running = false
 	tk.SetStatus(module.STATUS_PAUSING, "")
-
+	tk._pauseContinueChan <- 1
 	return nil
 }
-func (tk *BTask) Continue(data *module.Data) error {
+
+func (tk *BTask) Continue() error {
 	tk._locker.Lock()
 	defer tk._locker.Unlock()
 	if tk.running {
 		return face.ErrTaskIsRunning
 	}
 
-	tk.UpdateData(data) //update data
-
 	tk.running = true
 	tk.quitChan = make(chan int32)
+	tk.SetStatus(module.STATUS_CONTINUING, "")
 
-	go tk.Callback.OnStarting()
-	tk.SetStatus(module.STATUS_STARTING, "")
+	tk._pauseContinueChan <- 1
 
 	return nil
+}
+
+func (tk *BTask) EnsureResumed() error {
+	select {
+	case <-tk._pauseContinueChan:
+		tk.SetStatus(module.STATUS_PAUSED, "")
+		select {
+		//check for ctx done because if task is stopped context is cancelled
+		case <-tk.Ctx.Done():
+			tk.SetStatus(module.STATUS_ERROR, "Task Pause Timeout")
+			return face.ErrTaskPauseTimeout
+		//when continued the Continue function will send to the channel again
+		case <-tk._pauseContinueChan:
+			tk.SetStatus(module.STATUS_CONTINUED, "")
+			return nil
+		}
+	default:
+		return nil
+	}
 }
 
 func (tk *BTask) UpdateData(data *module.Data) {
