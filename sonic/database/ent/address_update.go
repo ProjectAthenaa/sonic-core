@@ -106,6 +106,20 @@ func (au *AddressUpdate) SetStateCode(s string) *AddressUpdate {
 	return au
 }
 
+// SetNillableStateCode sets the "StateCode" field if the given value is not nil.
+func (au *AddressUpdate) SetNillableStateCode(s *string) *AddressUpdate {
+	if s != nil {
+		au.SetStateCode(*s)
+	}
+	return au
+}
+
+// ClearStateCode clears the value of the "StateCode" field.
+func (au *AddressUpdate) ClearStateCode() *AddressUpdate {
+	au.mutation.ClearStateCode()
+	return au
+}
+
 // SetShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by ID.
 func (au *AddressUpdate) SetShippingAddressID(id uuid.UUID) *AddressUpdate {
 	au.mutation.SetShippingAddressID(id)
@@ -325,6 +339,12 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: address.FieldStateCode,
 		})
 	}
+	if au.mutation.StateCodeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: address.FieldStateCode,
+		})
+	}
 	if au.mutation.ShippingAddressCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -506,6 +526,20 @@ func (auo *AddressUpdateOne) SetZIP(s string) *AddressUpdateOne {
 // SetStateCode sets the "StateCode" field.
 func (auo *AddressUpdateOne) SetStateCode(s string) *AddressUpdateOne {
 	auo.mutation.SetStateCode(s)
+	return auo
+}
+
+// SetNillableStateCode sets the "StateCode" field if the given value is not nil.
+func (auo *AddressUpdateOne) SetNillableStateCode(s *string) *AddressUpdateOne {
+	if s != nil {
+		auo.SetStateCode(*s)
+	}
+	return auo
+}
+
+// ClearStateCode clears the value of the "StateCode" field.
+func (auo *AddressUpdateOne) ClearStateCode() *AddressUpdateOne {
+	auo.mutation.ClearStateCode()
 	return auo
 }
 
@@ -749,6 +783,12 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: address.FieldStateCode,
+		})
+	}
+	if auo.mutation.StateCodeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: address.FieldStateCode,
 		})
 	}

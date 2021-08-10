@@ -100,6 +100,14 @@ func (ac *AddressCreate) SetStateCode(s string) *AddressCreate {
 	return ac
 }
 
+// SetNillableStateCode sets the "StateCode" field if the given value is not nil.
+func (ac *AddressCreate) SetNillableStateCode(s *string) *AddressCreate {
+	if s != nil {
+		ac.SetStateCode(*s)
+	}
+	return ac
+}
+
 // SetID sets the "id" field.
 func (ac *AddressCreate) SetID(u uuid.UUID) *AddressCreate {
 	ac.mutation.SetID(u)
@@ -220,9 +228,6 @@ func (ac *AddressCreate) check() error {
 	}
 	if _, ok := ac.mutation.ZIP(); !ok {
 		return &ValidationError{Name: "ZIP", err: errors.New("ent: missing required field \"ZIP\"")}
-	}
-	if _, ok := ac.mutation.StateCode(); !ok {
-		return &ValidationError{Name: "StateCode", err: errors.New("ent: missing required field \"StateCode\"")}
 	}
 	if _, ok := ac.mutation.ShippingAddressID(); !ok {
 		return &ValidationError{Name: "ShippingAddress", err: errors.New("ent: missing required edge \"ShippingAddress\"")}

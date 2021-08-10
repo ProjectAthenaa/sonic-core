@@ -1092,9 +1092,22 @@ func (m *AddressMutation) OldStateCode(ctx context.Context) (v string, err error
 	return oldValue.StateCode, nil
 }
 
+// ClearStateCode clears the value of the "StateCode" field.
+func (m *AddressMutation) ClearStateCode() {
+	m._StateCode = nil
+	m.clearedFields[address.FieldStateCode] = struct{}{}
+}
+
+// StateCodeCleared returns if the "StateCode" field was cleared in this mutation.
+func (m *AddressMutation) StateCodeCleared() bool {
+	_, ok := m.clearedFields[address.FieldStateCode]
+	return ok
+}
+
 // ResetStateCode resets all changes to the "StateCode" field.
 func (m *AddressMutation) ResetStateCode() {
 	m._StateCode = nil
+	delete(m.clearedFields, address.FieldStateCode)
 }
 
 // SetShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by id.
@@ -1389,6 +1402,9 @@ func (m *AddressMutation) ClearedFields() []string {
 	if m.FieldCleared(address.FieldAddressLine2) {
 		fields = append(fields, address.FieldAddressLine2)
 	}
+	if m.FieldCleared(address.FieldStateCode) {
+		fields = append(fields, address.FieldStateCode)
+	}
 	return fields
 }
 
@@ -1405,6 +1421,9 @@ func (m *AddressMutation) ClearField(name string) error {
 	switch name {
 	case address.FieldAddressLine2:
 		m.ClearAddressLine2()
+		return nil
+	case address.FieldStateCode:
+		m.ClearStateCode()
 		return nil
 	}
 	return fmt.Errorf("unknown Address nullable field %s", name)

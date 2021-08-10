@@ -44,7 +44,7 @@ var (
 		{Name: "state", Type: field.TypeString},
 		{Name: "city", Type: field.TypeString},
 		{Name: "zip", Type: field.TypeString},
-		{Name: "state_code", Type: field.TypeString},
+		{Name: "state_code", Type: field.TypeString, Nullable: true},
 		{Name: "shipping_shipping_address", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// AddressesTable holds the schema information for the "addresses" table.

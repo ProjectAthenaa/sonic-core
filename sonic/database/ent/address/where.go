@@ -1086,6 +1086,20 @@ func StateCodeHasSuffix(v string) predicate.Address {
 	})
 }
 
+// StateCodeIsNil applies the IsNil predicate on the "StateCode" field.
+func StateCodeIsNil() predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStateCode)))
+	})
+}
+
+// StateCodeNotNil applies the NotNil predicate on the "StateCode" field.
+func StateCodeNotNil() predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStateCode)))
+	})
+}
+
 // StateCodeEqualFold applies the EqualFold predicate on the "StateCode" field.
 func StateCodeEqualFold(v string) predicate.Address {
 	return predicate.Address(func(s *sql.Selector) {

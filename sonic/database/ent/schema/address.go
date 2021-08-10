@@ -30,7 +30,8 @@ func (Address) Fields() []ent.Field {
 		field.String("State"),
 		field.String("City"),
 		field.String("ZIP"),
-		field.String("StateCode"),
+		field.String("StateCode").
+			Optional(),
 	}
 }
 
