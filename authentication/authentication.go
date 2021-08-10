@@ -28,7 +28,6 @@ func GenAuthenticationFunc(base face.ICoreContext) func(ctx context.Context) (co
 
 		newCtx := context.WithValue(ctx, "userID", userID)
 		newCtx = context.WithValue(newCtx, "appID", appID)
-		//newCtx = context.WithValue(newCtx, "encryptionKey", encPassword)
 
 		if os.Getenv("ENVIRONMENT") == "Production" {
 			newCtx = context.WithValue(newCtx, "IP", sonic.IPFromContext(ctx))

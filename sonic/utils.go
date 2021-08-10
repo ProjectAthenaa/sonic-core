@@ -84,7 +84,6 @@ func NopCloserBody(b io.ReadCloser) (io.ReadCloser, []byte) {
 }
 
 func GetMonitorProxy(site Site) (proxy *url.URL, authorization string, err error) {
-	//45.84.101.178:7249:KJND3:5Z6GNXPD
 	url, err := url.Parse("http://KJND3:5Z6GNXPD@45.84.101.178:7249")
 	if err != nil {
 		return nil, "", err

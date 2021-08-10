@@ -19,6 +19,7 @@ type ITask interface {
 	Pause() error
 
 	GetStatus() *module.Status
+	SetStatus(s module.STATUS, msg string)
 	Process()
 	QuitChan() chan int32
 }

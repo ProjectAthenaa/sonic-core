@@ -32,6 +32,7 @@ func (c *CoreContext) NewRedis(name string, dsn string) (redis.UniversalClient, 
 	c.store.Store(name, rds)
 	return rds, nil
 }
+
 func (c *CoreContext) GetRedis(name string) redis.UniversalClient {
 	if v, ok := c.store.Load(name); ok {
 		return v.(redis.UniversalClient)
@@ -53,6 +54,7 @@ func (c *CoreContext) NewPg(name string, dsn string) (*ent.Client, error) {
 	c.store.Store(name, conn)
 	return conn, nil
 }
+
 func (c *CoreContext) GetPg(name string) *ent.Client {
 	if v, ok := c.store.Load(name); ok {
 		return v.(*ent.Client)

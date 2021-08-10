@@ -21,6 +21,7 @@ type BTask struct {
 
 	//prv
 	_locker            sync.Mutex
+	_statusLocker      sync.Mutex
 	_runningChan       chan int32 //for stop command
 	_pauseContinueChan chan int8  //for pause/continue command
 
@@ -251,13 +252,17 @@ func (tk *BTask) GetStatus() *module.Status {
 }
 
 func (tk *BTask) SetStatus(s module.STATUS, msg string) {
-	if s != tk.state {
-		tk.state = s
-	}
-	if msg != "" {
-		tk.message = msg
-	}
-	tk.Process()
+	go func() {
+		tk._statusLocker.Lock()
+		defer tk._statusLocker.Unlock()
+		if s != tk.state {
+			tk.state = s
+		}
+		if msg != "" {
+			tk.message = msg
+		}
+		tk.Process()
+	}()
 }
 
 func (tk *BTask) QuitChan() chan int32 {
@@ -275,7 +280,6 @@ func (tk *BTask) OnPreStart() error {
 }
 func (tk *BTask) OnStarting() {
 	for {
-		fmt.Println(tk.ID)
 		select {
 		case <-time.After(time.Second):
 			break
