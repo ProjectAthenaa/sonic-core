@@ -6569,7 +6569,7 @@ func (m *ProductMutation) Metadata() (r sonic.Map, exists bool) {
 // OldMetadata returns the old "Metadata" field's value of the Product entity.
 // If the Product object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProductMutation) OldMetadata(ctx context.Context) (v *sonic.Map, err error) {
+func (m *ProductMutation) OldMetadata(ctx context.Context) (v sonic.Map, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldMetadata is only allowed on UpdateOne operations")
 	}

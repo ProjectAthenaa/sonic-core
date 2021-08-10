@@ -432,7 +432,7 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: product.FieldMetadata,
 		})
-		_node.Metadata = &value
+		_node.Metadata = value
 	}
 	if nodes := pc.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

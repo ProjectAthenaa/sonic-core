@@ -45,7 +45,7 @@ type Product struct {
 	// Site holds the value of the "Site" field.
 	Site product.Site `json:"Site,omitempty"`
 	// Metadata holds the value of the "Metadata" field.
-	Metadata *sonic.Map `json:"Metadata,omitempty"`
+	Metadata sonic.Map `json:"Metadata,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProductQuery when eager-loading is set.
 	Edges               ProductEdges `json:"edges"`
@@ -225,7 +225,7 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sonic.Map); !ok {
 				return fmt.Errorf("unexpected type %T for field Metadata", values[i])
 			} else if value != nil {
-				pr.Metadata = value
+				pr.Metadata = *value
 			}
 		case product.ForeignKeys[0]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -300,10 +300,8 @@ func (pr *Product) String() string {
 	builder.WriteString(fmt.Sprintf("%v", pr.Colors))
 	builder.WriteString(", Site=")
 	builder.WriteString(fmt.Sprintf("%v", pr.Site))
-	if v := pr.Metadata; v != nil {
-		builder.WriteString(", Metadata=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString(", Metadata=")
+	builder.WriteString(fmt.Sprintf("%v", pr.Metadata))
 	builder.WriteByte(')')
 	return builder.String()
 }
