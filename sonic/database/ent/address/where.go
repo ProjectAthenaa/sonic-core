@@ -150,6 +150,13 @@ func ZIP(v string) predicate.Address {
 	})
 }
 
+// StateCode applies equality check predicate on the "StateCode" field. It's identical to StateCodeEQ.
+func StateCode(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStateCode), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Address {
 	return predicate.Address(func(s *sql.Selector) {
@@ -979,6 +986,117 @@ func ZIPEqualFold(v string) predicate.Address {
 func ZIPContainsFold(v string) predicate.Address {
 	return predicate.Address(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldZIP), v))
+	})
+}
+
+// StateCodeEQ applies the EQ predicate on the "StateCode" field.
+func StateCodeEQ(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeNEQ applies the NEQ predicate on the "StateCode" field.
+func StateCodeNEQ(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeIn applies the In predicate on the "StateCode" field.
+func StateCodeIn(vs ...string) predicate.Address {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Address(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStateCode), v...))
+	})
+}
+
+// StateCodeNotIn applies the NotIn predicate on the "StateCode" field.
+func StateCodeNotIn(vs ...string) predicate.Address {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Address(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStateCode), v...))
+	})
+}
+
+// StateCodeGT applies the GT predicate on the "StateCode" field.
+func StateCodeGT(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeGTE applies the GTE predicate on the "StateCode" field.
+func StateCodeGTE(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeLT applies the LT predicate on the "StateCode" field.
+func StateCodeLT(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeLTE applies the LTE predicate on the "StateCode" field.
+func StateCodeLTE(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeContains applies the Contains predicate on the "StateCode" field.
+func StateCodeContains(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeHasPrefix applies the HasPrefix predicate on the "StateCode" field.
+func StateCodeHasPrefix(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeHasSuffix applies the HasSuffix predicate on the "StateCode" field.
+func StateCodeHasSuffix(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeEqualFold applies the EqualFold predicate on the "StateCode" field.
+func StateCodeEqualFold(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldStateCode), v))
+	})
+}
+
+// StateCodeContainsFold applies the ContainsFold predicate on the "StateCode" field.
+func StateCodeContainsFold(v string) predicate.Address {
+	return predicate.Address(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldStateCode), v))
 	})
 }
 

@@ -29,6 +29,8 @@ const (
 	FieldCity = "city"
 	// FieldZIP holds the string denoting the zip field in the database.
 	FieldZIP = "zip"
+	// FieldStateCode holds the string denoting the statecode field in the database.
+	FieldStateCode = "state_code"
 	// EdgeShippingAddress holds the string denoting the shippingaddress edge name in mutations.
 	EdgeShippingAddress = "ShippingAddress"
 	// EdgeBillingAddress holds the string denoting the billingaddress edge name in mutations.
@@ -60,6 +62,7 @@ var Columns = []string{
 	FieldState,
 	FieldCity,
 	FieldZIP,
+	FieldStateCode,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "addresses"

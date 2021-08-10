@@ -61,10 +61,10 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "taskgroup" package.
 	TaskGroupsInverseTable = "task_groups"
 	// AccountGroupsTable is the table the holds the AccountGroups relation/edge.
-	AccountGroupsTable = "account_groups"
+	AccountGroupsTable = "account_group"
 	// AccountGroupsInverseTable is the table name for the AccountGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "accountgroup" package.
-	AccountGroupsInverseTable = "account_groups"
+	AccountGroupsInverseTable = "account_group"
 	// AccountGroupsColumn is the table column denoting the AccountGroups relation/edge.
 	AccountGroupsColumn = "app_account_groups"
 )

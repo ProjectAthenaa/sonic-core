@@ -3,13 +3,14 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
 
 var (
-	// AccountGroupsColumns holds the columns for the "account_groups" table.
-	AccountGroupsColumns = []*schema.Column{
+	// AccountGroupColumns holds the columns for the "account_group" table.
+	AccountGroupColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -18,15 +19,15 @@ var (
 		{Name: "accounts", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "bytea"}},
 		{Name: "app_account_groups", Type: field.TypeUUID, Nullable: true},
 	}
-	// AccountGroupsTable holds the schema information for the "account_groups" table.
-	AccountGroupsTable = &schema.Table{
-		Name:       "account_groups",
-		Columns:    AccountGroupsColumns,
-		PrimaryKey: []*schema.Column{AccountGroupsColumns[0]},
+	// AccountGroupTable holds the schema information for the "account_group" table.
+	AccountGroupTable = &schema.Table{
+		Name:       "account_group",
+		Columns:    AccountGroupColumns,
+		PrimaryKey: []*schema.Column{AccountGroupColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "account_groups_apps_AccountGroups",
-				Columns:    []*schema.Column{AccountGroupsColumns[6]},
+				Symbol:     "account_group_apps_AccountGroups",
+				Columns:    []*schema.Column{AccountGroupColumns[6]},
 				RefColumns: []*schema.Column{AppsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -43,6 +44,7 @@ var (
 		{Name: "state", Type: field.TypeString},
 		{Name: "city", Type: field.TypeString},
 		{Name: "zip", Type: field.TypeString},
+		{Name: "state_code", Type: field.TypeString},
 		{Name: "shipping_shipping_address", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// AddressesTable holds the schema information for the "addresses" table.
@@ -53,7 +55,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "addresses_shippings_ShippingAddress",
-				Columns:    []*schema.Column{AddressesColumns[9]},
+				Columns:    []*schema.Column{AddressesColumns[10]},
 				RefColumns: []*schema.Column{ShippingsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -758,7 +760,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		AccountGroupsTable,
+		AccountGroupTable,
 		AddressesTable,
 		AppsTable,
 		BillingsTable,
@@ -795,7 +797,10 @@ var (
 )
 
 func init() {
-	AccountGroupsTable.ForeignKeys[0].RefTable = AppsTable
+	AccountGroupTable.ForeignKeys[0].RefTable = AppsTable
+	AccountGroupTable.Annotation = &entsql.Annotation{
+		Table: "account_group",
+	}
 	AddressesTable.ForeignKeys[0].RefTable = ShippingsTable
 	AppsTable.ForeignKeys[0].RefTable = UsersTable
 	LicensesTable.ForeignKeys[0].RefTable = UsersTable

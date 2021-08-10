@@ -27,9 +27,9 @@ const (
 	// EdgeApp holds the string denoting the app edge name in mutations.
 	EdgeApp = "App"
 	// Table holds the table name of the accountgroup in the database.
-	Table = "account_groups"
+	Table = "account_group"
 	// AppTable is the table the holds the App relation/edge.
-	AppTable = "account_groups"
+	AppTable = "account_group"
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
@@ -47,7 +47,7 @@ var Columns = []string{
 	FieldAccounts,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "account_groups"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "account_group"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"app_account_groups",

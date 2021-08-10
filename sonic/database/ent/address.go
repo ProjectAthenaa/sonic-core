@@ -34,6 +34,8 @@ type Address struct {
 	City string `json:"City,omitempty"`
 	// ZIP holds the value of the "ZIP" field.
 	ZIP string `json:"ZIP,omitempty"`
+	// StateCode holds the value of the "StateCode" field.
+	StateCode string `json:"StateCode,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AddressQuery when eager-loading is set.
 	Edges                     AddressEdges `json:"edges"`
@@ -79,7 +81,7 @@ func (*Address) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case address.FieldAddressLine, address.FieldAddressLine2, address.FieldCountry, address.FieldState, address.FieldCity, address.FieldZIP:
+		case address.FieldAddressLine, address.FieldAddressLine2, address.FieldCountry, address.FieldState, address.FieldCity, address.FieldZIP, address.FieldStateCode:
 			values[i] = new(sql.NullString)
 		case address.FieldCreatedAt, address.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -156,6 +158,12 @@ func (a *Address) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				a.ZIP = value.String
 			}
+		case address.FieldStateCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field StateCode", values[i])
+			} else if value.Valid {
+				a.StateCode = value.String
+			}
 		case address.ForeignKeys[0]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field shipping_shipping_address", values[i])
@@ -216,6 +224,8 @@ func (a *Address) String() string {
 	builder.WriteString(a.City)
 	builder.WriteString(", ZIP=")
 	builder.WriteString(a.ZIP)
+	builder.WriteString(", StateCode=")
+	builder.WriteString(a.StateCode)
 	builder.WriteByte(')')
 	return builder.String()
 }

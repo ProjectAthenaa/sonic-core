@@ -663,6 +663,7 @@ type AddressMutation struct {
 	_State                  *string
 	_City                   *string
 	_ZIP                    *string
+	_StateCode              *string
 	clearedFields           map[string]struct{}
 	_ShippingAddress        *uuid.UUID
 	cleared_ShippingAddress bool
@@ -1060,6 +1061,42 @@ func (m *AddressMutation) ResetZIP() {
 	m._ZIP = nil
 }
 
+// SetStateCode sets the "StateCode" field.
+func (m *AddressMutation) SetStateCode(s string) {
+	m._StateCode = &s
+}
+
+// StateCode returns the value of the "StateCode" field in the mutation.
+func (m *AddressMutation) StateCode() (r string, exists bool) {
+	v := m._StateCode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStateCode returns the old "StateCode" field's value of the Address entity.
+// If the Address object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AddressMutation) OldStateCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStateCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStateCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStateCode: %w", err)
+	}
+	return oldValue.StateCode, nil
+}
+
+// ResetStateCode resets all changes to the "StateCode" field.
+func (m *AddressMutation) ResetStateCode() {
+	m._StateCode = nil
+}
+
 // SetShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by id.
 func (m *AddressMutation) SetShippingAddressID(id uuid.UUID) {
 	m._ShippingAddress = &id
@@ -1166,7 +1203,7 @@ func (m *AddressMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AddressMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, address.FieldCreatedAt)
 	}
@@ -1190,6 +1227,9 @@ func (m *AddressMutation) Fields() []string {
 	}
 	if m._ZIP != nil {
 		fields = append(fields, address.FieldZIP)
+	}
+	if m._StateCode != nil {
+		fields = append(fields, address.FieldStateCode)
 	}
 	return fields
 }
@@ -1215,6 +1255,8 @@ func (m *AddressMutation) Field(name string) (ent.Value, bool) {
 		return m.City()
 	case address.FieldZIP:
 		return m.ZIP()
+	case address.FieldStateCode:
+		return m.StateCode()
 	}
 	return nil, false
 }
@@ -1240,6 +1282,8 @@ func (m *AddressMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCity(ctx)
 	case address.FieldZIP:
 		return m.OldZIP(ctx)
+	case address.FieldStateCode:
+		return m.OldStateCode(ctx)
 	}
 	return nil, fmt.Errorf("unknown Address field %s", name)
 }
@@ -1304,6 +1348,13 @@ func (m *AddressMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetZIP(v)
+		return nil
+	case address.FieldStateCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStateCode(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Address field %s", name)
@@ -1386,6 +1437,9 @@ func (m *AddressMutation) ResetField(name string) error {
 		return nil
 	case address.FieldZIP:
 		m.ResetZIP()
+		return nil
+	case address.FieldStateCode:
+		m.ResetStateCode()
 		return nil
 	}
 	return fmt.Errorf("unknown Address field %s", name)

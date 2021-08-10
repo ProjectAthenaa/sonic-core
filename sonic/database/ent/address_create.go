@@ -94,6 +94,12 @@ func (ac *AddressCreate) SetZIP(s string) *AddressCreate {
 	return ac
 }
 
+// SetStateCode sets the "StateCode" field.
+func (ac *AddressCreate) SetStateCode(s string) *AddressCreate {
+	ac.mutation.SetStateCode(s)
+	return ac
+}
+
 // SetID sets the "id" field.
 func (ac *AddressCreate) SetID(u uuid.UUID) *AddressCreate {
 	ac.mutation.SetID(u)
@@ -215,6 +221,9 @@ func (ac *AddressCreate) check() error {
 	if _, ok := ac.mutation.ZIP(); !ok {
 		return &ValidationError{Name: "ZIP", err: errors.New("ent: missing required field \"ZIP\"")}
 	}
+	if _, ok := ac.mutation.StateCode(); !ok {
+		return &ValidationError{Name: "StateCode", err: errors.New("ent: missing required field \"StateCode\"")}
+	}
 	if _, ok := ac.mutation.ShippingAddressID(); !ok {
 		return &ValidationError{Name: "ShippingAddress", err: errors.New("ent: missing required edge \"ShippingAddress\"")}
 	}
@@ -310,6 +319,14 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 			Column: address.FieldZIP,
 		})
 		_node.ZIP = value
+	}
+	if value, ok := ac.mutation.StateCode(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: address.FieldStateCode,
+		})
+		_node.StateCode = value
 	}
 	if nodes := ac.mutation.ShippingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

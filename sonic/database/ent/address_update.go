@@ -100,6 +100,12 @@ func (au *AddressUpdate) SetZIP(s string) *AddressUpdate {
 	return au
 }
 
+// SetStateCode sets the "StateCode" field.
+func (au *AddressUpdate) SetStateCode(s string) *AddressUpdate {
+	au.mutation.SetStateCode(s)
+	return au
+}
+
 // SetShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by ID.
 func (au *AddressUpdate) SetShippingAddressID(id uuid.UUID) *AddressUpdate {
 	au.mutation.SetShippingAddressID(id)
@@ -312,6 +318,13 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: address.FieldZIP,
 		})
 	}
+	if value, ok := au.mutation.StateCode(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: address.FieldStateCode,
+		})
+	}
 	if au.mutation.ShippingAddressCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -487,6 +500,12 @@ func (auo *AddressUpdateOne) SetCity(s string) *AddressUpdateOne {
 // SetZIP sets the "ZIP" field.
 func (auo *AddressUpdateOne) SetZIP(s string) *AddressUpdateOne {
 	auo.mutation.SetZIP(s)
+	return auo
+}
+
+// SetStateCode sets the "StateCode" field.
+func (auo *AddressUpdateOne) SetStateCode(s string) *AddressUpdateOne {
+	auo.mutation.SetStateCode(s)
 	return auo
 }
 
@@ -724,6 +743,13 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Type:   field.TypeString,
 			Value:  value,
 			Column: address.FieldZIP,
+		})
+	}
+	if value, ok := auo.mutation.StateCode(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: address.FieldStateCode,
 		})
 	}
 	if auo.mutation.ShippingAddressCleared() {
