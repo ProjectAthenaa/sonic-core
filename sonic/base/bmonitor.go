@@ -19,6 +19,9 @@ import (
 	"time"
 )
 
+//TODO Add Godtoy's http client
+//TODO test proxy sync validity
+
 var (
 	json         = jsoniter.ConfigCompatibleWithStandardLibrary
 	monitorCount = os.Getenv("MONITOR_TASK_COUNT")
@@ -118,6 +121,7 @@ func (tk *BMonitor) Start() error {
 
 func (tk *BMonitor) Stop() {
 	tk.cancel()
+	tk.Callback.OnStopping()
 }
 
 func (tk *BMonitor) Submit(data map[string]interface{}) error {
