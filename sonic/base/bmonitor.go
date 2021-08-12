@@ -108,7 +108,7 @@ func (tk *BMonitor) Start() error {
 	}
 
 	var proxyWait sync.WaitGroup
-
+	proxyWait.Add(1)
 	go tk.proxyRefresher(&proxyWait)
 	proxyWait.Wait()
 
