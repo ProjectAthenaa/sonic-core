@@ -198,7 +198,7 @@ func (tk *BMonitor) NewRequest(method, url string, body io.Reader) (*http.Reques
 		return nil, err
 	}
 
-	if tk.proxy.Username != nil && tk.proxy.Password != nil && tk._proxyLocker.TryLock() {
+	if tk.proxy.Username != nil && tk.proxy.Password != nil && tk._proxyLocker.TryLockWithContext(tk.Ctx) {
 		req.Header.Set("Proxy-Authorization", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *tk.proxy.Username, *tk.proxy.Password))))
 		tk._proxyLocker.Unlock()
 	}
