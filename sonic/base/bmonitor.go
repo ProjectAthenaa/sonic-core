@@ -101,6 +101,7 @@ func (tk *BMonitor) Start() error {
 
 	tk.redisKey = fmt.Sprintf("monitors:%s", tk.Data.RedisChannelName)
 	tk.proxyRedisKey = fmt.Sprintf("proxies:monitors:%s", tk.Data.Site)
+	tk._proxyLocker = lock.NewCASMutex()
 
 	if tk.cancel == nil {
 		tk.Ctx, tk.cancel = context.WithCancel(tk.Ctx)
