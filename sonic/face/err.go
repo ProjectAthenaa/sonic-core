@@ -11,4 +11,5 @@ var (
 	ErrTaskPauseTimeout      = errors.New("task pause has timed out")
 	ErrTaskIsPaused          = errors.New("task is already paused")
 	ErrTaskIsNotPaused       = errors.New("task is not paused")
+	ErrTaskHasNoData         = errors.New("task has no data")
 )
