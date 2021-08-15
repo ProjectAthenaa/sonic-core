@@ -22,4 +22,5 @@ type ITask interface {
 	SetStatus(s module.STATUS, msg string)
 	Process()
 	QuitChan() chan int32
+	FormatProxy() string
 }

@@ -271,6 +271,19 @@ func (tk *BTask) QuitChan() chan int32 {
 	return tk.quitChan
 }
 
+func (tk *BTask) FormatProxy() string {
+	if tk.Data.Proxy == nil {
+		tk.SetStatus(module.STATUS_ERROR, "no proxy set")
+		tk.Stop()
+		return ""
+	}
+
+	if tk.Data.Proxy.Username != nil && tk.Data.Proxy.Password != nil {
+		return fmt.Sprintf("http://%s:%s@%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password, tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+	}
+
+	return fmt.Sprintf("http://%s:%s", tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+}
 
 //#region need override methods by callback
 
