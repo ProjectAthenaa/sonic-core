@@ -6,6 +6,7 @@ import (
 	module "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/prometheus/common/log"
+	http "github.com/useflyent/fhttp"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -15,6 +16,7 @@ type BTask struct {
 	ID       string
 	Frontend module.Module_TaskServer
 	Ctx      context.Context
+	Client   http.Client
 
 	Data     *module.Data
 	Callback face.ICallback
@@ -268,6 +270,7 @@ func (tk *BTask) SetStatus(s module.STATUS, msg string) {
 func (tk *BTask) QuitChan() chan int32 {
 	return tk.quitChan
 }
+
 
 //#region need override methods by callback
 

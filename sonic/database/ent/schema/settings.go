@@ -39,3 +39,4 @@ func (Settings) Edges() []ent.Edge {
 			Unique(),
 	}
 }
+

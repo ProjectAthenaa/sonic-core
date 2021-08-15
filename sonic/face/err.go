@@ -12,4 +12,5 @@ var (
 	ErrTaskIsPaused          = errors.New("task is already paused")
 	ErrTaskIsNotPaused       = errors.New("task is not paused")
 	ErrTaskHasNoData         = errors.New("task has no data")
+	ErrCtxDeadlineExceeded= errors.New("context deadline exceeded")
 )

@@ -11,7 +11,6 @@ func Connect(pgURL string) *ent.Client {
 	if err != nil {
 		panic(err)
 	}
-
 	//err = client.Schema.Create(context.Background())
 	//if err != nil {
 	//	panic(err)
