@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
-	"github.com/getsentry/sentry-go"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,7 +17,7 @@ func GenAuthenticationFunc(base face.ICoreContext) func(ctx context.Context) (co
 		defer span.Finish()
 		token, err := grpc_auth.AuthFromMD(ctx, "bearer")
 		if err != nil {
-			return nil, err
+			return nil, status.Errorf(codes.Unauthenticated, "no token")
 		}
 
 		userID, appID, err := extractTokens(base, ctx, token)
