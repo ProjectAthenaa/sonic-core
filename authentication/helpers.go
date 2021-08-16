@@ -19,7 +19,7 @@ var (
 )
 
 func extractTokens(base face.ICoreContext, ctx context.Context, sessionID string) (string, string, error) {
-	val, err := base.GetRedis("default").Get(ctx, sessionID).Result()
+	val, err := base.GetRedis("cache").Get(ctx, "users"+sessionID).Result()
 	if err != redis.Nil && err != nil {
 		p, _ := peer.FromContext(ctx)
 		sentry.WithScope(func(scope *sentry.Scope) {
@@ -42,6 +42,11 @@ func extractTokens(base face.ICoreContext, ctx context.Context, sessionID string
 	var user CachedUser
 	if err = json.Unmarshal([]byte(val), &user); err != nil {
 		return "", "", err
+	}
+
+	if time.Since(user.LastRefresh) >= time.Minute*30 || time.Since(user.LoginTime) >= time.Hour*24 {
+		base.GetRedis("cache").Del(ctx, "users:"+sessionID)
+		return "", "", errors.New("session_expired")
 	}
 
 	return user.UserID.String(), user.AppID.String(), nil
