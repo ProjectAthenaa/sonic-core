@@ -11,6 +11,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/peer"
+	"time"
 )
 
 var (
@@ -47,10 +48,11 @@ func extractTokens(base face.ICoreContext, ctx context.Context, sessionID string
 }
 
 type CachedUser struct {
-	UserID    uuid.UUID `json:"user_id"`
-	LicenseID uuid.UUID `json:"key"`
-	AppID     uuid.UUID `json:"app_id"`
-	SessionID uuid.UUID `json:"session_id"`
-	DiscordID string    `json:"discord_id"`
-	LoginTime int64     `json:"login_time"`
+	UserID      uuid.UUID `json:"user_id"`
+	LicenseID   uuid.UUID `json:"key"`
+	AppID       uuid.UUID `json:"app_id"`
+	SessionID   uuid.UUID `json:"session_id"`
+	DiscordID   string    `json:"discord_id"`
+	LoginTime   time.Time `json:"login_time"`
+	LastRefresh time.Time `json:"last_refresh"`
 }
