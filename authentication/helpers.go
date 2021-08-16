@@ -10,6 +10,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
+	"github.com/prometheus/common/log"
 	"google.golang.org/grpc/peer"
 	"time"
 )
@@ -19,7 +20,7 @@ var (
 )
 
 func extractTokens(base face.ICoreContext, ctx context.Context, sessionID string) (string, string, error) {
-	val, err := base.GetRedis("cache").Get(ctx, "users"+sessionID).Result()
+	val, err := base.GetRedis("cache").Get(ctx, "users:"+sessionID).Result()
 	if err != redis.Nil && err != nil {
 		p, _ := peer.FromContext(ctx)
 		sentry.WithScope(func(scope *sentry.Scope) {
@@ -43,6 +44,8 @@ func extractTokens(base face.ICoreContext, ctx context.Context, sessionID string
 	if err = json.Unmarshal([]byte(val), &user); err != nil {
 		return "", "", err
 	}
+
+	log.Info(user)
 
 	if time.Since(user.LastRefresh) >= time.Minute*30 || time.Since(user.LoginTime) >= time.Hour*24 {
 		base.GetRedis("cache").Del(ctx, "users:"+sessionID)
