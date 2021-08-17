@@ -64,6 +64,20 @@ func (mc *MetadataCreate) SetNillableFirstLogin(b *bool) *MetadataCreate {
 	return mc
 }
 
+// SetFirstLoginMobile sets the "FirstLoginMobile" field.
+func (mc *MetadataCreate) SetFirstLoginMobile(b bool) *MetadataCreate {
+	mc.mutation.SetFirstLoginMobile(b)
+	return mc
+}
+
+// SetNillableFirstLoginMobile sets the "FirstLoginMobile" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableFirstLoginMobile(b *bool) *MetadataCreate {
+	if b != nil {
+		mc.SetFirstLoginMobile(*b)
+	}
+	return mc
+}
+
 // SetTheme sets the "Theme" field.
 func (mc *MetadataCreate) SetTheme(m metadata.Theme) *MetadataCreate {
 	mc.mutation.SetTheme(m)
@@ -257,6 +271,10 @@ func (mc *MetadataCreate) defaults() {
 		v := metadata.DefaultFirstLogin
 		mc.mutation.SetFirstLogin(v)
 	}
+	if _, ok := mc.mutation.FirstLoginMobile(); !ok {
+		v := metadata.DefaultFirstLoginMobile
+		mc.mutation.SetFirstLoginMobile(v)
+	}
 	if _, ok := mc.mutation.Theme(); !ok {
 		v := metadata.DefaultTheme
 		mc.mutation.SetTheme(v)
@@ -305,6 +323,9 @@ func (mc *MetadataCreate) check() error {
 	}
 	if _, ok := mc.mutation.FirstLogin(); !ok {
 		return &ValidationError{Name: "FirstLogin", err: errors.New("ent: missing required field \"FirstLogin\"")}
+	}
+	if _, ok := mc.mutation.FirstLoginMobile(); !ok {
+		return &ValidationError{Name: "FirstLoginMobile", err: errors.New("ent: missing required field \"FirstLoginMobile\"")}
 	}
 	if _, ok := mc.mutation.Theme(); !ok {
 		return &ValidationError{Name: "Theme", err: errors.New("ent: missing required field \"Theme\"")}
@@ -390,6 +411,14 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 			Column: metadata.FieldFirstLogin,
 		})
 		_node.FirstLogin = value
+	}
+	if value, ok := mc.mutation.FirstLoginMobile(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: metadata.FieldFirstLoginMobile,
+		})
+		_node.FirstLoginMobile = value
 	}
 	if value, ok := mc.mutation.Theme(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

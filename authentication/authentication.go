@@ -21,7 +21,7 @@ func GenAuthenticationFunc(base face.ICoreContext) func(ctx context.Context) (co
 			return nil, status.Errorf(codes.Unauthenticated, "no token")
 		}
 
-		userID, appID, err := extractTokens(base, ctx, token)
+		userID, appID, ip, err := extractTokens(base, ctx, token)
 		if err != nil {
 			return nil, status.Errorf(codes.Unauthenticated, fmt.Sprint(err))
 		}
@@ -30,6 +30,10 @@ func GenAuthenticationFunc(base face.ICoreContext) func(ctx context.Context) (co
 		newCtx = context.WithValue(newCtx, "appID", appID)
 
 		if os.Getenv("ENVIRONMENT") == "Production" {
+			if ip != sonic.IPFromContext(ctx) {
+				return nil, status.Error(codes.Unauthenticated, "ip_changed")
+			}
+
 			newCtx = context.WithValue(newCtx, "IP", sonic.IPFromContext(ctx))
 		}
 		return newCtx, nil

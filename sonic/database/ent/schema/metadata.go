@@ -25,6 +25,8 @@ func (Metadata) Fields() []ent.Field {
 			UpdateDefault(time.Now),
 		field.Bool("FirstLogin").
 			Default(true),
+		field.Bool("FirstLoginMobile").
+			Default(true),
 		field.Enum("Theme").
 			Values("Variation1", "Variation2", "Variation3", "Variation4").
 			Default("Variation1"),

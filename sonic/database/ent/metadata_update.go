@@ -64,6 +64,20 @@ func (mu *MetadataUpdate) SetNillableFirstLogin(b *bool) *MetadataUpdate {
 	return mu
 }
 
+// SetFirstLoginMobile sets the "FirstLoginMobile" field.
+func (mu *MetadataUpdate) SetFirstLoginMobile(b bool) *MetadataUpdate {
+	mu.mutation.SetFirstLoginMobile(b)
+	return mu
+}
+
+// SetNillableFirstLoginMobile sets the "FirstLoginMobile" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableFirstLoginMobile(b *bool) *MetadataUpdate {
+	if b != nil {
+		mu.SetFirstLoginMobile(*b)
+	}
+	return mu
+}
+
 // SetTheme sets the "Theme" field.
 func (mu *MetadataUpdate) SetTheme(m metadata.Theme) *MetadataUpdate {
 	mu.mutation.SetTheme(m)
@@ -316,6 +330,13 @@ func (mu *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: metadata.FieldFirstLogin,
 		})
 	}
+	if value, ok := mu.mutation.FirstLoginMobile(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: metadata.FieldFirstLoginMobile,
+		})
+	}
 	if value, ok := mu.mutation.Theme(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
@@ -456,6 +477,20 @@ func (muo *MetadataUpdateOne) SetFirstLogin(b bool) *MetadataUpdateOne {
 func (muo *MetadataUpdateOne) SetNillableFirstLogin(b *bool) *MetadataUpdateOne {
 	if b != nil {
 		muo.SetFirstLogin(*b)
+	}
+	return muo
+}
+
+// SetFirstLoginMobile sets the "FirstLoginMobile" field.
+func (muo *MetadataUpdateOne) SetFirstLoginMobile(b bool) *MetadataUpdateOne {
+	muo.mutation.SetFirstLoginMobile(b)
+	return muo
+}
+
+// SetNillableFirstLoginMobile sets the "FirstLoginMobile" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableFirstLoginMobile(b *bool) *MetadataUpdateOne {
+	if b != nil {
+		muo.SetFirstLoginMobile(*b)
 	}
 	return muo
 }
@@ -734,6 +769,13 @@ func (muo *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: metadata.FieldFirstLogin,
+		})
+	}
+	if value, ok := muo.mutation.FirstLoginMobile(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: metadata.FieldFirstLoginMobile,
 		})
 	}
 	if value, ok := muo.mutation.Theme(); ok {

@@ -5010,6 +5010,7 @@ type MetadataMutation struct {
 	created_at            *time.Time
 	updated_at            *time.Time
 	_FirstLogin           *bool
+	_FirstLoginMobile     *bool
 	_Theme                *metadata.Theme
 	_DiscordID            *string
 	_DiscordAccessToken   *string
@@ -5217,6 +5218,42 @@ func (m *MetadataMutation) OldFirstLogin(ctx context.Context) (v bool, err error
 // ResetFirstLogin resets all changes to the "FirstLogin" field.
 func (m *MetadataMutation) ResetFirstLogin() {
 	m._FirstLogin = nil
+}
+
+// SetFirstLoginMobile sets the "FirstLoginMobile" field.
+func (m *MetadataMutation) SetFirstLoginMobile(b bool) {
+	m._FirstLoginMobile = &b
+}
+
+// FirstLoginMobile returns the value of the "FirstLoginMobile" field in the mutation.
+func (m *MetadataMutation) FirstLoginMobile() (r bool, exists bool) {
+	v := m._FirstLoginMobile
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstLoginMobile returns the old "FirstLoginMobile" field's value of the Metadata entity.
+// If the Metadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetadataMutation) OldFirstLoginMobile(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldFirstLoginMobile is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldFirstLoginMobile requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstLoginMobile: %w", err)
+	}
+	return oldValue.FirstLoginMobile, nil
+}
+
+// ResetFirstLoginMobile resets all changes to the "FirstLoginMobile" field.
+func (m *MetadataMutation) ResetFirstLoginMobile() {
+	m._FirstLoginMobile = nil
 }
 
 // SetTheme sets the "Theme" field.
@@ -5560,7 +5597,7 @@ func (m *MetadataMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MetadataMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, metadata.FieldCreatedAt)
 	}
@@ -5569,6 +5606,9 @@ func (m *MetadataMutation) Fields() []string {
 	}
 	if m._FirstLogin != nil {
 		fields = append(fields, metadata.FieldFirstLogin)
+	}
+	if m._FirstLoginMobile != nil {
+		fields = append(fields, metadata.FieldFirstLoginMobile)
 	}
 	if m._Theme != nil {
 		fields = append(fields, metadata.FieldTheme)
@@ -5608,6 +5648,8 @@ func (m *MetadataMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case metadata.FieldFirstLogin:
 		return m.FirstLogin()
+	case metadata.FieldFirstLoginMobile:
+		return m.FirstLoginMobile()
 	case metadata.FieldTheme:
 		return m.Theme()
 	case metadata.FieldDiscordID:
@@ -5639,6 +5681,8 @@ func (m *MetadataMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldUpdatedAt(ctx)
 	case metadata.FieldFirstLogin:
 		return m.OldFirstLogin(ctx)
+	case metadata.FieldFirstLoginMobile:
+		return m.OldFirstLoginMobile(ctx)
 	case metadata.FieldTheme:
 		return m.OldTheme(ctx)
 	case metadata.FieldDiscordID:
@@ -5684,6 +5728,13 @@ func (m *MetadataMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFirstLogin(v)
+		return nil
+	case metadata.FieldFirstLoginMobile:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstLoginMobile(v)
 		return nil
 	case metadata.FieldTheme:
 		v, ok := value.(metadata.Theme)
@@ -5798,6 +5849,9 @@ func (m *MetadataMutation) ResetField(name string) error {
 		return nil
 	case metadata.FieldFirstLogin:
 		m.ResetFirstLogin()
+		return nil
+	case metadata.FieldFirstLoginMobile:
+		m.ResetFirstLoginMobile()
 		return nil
 	case metadata.FieldTheme:
 		m.ResetTheme()

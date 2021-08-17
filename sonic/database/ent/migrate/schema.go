@@ -163,6 +163,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "first_login", Type: field.TypeBool, Default: true},
+		{Name: "first_login_mobile", Type: field.TypeBool, Default: true},
 		{Name: "theme", Type: field.TypeEnum, Enums: []string{"Variation1", "Variation2", "Variation3", "Variation4"}, Default: "Variation1"},
 		{Name: "discord_id", Type: field.TypeString, Default: ""},
 		{Name: "discord_access_token", Type: field.TypeString, Default: ""},
@@ -181,7 +182,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "metadata_users_Metadata",
-				Columns:    []*schema.Column{MetadataColumns[12]},
+				Columns:    []*schema.Column{MetadataColumns[13]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

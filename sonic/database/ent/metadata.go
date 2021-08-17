@@ -24,6 +24,8 @@ type Metadata struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// FirstLogin holds the value of the "FirstLogin" field.
 	FirstLogin bool `json:"FirstLogin,omitempty"`
+	// FirstLoginMobile holds the value of the "FirstLoginMobile" field.
+	FirstLoginMobile bool `json:"FirstLoginMobile,omitempty"`
 	// Theme holds the value of the "Theme" field.
 	Theme metadata.Theme `json:"Theme,omitempty"`
 	// DiscordID holds the value of the "DiscordID" field.
@@ -74,7 +76,7 @@ func (*Metadata) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case metadata.FieldFirstLogin:
+		case metadata.FieldFirstLogin, metadata.FieldFirstLoginMobile:
 			values[i] = new(sql.NullBool)
 		case metadata.FieldTheme, metadata.FieldDiscordID, metadata.FieldDiscordAccessToken, metadata.FieldDiscordRefreshToken, metadata.FieldDiscordUsername, metadata.FieldDiscordAvatar, metadata.FieldDiscordDiscriminator:
 			values[i] = new(sql.NullString)
@@ -122,6 +124,12 @@ func (m *Metadata) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field FirstLogin", values[i])
 			} else if value.Valid {
 				m.FirstLogin = value.Bool
+			}
+		case metadata.FieldFirstLoginMobile:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field FirstLoginMobile", values[i])
+			} else if value.Valid {
+				m.FirstLoginMobile = value.Bool
 			}
 		case metadata.FieldTheme:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -216,6 +224,8 @@ func (m *Metadata) String() string {
 	builder.WriteString(m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", FirstLogin=")
 	builder.WriteString(fmt.Sprintf("%v", m.FirstLogin))
+	builder.WriteString(", FirstLoginMobile=")
+	builder.WriteString(fmt.Sprintf("%v", m.FirstLoginMobile))
 	builder.WriteString(", Theme=")
 	builder.WriteString(fmt.Sprintf("%v", m.Theme))
 	builder.WriteString(", DiscordID=")

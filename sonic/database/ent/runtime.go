@@ -157,32 +157,36 @@ func init() {
 	metadataDescFirstLogin := metadataFields[3].Descriptor()
 	// metadata.DefaultFirstLogin holds the default value on creation for the FirstLogin field.
 	metadata.DefaultFirstLogin = metadataDescFirstLogin.Default.(bool)
+	// metadataDescFirstLoginMobile is the schema descriptor for FirstLoginMobile field.
+	metadataDescFirstLoginMobile := metadataFields[4].Descriptor()
+	// metadata.DefaultFirstLoginMobile holds the default value on creation for the FirstLoginMobile field.
+	metadata.DefaultFirstLoginMobile = metadataDescFirstLoginMobile.Default.(bool)
 	// metadataDescDiscordID is the schema descriptor for DiscordID field.
-	metadataDescDiscordID := metadataFields[5].Descriptor()
+	metadataDescDiscordID := metadataFields[6].Descriptor()
 	// metadata.DefaultDiscordID holds the default value on creation for the DiscordID field.
 	metadata.DefaultDiscordID = metadataDescDiscordID.Default.(string)
 	// metadataDescDiscordAccessToken is the schema descriptor for DiscordAccessToken field.
-	metadataDescDiscordAccessToken := metadataFields[6].Descriptor()
+	metadataDescDiscordAccessToken := metadataFields[7].Descriptor()
 	// metadata.DefaultDiscordAccessToken holds the default value on creation for the DiscordAccessToken field.
 	metadata.DefaultDiscordAccessToken = metadataDescDiscordAccessToken.Default.(string)
 	// metadataDescDiscordRefreshToken is the schema descriptor for DiscordRefreshToken field.
-	metadataDescDiscordRefreshToken := metadataFields[7].Descriptor()
+	metadataDescDiscordRefreshToken := metadataFields[8].Descriptor()
 	// metadata.DefaultDiscordRefreshToken holds the default value on creation for the DiscordRefreshToken field.
 	metadata.DefaultDiscordRefreshToken = metadataDescDiscordRefreshToken.Default.(string)
 	// metadataDescDiscordUsername is the schema descriptor for DiscordUsername field.
-	metadataDescDiscordUsername := metadataFields[8].Descriptor()
+	metadataDescDiscordUsername := metadataFields[9].Descriptor()
 	// metadata.DefaultDiscordUsername holds the default value on creation for the DiscordUsername field.
 	metadata.DefaultDiscordUsername = metadataDescDiscordUsername.Default.(string)
 	// metadataDescDiscordAvatar is the schema descriptor for DiscordAvatar field.
-	metadataDescDiscordAvatar := metadataFields[9].Descriptor()
+	metadataDescDiscordAvatar := metadataFields[10].Descriptor()
 	// metadata.DefaultDiscordAvatar holds the default value on creation for the DiscordAvatar field.
 	metadata.DefaultDiscordAvatar = metadataDescDiscordAvatar.Default.(string)
 	// metadataDescDiscordDiscriminator is the schema descriptor for DiscordDiscriminator field.
-	metadataDescDiscordDiscriminator := metadataFields[10].Descriptor()
+	metadataDescDiscordDiscriminator := metadataFields[11].Descriptor()
 	// metadata.DefaultDiscordDiscriminator holds the default value on creation for the DiscordDiscriminator field.
 	metadata.DefaultDiscordDiscriminator = metadataDescDiscordDiscriminator.Default.(string)
 	// metadataDescDiscordExpiryTime is the schema descriptor for DiscordExpiryTime field.
-	metadataDescDiscordExpiryTime := metadataFields[11].Descriptor()
+	metadataDescDiscordExpiryTime := metadataFields[12].Descriptor()
 	// metadata.DefaultDiscordExpiryTime holds the default value on creation for the DiscordExpiryTime field.
 	metadata.DefaultDiscordExpiryTime = metadataDescDiscordExpiryTime.Default.(func() time.Time)
 	// metadataDescID is the schema descriptor for id field.

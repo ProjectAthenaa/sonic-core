@@ -20,6 +20,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldFirstLogin holds the string denoting the firstlogin field in the database.
 	FieldFirstLogin = "first_login"
+	// FieldFirstLoginMobile holds the string denoting the firstloginmobile field in the database.
+	FieldFirstLoginMobile = "first_login_mobile"
 	// FieldTheme holds the string denoting the theme field in the database.
 	FieldTheme = "theme"
 	// FieldDiscordID holds the string denoting the discordid field in the database.
@@ -55,6 +57,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldFirstLogin,
+	FieldFirstLoginMobile,
 	FieldTheme,
 	FieldDiscordID,
 	FieldDiscordAccessToken,
@@ -95,6 +98,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultFirstLogin holds the default value on creation for the "FirstLogin" field.
 	DefaultFirstLogin bool
+	// DefaultFirstLoginMobile holds the default value on creation for the "FirstLoginMobile" field.
+	DefaultFirstLoginMobile bool
 	// DefaultDiscordID holds the default value on creation for the "DiscordID" field.
 	DefaultDiscordID string
 	// DefaultDiscordAccessToken holds the default value on creation for the "DiscordAccessToken" field.

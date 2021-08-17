@@ -115,6 +115,13 @@ func FirstLogin(v bool) predicate.Metadata {
 	})
 }
 
+// FirstLoginMobile applies equality check predicate on the "FirstLoginMobile" field. It's identical to FirstLoginMobileEQ.
+func FirstLoginMobile(v bool) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFirstLoginMobile), v))
+	})
+}
+
 // DiscordID applies equality check predicate on the "DiscordID" field. It's identical to DiscordIDEQ.
 func DiscordID(v string) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
@@ -327,6 +334,20 @@ func FirstLoginEQ(v bool) predicate.Metadata {
 func FirstLoginNEQ(v bool) predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldFirstLogin), v))
+	})
+}
+
+// FirstLoginMobileEQ applies the EQ predicate on the "FirstLoginMobile" field.
+func FirstLoginMobileEQ(v bool) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldFirstLoginMobile), v))
+	})
+}
+
+// FirstLoginMobileNEQ applies the NEQ predicate on the "FirstLoginMobile" field.
+func FirstLoginMobileNEQ(v bool) predicate.Metadata {
+	return predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldFirstLoginMobile), v))
 	})
 }
 
