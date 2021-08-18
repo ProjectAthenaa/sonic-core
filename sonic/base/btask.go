@@ -192,8 +192,8 @@ func (tk *BTask) Pause() error {
 
 	close(tk.quitChan)
 	tk.running = false
-	tk.SetStatus(module.STATUS_PAUSING, "")
 	tk._pauseContinueChan <- 1
+	tk.SetStatus(module.STATUS_PAUSING, "")
 	return nil
 }
 
@@ -228,15 +228,16 @@ func (tk *BTask) EnsureResumed(noPause ...bool) error {
 		}
 
 		tk.SetStatus(module.STATUS_PAUSED, "")
-		select {
-		//check for ctx done because if task is stopped context is cancelled
-		case <-tk.Ctx.Done():
-			tk.SetStatus(module.STATUS_ERROR, "Task Pause Timeout")
-			return face.ErrTaskPauseTimeout
-		//when continued the Continue function will send to the channel again
-		case <-tk._pauseContinueChan:
-			tk.SetStatus(module.STATUS_CONTINUED, "")
-			return nil
+		for {
+			select {
+			//check for ctx done because if task is stopped context is cancelled
+			case <-tk.Ctx.Done():
+				return face.ErrTaskPauseTimeout
+			//when continued the Continue function will send to the channel again
+			case <-tk._pauseContinueChan:
+				tk.SetStatus(module.STATUS_CONTINUED, "")
+				return nil
+			}
 		}
 	default:
 		return nil
@@ -244,13 +245,10 @@ func (tk *BTask) EnsureResumed(noPause ...bool) error {
 }
 
 func (tk *BTask) UpdateData(data *module.Data) {
-	//tk._locker.Lock()
-	//defer tk._locker.Unlock()
 	//new data should have old data with updated data
 	tk.Data = data
 }
 
-//TODO  add notice state bounce to limit request
 func (tk *BTask) Process() {
 	if tk.state == module.STATUS_CHECKED_OUT {
 		if err := tk.Frontend.Send(&module.Status{
@@ -316,7 +314,6 @@ func (tk *BTask) SetStatus(s module.STATUS, msg string) {
 		}
 		tk.Process()
 	}()
-
 }
 
 func (tk *BTask) QuitChan() chan int32 {
@@ -347,6 +344,7 @@ func (tk *BTask) Restart() {
 		log.Error("error starting task", err)
 		tk.SetStatus(module.STATUS_ERROR, "error restarting task")
 		tk.Stop()
+		return
 	}
 }
 

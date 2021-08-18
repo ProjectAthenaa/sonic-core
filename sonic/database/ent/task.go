@@ -22,7 +22,7 @@ type Task struct {
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// StartTime holds the value of the "StartTime" field.
-	StartTime *time.Time `json:"StartTime,omitempty"`
+	StartTime time.Time `json:"StartTime,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TaskQuery when eager-loading is set.
 	Edges TaskEdges `json:"edges"`
@@ -125,8 +125,7 @@ func (t *Task) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field StartTime", values[i])
 			} else if value.Valid {
-				t.StartTime = new(time.Time)
-				*t.StartTime = value.Time
+				t.StartTime = value.Time
 			}
 		}
 	}
@@ -180,10 +179,8 @@ func (t *Task) String() string {
 	builder.WriteString(t.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")
 	builder.WriteString(t.UpdatedAt.Format(time.ANSIC))
-	if v := t.StartTime; v != nil {
-		builder.WriteString(", StartTime=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
+	builder.WriteString(", StartTime=")
+	builder.WriteString(t.StartTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
