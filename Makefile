@@ -18,3 +18,6 @@ webhookCompile:
 
 shapeCompile:
 	cd sonic/antibots/shape && protoc --go_out=./ --go_opt=paths=source_relative --go-grpc_out=./ --go-grpc_opt=paths=source_relative ./Shape.proto
+
+taskControllerCompile:
+	protoc --go_out=./task_controller --go_opt=paths=source_relative --go-grpc_out=./task_controller --go-grpc_opt=paths=source_relative ./Module.proto ./TasksController.proto

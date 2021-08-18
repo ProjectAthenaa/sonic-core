@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package modules.moduleName;
+package module;
 
 option go_package = "sonic/module";
 
