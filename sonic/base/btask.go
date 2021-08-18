@@ -287,6 +287,8 @@ func (tk *BTask) FormatProxy() string {
 }
 
 func (tk *BTask) Restart() {
+	tk._statusLocker.Lock()
+	defer tk._statusLocker.Unlock()
 	tk.SetStatus(module.STATUS_RESTARTING, "")
 
 	tk.Init(tk.Frontend)
