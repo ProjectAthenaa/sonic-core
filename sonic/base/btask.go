@@ -265,6 +265,7 @@ func (tk *BTask) SetStatus(s module.STATUS, msg string) {
 		}
 		tk.Process()
 	}()
+
 }
 
 func (tk *BTask) QuitChan() chan int32 {
@@ -283,6 +284,17 @@ func (tk *BTask) FormatProxy() string {
 	}
 
 	return fmt.Sprintf("http://%s:%s", tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+}
+
+func (tk *BTask) Restart() {
+	tk.SetStatus(module.STATUS_RESTARTING, "")
+
+	tk.Init(tk.Frontend)
+	if err := tk.Start(tk.Data); err != nil {
+		log.Error("error starting task", err)
+		tk.SetStatus(module.STATUS_ERROR, "error restarting task")
+		tk.Stop()
+	}
 }
 
 //#region need override methods by callback

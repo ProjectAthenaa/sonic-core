@@ -17,6 +17,7 @@ type ITask interface {
 	Start(data *module.Data) error
 	Stop() error
 	Pause() error
+	Restart()
 
 	GetStatus() *module.Status
 	SetStatus(s module.STATUS, msg string)

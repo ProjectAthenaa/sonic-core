@@ -44,6 +44,7 @@ enum STATUS{
   PAUSED = 22;
   CONTINUING = 23;
   CONTINUED = 24;
+  RESTARTING = 25;
 }
 
 message Status{
