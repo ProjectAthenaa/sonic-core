@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MonitorClient interface {
-	NewTask(ctx context.Context, in *Task, opts ...grpc.CallOption) (*RedisChannel, error)
+	NewTask(ctx context.Context, in *Task, opts ...grpc.CallOption) (*BoolResponse, error)
 	Stop(ctx context.Context, in *Key, opts ...grpc.CallOption) (*BoolResponse, error)
 }
 
@@ -30,8 +30,8 @@ func NewMonitorClient(cc grpc.ClientConnInterface) MonitorClient {
 	return &monitorClient{cc}
 }
 
-func (c *monitorClient) NewTask(ctx context.Context, in *Task, opts ...grpc.CallOption) (*RedisChannel, error) {
-	out := new(RedisChannel)
+func (c *monitorClient) NewTask(ctx context.Context, in *Task, opts ...grpc.CallOption) (*BoolResponse, error) {
+	out := new(BoolResponse)
 	err := c.cc.Invoke(ctx, "/monitor_controller.Monitor/NewTask", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (c *monitorClient) Stop(ctx context.Context, in *Key, opts ...grpc.CallOpti
 // All implementations must embed UnimplementedMonitorServer
 // for forward compatibility
 type MonitorServer interface {
-	NewTask(context.Context, *Task) (*RedisChannel, error)
+	NewTask(context.Context, *Task) (*BoolResponse, error)
 	Stop(context.Context, *Key) (*BoolResponse, error)
 	mustEmbedUnimplementedMonitorServer()
 }
@@ -61,7 +61,7 @@ type MonitorServer interface {
 type UnimplementedMonitorServer struct {
 }
 
-func (UnimplementedMonitorServer) NewTask(context.Context, *Task) (*RedisChannel, error) {
+func (UnimplementedMonitorServer) NewTask(context.Context, *Task) (*BoolResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewTask not implemented")
 }
 func (UnimplementedMonitorServer) Stop(context.Context, *Key) (*BoolResponse, error) {

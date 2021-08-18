@@ -5,7 +5,7 @@ package monitor_controller;
 option go_package = "main/monitor_controller";
 
 service Monitor{
-  rpc NewTask(Task) returns (RedisChannel);
+  rpc NewTask(Task) returns (BoolResponse);
   rpc Stop(Key) returns (BoolResponse);
 }
 
@@ -20,13 +20,10 @@ message Task{
   oneof Lookup {
     Keywords Keywords = 2;
     string Link = 3;
+    bool Other = 4;
   }
-  map<string, string> Metadata = 4;
-}
-
-message RedisChannel{
-  string ChannelName = 1;
-  string SubscriberKey = 2;
+  string RedisChannel = 5;
+  map<string, string> Metadata = 6;
 }
 
 message Key{
