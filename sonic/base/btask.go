@@ -268,6 +268,21 @@ func (tk *BTask) Process() {
 			log.Error("err sending status to frontend: ", err)
 		}
 		return
+	} else if tk.state == module.STATUS_CHECKOUT_DECLINE {
+		if err := tk.Frontend.Send(&module.Status{
+			Status: module.STATUS_CHECKED_OUT,
+			Information: map[string]string{
+				"size":         tk.ReturningFields.Size,
+				"price":        tk.ReturningFields.Price,
+				"color":        tk.ReturningFields.Color,
+				"productImage": tk.ReturningFields.ProductImage,
+				"message":      tk.message,
+				"running":      fmt.Sprintf("%v", tk.running),
+			},
+		}); err != nil {
+			log.Error("err sending status to frontend: ", err)
+		}
+		return
 	}
 
 	if err := tk.Frontend.Send(tk.GetStatus()); err != nil {
