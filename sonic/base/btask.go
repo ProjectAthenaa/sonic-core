@@ -36,7 +36,7 @@ type BTask struct {
 	message  string        //tag more message
 
 	//returnFields
-	ReturningFields returningFields
+	ReturningFields *returningFields
 }
 
 type returningFields struct {
@@ -138,7 +138,7 @@ func (tk *BTask) Start(data *module.Data) error {
 	tk._runningChan = make(chan int32)
 	tk._pauseContinueChan = make(chan int8)
 	tk.quitChan = make(chan int32)
-	tk.ReturningFields = returningFields{
+	tk.ReturningFields = &returningFields{
 		Size:         tk.Data.TaskData.Size[0],
 		Price:        "",
 		OrderNumber:  "",
@@ -256,11 +256,11 @@ func (tk *BTask) Process() {
 		if err := tk.Frontend.Send(&module.Status{
 			Status: module.STATUS_CHECKED_OUT,
 			Information: map[string]string{
-				"size":         tk.Size,
-				"price":        tk.Price,
-				"orderNumber":  tk.OrderNumber,
-				"color":        tk.Color,
-				"productImage": tk.ProductImage,
+				"size":         tk.ReturningFields.Size,
+				"price":        tk.ReturningFields.Price,
+				"orderNumber":  tk.ReturningFields.OrderNumber,
+				"color":        tk.ReturningFields.Color,
+				"productImage": tk.ReturningFields.ProductImage,
 				"message":      tk.message,
 				"running":      fmt.Sprintf("%v", tk.running),
 			},
