@@ -24,7 +24,8 @@ func (Task) Fields() []ent.Field {
 			Default(time.Now).
 			UpdateDefault(time.Now),
 		field.Time("StartTime").
-			Optional(),
+			Optional().
+			Nillable(),
 	}
 }
 

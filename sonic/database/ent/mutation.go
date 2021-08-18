@@ -14875,7 +14875,7 @@ func (m *TaskMutation) StartTime() (r time.Time, exists bool) {
 // OldStartTime returns the old "StartTime" field's value of the Task entity.
 // If the Task object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskMutation) OldStartTime(ctx context.Context) (v time.Time, err error) {
+func (m *TaskMutation) OldStartTime(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldStartTime is only allowed on UpdateOne operations")
 	}
