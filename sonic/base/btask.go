@@ -34,6 +34,13 @@ type BTask struct {
 	stopping bool
 	state    module.STATUS //tag state
 	message  string        //tag more message
+
+	//returnFields
+	Size         string
+	Price        string
+	OrderNumber  string
+	Color        string
+	ProductImage string
 }
 
 func (tk *BTask) Init(server module.Module_TaskServer) {
@@ -234,6 +241,24 @@ func (tk *BTask) UpdateData(data *module.Data) {
 
 //TODO  add notice state bounce to limit request
 func (tk *BTask) Process() {
+	if tk.state == module.STATUS_CHECKED_OUT {
+		if err := tk.Frontend.Send(&module.Status{
+			Status: module.STATUS_CHECKED_OUT,
+			Information: map[string]string{
+				"size":         tk.Size,
+				"price":        tk.Price,
+				"orderNumber":  tk.OrderNumber,
+				"color":        tk.Color,
+				"productImage": tk.ProductImage,
+				"message":      tk.message,
+				"running":      fmt.Sprintf("%v", tk.running),
+			},
+		}); err != nil {
+			log.Error("err sending status to frontend: ", err)
+		}
+		return
+	}
+
 	if err := tk.Frontend.Send(tk.GetStatus()); err != nil {
 		log.Error("err sending status to frontend: ", err)
 	}
