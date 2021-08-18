@@ -135,6 +135,7 @@ type LookupType string
 const (
 	LookupTypeKeywords LookupType = "Keywords"
 	LookupTypeLink     LookupType = "Link"
+	LookupTypeOther    LookupType = "Other"
 )
 
 func (_lookuptype LookupType) String() string {
@@ -144,7 +145,7 @@ func (_lookuptype LookupType) String() string {
 // LookupTypeValidator is a validator for the "LookupType" field enum values. It is called by the builders before save.
 func LookupTypeValidator(_lookuptype LookupType) error {
 	switch _lookuptype {
-	case LookupTypeKeywords, LookupTypeLink:
+	case LookupTypeKeywords, LookupTypeLink, LookupTypeOther:
 		return nil
 	default:
 		return fmt.Errorf("product: invalid enum value for LookupType field: %q", _lookuptype)

@@ -54,7 +54,7 @@ func (Product) Fields() []ent.Field {
 		field.String("Image").
 			Optional(),
 		field.Enum("LookupType").
-			Values("Keywords", "Link"),
+			Values("Keywords", "Link", "Other"),
 		field.Strings("PositiveKeywords").Optional(),
 		field.Strings("NegativeKeywords").Optional(),
 		field.String("Link").Optional(),

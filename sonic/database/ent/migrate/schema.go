@@ -195,7 +195,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
 		{Name: "image", Type: field.TypeString, Nullable: true},
-		{Name: "lookup_type", Type: field.TypeEnum, Enums: []string{"Keywords", "Link"}},
+		{Name: "lookup_type", Type: field.TypeEnum, Enums: []string{"Keywords", "Link", "Other"}},
 		{Name: "positive_keywords", Type: field.TypeJSON, Nullable: true},
 		{Name: "negative_keywords", Type: field.TypeJSON, Nullable: true},
 		{Name: "link", Type: field.TypeString, Nullable: true},
