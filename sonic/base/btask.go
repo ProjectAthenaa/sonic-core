@@ -36,6 +36,10 @@ type BTask struct {
 	message  string        //tag more message
 
 	//returnFields
+	ReturningFields returningFields
+}
+
+type returningFields struct {
 	Size         string
 	Price        string
 	OrderNumber  string
@@ -134,6 +138,13 @@ func (tk *BTask) Start(data *module.Data) error {
 	tk._runningChan = make(chan int32)
 	tk._pauseContinueChan = make(chan int8)
 	tk.quitChan = make(chan int32)
+	tk.ReturningFields = returningFields{
+		Size:         tk.Data.TaskData.Size[0],
+		Price:        "",
+		OrderNumber:  "",
+		Color:        tk.Data.TaskData.Color[0],
+		ProductImage: "",
+	}
 
 	go tk.Callback.OnStarting()
 	tk.SetStatus(module.STATUS_STARTING, "")
