@@ -68,16 +68,16 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 				var body []byte
 				c.Request.Body, body = sonic.NopCloserBody(c.Request.Body)
 
-				c.JSON(200, gin.H{
-					"errors": []map[string]interface{}{
-						{
-							"message": "error_shit",
-							"path":    "test",
-						},
-					},
-					"data": nil,
-				})
-				return
+				//c.JSON(200, gin.H{
+				//	"errors": []map[string]interface{}{
+				//		{
+				//			"message": "error_shit",
+				//			"path":    "test",
+				//		},
+				//	},
+				//	"data": nil,
+				//})
+				//return
 
 				//check if body contains no auth resolver
 				if contains(string(body), noAuthResolverNames...) {
