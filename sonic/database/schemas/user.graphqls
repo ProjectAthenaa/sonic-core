@@ -10,3 +10,9 @@ type User{
     Metadata: Metadata!
     Sessions: [Session!]
 }
+
+extend type Query {
+    getUserData: Metadata!
+    getUserStatistics: [Statistic!]!
+    getUserLicense: License!
+}

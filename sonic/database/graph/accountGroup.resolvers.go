@@ -10,6 +10,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/graph/generated"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/graph/model"
 )
 
 func (r *accountGroupResolver) ID(ctx context.Context, obj *ent.AccountGroup) (string, error) {
@@ -21,6 +22,18 @@ func (r *accountGroupResolver) Site(ctx context.Context, obj *ent.AccountGroup) 
 }
 
 func (r *accountGroupResolver) Accounts(ctx context.Context, obj *ent.AccountGroup) (map[string]interface{}, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) CreateAccountGroup(ctx context.Context, newAccountGroup model.AccountGroupInput) (*ent.AccountGroup, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) UpdateAccountGroup(ctx context.Context, accountGroupID string, updatedAccountGroup model.AccountGroupInput) (*ent.AccountGroup, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetAllAccountGroups(ctx context.Context) ([]*ent.AccountGroup, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

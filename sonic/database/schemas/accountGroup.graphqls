@@ -6,3 +6,18 @@ type AccountGroup{
     Site: Site!
     Accounts: Map!
 }
+
+input AccountGroupInput{
+    Name: String!
+    Site: Site!
+    Accounts: Map!
+}
+
+extend type Query {
+    getAllAccountGroups: [AccountGroup!]
+}
+
+extend type Mutation {
+    createAccountGroup(newAccountGroup: AccountGroupInput!): AccountGroup!
+    updateAccountGroup(accountGroupID: UUID!, updatedAccountGroup: AccountGroupInput!): AccountGroup!
+}

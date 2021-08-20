@@ -12,6 +12,12 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 )
 
+type AccountGroupInput struct {
+	Name     string                 `json:"Name"`
+	Site     product.Site           `json:"Site"`
+	Accounts map[string]interface{} `json:"Accounts"`
+}
+
 type NewAddress struct {
 	AddressLine string  `json:"AddressLine"`
 	AdressLine2 *string `json:"AdressLine2"`

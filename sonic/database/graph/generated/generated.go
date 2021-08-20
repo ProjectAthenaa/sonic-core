@@ -126,6 +126,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateAccountGroup func(childComplexity int, newAccountGroup model.AccountGroupInput) int
 		CreateProfile      func(childComplexity int, newProfile model.NewProfile) int
 		CreateProfileGroup func(childComplexity int, newGroup model.NewProfileGroup) int
 		CreateProxyList    func(childComplexity int, proxyList model.NewProxyList) int
@@ -140,6 +141,7 @@ type ComplexityRoot struct {
 		SetCheckoutDelay   func(childComplexity int, delay int) int
 		SetDeclineWebhook  func(childComplexity int, webhook string) int
 		SetSuccessWebhook  func(childComplexity int, webhook string) int
+		UpdateAccountGroup func(childComplexity int, accountGroupID string, updatedAccountGroup model.AccountGroupInput) int
 		UpdateProduct      func(childComplexity int, productID *string, updatedProduct model.ProductIn) int
 		UpdateProfile      func(childComplexity int, profileID string, updatedProfile model.NewProfile) int
 		UpdateProfileGroup func(childComplexity int, groupID string, updatedGroup model.NewProfileGroup) int
@@ -198,20 +200,25 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAllProxyLists   func(childComplexity int) int
-		GetAllTaskGroups   func(childComplexity int) int
-		GetAllTasks        func(childComplexity int, taskGroupID string) int
-		GetProduct         func(childComplexity int, productID string) int
-		GetProfile         func(childComplexity int, profileID string) int
-		GetProfileGroup    func(childComplexity int, profileGroupID string) int
-		GetProfileGroups   func(childComplexity int) int
-		GetProxyList       func(childComplexity int, proxyListID string) int
-		GetSettings        func(childComplexity int) int
-		GetTask            func(childComplexity int, taskID string) int
-		GetTaskGroup       func(childComplexity int, taskGroupID string) int
-		TestDeclineWebhook func(childComplexity int) int
-		TestProxyList      func(childComplexity int, proxyListID string) int
-		TestSuccessWebhook func(childComplexity int) int
+		GetAllAccountGroups func(childComplexity int) int
+		GetAllProxyLists    func(childComplexity int) int
+		GetAllTaskGroups    func(childComplexity int) int
+		GetAllTasks         func(childComplexity int, taskGroupID string) int
+		GetApp              func(childComplexity int) int
+		GetProduct          func(childComplexity int, productID string) int
+		GetProfile          func(childComplexity int, profileID string) int
+		GetProfileGroup     func(childComplexity int, profileGroupID string) int
+		GetProfileGroups    func(childComplexity int) int
+		GetProxyList        func(childComplexity int, proxyListID string) int
+		GetSettings         func(childComplexity int) int
+		GetTask             func(childComplexity int, taskID string) int
+		GetTaskGroup        func(childComplexity int, taskGroupID string) int
+		GetUserData         func(childComplexity int) int
+		GetUserLicense      func(childComplexity int) int
+		GetUserStatistics   func(childComplexity int) int
+		TestDeclineWebhook  func(childComplexity int) int
+		TestProxyList       func(childComplexity int, proxyListID string) int
+		TestSuccessWebhook  func(childComplexity int) int
 	}
 
 	Session struct {
@@ -309,6 +316,8 @@ type MutationResolver interface {
 	SetDeclineWebhook(ctx context.Context, webhook string) (bool, error)
 	SetCheckoutDelay(ctx context.Context, delay int) (bool, error)
 	SetATCDelay(ctx context.Context, delay int) (bool, error)
+	CreateAccountGroup(ctx context.Context, newAccountGroup model.AccountGroupInput) (*ent.AccountGroup, error)
+	UpdateAccountGroup(ctx context.Context, accountGroupID string, updatedAccountGroup model.AccountGroupInput) (*ent.AccountGroup, error)
 	CreateProfile(ctx context.Context, newProfile model.NewProfile) (*ent.Profile, error)
 	UpdateProfile(ctx context.Context, profileID string, updatedProfile model.NewProfile) (*ent.Profile, error)
 	DeleteProfile(ctx context.Context, profileID string) (bool, error)
@@ -349,6 +358,8 @@ type QueryResolver interface {
 	GetSettings(ctx context.Context) (*ent.Settings, error)
 	TestSuccessWebhook(ctx context.Context) (bool, error)
 	TestDeclineWebhook(ctx context.Context) (bool, error)
+	GetAllAccountGroups(ctx context.Context) ([]*ent.AccountGroup, error)
+	GetApp(ctx context.Context) (*ent.App, error)
 	GetProfile(ctx context.Context, profileID string) (*ent.Profile, error)
 	GetProfileGroup(ctx context.Context, profileGroupID string) (*ent.ProfileGroup, error)
 	GetProfileGroups(ctx context.Context) ([]*ent.ProfileGroup, error)
@@ -360,6 +371,9 @@ type QueryResolver interface {
 	GetProduct(ctx context.Context, productID string) (*ent.Product, error)
 	GetAllTaskGroups(ctx context.Context) ([]*ent.TaskGroup, error)
 	GetAllTasks(ctx context.Context, taskGroupID string) ([]*ent.Task, error)
+	GetUserData(ctx context.Context) (*ent.Metadata, error)
+	GetUserStatistics(ctx context.Context) ([]*ent.Statistic, error)
+	GetUserLicense(ctx context.Context) (*ent.License, error)
 }
 type SessionResolver interface {
 	ID(ctx context.Context, obj *ent.Session) (string, error)
@@ -668,6 +682,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Metadata.Theme(childComplexity), true
 
+	case "Mutation.createAccountGroup":
+		if e.complexity.Mutation.CreateAccountGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createAccountGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateAccountGroup(childComplexity, args["newAccountGroup"].(model.AccountGroupInput)), true
+
 	case "Mutation.createProfile":
 		if e.complexity.Mutation.CreateProfile == nil {
 			break
@@ -835,6 +861,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SetSuccessWebhook(childComplexity, args["Webhook"].(string)), true
+
+	case "Mutation.updateAccountGroup":
+		if e.complexity.Mutation.UpdateAccountGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateAccountGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateAccountGroup(childComplexity, args["accountGroupID"].(string), args["updatedAccountGroup"].(model.AccountGroupInput)), true
 
 	case "Mutation.updateProduct":
 		if e.complexity.Mutation.UpdateProduct == nil {
@@ -1125,6 +1163,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ProxyTest.Status(childComplexity), true
 
+	case "Query.getAllAccountGroups":
+		if e.complexity.Query.GetAllAccountGroups == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllAccountGroups(childComplexity), true
+
 	case "Query.getAllProxyLists":
 		if e.complexity.Query.GetAllProxyLists == nil {
 			break
@@ -1150,6 +1195,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetAllTasks(childComplexity, args["taskGroupID"].(string)), true
+
+	case "Query.getApp":
+		if e.complexity.Query.GetApp == nil {
+			break
+		}
+
+		return e.complexity.Query.GetApp(childComplexity), true
 
 	case "Query.getProduct":
 		if e.complexity.Query.GetProduct == nil {
@@ -1236,6 +1288,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetTaskGroup(childComplexity, args["taskGroupID"].(string)), true
+
+	case "Query.getUserData":
+		if e.complexity.Query.GetUserData == nil {
+			break
+		}
+
+		return e.complexity.Query.GetUserData(childComplexity), true
+
+	case "Query.getUserLicense":
+		if e.complexity.Query.GetUserLicense == nil {
+			break
+		}
+
+		return e.complexity.Query.GetUserLicense(childComplexity), true
+
+	case "Query.getUserStatistics":
+		if e.complexity.Query.GetUserStatistics == nil {
+			break
+		}
+
+		return e.complexity.Query.GetUserStatistics(childComplexity), true
 
 	case "Query.testDeclineWebhook":
 		if e.complexity.Query.TestDeclineWebhook == nil {
@@ -1635,6 +1708,21 @@ type AccountGroup{
     Name: String!
     Site: Site!
     Accounts: Map!
+}
+
+input AccountGroupInput{
+    Name: String!
+    Site: Site!
+    Accounts: Map!
+}
+
+extend type Query {
+    getAllAccountGroups: [AccountGroup!]
+}
+
+extend type Mutation {
+    createAccountGroup(newAccountGroup: AccountGroupInput!): AccountGroup!
+    updateAccountGroup(accountGroupID: UUID!, updatedAccountGroup: AccountGroupInput!): AccountGroup!
 }`, BuiltIn: false},
 	{Name: "schemas/app.graphqls", Input: `type App{
     ID: UUID!
@@ -1643,6 +1731,10 @@ type AccountGroup{
     ProfileGroups: [ProfileGroup!]
     TaskGroups: [TaskGroup!]
     AccountGroups: [AccountGroup!]
+}
+
+extend type Query {
+    getApp: App!
 }`, BuiltIn: false},
 	{Name: "schemas/license.graphqls", Input: `enum LicenseType{Test}
 
@@ -1968,6 +2060,12 @@ type User{
     App: App!
     Metadata: Metadata!
     Sessions: [Session!]
+}
+
+extend type Query {
+    getUserData: Metadata!
+    getUserStatistics: [Statistic!]!
+    getUserLicense: License!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -1975,6 +2073,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createAccountGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.AccountGroupInput
+	if tmp, ok := rawArgs["newAccountGroup"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newAccountGroup"))
+		arg0, err = ec.unmarshalNAccountGroupInput2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐAccountGroupInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newAccountGroup"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createProfileGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -2192,6 +2305,30 @@ func (ec *executionContext) field_Mutation_setSuccessWebhook_args(ctx context.Co
 		}
 	}
 	args["Webhook"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateAccountGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["accountGroupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountGroupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accountGroupID"] = arg0
+	var arg1 model.AccountGroupInput
+	if tmp, ok := rawArgs["updatedAccountGroup"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedAccountGroup"))
+		arg1, err = ec.unmarshalNAccountGroupInput2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐAccountGroupInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["updatedAccountGroup"] = arg1
 	return args, nil
 }
 
@@ -3949,6 +4086,90 @@ func (ec *executionContext) _Mutation_setATCDelay(ctx context.Context, field gra
 	res := resTmp.(bool)
 	fc.Result = res
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createAccountGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createAccountGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateAccountGroup(rctx, args["newAccountGroup"].(model.AccountGroupInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.AccountGroup)
+	fc.Result = res
+	return ec.marshalNAccountGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAccountGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateAccountGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateAccountGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateAccountGroup(rctx, args["accountGroupID"].(string), args["updatedAccountGroup"].(model.AccountGroupInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.AccountGroup)
+	fc.Result = res
+	return ec.marshalNAccountGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAccountGroup(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5777,6 +5998,73 @@ func (ec *executionContext) _Query_testDeclineWebhook(ctx context.Context, field
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_getAllAccountGroups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllAccountGroups(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.AccountGroup)
+	fc.Result = res
+	return ec.marshalOAccountGroup2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAccountGroupᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getApp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetApp(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.App)
+	fc.Result = res
+	return ec.marshalNApp2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐApp(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -6210,6 +6498,111 @@ func (ec *executionContext) _Query_getAllTasks(ctx context.Context, field graphq
 	res := resTmp.([]*ent.Task)
 	fc.Result = res
 	return ec.marshalNTask2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getUserData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUserData(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Metadata)
+	fc.Result = res
+	return ec.marshalNMetadata2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐMetadata(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getUserStatistics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUserStatistics(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.Statistic)
+	fc.Result = res
+	return ec.marshalNStatistic2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatisticᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getUserLicense(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUserLicense(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.License)
+	fc.Result = res
+	return ec.marshalNLicense2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐLicense(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -8836,6 +9229,42 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAccountGroupInput(ctx context.Context, obj interface{}) (model.AccountGroupInput, error) {
+	var it model.AccountGroupInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Site":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Site"))
+			it.Site, err = ec.unmarshalNSite2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproductᚐSite(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Accounts":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Accounts"))
+			it.Accounts, err = ec.unmarshalNMap2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewAddress(ctx context.Context, obj interface{}) (model.NewAddress, error) {
 	var it model.NewAddress
 	var asMap = obj.(map[string]interface{})
@@ -9869,6 +10298,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createAccountGroup":
+			out.Values[i] = ec._Mutation_createAccountGroup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateAccountGroup":
+			out.Values[i] = ec._Mutation_updateAccountGroup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createProfile":
 			out.Values[i] = ec._Mutation_createProfile(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -10349,6 +10788,31 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "getAllAccountGroups":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllAccountGroups(ctx, field)
+				return res
+			})
+		case "getApp":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getApp(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "getProfile":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -10492,6 +10956,48 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getAllTasks(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getUserData":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserData(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getUserStatistics":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserStatistics(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getUserLicense":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserLicense(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -11289,6 +11795,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAccountGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAccountGroup(ctx context.Context, sel ast.SelectionSet, v ent.AccountGroup) graphql.Marshaler {
+	return ec._AccountGroup(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNAccountGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAccountGroup(ctx context.Context, sel ast.SelectionSet, v *ent.AccountGroup) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -11299,6 +11809,11 @@ func (ec *executionContext) marshalNAccountGroup2ᚖgithubᚗcomᚋProjectAthena
 	return ec._AccountGroup(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNAccountGroupInput2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐAccountGroupInput(ctx context.Context, v interface{}) (model.AccountGroupInput, error) {
+	res, err := ec.unmarshalInputAccountGroupInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAddress(ctx context.Context, sel ast.SelectionSet, v *ent.Address) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -11307,6 +11822,10 @@ func (ec *executionContext) marshalNAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋs
 		return graphql.Null
 	}
 	return ec._Address(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNApp2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐApp(ctx context.Context, sel ast.SelectionSet, v ent.App) graphql.Marshaler {
+	return ec._App(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNApp2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐApp(ctx context.Context, sel ast.SelectionSet, v *ent.App) graphql.Marshaler {
@@ -11374,6 +11893,10 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) marshalNLicense2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐLicense(ctx context.Context, sel ast.SelectionSet, v ent.License) graphql.Marshaler {
+	return ec._License(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNLicense2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐLicense(ctx context.Context, sel ast.SelectionSet, v *ent.License) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -11423,6 +11946,10 @@ func (ec *executionContext) marshalNMap2map(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNMetadata2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐMetadata(ctx context.Context, sel ast.SelectionSet, v ent.Metadata) graphql.Marshaler {
+	return ec._Metadata(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNMetadata2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐMetadata(ctx context.Context, sel ast.SelectionSet, v *ent.Metadata) graphql.Marshaler {
@@ -11716,6 +12243,43 @@ func (ec *executionContext) unmarshalNStatType2githubᚗcomᚋProjectAthenaaᚋs
 
 func (ec *executionContext) marshalNStatType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋstatisticᚐType(ctx context.Context, sel ast.SelectionSet, v statistic.Type) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNStatistic2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatisticᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Statistic) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNStatistic2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistic(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNStatistic2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistic(ctx context.Context, sel ast.SelectionSet, v *ent.Statistic) graphql.Marshaler {

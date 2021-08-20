@@ -11,6 +11,18 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/graph/generated"
 )
 
+func (r *queryResolver) GetUserData(ctx context.Context) (*ent.Metadata, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetUserStatistics(ctx context.Context) ([]*ent.Statistic, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) GetUserLicense(ctx context.Context) (*ent.License, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *userResolver) ID(ctx context.Context, obj *ent.User) (string, error) {
 	panic(fmt.Errorf("not implemented"))
 }

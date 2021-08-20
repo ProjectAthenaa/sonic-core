@@ -6,3 +6,7 @@ type App{
     TaskGroups: [TaskGroup!]
     AccountGroups: [AccountGroup!]
 }
+
+extend type Query {
+    getApp: App!
+}

@@ -19,6 +19,10 @@ func (r *appResolver) Settings(ctx context.Context, obj *ent.App) (*ent.Settings
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *queryResolver) GetApp(ctx context.Context) (*ent.App, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // App returns generated.AppResolver implementation.
 func (r *Resolver) App() generated.AppResolver { return &appResolver{r} }
 
