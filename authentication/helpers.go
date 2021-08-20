@@ -22,6 +22,7 @@ type sessionCallback = func(ctx context.Context, sessionID string) (context.Cont
 
 var (
 	sessionExpiredError = errors.New("session_expired")
+	operationNameRe     = regexp.MustCompile(`(mutation|query|subscription)\s+{\s+(\w+)?`)
 )
 
 func extractTokens(base face.ICoreContext, ctx context.Context, sessionID string) (string, string, string, error) {
@@ -99,7 +100,13 @@ type CachedUser struct {
 	IP          string    `json:"ip"`
 }
 
-func contains(str string, subStrs ...string) bool {
+func contains(body string, subStrs ...string) bool {
+	var str string
+	if v := operationNameRe.FindStringSubmatch(body); len(v) >= 2 {
+		str = v[2]
+	} else {
+		return false
+	}
 	if len(subStrs) == 0 {
 		return true
 	}
