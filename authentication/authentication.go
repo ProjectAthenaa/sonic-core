@@ -77,6 +77,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 					},
 					"data": nil,
 				})
+				return
 
 				//check if body contains no auth resolver
 				if contains(string(body), noAuthResolverNames...) {
