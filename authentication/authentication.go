@@ -58,6 +58,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 
 	return func() gin.HandlerFunc {
 		return func(c *gin.Context) {
+
 			ctx := context.WithValue(c.Request.Context(), "IP", c.Request.Header.Get("x-original-forwarded-for"))
 			ctx = context.WithValue(ctx, "Location", c.Request.Header.Get("cf-ipcountry"))
 			span := sentry.StartSpan(c.Request.Context(), "Authentication Middleware", sentry.TransactionName("Authentication"))
@@ -66,6 +67,17 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 			if c.Request.URL.Path == "/query" {
 				var body []byte
 				c.Request.Body, body = sonic.NopCloserBody(c.Request.Body)
+
+				c.JSON(200, gin.H{
+					"errors": []map[string]interface{}{
+						{
+							"message": "error_shit",
+							"path":    operationNameRe.FindStringSubmatch(string(body))[2],
+						},
+					},
+					"data": nil,
+				})
+
 				//check if body contains no auth resolver
 				if contains(string(body), noAuthResolverNames...) {
 					goto setRequestContext
