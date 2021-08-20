@@ -100,6 +100,14 @@ type CachedUser struct {
 	IP          string    `json:"ip"`
 }
 
+type GraphQLError struct {
+	Errors []struct {
+		Message string   `json:"message"`
+		Path    []string `json:"path"`
+	} `json:"errors"`
+	Data interface{} `json:"data"`
+}
+
 func contains(body string, subStrs ...string) bool {
 	var str string
 	if v := operationNameRe.FindStringSubmatch(body); len(v) >= 2 {
