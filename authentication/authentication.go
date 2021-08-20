@@ -126,7 +126,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 
 		setRequestContext:
 			c.Request = c.Request.WithContext(ctx)
-			c.Next()
+			//c.Next()
 		}
 	}
 }
