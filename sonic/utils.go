@@ -96,10 +96,12 @@ func GrabValueFromHTMLName(name string, html *[]byte) string {
 	return strings.ReplaceAll(strings.Split(strings.Split(strings.Split(string(*html), name)[1], "/>")[0], "value=")[1], "\"", "")
 }
 
-func MapConverter(m map[string]string) map[string]interface{} {
-	m2 := make(map[string]interface{}, len(m))
+func MapConverter(m map[string]interface{}) map[string]string {
+	m2 := make(map[string]string, len(m))
 	for k, v := range m {
-		m2[k] = v
+		if v, ok := v.(string); ok {
+			m2[k] = v
+		}
 	}
 	return m2
 }
