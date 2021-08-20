@@ -99,10 +99,12 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 					goto setRequestContext
 				}
 
-				ctx, err = sessionCallback(ctx, sessionID)
-				if err != nil {
-					c.JSON(403, err)
-					return
+				if sessionCallback != nil {
+					ctx, err = sessionCallback(ctx, sessionID)
+					if err != nil {
+						c.JSON(403, err)
+						return
+					}
 				}
 			}
 
