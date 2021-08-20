@@ -36,6 +36,7 @@ resolver:
 # if they match it will use them, otherwise it will generate them.
 autobind:
   - "github.com/ProjectAthenaa/sonic-core/sonic/database/ent"
+  - "github.com/Z-M-Huang/gqlgen-scalar"
 
 # This section declares type mapping between the GraphQL and go type systems
 #

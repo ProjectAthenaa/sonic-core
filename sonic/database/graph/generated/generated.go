@@ -20,6 +20,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -48,11 +49,13 @@ type ResolverRoot interface {
 	Billing() BillingResolver
 	License() LicenseResolver
 	Metadata() MetadataResolver
+	Mutation() MutationResolver
 	Product() ProductResolver
 	Profile() ProfileResolver
 	ProfileGroup() ProfileGroupResolver
 	Proxy() ProxyResolver
 	ProxyList() ProxyListResolver
+	Query() QueryResolver
 	Session() SessionResolver
 	Settings() SettingsResolver
 	Shipping() ShippingResolver
@@ -122,6 +125,29 @@ type ComplexityRoot struct {
 		Theme                func(childComplexity int) int
 	}
 
+	Mutation struct {
+		CreateProfile      func(childComplexity int, newProfile model.NewProfile) int
+		CreateProfileGroup func(childComplexity int, newGroup model.NewProfileGroup) int
+		CreateProxyList    func(childComplexity int, proxyList model.NewProxyList) int
+		CreateTask         func(childComplexity int, newTask model.NewTask) int
+		CreateTaskGroup    func(childComplexity int, newTaskGroup model.NewTaskGroup) int
+		DeleteProfile      func(childComplexity int, profileID string) int
+		DeleteProfileGroup func(childComplexity int, groupID string) int
+		DeleteProxyList    func(childComplexity int, proxyListID string) int
+		DeleteTask         func(childComplexity int, taskID string, deletedProduct bool) int
+		DeleteTaskGroup    func(childComplexity int, taskGroupID string) int
+		SetATCDelay        func(childComplexity int, delay int) int
+		SetCheckoutDelay   func(childComplexity int, delay int) int
+		SetDeclineWebhook  func(childComplexity int, webhook string) int
+		SetSuccessWebhook  func(childComplexity int, webhook string) int
+		UpdateProduct      func(childComplexity int, productID *string, updatedProduct model.ProductIn) int
+		UpdateProfile      func(childComplexity int, profileID string, updatedProfile model.NewProfile) int
+		UpdateProfileGroup func(childComplexity int, groupID string, updatedGroup model.NewProfileGroup) int
+		UpdateProxyList    func(childComplexity int, proxyListID string, proxyList model.NewProxyList) int
+		UpdateTask         func(childComplexity int, taskID string, updatedTask model.UpdatedTask) int
+		UpdateTaskGroup    func(childComplexity int, taskGroupID string, updatedTaskGroup model.NewTaskGroup) int
+	}
+
 	Product struct {
 		Colors           func(childComplexity int) int
 		ID               func(childComplexity int) int
@@ -165,7 +191,27 @@ type ComplexityRoot struct {
 		Type    func(childComplexity int) int
 	}
 
+	ProxyTest struct {
+		Latency func(childComplexity int) int
+		ProxyID func(childComplexity int) int
+		Status  func(childComplexity int) int
+	}
+
 	Query struct {
+		GetAllProxyLists   func(childComplexity int) int
+		GetAllTaskGroups   func(childComplexity int) int
+		GetAllTasks        func(childComplexity int, taskGroupID string) int
+		GetProduct         func(childComplexity int, productID string) int
+		GetProfile         func(childComplexity int, profileID string) int
+		GetProfileGroup    func(childComplexity int, profileGroupID string) int
+		GetProfileGroups   func(childComplexity int) int
+		GetProxyList       func(childComplexity int, proxyListID string) int
+		GetSettings        func(childComplexity int) int
+		GetTask            func(childComplexity int, taskID string) int
+		GetTaskGroup       func(childComplexity int, taskGroupID string) int
+		TestDeclineWebhook func(childComplexity int) int
+		TestProxyList      func(childComplexity int, proxyListID string) int
+		TestSuccessWebhook func(childComplexity int) int
 	}
 
 	Session struct {
@@ -248,10 +294,6 @@ type AddressResolver interface {
 type AppResolver interface {
 	ID(ctx context.Context, obj *ent.App) (string, error)
 	Settings(ctx context.Context, obj *ent.App) (*ent.Settings, error)
-	ProxyLists(ctx context.Context, obj *ent.App) ([]*ent.ProxyList, error)
-	ProfileGroups(ctx context.Context, obj *ent.App) ([]*ent.ProfileGroup, error)
-	TaskGroups(ctx context.Context, obj *ent.App) ([]*ent.TaskGroup, error)
-	AccountGroups(ctx context.Context, obj *ent.App) ([]*ent.AccountGroup, error)
 }
 type BillingResolver interface {
 	ID(ctx context.Context, obj *ent.Billing) (string, error)
@@ -261,6 +303,28 @@ type LicenseResolver interface {
 }
 type MetadataResolver interface {
 	ID(ctx context.Context, obj *ent.Metadata) (string, error)
+}
+type MutationResolver interface {
+	SetSuccessWebhook(ctx context.Context, webhook string) (bool, error)
+	SetDeclineWebhook(ctx context.Context, webhook string) (bool, error)
+	SetCheckoutDelay(ctx context.Context, delay int) (bool, error)
+	SetATCDelay(ctx context.Context, delay int) (bool, error)
+	CreateProfile(ctx context.Context, newProfile model.NewProfile) (*ent.Profile, error)
+	UpdateProfile(ctx context.Context, profileID string, updatedProfile model.NewProfile) (*ent.Profile, error)
+	DeleteProfile(ctx context.Context, profileID string) (bool, error)
+	CreateProfileGroup(ctx context.Context, newGroup model.NewProfileGroup) (*ent.ProfileGroup, error)
+	UpdateProfileGroup(ctx context.Context, groupID string, updatedGroup model.NewProfileGroup) (*ent.ProfileGroup, error)
+	DeleteProfileGroup(ctx context.Context, groupID string) (bool, error)
+	CreateProxyList(ctx context.Context, proxyList model.NewProxyList) (*ent.ProxyList, error)
+	UpdateProxyList(ctx context.Context, proxyListID string, proxyList model.NewProxyList) (*ent.ProxyList, error)
+	DeleteProxyList(ctx context.Context, proxyListID string) (bool, error)
+	CreateTask(ctx context.Context, newTask model.NewTask) (*ent.Task, error)
+	UpdateTask(ctx context.Context, taskID string, updatedTask model.UpdatedTask) (*ent.Task, error)
+	DeleteTask(ctx context.Context, taskID string, deletedProduct bool) (bool, error)
+	CreateTaskGroup(ctx context.Context, newTaskGroup model.NewTaskGroup) (*ent.TaskGroup, error)
+	UpdateTaskGroup(ctx context.Context, taskGroupID string, updatedTaskGroup model.NewTaskGroup) (*ent.TaskGroup, error)
+	DeleteTaskGroup(ctx context.Context, taskGroupID string) (bool, error)
+	UpdateProduct(ctx context.Context, productID *string, updatedProduct model.ProductIn) (*ent.Product, error)
 }
 type ProductResolver interface {
 	ID(ctx context.Context, obj *ent.Product) (string, error)
@@ -274,16 +338,28 @@ type ProfileResolver interface {
 }
 type ProfileGroupResolver interface {
 	ID(ctx context.Context, obj *ent.ProfileGroup) (string, error)
-
-	Profiles(ctx context.Context, obj *ent.ProfileGroup) ([]*ent.Profile, error)
 }
 type ProxyResolver interface {
 	ID(ctx context.Context, obj *ent.Proxy) (string, error)
 }
 type ProxyListResolver interface {
 	ID(ctx context.Context, obj *ent.ProxyList) (string, error)
-
-	Proxies(ctx context.Context, obj *ent.ProxyList) ([]*ent.Proxy, error)
+}
+type QueryResolver interface {
+	GetSettings(ctx context.Context) (*ent.Settings, error)
+	TestSuccessWebhook(ctx context.Context) (bool, error)
+	TestDeclineWebhook(ctx context.Context) (bool, error)
+	GetProfile(ctx context.Context, profileID string) (*ent.Profile, error)
+	GetProfileGroup(ctx context.Context, profileGroupID string) (*ent.ProfileGroup, error)
+	GetProfileGroups(ctx context.Context) ([]*ent.ProfileGroup, error)
+	GetProxyList(ctx context.Context, proxyListID string) (*ent.ProxyList, error)
+	TestProxyList(ctx context.Context, proxyListID string) ([]*model.ProxyTest, error)
+	GetAllProxyLists(ctx context.Context) ([]*ent.ProxyList, error)
+	GetTask(ctx context.Context, taskID string) (*ent.Task, error)
+	GetTaskGroup(ctx context.Context, taskGroupID string) (*ent.TaskGroup, error)
+	GetProduct(ctx context.Context, productID string) (*ent.Product, error)
+	GetAllTaskGroups(ctx context.Context) ([]*ent.TaskGroup, error)
+	GetAllTasks(ctx context.Context, taskGroupID string) ([]*ent.Task, error)
 }
 type SessionResolver interface {
 	ID(ctx context.Context, obj *ent.Session) (string, error)
@@ -294,7 +370,6 @@ type SettingsResolver interface {
 type ShippingResolver interface {
 	ID(ctx context.Context, obj *ent.Shipping) (string, error)
 
-	ShippingAddress(ctx context.Context, obj *ent.Shipping) (*ent.Address, error)
 	BillingAddress(ctx context.Context, obj *ent.Shipping) (*ent.Address, error)
 }
 type StatisticResolver interface {
@@ -314,17 +389,9 @@ type TaskResolver interface {
 }
 type TaskGroupResolver interface {
 	ID(ctx context.Context, obj *ent.TaskGroup) (string, error)
-
-	Tasks(ctx context.Context, obj *ent.TaskGroup) ([]*ent.Task, error)
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *ent.User) (string, error)
-
-	License(ctx context.Context, obj *ent.User) (*ent.License, error)
-	Statistics(ctx context.Context, obj *ent.User) ([]*ent.Statistic, error)
-	App(ctx context.Context, obj *ent.User) (*ent.App, error)
-	Metadata(ctx context.Context, obj *ent.User) (*ent.Metadata, error)
-	Sessions(ctx context.Context, obj *ent.User) ([]*ent.Session, error)
 }
 
 type executableSchema struct {
@@ -601,6 +668,246 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Metadata.Theme(childComplexity), true
 
+	case "Mutation.createProfile":
+		if e.complexity.Mutation.CreateProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateProfile(childComplexity, args["newProfile"].(model.NewProfile)), true
+
+	case "Mutation.createProfileGroup":
+		if e.complexity.Mutation.CreateProfileGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createProfileGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateProfileGroup(childComplexity, args["newGroup"].(model.NewProfileGroup)), true
+
+	case "Mutation.createProxyList":
+		if e.complexity.Mutation.CreateProxyList == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createProxyList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateProxyList(childComplexity, args["proxyList"].(model.NewProxyList)), true
+
+	case "Mutation.createTask":
+		if e.complexity.Mutation.CreateTask == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createTask_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateTask(childComplexity, args["newTask"].(model.NewTask)), true
+
+	case "Mutation.createTaskGroup":
+		if e.complexity.Mutation.CreateTaskGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createTaskGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateTaskGroup(childComplexity, args["newTaskGroup"].(model.NewTaskGroup)), true
+
+	case "Mutation.deleteProfile":
+		if e.complexity.Mutation.DeleteProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteProfile(childComplexity, args["profileID"].(string)), true
+
+	case "Mutation.deleteProfileGroup":
+		if e.complexity.Mutation.DeleteProfileGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteProfileGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteProfileGroup(childComplexity, args["groupID"].(string)), true
+
+	case "Mutation.deleteProxyList":
+		if e.complexity.Mutation.DeleteProxyList == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteProxyList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteProxyList(childComplexity, args["proxyListID"].(string)), true
+
+	case "Mutation.deleteTask":
+		if e.complexity.Mutation.DeleteTask == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteTask_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteTask(childComplexity, args["taskID"].(string), args["deletedProduct"].(bool)), true
+
+	case "Mutation.deleteTaskGroup":
+		if e.complexity.Mutation.DeleteTaskGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteTaskGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteTaskGroup(childComplexity, args["taskGroupID"].(string)), true
+
+	case "Mutation.setATCDelay":
+		if e.complexity.Mutation.SetATCDelay == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setATCDelay_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetATCDelay(childComplexity, args["Delay"].(int)), true
+
+	case "Mutation.setCheckoutDelay":
+		if e.complexity.Mutation.SetCheckoutDelay == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setCheckoutDelay_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetCheckoutDelay(childComplexity, args["Delay"].(int)), true
+
+	case "Mutation.setDeclineWebhook":
+		if e.complexity.Mutation.SetDeclineWebhook == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setDeclineWebhook_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetDeclineWebhook(childComplexity, args["Webhook"].(string)), true
+
+	case "Mutation.setSuccessWebhook":
+		if e.complexity.Mutation.SetSuccessWebhook == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setSuccessWebhook_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetSuccessWebhook(childComplexity, args["Webhook"].(string)), true
+
+	case "Mutation.updateProduct":
+		if e.complexity.Mutation.UpdateProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateProduct_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateProduct(childComplexity, args["productID"].(*string), args["updatedProduct"].(model.ProductIn)), true
+
+	case "Mutation.updateProfile":
+		if e.complexity.Mutation.UpdateProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateProfile(childComplexity, args["profileID"].(string), args["updatedProfile"].(model.NewProfile)), true
+
+	case "Mutation.updateProfileGroup":
+		if e.complexity.Mutation.UpdateProfileGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateProfileGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateProfileGroup(childComplexity, args["groupID"].(string), args["updatedGroup"].(model.NewProfileGroup)), true
+
+	case "Mutation.updateProxyList":
+		if e.complexity.Mutation.UpdateProxyList == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateProxyList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateProxyList(childComplexity, args["proxyListID"].(string), args["proxyList"].(model.NewProxyList)), true
+
+	case "Mutation.updateTask":
+		if e.complexity.Mutation.UpdateTask == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateTask_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateTask(childComplexity, args["taskID"].(string), args["updatedTask"].(model.UpdatedTask)), true
+
+	case "Mutation.updateTaskGroup":
+		if e.complexity.Mutation.UpdateTaskGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateTaskGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateTaskGroup(childComplexity, args["taskGroupID"].(string), args["updatedTaskGroup"].(model.NewTaskGroup)), true
+
 	case "Product.Colors":
 		if e.complexity.Product.Colors == nil {
 			break
@@ -796,6 +1103,165 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ProxyList.Type(childComplexity), true
+
+	case "ProxyTest.Latency":
+		if e.complexity.ProxyTest.Latency == nil {
+			break
+		}
+
+		return e.complexity.ProxyTest.Latency(childComplexity), true
+
+	case "ProxyTest.ProxyID":
+		if e.complexity.ProxyTest.ProxyID == nil {
+			break
+		}
+
+		return e.complexity.ProxyTest.ProxyID(childComplexity), true
+
+	case "ProxyTest.Status":
+		if e.complexity.ProxyTest.Status == nil {
+			break
+		}
+
+		return e.complexity.ProxyTest.Status(childComplexity), true
+
+	case "Query.getAllProxyLists":
+		if e.complexity.Query.GetAllProxyLists == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllProxyLists(childComplexity), true
+
+	case "Query.getAllTaskGroups":
+		if e.complexity.Query.GetAllTaskGroups == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllTaskGroups(childComplexity), true
+
+	case "Query.getAllTasks":
+		if e.complexity.Query.GetAllTasks == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getAllTasks_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAllTasks(childComplexity, args["taskGroupID"].(string)), true
+
+	case "Query.getProduct":
+		if e.complexity.Query.GetProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getProduct_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetProduct(childComplexity, args["productID"].(string)), true
+
+	case "Query.getProfile":
+		if e.complexity.Query.GetProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetProfile(childComplexity, args["profileID"].(string)), true
+
+	case "Query.getProfileGroup":
+		if e.complexity.Query.GetProfileGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getProfileGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetProfileGroup(childComplexity, args["profileGroupID"].(string)), true
+
+	case "Query.getProfileGroups":
+		if e.complexity.Query.GetProfileGroups == nil {
+			break
+		}
+
+		return e.complexity.Query.GetProfileGroups(childComplexity), true
+
+	case "Query.getProxyList":
+		if e.complexity.Query.GetProxyList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getProxyList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetProxyList(childComplexity, args["proxyListID"].(string)), true
+
+	case "Query.getSettings":
+		if e.complexity.Query.GetSettings == nil {
+			break
+		}
+
+		return e.complexity.Query.GetSettings(childComplexity), true
+
+	case "Query.getTask":
+		if e.complexity.Query.GetTask == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getTask_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetTask(childComplexity, args["taskID"].(string)), true
+
+	case "Query.getTaskGroup":
+		if e.complexity.Query.GetTaskGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getTaskGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetTaskGroup(childComplexity, args["taskGroupID"].(string)), true
+
+	case "Query.testDeclineWebhook":
+		if e.complexity.Query.TestDeclineWebhook == nil {
+			break
+		}
+
+		return e.complexity.Query.TestDeclineWebhook(childComplexity), true
+
+	case "Query.testProxyList":
+		if e.complexity.Query.TestProxyList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_testProxyList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.TestProxyList(childComplexity, args["proxyListID"].(string)), true
+
+	case "Query.testSuccessWebhook":
+		if e.complexity.Query.TestSuccessWebhook == nil {
+			break
+		}
+
+		return e.complexity.Query.TestSuccessWebhook(childComplexity), true
 
 	case "Session.DeviceName":
 		if e.complexity.Session.DeviceName == nil {
@@ -1122,6 +1588,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -1233,9 +1713,70 @@ type Billing{
     ExpiryMonth: String!
     ExpiryYear: String!
     CVV: String!
+}
+
+input NewProfile{
+    GroupID: UUID!
+    Name: String!
+    Email: String!
+    Shipping: NewShipping!
+    Billing: NewBilling!
+}
+
+input NewBilling{
+    CardHolderName: String!
+    CardNumber: String!
+    ExpiryMonth: String!
+    ExpiryYear: String!
+    CVV: String!
+}
+
+input NewShipping{
+    FirstName: String!
+    LastName: String!
+    PhoneNumber: String!
+    ShippingAddress: NewAddress!
+    BillingAddress: NewAddress
+    BillingIsShipping: Boolean!
+}
+
+input NewAddress{
+    AddressLine: String!
+    AdressLine2: String
+    Country: String!
+    State: String!
+    StateCode: String
+    City: String!
+    ZIP: String!
+}
+
+input NewProfileGroup{
+    Name: String!
+    Profiles: [UUID!]
+}
+
+extend type Query{
+    getProfile(profileID: UUID!): Profile!
+    getProfileGroup(profileGroupID: UUID!): ProfileGroup!
+    getProfileGroups: [ProfileGroup!]!
+}
+
+extend type Mutation{
+    createProfile(newProfile: NewProfile!): Profile!
+    updateProfile(profileID: UUID!, updatedProfile: NewProfile!): Profile!
+    deleteProfile(profileID: UUID!): Boolean!
+
+    createProfileGroup(newGroup: NewProfileGroup!): ProfileGroup!
+    updateProfileGroup(groupID: UUID!, updatedGroup: NewProfileGroup!): ProfileGroup!
+    deleteProfileGroup(groupID: UUID!): Boolean!
 }`, BuiltIn: false},
 	{Name: "schemas/proxylists.graphqls", Input: `enum ProxyListType{
     Test
+}
+
+enum ProxyTestStatus{
+    Pinging
+    NotPinging
 }
 
 type ProxyList{
@@ -1251,6 +1792,37 @@ type Proxy{
     Password: String
     IP: String!
     Port: String!
+}
+
+type ProxyTest{
+    Latency: Int!
+    Status: ProxyTestStatus!
+    ProxyID: String!
+}
+
+input NewProxyList{
+    Name: String!
+    Type: ProxyListType!
+    Proxies: [NewProxy!]
+}
+
+input NewProxy{
+    Username: String
+    Password: String
+    IP: String!
+    Port: String!
+}
+
+extend type Query{
+    getProxyList(proxyListID: UUID!): ProxyList!
+    testProxyList(proxyListID: UUID!): [ProxyTest!]!
+    getAllProxyLists: [ProxyList!]
+}
+
+extend type Mutation {
+    createProxyList(proxyList: NewProxyList!): ProxyList!
+    updateProxyList(proxyListID: UUID!, proxyList: NewProxyList!): ProxyList!
+    deleteProxyList(proxyListID: UUID!): Boolean!
 }`, BuiltIn: false},
 	{Name: "schemas/sessions.graphqls", Input: `enum DeviceType{
     Unknown
@@ -1274,6 +1846,19 @@ type Session{
     DeclineWebhook: String!
     CheckoutDelay: Int!
     ATCDelay: Int!
+}
+
+type Query{
+    getSettings: Settings!
+    testSuccessWebhook: Boolean!
+    testDeclineWebhook: Boolean!
+}
+
+type Mutation{
+    setSuccessWebhook(Webhook: String!): Boolean!
+    setDeclineWebhook(Webhook: String!): Boolean!
+    setCheckoutDelay(Delay: Int!): Boolean!
+    setATCDelay(Delay: Int!): Boolean!
 }`, BuiltIn: false},
 	{Name: "schemas/statistics.graphqls", Input: `enum StatType{Test}
 
@@ -1290,13 +1875,13 @@ type Statistic{
 enum LookupType{Test}
 
 type TaskGroup{
-    ID: String!
+    ID: UUID!
     Name: String!
     Tasks: [Task!]
 }
 
 type Task{
-    ID: String!
+    ID: UUID!
     StartTime: Time
     Product: Product
     ProxyList: ProxyList
@@ -1304,7 +1889,7 @@ type Task{
 }
 
 type Product{
-    ID: String!
+    ID: UUID!
     Name: String!
     Image: String
     LookupType: LookupType!
@@ -1316,9 +1901,64 @@ type Product{
     Colors: [String!]
     Site: Site!
     Metadata: Map
+}
+
+
+input ProductIn{
+    Name: String!
+    Image: String
+    LookupType: LookupType!
+    PositiveKeywords: [String!]
+    NegativeKeywords: [String!]
+    Link: String
+    Quantity: Int
+    Sizes: [String!]
+    Colors: [String!]
+    Site: Site!
+    Metadata: Map
+}
+
+input NewTask{
+    StartTime: Time
+    Product: ProductIn!
+    ProxyListID: UUID!
+    ProfileGroupID: UUID!
+    TaskGroupID: String! = "DEF_GROUP"
+}
+
+input UpdatedTask{
+    StartTime: Time
+    ProductID: UUID
+    ProxyListID: UUID
+    ProfileGroupID: UUID
+    TaskGroupID: UUID
+}
+
+input NewTaskGroup{
+    Name: String!="DEF_GROUP"
+    Tasks: [String!]
+}
+
+extend type Query{
+    getTask(taskID: UUID!): Task!
+    getTaskGroup(taskGroupID: UUID!): TaskGroup!
+    getProduct(productID: UUID!): Product!
+    getAllTaskGroups: [TaskGroup!]
+    getAllTasks(taskGroupID: UUID!): [Task!]!
+}
+
+extend type Mutation {
+    createTask(newTask: NewTask!): Task!
+    updateTask(taskID: UUID!, updatedTask: UpdatedTask!): Task!
+    deleteTask(taskID: UUID!, deletedProduct: Boolean!=False): Boolean!
+    createTaskGroup(newTaskGroup: NewTaskGroup!): TaskGroup!
+    updateTaskGroup(taskGroupID: UUID!, updatedTaskGroup: NewTaskGroup!): TaskGroup!
+    deleteTaskGroup(taskGroupID: UUID!): Boolean!
+
+    updateProduct(productID: UUID, updatedProduct: ProductIn!): Product!
 }`, BuiltIn: false},
-	{Name: "schemas/user.graphqls", Input: `scalar UUID
-scalar Time
+	{Name: "schemas/user.graphqls", Input: `scalar Time
+scalar UUID
 
 type User{
     ID: UUID!
@@ -1328,7 +1968,6 @@ type User{
     App: App!
     Metadata: Metadata!
     Sessions: [Session!]
-
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -1336,6 +1975,369 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createProfileGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.NewProfileGroup
+	if tmp, ok := rawArgs["newGroup"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newGroup"))
+		arg0, err = ec.unmarshalNNewProfileGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProfileGroup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newGroup"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.NewProfile
+	if tmp, ok := rawArgs["newProfile"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newProfile"))
+		arg0, err = ec.unmarshalNNewProfile2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProfile(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newProfile"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createProxyList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.NewProxyList
+	if tmp, ok := rawArgs["proxyList"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("proxyList"))
+		arg0, err = ec.unmarshalNNewProxyList2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProxyList(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["proxyList"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createTaskGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.NewTaskGroup
+	if tmp, ok := rawArgs["newTaskGroup"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newTaskGroup"))
+		arg0, err = ec.unmarshalNNewTaskGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewTaskGroup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newTaskGroup"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.NewTask
+	if tmp, ok := rawArgs["newTask"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newTask"))
+		arg0, err = ec.unmarshalNNewTask2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewTask(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["newTask"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteProfileGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["groupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("groupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["groupID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["profileID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["profileID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteProxyList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["proxyListID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("proxyListID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["proxyListID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteTaskGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskGroupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskGroupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskGroupID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskID"] = arg0
+	var arg1 bool
+	if tmp, ok := rawArgs["deletedProduct"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deletedProduct"))
+		arg1, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["deletedProduct"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setATCDelay_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["Delay"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Delay"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Delay"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setCheckoutDelay_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["Delay"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Delay"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Delay"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setDeclineWebhook_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["Webhook"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Webhook"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Webhook"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setSuccessWebhook_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["Webhook"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Webhook"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["Webhook"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["productID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
+		arg0, err = ec.unmarshalOUUID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["productID"] = arg0
+	var arg1 model.ProductIn
+	if tmp, ok := rawArgs["updatedProduct"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedProduct"))
+		arg1, err = ec.unmarshalNProductIn2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProductIn(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["updatedProduct"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateProfileGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["groupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("groupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["groupID"] = arg0
+	var arg1 model.NewProfileGroup
+	if tmp, ok := rawArgs["updatedGroup"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedGroup"))
+		arg1, err = ec.unmarshalNNewProfileGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProfileGroup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["updatedGroup"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["profileID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["profileID"] = arg0
+	var arg1 model.NewProfile
+	if tmp, ok := rawArgs["updatedProfile"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedProfile"))
+		arg1, err = ec.unmarshalNNewProfile2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProfile(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["updatedProfile"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateProxyList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["proxyListID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("proxyListID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["proxyListID"] = arg0
+	var arg1 model.NewProxyList
+	if tmp, ok := rawArgs["proxyList"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("proxyList"))
+		arg1, err = ec.unmarshalNNewProxyList2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProxyList(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["proxyList"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateTaskGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskGroupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskGroupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskGroupID"] = arg0
+	var arg1 model.NewTaskGroup
+	if tmp, ok := rawArgs["updatedTaskGroup"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedTaskGroup"))
+		arg1, err = ec.unmarshalNNewTaskGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewTaskGroup(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["updatedTaskGroup"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskID"] = arg0
+	var arg1 model.UpdatedTask
+	if tmp, ok := rawArgs["updatedTask"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedTask"))
+		arg1, err = ec.unmarshalNUpdatedTask2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐUpdatedTask(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["updatedTask"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1349,6 +2351,126 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getAllTasks_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskGroupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskGroupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskGroupID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["productID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["productID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getProfileGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["profileGroupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileGroupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["profileGroupID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["profileID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profileID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["profileID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getProxyList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["proxyListID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("proxyListID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["proxyListID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getTaskGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskGroupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskGroupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskGroupID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["taskID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_testProxyList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["proxyListID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("proxyListID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["proxyListID"] = arg0
 	return args, nil
 }
 
@@ -1886,13 +3008,13 @@ func (ec *executionContext) _App_ProxyLists(ctx context.Context, field graphql.C
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.App().ProxyLists(rctx, obj)
+		return obj.ProxyLists(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1918,13 +3040,13 @@ func (ec *executionContext) _App_ProfileGroups(ctx context.Context, field graphq
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.App().ProfileGroups(rctx, obj)
+		return obj.ProfileGroups(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1950,13 +3072,13 @@ func (ec *executionContext) _App_TaskGroups(ctx context.Context, field graphql.C
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.App().TaskGroups(rctx, obj)
+		return obj.TaskGroups(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1982,13 +3104,13 @@ func (ec *executionContext) _App_AccountGroups(ctx context.Context, field graphq
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.App().AccountGroups(rctx, obj)
+		return obj.AccountGroups(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2661,6 +3783,846 @@ func (ec *executionContext) _Metadata_DiscordDiscriminator(ctx context.Context, 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_setSuccessWebhook(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_setSuccessWebhook_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetSuccessWebhook(rctx, args["Webhook"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_setDeclineWebhook(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_setDeclineWebhook_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetDeclineWebhook(rctx, args["Webhook"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_setCheckoutDelay(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_setCheckoutDelay_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetCheckoutDelay(rctx, args["Delay"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_setATCDelay(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_setATCDelay_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SetATCDelay(rctx, args["Delay"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createProfile_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateProfile(rctx, args["newProfile"].(model.NewProfile))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Profile)
+	fc.Result = res
+	return ec.marshalNProfile2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateProfile_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateProfile(rctx, args["profileID"].(string), args["updatedProfile"].(model.NewProfile))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Profile)
+	fc.Result = res
+	return ec.marshalNProfile2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteProfile_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteProfile(rctx, args["profileID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createProfileGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createProfileGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateProfileGroup(rctx, args["newGroup"].(model.NewProfileGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.ProfileGroup)
+	fc.Result = res
+	return ec.marshalNProfileGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfileGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateProfileGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateProfileGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateProfileGroup(rctx, args["groupID"].(string), args["updatedGroup"].(model.NewProfileGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.ProfileGroup)
+	fc.Result = res
+	return ec.marshalNProfileGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfileGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteProfileGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteProfileGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteProfileGroup(rctx, args["groupID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createProxyList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createProxyList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateProxyList(rctx, args["proxyList"].(model.NewProxyList))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.ProxyList)
+	fc.Result = res
+	return ec.marshalNProxyList2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProxyList(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateProxyList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateProxyList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateProxyList(rctx, args["proxyListID"].(string), args["proxyList"].(model.NewProxyList))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.ProxyList)
+	fc.Result = res
+	return ec.marshalNProxyList2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProxyList(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteProxyList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteProxyList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteProxyList(rctx, args["proxyListID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createTask(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createTask_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateTask(rctx, args["newTask"].(model.NewTask))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Task)
+	fc.Result = res
+	return ec.marshalNTask2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTask(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateTask(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateTask_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateTask(rctx, args["taskID"].(string), args["updatedTask"].(model.UpdatedTask))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Task)
+	fc.Result = res
+	return ec.marshalNTask2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTask(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteTask(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteTask_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteTask(rctx, args["taskID"].(string), args["deletedProduct"].(bool))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createTaskGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createTaskGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateTaskGroup(rctx, args["newTaskGroup"].(model.NewTaskGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.TaskGroup)
+	fc.Result = res
+	return ec.marshalNTaskGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateTaskGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateTaskGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateTaskGroup(rctx, args["taskGroupID"].(string), args["updatedTaskGroup"].(model.NewTaskGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.TaskGroup)
+	fc.Result = res
+	return ec.marshalNTaskGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteTaskGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteTaskGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteTaskGroup(rctx, args["taskGroupID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateProduct_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateProduct(rctx, args["productID"].(*string), args["updatedProduct"].(model.ProductIn))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Product)
+	fc.Result = res
+	return ec.marshalNProduct2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProduct(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Product_ID(ctx context.Context, field graphql.CollectedField, obj *ent.Product) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2693,7 +4655,7 @@ func (ec *executionContext) _Product_ID(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNUUID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Product_Name(ctx context.Context, field graphql.CollectedField, obj *ent.Product) (ret graphql.Marshaler) {
@@ -3279,13 +5241,13 @@ func (ec *executionContext) _ProfileGroup_Profiles(ctx context.Context, field gr
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ProfileGroup().Profiles(rctx, obj)
+		return obj.Profiles(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3585,13 +5547,13 @@ func (ec *executionContext) _ProxyList_Proxies(ctx context.Context, field graphq
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ProxyList().Proxies(rctx, obj)
+		return obj.Proxies(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3603,6 +5565,651 @@ func (ec *executionContext) _ProxyList_Proxies(ctx context.Context, field graphq
 	res := resTmp.([]*ent.Proxy)
 	fc.Result = res
 	return ec.marshalOProxy2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProxyᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProxyTest_Latency(ctx context.Context, field graphql.CollectedField, obj *model.ProxyTest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProxyTest",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Latency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProxyTest_Status(ctx context.Context, field graphql.CollectedField, obj *model.ProxyTest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProxyTest",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.ProxyTestStatus)
+	fc.Result = res
+	return ec.marshalNProxyTestStatus2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProxyTestStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ProxyTest_ProxyID(ctx context.Context, field graphql.CollectedField, obj *model.ProxyTest) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ProxyTest",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProxyID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getSettings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSettings(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Settings)
+	fc.Result = res
+	return ec.marshalNSettings2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐSettings(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_testSuccessWebhook(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().TestSuccessWebhook(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_testDeclineWebhook(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().TestDeclineWebhook(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getProfile_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetProfile(rctx, args["profileID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Profile)
+	fc.Result = res
+	return ec.marshalNProfile2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getProfileGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getProfileGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetProfileGroup(rctx, args["profileGroupID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.ProfileGroup)
+	fc.Result = res
+	return ec.marshalNProfileGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfileGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getProfileGroups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetProfileGroups(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.ProfileGroup)
+	fc.Result = res
+	return ec.marshalNProfileGroup2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfileGroupᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getProxyList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getProxyList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetProxyList(rctx, args["proxyListID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.ProxyList)
+	fc.Result = res
+	return ec.marshalNProxyList2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProxyList(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_testProxyList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_testProxyList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().TestProxyList(rctx, args["proxyListID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ProxyTest)
+	fc.Result = res
+	return ec.marshalNProxyTest2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProxyTestᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getAllProxyLists(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllProxyLists(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.ProxyList)
+	fc.Result = res
+	return ec.marshalOProxyList2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProxyListᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getTask(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getTask_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetTask(rctx, args["taskID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Task)
+	fc.Result = res
+	return ec.marshalNTask2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTask(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getTaskGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getTaskGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetTaskGroup(rctx, args["taskGroupID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.TaskGroup)
+	fc.Result = res
+	return ec.marshalNTaskGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getProduct_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetProduct(rctx, args["productID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Product)
+	fc.Result = res
+	return ec.marshalNProduct2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProduct(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getAllTaskGroups(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllTaskGroups(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.TaskGroup)
+	fc.Result = res
+	return ec.marshalOTaskGroup2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskGroupᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getAllTasks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getAllTasks_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllTasks(rctx, args["taskGroupID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.Task)
+	fc.Result = res
+	return ec.marshalNTask2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4248,13 +6855,13 @@ func (ec *executionContext) _Shipping_ShippingAddress(ctx context.Context, field
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Shipping().ShippingAddress(rctx, obj)
+		return obj.ShippingAddress(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4670,7 +7277,7 @@ func (ec *executionContext) _Task_ID(ctx context.Context, field graphql.Collecte
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNUUID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Task_StartTime(ctx context.Context, field graphql.CollectedField, obj *ent.Task) (ret graphql.Marshaler) {
@@ -4833,7 +7440,7 @@ func (ec *executionContext) _TaskGroup_ID(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNUUID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TaskGroup_Name(ctx context.Context, field graphql.CollectedField, obj *ent.TaskGroup) (ret graphql.Marshaler) {
@@ -4883,13 +7490,13 @@ func (ec *executionContext) _TaskGroup_Tasks(ctx context.Context, field graphql.
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.TaskGroup().Tasks(rctx, obj)
+		return obj.Tasks(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4985,13 +7592,13 @@ func (ec *executionContext) _User_License(ctx context.Context, field graphql.Col
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().License(rctx, obj)
+		return obj.License(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5020,13 +7627,13 @@ func (ec *executionContext) _User_Statistics(ctx context.Context, field graphql.
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().Statistics(rctx, obj)
+		return obj.Statistics(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5052,13 +7659,13 @@ func (ec *executionContext) _User_App(ctx context.Context, field graphql.Collect
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().App(rctx, obj)
+		return obj.App(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5087,13 +7694,13 @@ func (ec *executionContext) _User_Metadata(ctx context.Context, field graphql.Co
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().Metadata(rctx, obj)
+		return obj.Metadata(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5122,13 +7729,13 @@ func (ec *executionContext) _User_Sessions(ctx context.Context, field graphql.Co
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().Sessions(rctx, obj)
+		return obj.Sessions(ctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6229,6 +8836,586 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewAddress(ctx context.Context, obj interface{}) (model.NewAddress, error) {
+	var it model.NewAddress
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "AddressLine":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("AddressLine"))
+			it.AddressLine, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "AdressLine2":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("AdressLine2"))
+			it.AdressLine2, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Country":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Country"))
+			it.Country, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "State":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("State"))
+			it.State, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "StateCode":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("StateCode"))
+			it.StateCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "City":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("City"))
+			it.City, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ZIP":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ZIP"))
+			it.Zip, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewBilling(ctx context.Context, obj interface{}) (model.NewBilling, error) {
+	var it model.NewBilling
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "CardHolderName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("CardHolderName"))
+			it.CardHolderName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "CardNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("CardNumber"))
+			it.CardNumber, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ExpiryMonth":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ExpiryMonth"))
+			it.ExpiryMonth, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ExpiryYear":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ExpiryYear"))
+			it.ExpiryYear, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "CVV":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("CVV"))
+			it.Cvv, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj interface{}) (model.NewProfile, error) {
+	var it model.NewProfile
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "GroupID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("GroupID"))
+			it.GroupID, err = ec.unmarshalNUUID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Shipping":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Shipping"))
+			it.Shipping, err = ec.unmarshalNNewShipping2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewShipping(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Billing":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Billing"))
+			it.Billing, err = ec.unmarshalNNewBilling2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewBilling(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewProfileGroup(ctx context.Context, obj interface{}) (model.NewProfileGroup, error) {
+	var it model.NewProfileGroup
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Profiles":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Profiles"))
+			it.Profiles, err = ec.unmarshalOUUID2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewProxy(ctx context.Context, obj interface{}) (model.NewProxy, error) {
+	var it model.NewProxy
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "Username":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Username"))
+			it.Username, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Password"))
+			it.Password, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "IP":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("IP"))
+			it.IP, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Port":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Port"))
+			it.Port, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewProxyList(ctx context.Context, obj interface{}) (model.NewProxyList, error) {
+	var it model.NewProxyList
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Type"))
+			it.Type, err = ec.unmarshalNProxyListType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproxylistᚐType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Proxies":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Proxies"))
+			it.Proxies, err = ec.unmarshalONewProxy2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProxyᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewShipping(ctx context.Context, obj interface{}) (model.NewShipping, error) {
+	var it model.NewShipping
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "FirstName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("FirstName"))
+			it.FirstName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "LastName":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("LastName"))
+			it.LastName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "PhoneNumber":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("PhoneNumber"))
+			it.PhoneNumber, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ShippingAddress":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ShippingAddress"))
+			it.ShippingAddress, err = ec.unmarshalNNewAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewAddress(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "BillingAddress":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("BillingAddress"))
+			it.BillingAddress, err = ec.unmarshalONewAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewAddress(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "BillingIsShipping":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("BillingIsShipping"))
+			it.BillingIsShipping, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewTask(ctx context.Context, obj interface{}) (model.NewTask, error) {
+	var it model.NewTask
+	var asMap = obj.(map[string]interface{})
+
+	if _, present := asMap["TaskGroupID"]; !present {
+		asMap["TaskGroupID"] = "DEF_GROUP"
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "StartTime":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("StartTime"))
+			it.StartTime, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Product":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Product"))
+			it.Product, err = ec.unmarshalNProductIn2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProductIn(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ProxyListID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ProxyListID"))
+			it.ProxyListID, err = ec.unmarshalNUUID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ProfileGroupID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ProfileGroupID"))
+			it.ProfileGroupID, err = ec.unmarshalNUUID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "TaskGroupID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("TaskGroupID"))
+			it.TaskGroupID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewTaskGroup(ctx context.Context, obj interface{}) (model.NewTaskGroup, error) {
+	var it model.NewTaskGroup
+	var asMap = obj.(map[string]interface{})
+
+	if _, present := asMap["Name"]; !present {
+		asMap["Name"] = "DEF_GROUP"
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Tasks":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Tasks"))
+			it.Tasks, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputProductIn(ctx context.Context, obj interface{}) (model.ProductIn, error) {
+	var it model.ProductIn
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "Name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Image":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Image"))
+			it.Image, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "LookupType":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("LookupType"))
+			it.LookupType, err = ec.unmarshalNLookupType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproductᚐLookupType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "PositiveKeywords":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("PositiveKeywords"))
+			it.PositiveKeywords, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "NegativeKeywords":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("NegativeKeywords"))
+			it.NegativeKeywords, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Link":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Link"))
+			it.Link, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Quantity":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Quantity"))
+			it.Quantity, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Sizes":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Sizes"))
+			it.Sizes, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Colors":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Colors"))
+			it.Colors, err = ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Site":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Site"))
+			it.Site, err = ec.unmarshalNSite2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproductᚐSite(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "Metadata":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Metadata"))
+			it.Metadata, err = ec.unmarshalOMap2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdatedTask(ctx context.Context, obj interface{}) (model.UpdatedTask, error) {
+	var it model.UpdatedTask
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "StartTime":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("StartTime"))
+			it.StartTime, err = ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ProductID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ProductID"))
+			it.ProductID, err = ec.unmarshalOUUID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ProxyListID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ProxyListID"))
+			it.ProxyListID, err = ec.unmarshalOUUID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "ProfileGroupID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ProfileGroupID"))
+			it.ProfileGroupID, err = ec.unmarshalOUUID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "TaskGroupID":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("TaskGroupID"))
+			it.TaskGroupID, err = ec.unmarshalOUUID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -6647,6 +9834,132 @@ func (ec *executionContext) _Metadata(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "setSuccessWebhook":
+			out.Values[i] = ec._Mutation_setSuccessWebhook(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "setDeclineWebhook":
+			out.Values[i] = ec._Mutation_setDeclineWebhook(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "setCheckoutDelay":
+			out.Values[i] = ec._Mutation_setCheckoutDelay(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "setATCDelay":
+			out.Values[i] = ec._Mutation_setATCDelay(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createProfile":
+			out.Values[i] = ec._Mutation_createProfile(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateProfile":
+			out.Values[i] = ec._Mutation_updateProfile(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteProfile":
+			out.Values[i] = ec._Mutation_deleteProfile(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createProfileGroup":
+			out.Values[i] = ec._Mutation_createProfileGroup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateProfileGroup":
+			out.Values[i] = ec._Mutation_updateProfileGroup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteProfileGroup":
+			out.Values[i] = ec._Mutation_deleteProfileGroup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createProxyList":
+			out.Values[i] = ec._Mutation_createProxyList(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateProxyList":
+			out.Values[i] = ec._Mutation_updateProxyList(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteProxyList":
+			out.Values[i] = ec._Mutation_deleteProxyList(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createTask":
+			out.Values[i] = ec._Mutation_createTask(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateTask":
+			out.Values[i] = ec._Mutation_updateTask(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteTask":
+			out.Values[i] = ec._Mutation_deleteTask(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createTaskGroup":
+			out.Values[i] = ec._Mutation_createTaskGroup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateTaskGroup":
+			out.Values[i] = ec._Mutation_updateTaskGroup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteTaskGroup":
+			out.Values[i] = ec._Mutation_deleteTaskGroup(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateProduct":
+			out.Values[i] = ec._Mutation_updateProduct(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var productImplementors = []string{"Product"}
 
 func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *ent.Product) graphql.Marshaler {
@@ -6942,6 +10255,43 @@ func (ec *executionContext) _ProxyList(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var proxyTestImplementors = []string{"ProxyTest"}
+
+func (ec *executionContext) _ProxyTest(ctx context.Context, sel ast.SelectionSet, obj *model.ProxyTest) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, proxyTestImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProxyTest")
+		case "Latency":
+			out.Values[i] = ec._ProxyTest_Latency(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Status":
+			out.Values[i] = ec._ProxyTest_Status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ProxyID":
+			out.Values[i] = ec._ProxyTest_ProxyID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -6957,6 +10307,196 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "getSettings":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSettings(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "testSuccessWebhook":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_testSuccessWebhook(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "testDeclineWebhook":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_testDeclineWebhook(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getProfile":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getProfile(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getProfileGroup":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getProfileGroup(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getProfileGroups":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getProfileGroups(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getProxyList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getProxyList(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "testProxyList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_testProxyList(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getAllProxyLists":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllProxyLists(ctx, field)
+				return res
+			})
+		case "getTask":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getTask(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getTaskGroup":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getTaskGroup(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getProduct":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getProduct(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getAllTaskGroups":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllTaskGroups(ctx, field)
+				return res
+			})
+		case "getAllTasks":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllTasks(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -7759,10 +11299,6 @@ func (ec *executionContext) marshalNAccountGroup2ᚖgithubᚗcomᚋProjectAthena
 	return ec._AccountGroup(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAddress2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAddress(ctx context.Context, sel ast.SelectionSet, v ent.Address) graphql.Marshaler {
-	return ec._Address(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAddress(ctx context.Context, sel ast.SelectionSet, v *ent.Address) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -7771,10 +11307,6 @@ func (ec *executionContext) marshalNAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋs
 		return graphql.Null
 	}
 	return ec._Address(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNApp2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐApp(ctx context.Context, sel ast.SelectionSet, v ent.App) graphql.Marshaler {
-	return ec._App(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNApp2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐApp(ctx context.Context, sel ast.SelectionSet, v *ent.App) graphql.Marshaler {
@@ -7803,13 +11335,22 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 }
 
 func (ec *executionContext) unmarshalNDeviceType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋsessionᚐDeviceType(ctx context.Context, v interface{}) (session.DeviceType, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := session.DeviceType(tmp)
+	var res session.DeviceType
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNDeviceType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋsessionᚐDeviceType(ctx context.Context, sel ast.SelectionSet, v session.DeviceType) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
+	return v
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -7833,10 +11374,6 @@ func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNLicense2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐLicense(ctx context.Context, sel ast.SelectionSet, v ent.License) graphql.Marshaler {
-	return ec._License(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNLicense2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐLicense(ctx context.Context, sel ast.SelectionSet, v *ent.License) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -7848,35 +11385,23 @@ func (ec *executionContext) marshalNLicense2ᚖgithubᚗcomᚋProjectAthenaaᚋs
 }
 
 func (ec *executionContext) unmarshalNLicenseType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋlicenseᚐType(ctx context.Context, v interface{}) (license.Type, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := license.Type(tmp)
+	var res license.Type
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNLicenseType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋlicenseᚐType(ctx context.Context, sel ast.SelectionSet, v license.Type) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
+	return v
 }
 
 func (ec *executionContext) unmarshalNLookupType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproductᚐLookupType(ctx context.Context, v interface{}) (product.LookupType, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := product.LookupType(tmp)
+	var res product.LookupType
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNLookupType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproductᚐLookupType(ctx context.Context, sel ast.SelectionSet, v product.LookupType) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
+	return v
 }
 
 func (ec *executionContext) unmarshalNMap2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
@@ -7900,10 +11425,6 @@ func (ec *executionContext) marshalNMap2map(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNMetadata2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐMetadata(ctx context.Context, sel ast.SelectionSet, v ent.Metadata) graphql.Marshaler {
-	return ec._Metadata(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNMetadata2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐMetadata(ctx context.Context, sel ast.SelectionSet, v *ent.Metadata) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -7914,6 +11435,79 @@ func (ec *executionContext) marshalNMetadata2ᚖgithubᚗcomᚋProjectAthenaaᚋ
 	return ec._Metadata(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNNewAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewAddress(ctx context.Context, v interface{}) (*model.NewAddress, error) {
+	res, err := ec.unmarshalInputNewAddress(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewBilling2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewBilling(ctx context.Context, v interface{}) (*model.NewBilling, error) {
+	res, err := ec.unmarshalInputNewBilling(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewProfile2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProfile(ctx context.Context, v interface{}) (model.NewProfile, error) {
+	res, err := ec.unmarshalInputNewProfile(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewProfileGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProfileGroup(ctx context.Context, v interface{}) (model.NewProfileGroup, error) {
+	res, err := ec.unmarshalInputNewProfileGroup(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewProxy2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProxy(ctx context.Context, v interface{}) (*model.NewProxy, error) {
+	res, err := ec.unmarshalInputNewProxy(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewProxyList2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProxyList(ctx context.Context, v interface{}) (model.NewProxyList, error) {
+	res, err := ec.unmarshalInputNewProxyList(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewShipping2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewShipping(ctx context.Context, v interface{}) (*model.NewShipping, error) {
+	res, err := ec.unmarshalInputNewShipping(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewTask2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewTask(ctx context.Context, v interface{}) (model.NewTask, error) {
+	res, err := ec.unmarshalInputNewTask(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewTaskGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewTaskGroup(ctx context.Context, v interface{}) (model.NewTaskGroup, error) {
+	res, err := ec.unmarshalInputNewTaskGroup(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProduct2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProduct(ctx context.Context, sel ast.SelectionSet, v ent.Product) graphql.Marshaler {
+	return ec._Product(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProduct(ctx context.Context, sel ast.SelectionSet, v *ent.Product) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Product(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNProductIn2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProductIn(ctx context.Context, v interface{}) (model.ProductIn, error) {
+	res, err := ec.unmarshalInputProductIn(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNProductIn2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProductIn(ctx context.Context, v interface{}) (*model.ProductIn, error) {
+	res, err := ec.unmarshalInputProductIn(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProfile2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfile(ctx context.Context, sel ast.SelectionSet, v ent.Profile) graphql.Marshaler {
+	return ec._Profile(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfile(ctx context.Context, sel ast.SelectionSet, v *ent.Profile) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -7922,6 +11516,47 @@ func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋProjectAthenaaᚋs
 		return graphql.Null
 	}
 	return ec._Profile(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNProfileGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfileGroup(ctx context.Context, sel ast.SelectionSet, v ent.ProfileGroup) graphql.Marshaler {
+	return ec._ProfileGroup(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProfileGroup2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfileGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.ProfileGroup) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNProfileGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfileGroup(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalNProfileGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProfileGroup(ctx context.Context, sel ast.SelectionSet, v *ent.ProfileGroup) graphql.Marshaler {
@@ -7944,6 +11579,10 @@ func (ec *executionContext) marshalNProxy2ᚖgithubᚗcomᚋProjectAthenaaᚋson
 	return ec._Proxy(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNProxyList2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProxyList(ctx context.Context, sel ast.SelectionSet, v ent.ProxyList) graphql.Marshaler {
+	return ec._ProxyList(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNProxyList2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProxyList(ctx context.Context, sel ast.SelectionSet, v *ent.ProxyList) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -7955,19 +11594,70 @@ func (ec *executionContext) marshalNProxyList2ᚖgithubᚗcomᚋProjectAthenaa�
 }
 
 func (ec *executionContext) unmarshalNProxyListType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproxylistᚐType(ctx context.Context, v interface{}) (proxylist.Type, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := proxylist.Type(tmp)
+	var res proxylist.Type
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNProxyListType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproxylistᚐType(ctx context.Context, sel ast.SelectionSet, v proxylist.Type) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
+	return v
+}
+
+func (ec *executionContext) marshalNProxyTest2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProxyTestᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ProxyTest) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNProxyTest2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProxyTest(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNProxyTest2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProxyTest(ctx context.Context, sel ast.SelectionSet, v *model.ProxyTest) graphql.Marshaler {
+	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
+		return graphql.Null
 	}
-	return res
+	return ec._ProxyTest(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNProxyTestStatus2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProxyTestStatus(ctx context.Context, v interface{}) (model.ProxyTestStatus, error) {
+	var res model.ProxyTestStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProxyTestStatus2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐProxyTestStatus(ctx context.Context, sel ast.SelectionSet, v model.ProxyTestStatus) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNSession2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐSession(ctx context.Context, sel ast.SelectionSet, v *ent.Session) graphql.Marshaler {
@@ -8009,35 +11699,23 @@ func (ec *executionContext) marshalNShipping2ᚖgithubᚗcomᚋProjectAthenaaᚋ
 }
 
 func (ec *executionContext) unmarshalNSite2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproductᚐSite(ctx context.Context, v interface{}) (product.Site, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := product.Site(tmp)
+	var res product.Site
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNSite2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproductᚐSite(ctx context.Context, sel ast.SelectionSet, v product.Site) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
+	return v
 }
 
 func (ec *executionContext) unmarshalNStatType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋstatisticᚐType(ctx context.Context, v interface{}) (statistic.Type, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := statistic.Type(tmp)
+	var res statistic.Type
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNStatType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋstatisticᚐType(ctx context.Context, sel ast.SelectionSet, v statistic.Type) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
+	return v
 }
 
 func (ec *executionContext) marshalNStatistic2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistic(ctx context.Context, sel ast.SelectionSet, v *ent.Statistic) graphql.Marshaler {
@@ -8065,6 +11743,47 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) marshalNTask2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTask(ctx context.Context, sel ast.SelectionSet, v ent.Task) graphql.Marshaler {
+	return ec._Task(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTask2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Task) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTask2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTask(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalNTask2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTask(ctx context.Context, sel ast.SelectionSet, v *ent.Task) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -8073,6 +11792,10 @@ func (ec *executionContext) marshalNTask2ᚖgithubᚗcomᚋProjectAthenaaᚋsoni
 		return graphql.Null
 	}
 	return ec._Task(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNTaskGroup2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskGroup(ctx context.Context, sel ast.SelectionSet, v ent.TaskGroup) graphql.Marshaler {
+	return ec._TaskGroup(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNTaskGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐTaskGroup(ctx context.Context, sel ast.SelectionSet, v *ent.TaskGroup) graphql.Marshaler {
@@ -8086,19 +11809,13 @@ func (ec *executionContext) marshalNTaskGroup2ᚖgithubᚗcomᚋProjectAthenaa�
 }
 
 func (ec *executionContext) unmarshalNTheme2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋmetadataᚐTheme(ctx context.Context, v interface{}) (metadata.Theme, error) {
-	tmp, err := graphql.UnmarshalString(v)
-	res := metadata.Theme(tmp)
+	var res metadata.Theme
+	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNTheme2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋmetadataᚐTheme(ctx context.Context, sel ast.SelectionSet, v metadata.Theme) graphql.Marshaler {
-	res := graphql.MarshalString(string(v))
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
+	return v
 }
 
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
@@ -8129,6 +11846,11 @@ func (ec *executionContext) marshalNUUID2string(ctx context.Context, sel ast.Sel
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNUpdatedTask2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐUpdatedTask(ctx context.Context, v interface{}) (model.UpdatedTask, error) {
+	res, err := ec.unmarshalInputUpdatedTask(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -8486,6 +12208,38 @@ func (ec *executionContext) marshalOMap2map(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 	return graphql.MarshalMap(v)
+}
+
+func (ec *executionContext) unmarshalONewAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewAddress(ctx context.Context, v interface{}) (*model.NewAddress, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputNewAddress(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalONewProxy2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProxyᚄ(ctx context.Context, v interface{}) ([]*model.NewProxy, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*model.NewProxy, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNNewProxy2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProxy(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) marshalOProduct2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐProduct(ctx context.Context, sel ast.SelectionSet, v *ent.Product) graphql.Marshaler {
@@ -8911,6 +12665,57 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 		return graphql.Null
 	}
 	return graphql.MarshalTime(*v)
+}
+
+func (ec *executionContext) unmarshalOUUID2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNUUID2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOUUID2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNUUID2string(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOUUID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUUID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

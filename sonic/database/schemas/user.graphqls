@@ -1,5 +1,5 @@
-scalar UUID
 scalar Time
+scalar UUID
 
 type User{
     ID: UUID!
@@ -9,5 +9,4 @@ type User{
     App: App!
     Metadata: Metadata!
     Sessions: [Session!]
-
 }

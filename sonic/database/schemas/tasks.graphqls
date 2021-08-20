@@ -2,13 +2,13 @@ scalar Map
 enum LookupType{Test}
 
 type TaskGroup{
-    ID: String!
+    ID: UUID!
     Name: String!
     Tasks: [Task!]
 }
 
 type Task{
-    ID: String!
+    ID: UUID!
     StartTime: Time
     Product: Product
     ProxyList: ProxyList
@@ -16,7 +16,7 @@ type Task{
 }
 
 type Product{
-    ID: String!
+    ID: UUID!
     Name: String!
     Image: String
     LookupType: LookupType!
@@ -28,4 +28,59 @@ type Product{
     Colors: [String!]
     Site: Site!
     Metadata: Map
+}
+
+
+input ProductIn{
+    Name: String!
+    Image: String
+    LookupType: LookupType!
+    PositiveKeywords: [String!]
+    NegativeKeywords: [String!]
+    Link: String
+    Quantity: Int
+    Sizes: [String!]
+    Colors: [String!]
+    Site: Site!
+    Metadata: Map
+}
+
+input NewTask{
+    StartTime: Time
+    Product: ProductIn!
+    ProxyListID: UUID!
+    ProfileGroupID: UUID!
+    TaskGroupID: String! = "DEF_GROUP"
+}
+
+input UpdatedTask{
+    StartTime: Time
+    ProductID: UUID
+    ProxyListID: UUID
+    ProfileGroupID: UUID
+    TaskGroupID: UUID
+}
+
+input NewTaskGroup{
+    Name: String!="DEF_GROUP"
+    Tasks: [String!]
+}
+
+extend type Query{
+    getTask(taskID: UUID!): Task!
+    getTaskGroup(taskGroupID: UUID!): TaskGroup!
+    getProduct(productID: UUID!): Product!
+    getAllTaskGroups: [TaskGroup!]
+    getAllTasks(taskGroupID: UUID!): [Task!]!
+}
+
+extend type Mutation {
+    createTask(newTask: NewTask!): Task!
+    updateTask(taskID: UUID!, updatedTask: UpdatedTask!): Task!
+    deleteTask(taskID: UUID!, deletedProduct: Boolean!=False): Boolean!
+    createTaskGroup(newTaskGroup: NewTaskGroup!): TaskGroup!
+    updateTaskGroup(taskGroupID: UUID!, updatedTaskGroup: NewTaskGroup!): TaskGroup!
+    deleteTaskGroup(taskGroupID: UUID!): Boolean!
+
+    updateProduct(productID: UUID, updatedProduct: ProductIn!): Product!
 }

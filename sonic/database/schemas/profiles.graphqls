@@ -40,3 +40,59 @@ type Billing{
     ExpiryYear: String!
     CVV: String!
 }
+
+input NewProfile{
+    GroupID: UUID!
+    Name: String!
+    Email: String!
+    Shipping: NewShipping!
+    Billing: NewBilling!
+}
+
+input NewBilling{
+    CardHolderName: String!
+    CardNumber: String!
+    ExpiryMonth: String!
+    ExpiryYear: String!
+    CVV: String!
+}
+
+input NewShipping{
+    FirstName: String!
+    LastName: String!
+    PhoneNumber: String!
+    ShippingAddress: NewAddress!
+    BillingAddress: NewAddress
+    BillingIsShipping: Boolean!
+}
+
+input NewAddress{
+    AddressLine: String!
+    AdressLine2: String
+    Country: String!
+    State: String!
+    StateCode: String
+    City: String!
+    ZIP: String!
+}
+
+input NewProfileGroup{
+    Name: String!
+    Profiles: [UUID!]
+}
+
+extend type Query{
+    getProfile(profileID: UUID!): Profile!
+    getProfileGroup(profileGroupID: UUID!): ProfileGroup!
+    getProfileGroups: [ProfileGroup!]!
+}
+
+extend type Mutation{
+    createProfile(newProfile: NewProfile!): Profile!
+    updateProfile(profileID: UUID!, updatedProfile: NewProfile!): Profile!
+    deleteProfile(profileID: UUID!): Boolean!
+
+    createProfileGroup(newGroup: NewProfileGroup!): ProfileGroup!
+    updateProfileGroup(groupID: UUID!, updatedGroup: NewProfileGroup!): ProfileGroup!
+    deleteProfileGroup(groupID: UUID!): Boolean!
+}

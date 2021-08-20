@@ -5,3 +5,16 @@ type Settings{
     CheckoutDelay: Int!
     ATCDelay: Int!
 }
+
+type Query{
+    getSettings: Settings!
+    testSuccessWebhook: Boolean!
+    testDeclineWebhook: Boolean!
+}
+
+type Mutation{
+    setSuccessWebhook(Webhook: String!): Boolean!
+    setDeclineWebhook(Webhook: String!): Boolean!
+    setCheckoutDelay(Delay: Int!): Boolean!
+    setATCDelay(Delay: Int!): Boolean!
+}
