@@ -113,6 +113,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 		setRequestContext:
 			c.Request = c.Request.WithContext(ctx)
 			c.Next()
+		c.Writer.Reset(c.Writer)
 		c.JSON(200, GraphQLError{
 			Errors: []struct {
 				Message string   `json:"message"`
