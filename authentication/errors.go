@@ -1,6 +1,8 @@
 package authentication
 
+import "errors"
+
 var (
-	ipDoesNotMatchSessionError = "ip_does_not_match_session"
-	unauthorizedError = "unauthorized"
+	ipDoesNotMatchSessionError = errors.New("ip_does_not_match_session")
+	unauthorizedError = errors.New("unauthorized")
 )
