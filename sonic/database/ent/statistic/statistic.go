@@ -4,6 +4,8 @@ package statistic
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,12 +36,12 @@ const (
 	EdgeProduct = "Product"
 	// Table holds the table name of the statistic in the database.
 	Table = "statistics"
-	// UserTable is the table the holds the User relation/edge. The primary key declared below.
+	// UserTable is the table that holds the User relation/edge. The primary key declared below.
 	UserTable = "user_Statistics"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
-	// ProductTable is the table the holds the Product relation/edge. The primary key declared below.
+	// ProductTable is the table that holds the Product relation/edge. The primary key declared below.
 	ProductTable = "statistic_Product"
 	// ProductInverseTable is the table name for the Product entity.
 	// It exists in this package in order to avoid circular dependency with the "product" package.
@@ -117,4 +119,22 @@ func TypeValidator(_type Type) error {
 	default:
 		return fmt.Errorf("statistic: invalid enum value for Type field: %q", _type)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_type Type) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_type.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_type *Type) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_type = Type(str)
+	if err := TypeValidator(*_type); err != nil {
+		return fmt.Errorf("%s is not a valid Type", str)
+	}
+	return nil
 }

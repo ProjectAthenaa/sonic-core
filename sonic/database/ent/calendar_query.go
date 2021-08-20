@@ -326,8 +326,8 @@ func (cq *CalendarQuery) GroupBy(field string, fields ...string) *CalendarGroupB
 //		Select(calendar.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (cq *CalendarQuery) Select(field string, fields ...string) *CalendarSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CalendarQuery) Select(fields ...string) *CalendarSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CalendarSelect{CalendarQuery: cq}
 }
 
@@ -470,10 +470,14 @@ func (cq *CalendarQuery) querySpec() *sqlgraph.QuerySpec {
 func (cq *CalendarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(calendar.Table)
-	selector := builder.Select(t1.Columns(calendar.Columns...)...).From(t1)
+	columns := cq.fields
+	if len(columns) == 0 {
+		columns = calendar.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if cq.sql != nil {
 		selector = cq.sql
-		selector.Select(selector.Columns(calendar.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range cq.predicates {
 		p(selector)
@@ -741,13 +745,24 @@ func (cgb *CalendarGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (cgb *CalendarGroupBy) sqlQuery() *sql.Selector {
-	selector := cgb.sql
-	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
-	columns = append(columns, cgb.fields...)
+	selector := cgb.sql.Select()
+	aggregation := make([]string, 0, len(cgb.fns))
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(cgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
+		for _, f := range cgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(cgb.fields...)...)
 }
 
 // CalendarSelect is the builder for selecting fields of Calendar entities.
@@ -963,16 +978,10 @@ func (cs *CalendarSelect) BoolX(ctx context.Context) bool {
 
 func (cs *CalendarSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := cs.sqlQuery().Query()
+	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (cs *CalendarSelect) sqlQuery() sql.Querier {
-	selector := cs.sql
-	selector.Select(selector.Columns(cs.fields...)...)
-	return selector
 }

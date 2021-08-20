@@ -1,0 +1,42 @@
+type ProfileGroup{
+    ID: UUID!
+    Name: String!
+    Profiles: [Profile!]
+}
+
+type Profile{
+    ID: UUID!
+    Name: String!
+    Email: String!
+    Shipping: Shipping!
+}
+
+type Shipping{
+    ID: UUID!
+    FirstName: String!
+    LastName: String!
+    PhoneNumber: String!
+    BillingIsShipping: Boolean!
+    ShippingAddress: Address!
+    BillingAddress: Address
+}
+
+type Address{
+    ID: UUID!
+    AddressLine: String!
+    AddressLine2: String
+    Country: String!
+    State: String!
+    City: String!
+    ZIP: String!
+    StateCode: String
+}
+
+type Billing{
+    ID: UUID!
+    CardHolderName: String!
+    CardNumber: String!
+    ExpiryMonth: String!
+    ExpiryYear: String!
+    CVV: String!
+}

@@ -166,8 +166,8 @@ func (m *AccountGroupMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *AccountGroupMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -392,6 +392,11 @@ func (m *AccountGroupMutation) AppIDs() (ids []uuid.UUID) {
 func (m *AccountGroupMutation) ResetApp() {
 	m._App = nil
 	m.cleared_App = false
+}
+
+// Where appends a list predicates to the AccountGroupMutation builder.
+func (m *AccountGroupMutation) Where(ps ...predicate.AccountGroup) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -751,8 +756,8 @@ func (m *AddressMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *AddressMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -1175,6 +1180,7 @@ func (m *AddressMutation) RemoveBillingAddresIDs(ids ...uuid.UUID) {
 		m.removed_BillingAddress = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._BillingAddress, ids[i])
 		m.removed_BillingAddress[ids[i]] = struct{}{}
 	}
 }
@@ -1200,6 +1206,11 @@ func (m *AddressMutation) ResetBillingAddress() {
 	m._BillingAddress = nil
 	m.cleared_BillingAddress = false
 	m.removed_BillingAddress = nil
+}
+
+// Where appends a list predicates to the AddressMutation builder.
+func (m *AddressMutation) Where(ps ...predicate.Address) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1673,8 +1684,8 @@ func (m *AppMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *AppMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -1819,6 +1830,7 @@ func (m *AppMutation) RemoveSettingIDs(ids ...uuid.UUID) {
 		m.removed_Settings = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Settings, ids[i])
 		m.removed_Settings[ids[i]] = struct{}{}
 	}
 }
@@ -1872,6 +1884,7 @@ func (m *AppMutation) RemoveProxyListIDs(ids ...uuid.UUID) {
 		m.removed_ProxyLists = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._ProxyLists, ids[i])
 		m.removed_ProxyLists[ids[i]] = struct{}{}
 	}
 }
@@ -1925,6 +1938,7 @@ func (m *AppMutation) RemoveProfileGroupIDs(ids ...uuid.UUID) {
 		m.removed_ProfileGroups = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._ProfileGroups, ids[i])
 		m.removed_ProfileGroups[ids[i]] = struct{}{}
 	}
 }
@@ -1978,6 +1992,7 @@ func (m *AppMutation) RemoveTaskGroupIDs(ids ...uuid.UUID) {
 		m.removed_TaskGroups = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._TaskGroups, ids[i])
 		m.removed_TaskGroups[ids[i]] = struct{}{}
 	}
 }
@@ -2031,6 +2046,7 @@ func (m *AppMutation) RemoveAccountGroupIDs(ids ...uuid.UUID) {
 		m.removed_AccountGroups = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._AccountGroups, ids[i])
 		m.removed_AccountGroups[ids[i]] = struct{}{}
 	}
 }
@@ -2056,6 +2072,11 @@ func (m *AppMutation) ResetAccountGroups() {
 	m._AccountGroups = nil
 	m.cleared_AccountGroups = false
 	m.removed_AccountGroups = nil
+}
+
+// Where appends a list predicates to the AppMutation builder.
+func (m *AppMutation) Where(ps ...predicate.App) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2490,8 +2511,8 @@ func (m *BillingMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *BillingMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -2777,6 +2798,7 @@ func (m *BillingMutation) RemoveProfileIDs(ids ...uuid.UUID) {
 		m.removed_Profile = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Profile, ids[i])
 		m.removed_Profile[ids[i]] = struct{}{}
 	}
 }
@@ -2802,6 +2824,11 @@ func (m *BillingMutation) ResetProfile() {
 	m._Profile = nil
 	m.cleared_Profile = false
 	m.removed_Profile = nil
+}
+
+// Where appends a list predicates to the BillingMutation builder.
+func (m *BillingMutation) Where(ps ...predicate.Billing) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -3199,8 +3226,8 @@ func (m *CalendarMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CalendarMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -3517,6 +3544,11 @@ func (m *CalendarMutation) QuickTaskIDs() (ids []uuid.UUID) {
 func (m *CalendarMutation) ResetQuickTask() {
 	m._QuickTask = nil
 	m.cleared_QuickTask = false
+}
+
+// Where appends a list predicates to the CalendarMutation builder.
+func (m *CalendarMutation) Where(ps ...predicate.Calendar) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -3914,8 +3946,8 @@ func (m *DeviceMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *DeviceMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -4042,6 +4074,11 @@ func (m *DeviceMutation) AdeviceCleared() bool {
 func (m *DeviceMutation) ResetAdevice() {
 	m.adevice = nil
 	delete(m.clearedFields, device.FieldAdevice)
+}
+
+// Where appends a list predicates to the DeviceMutation builder.
+func (m *DeviceMutation) Where(ps ...predicate.Device) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -4345,8 +4382,8 @@ func (m *LicenseMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *LicenseMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -4661,6 +4698,7 @@ func (m *LicenseMutation) RemoveStripeIDs(ids ...uuid.UUID) {
 		m.removed_Stripe = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Stripe, ids[i])
 		m.removed_Stripe[ids[i]] = struct{}{}
 	}
 }
@@ -4686,6 +4724,11 @@ func (m *LicenseMutation) ResetStripe() {
 	m._Stripe = nil
 	m.cleared_Stripe = false
 	m.removed_Stripe = nil
+}
+
+// Where appends a list predicates to the LicenseMutation builder.
+func (m *LicenseMutation) Where(ps ...predicate.License) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -5103,8 +5146,8 @@ func (m *MetadataMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *MetadataMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -5581,6 +5624,11 @@ func (m *MetadataMutation) UserIDs() (ids []uuid.UUID) {
 func (m *MetadataMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
+}
+
+// Where appends a list predicates to the MetadataMutation builder.
+func (m *MetadataMutation) Where(ps ...predicate.Metadata) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -6067,8 +6115,8 @@ func (m *ProductMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ProductMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -6681,6 +6729,7 @@ func (m *ProductMutation) RemoveTaskIDs(ids ...uuid.UUID) {
 		m.removed_Task = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Task, ids[i])
 		m.removed_Task[ids[i]] = struct{}{}
 	}
 }
@@ -6734,6 +6783,7 @@ func (m *ProductMutation) RemoveStatisticIDs(ids ...uuid.UUID) {
 		m.removed_Statistic = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Statistic, ids[i])
 		m.removed_Statistic[ids[i]] = struct{}{}
 	}
 }
@@ -6798,6 +6848,11 @@ func (m *ProductMutation) CalendarIDs() (ids []uuid.UUID) {
 func (m *ProductMutation) ResetCalendar() {
 	m._Calendar = nil
 	m.cleared_Calendar = false
+}
+
+// Where appends a list predicates to the ProductMutation builder.
+func (m *ProductMutation) Where(ps ...predicate.Product) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -7403,8 +7458,8 @@ func (m *ProfileMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ProfileMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -7621,6 +7676,7 @@ func (m *ProfileMutation) RemoveShippingIDs(ids ...uuid.UUID) {
 		m.removed_Shipping = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Shipping, ids[i])
 		m.removed_Shipping[ids[i]] = struct{}{}
 	}
 }
@@ -7674,6 +7730,7 @@ func (m *ProfileMutation) RemoveBillingIDs(ids ...uuid.UUID) {
 		m.removed_Billing = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Billing, ids[i])
 		m.removed_Billing[ids[i]] = struct{}{}
 	}
 }
@@ -7699,6 +7756,11 @@ func (m *ProfileMutation) ResetBilling() {
 	m._Billing = nil
 	m.cleared_Billing = false
 	m.removed_Billing = nil
+}
+
+// Where appends a list predicates to the ProfileMutation builder.
+func (m *ProfileMutation) Where(ps ...predicate.Profile) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -8091,8 +8153,8 @@ func (m *ProfileGroupMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ProfileGroupMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -8234,6 +8296,7 @@ func (m *ProfileGroupMutation) RemoveProfileIDs(ids ...uuid.UUID) {
 		m.removed_Profiles = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Profiles, ids[i])
 		m.removed_Profiles[ids[i]] = struct{}{}
 	}
 }
@@ -8287,6 +8350,7 @@ func (m *ProfileGroupMutation) RemoveAppIDs(ids ...uuid.UUID) {
 		m.removed_App = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._App, ids[i])
 		m.removed_App[ids[i]] = struct{}{}
 	}
 }
@@ -8340,6 +8404,7 @@ func (m *ProfileGroupMutation) RemoveTaskIDs(ids ...uuid.UUID) {
 		m.removed_Task = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Task, ids[i])
 		m.removed_Task[ids[i]] = struct{}{}
 	}
 }
@@ -8365,6 +8430,11 @@ func (m *ProfileGroupMutation) ResetTask() {
 	m._Task = nil
 	m.cleared_Task = false
 	m.removed_Task = nil
+}
+
+// Where appends a list predicates to the ProfileGroupMutation builder.
+func (m *ProfileGroupMutation) Where(ps ...predicate.ProfileGroup) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -8744,8 +8814,8 @@ func (m *ProxyMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ProxyMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -9032,6 +9102,11 @@ func (m *ProxyMutation) ProxyListIDs() (ids []uuid.UUID) {
 func (m *ProxyMutation) ResetProxyList() {
 	m._ProxyList = nil
 	m.cleared_ProxyList = false
+}
+
+// Where appends a list predicates to the ProxyMutation builder.
+func (m *ProxyMutation) Where(ps ...predicate.Proxy) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -9422,8 +9497,8 @@ func (m *ProxyListMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ProxyListMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -9601,6 +9676,7 @@ func (m *ProxyListMutation) RemoveAppIDs(ids ...uuid.UUID) {
 		m.removed_App = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._App, ids[i])
 		m.removed_App[ids[i]] = struct{}{}
 	}
 }
@@ -9654,6 +9730,7 @@ func (m *ProxyListMutation) RemoveProxyIDs(ids ...uuid.UUID) {
 		m.removed_Proxies = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Proxies, ids[i])
 		m.removed_Proxies[ids[i]] = struct{}{}
 	}
 }
@@ -9707,6 +9784,7 @@ func (m *ProxyListMutation) RemoveTaskIDs(ids ...uuid.UUID) {
 		m.removed_Task = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Task, ids[i])
 		m.removed_Task[ids[i]] = struct{}{}
 	}
 }
@@ -9732,6 +9810,11 @@ func (m *ProxyListMutation) ResetTask() {
 	m._Task = nil
 	m.cleared_Task = false
 	m.removed_Task = nil
+}
+
+// Where appends a list predicates to the ProxyListMutation builder.
+func (m *ProxyListMutation) Where(ps ...predicate.ProxyList) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -10135,8 +10218,8 @@ func (m *ReleaseMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ReleaseMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -10581,6 +10664,7 @@ func (m *ReleaseMutation) RemoveCustomerIDs(ids ...uuid.UUID) {
 		m.removed_Customers = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Customers, ids[i])
 		m.removed_Customers[ids[i]] = struct{}{}
 	}
 }
@@ -10606,6 +10690,11 @@ func (m *ReleaseMutation) ResetCustomers() {
 	m._Customers = nil
 	m.cleared_Customers = false
 	m.removed_Customers = nil
+}
+
+// Where appends a list predicates to the ReleaseMutation builder.
+func (m *ReleaseMutation) Where(ps ...predicate.Release) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -11089,8 +11178,8 @@ func (m *SessionMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *SessionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -11351,6 +11440,11 @@ func (m *SessionMutation) UserIDs() (ids []uuid.UUID) {
 func (m *SessionMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
+}
+
+// Where appends a list predicates to the SessionMutation builder.
+func (m *SessionMutation) Where(ps ...predicate.Session) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -11723,8 +11817,8 @@ func (m *SettingsMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *SettingsMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -12025,6 +12119,11 @@ func (m *SettingsMutation) AppIDs() (ids []uuid.UUID) {
 func (m *SettingsMutation) ResetApp() {
 	m._App = nil
 	m.cleared_App = false
+}
+
+// Where appends a list predicates to the SettingsMutation builder.
+func (m *SettingsMutation) Where(ps ...predicate.Settings) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -12427,8 +12526,8 @@ func (m *ShippingMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ShippingMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -12756,6 +12855,7 @@ func (m *ShippingMutation) RemoveBillingAddresIDs(ids ...uuid.UUID) {
 		m.removed_BillingAddress = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._BillingAddress, ids[i])
 		m.removed_BillingAddress[ids[i]] = struct{}{}
 	}
 }
@@ -12781,6 +12881,11 @@ func (m *ShippingMutation) ResetBillingAddress() {
 	m._BillingAddress = nil
 	m.cleared_BillingAddress = false
 	m.removed_BillingAddress = nil
+}
+
+// Where appends a list predicates to the ShippingMutation builder.
+func (m *ShippingMutation) Where(ps ...predicate.Shipping) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -13203,8 +13308,8 @@ func (m *StatisticMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *StatisticMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -13592,6 +13697,7 @@ func (m *StatisticMutation) RemoveUserIDs(ids ...uuid.UUID) {
 		m.removed_User = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._User, ids[i])
 		m.removed_User[ids[i]] = struct{}{}
 	}
 }
@@ -13645,6 +13751,7 @@ func (m *StatisticMutation) RemoveProductIDs(ids ...uuid.UUID) {
 		m.removed_Product = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Product, ids[i])
 		m.removed_Product[ids[i]] = struct{}{}
 	}
 }
@@ -13670,6 +13777,11 @@ func (m *StatisticMutation) ResetProduct() {
 	m._Product = nil
 	m.cleared_Product = false
 	m.removed_Product = nil
+}
+
+// Where appends a list predicates to the StatisticMutation builder.
+func (m *StatisticMutation) Where(ps ...predicate.Statistic) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -14150,8 +14262,8 @@ func (m *StripeMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *StripeMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -14402,6 +14514,11 @@ func (m *StripeMutation) LicenseIDs() (ids []uuid.UUID) {
 func (m *StripeMutation) ResetLicense() {
 	m._License = nil
 	m.cleared_License = false
+}
+
+// Where appends a list predicates to the StripeMutation builder.
+func (m *StripeMutation) Where(ps ...predicate.Stripe) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -14777,8 +14894,8 @@ func (m *TaskMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *TaskMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -14933,6 +15050,7 @@ func (m *TaskMutation) RemoveProductIDs(ids ...uuid.UUID) {
 		m.removed_Product = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Product, ids[i])
 		m.removed_Product[ids[i]] = struct{}{}
 	}
 }
@@ -14986,6 +15104,7 @@ func (m *TaskMutation) RemoveProxyListIDs(ids ...uuid.UUID) {
 		m.removed_ProxyList = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._ProxyList, ids[i])
 		m.removed_ProxyList[ids[i]] = struct{}{}
 	}
 }
@@ -15039,6 +15158,7 @@ func (m *TaskMutation) RemoveProfileGroupIDs(ids ...uuid.UUID) {
 		m.removed_ProfileGroup = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._ProfileGroup, ids[i])
 		m.removed_ProfileGroup[ids[i]] = struct{}{}
 	}
 }
@@ -15092,6 +15212,7 @@ func (m *TaskMutation) RemoveTaskGroupIDs(ids ...uuid.UUID) {
 		m.removed_TaskGroup = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._TaskGroup, ids[i])
 		m.removed_TaskGroup[ids[i]] = struct{}{}
 	}
 }
@@ -15117,6 +15238,11 @@ func (m *TaskMutation) ResetTaskGroup() {
 	m._TaskGroup = nil
 	m.cleared_TaskGroup = false
 	m.removed_TaskGroup = nil
+}
+
+// Where appends a list predicates to the TaskMutation builder.
+func (m *TaskMutation) Where(ps ...predicate.Task) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -15532,8 +15658,8 @@ func (m *TaskGroupMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *TaskGroupMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -15675,6 +15801,7 @@ func (m *TaskGroupMutation) RemoveAppIDs(ids ...uuid.UUID) {
 		m.removed_App = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._App, ids[i])
 		m.removed_App[ids[i]] = struct{}{}
 	}
 }
@@ -15728,6 +15855,7 @@ func (m *TaskGroupMutation) RemoveTaskIDs(ids ...uuid.UUID) {
 		m.removed_Tasks = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Tasks, ids[i])
 		m.removed_Tasks[ids[i]] = struct{}{}
 	}
 }
@@ -15753,6 +15881,11 @@ func (m *TaskGroupMutation) ResetTasks() {
 	m._Tasks = nil
 	m.cleared_Tasks = false
 	m.removed_Tasks = nil
+}
+
+// Where appends a list predicates to the TaskGroupMutation builder.
+func (m *TaskGroupMutation) Where(ps ...predicate.TaskGroup) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -16115,8 +16248,8 @@ func (m *UserMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -16297,6 +16430,7 @@ func (m *UserMutation) RemoveStatisticIDs(ids ...uuid.UUID) {
 		m.removed_Statistics = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Statistics, ids[i])
 		m.removed_Statistics[ids[i]] = struct{}{}
 	}
 }
@@ -16428,6 +16562,7 @@ func (m *UserMutation) RemoveSessionIDs(ids ...uuid.UUID) {
 		m.removed_Sessions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m._Sessions, ids[i])
 		m.removed_Sessions[ids[i]] = struct{}{}
 	}
 }
@@ -16492,6 +16627,11 @@ func (m *UserMutation) ReleaseIDs() (ids []uuid.UUID) {
 func (m *UserMutation) ResetRelease() {
 	m._Release = nil
 	m.cleared_Release = false
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

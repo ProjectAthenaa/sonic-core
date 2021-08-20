@@ -128,11 +128,17 @@ func (bc *BillingCreate) Save(ctx context.Context) (*Billing, error) {
 				return nil, err
 			}
 			bc.mutation = mutation
-			node, err = bc.sqlSave(ctx)
+			if node, err = bc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(bc.hooks) - 1; i >= 0; i-- {
+			if bc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = bc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, bc.mutation); err != nil {
@@ -149,6 +155,19 @@ func (bc *BillingCreate) SaveX(ctx context.Context) *Billing {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (bc *BillingCreate) Exec(ctx context.Context) error {
+	_, err := bc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (bc *BillingCreate) ExecX(ctx context.Context) {
+	if err := bc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -170,25 +189,25 @@ func (bc *BillingCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (bc *BillingCreate) check() error {
 	if _, ok := bc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := bc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
 	}
 	if _, ok := bc.mutation.CardholderName(); !ok {
-		return &ValidationError{Name: "CardholderName", err: errors.New("ent: missing required field \"CardholderName\"")}
+		return &ValidationError{Name: "CardholderName", err: errors.New(`ent: missing required field "CardholderName"`)}
 	}
 	if _, ok := bc.mutation.CardNumber(); !ok {
-		return &ValidationError{Name: "CardNumber", err: errors.New("ent: missing required field \"CardNumber\"")}
+		return &ValidationError{Name: "CardNumber", err: errors.New(`ent: missing required field "CardNumber"`)}
 	}
 	if _, ok := bc.mutation.ExpiryMonth(); !ok {
-		return &ValidationError{Name: "ExpiryMonth", err: errors.New("ent: missing required field \"ExpiryMonth\"")}
+		return &ValidationError{Name: "ExpiryMonth", err: errors.New(`ent: missing required field "ExpiryMonth"`)}
 	}
 	if _, ok := bc.mutation.ExpiryYear(); !ok {
-		return &ValidationError{Name: "ExpiryYear", err: errors.New("ent: missing required field \"ExpiryYear\"")}
+		return &ValidationError{Name: "ExpiryYear", err: errors.New(`ent: missing required field "ExpiryYear"`)}
 	}
 	if _, ok := bc.mutation.CVV(); !ok {
-		return &ValidationError{Name: "CVV", err: errors.New("ent: missing required field \"CVV\"")}
+		return &ValidationError{Name: "CVV", err: errors.New(`ent: missing required field "CVV"`)}
 	}
 	return nil
 }
@@ -196,10 +215,13 @@ func (bc *BillingCreate) check() error {
 func (bc *BillingCreate) sqlSave(ctx context.Context) (*Billing, error) {
 	_node, _spec := bc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -326,17 +348,19 @@ func (bcb *BillingCreateBulk) Save(ctx context.Context) ([]*Billing, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, bcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, bcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -360,4 +384,17 @@ func (bcb *BillingCreateBulk) SaveX(ctx context.Context) []*Billing {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (bcb *BillingCreateBulk) Exec(ctx context.Context) error {
+	_, err := bcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (bcb *BillingCreateBulk) ExecX(ctx context.Context) {
+	if err := bcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

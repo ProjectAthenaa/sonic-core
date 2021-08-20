@@ -1,0 +1,16 @@
+enum DeviceType{
+    Unknown
+    Phone
+    Tablet
+    PC
+    Laptop
+}
+
+type Session{
+    ID: UUID!
+    DeviceName: String!
+    DeviceType: DeviceType!
+    IP: String!
+    OS: String!
+    Expired: Boolean!
+}

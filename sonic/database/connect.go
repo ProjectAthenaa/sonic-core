@@ -18,15 +18,18 @@ func Connect(pgURL string) *ent.Client {
 	}
 
 	client.Use(
-		func(next ent.Mutator) ent.Mutator {
-			return hook.TaskFunc(func(ctx context.Context, mutation *ent.TaskMutation) (ent.Value, error) {
-				if id, ok := mutation.ID(); ok {
-					rdb.Publish(ctx, "scheduler:tasks-deleted", id.String())
-				}
-
-				return next.Mutate(ctx, mutation)
-			})
-		})
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.TaskFunc(func(ctx context.Context, mutation *ent.TaskMutation) (ent.Value, error) {
+					if id, ok := mutation.ID(); ok {
+						rdb.Publish(ctx, "scheduler:tasks-deleted", id.String())
+					}
+					return next.Mutate(ctx, mutation)
+				})
+			},
+			ent.OpDeleteOne|ent.OpDelete,
+		),
+	)
 
 	//err = client.Schema.Create(context.Background())
 	//if err != nil {

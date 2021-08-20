@@ -138,7 +138,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
 		case user.ForeignKeys[0]: // release_customers
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -179,10 +179,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				u.Disabled = value.Bool
 			}
 		case user.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field release_customers", values[i])
-			} else if value != nil {
-				u.release_customers = value
+			} else if value.Valid {
+				u.release_customers = new(uuid.UUID)
+				*u.release_customers = *value.S.(*uuid.UUID)
 			}
 		}
 	}

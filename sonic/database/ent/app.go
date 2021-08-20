@@ -116,7 +116,7 @@ func (*App) scanValues(columns []string) ([]interface{}, error) {
 		case app.FieldID:
 			values[i] = new(uuid.UUID)
 		case app.ForeignKeys[0]: // user_app
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type App", columns[i])
 		}
@@ -151,10 +151,11 @@ func (a *App) assignValues(columns []string, values []interface{}) error {
 				a.UpdatedAt = value.Time
 			}
 		case app.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field user_app", values[i])
-			} else if value != nil {
-				a.user_app = value
+			} else if value.Valid {
+				a.user_app = new(uuid.UUID)
+				*a.user_app = *value.S.(*uuid.UUID)
 			}
 		}
 	}

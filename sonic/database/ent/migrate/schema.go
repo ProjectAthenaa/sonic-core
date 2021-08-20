@@ -95,10 +95,9 @@ var (
 	}
 	// BillingsTable holds the schema information for the "billings" table.
 	BillingsTable = &schema.Table{
-		Name:        "billings",
-		Columns:     BillingsColumns,
-		PrimaryKey:  []*schema.Column{BillingsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "billings",
+		Columns:    BillingsColumns,
+		PrimaryKey: []*schema.Column{BillingsColumns[0]},
 	}
 	// CalendarsColumns holds the columns for the "calendars" table.
 	CalendarsColumns = []*schema.Column{
@@ -113,10 +112,9 @@ var (
 	}
 	// CalendarsTable holds the schema information for the "calendars" table.
 	CalendarsTable = &schema.Table{
-		Name:        "calendars",
-		Columns:     CalendarsColumns,
-		PrimaryKey:  []*schema.Column{CalendarsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "calendars",
+		Columns:    CalendarsColumns,
+		PrimaryKey: []*schema.Column{CalendarsColumns[0]},
 	}
 	// DevicesColumns holds the columns for the "devices" table.
 	DevicesColumns = []*schema.Column{
@@ -127,10 +125,9 @@ var (
 	}
 	// DevicesTable holds the schema information for the "devices" table.
 	DevicesTable = &schema.Table{
-		Name:        "devices",
-		Columns:     DevicesColumns,
-		PrimaryKey:  []*schema.Column{DevicesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "devices",
+		Columns:    DevicesColumns,
+		PrimaryKey: []*schema.Column{DevicesColumns[0]},
 	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
@@ -252,10 +249,9 @@ var (
 	}
 	// ProfileGroupsTable holds the schema information for the "profile_groups" table.
 	ProfileGroupsTable = &schema.Table{
-		Name:        "profile_groups",
-		Columns:     ProfileGroupsColumns,
-		PrimaryKey:  []*schema.Column{ProfileGroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "profile_groups",
+		Columns:    ProfileGroupsColumns,
+		PrimaryKey: []*schema.Column{ProfileGroupsColumns[0]},
 	}
 	// ProxiesColumns holds the columns for the "proxies" table.
 	ProxiesColumns = []*schema.Column{
@@ -292,10 +288,9 @@ var (
 	}
 	// ProxyListsTable holds the schema information for the "proxy_lists" table.
 	ProxyListsTable = &schema.Table{
-		Name:        "proxy_lists",
-		Columns:     ProxyListsColumns,
-		PrimaryKey:  []*schema.Column{ProxyListsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "proxy_lists",
+		Columns:    ProxyListsColumns,
+		PrimaryKey: []*schema.Column{ProxyListsColumns[0]},
 	}
 	// ReleasesColumns holds the columns for the "releases" table.
 	ReleasesColumns = []*schema.Column{
@@ -312,10 +307,9 @@ var (
 	}
 	// ReleasesTable holds the schema information for the "releases" table.
 	ReleasesTable = &schema.Table{
-		Name:        "releases",
-		Columns:     ReleasesColumns,
-		PrimaryKey:  []*schema.Column{ReleasesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "releases",
+		Columns:    ReleasesColumns,
+		PrimaryKey: []*schema.Column{ReleasesColumns[0]},
 	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
@@ -405,10 +399,9 @@ var (
 	}
 	// StatisticsTable holds the schema information for the "statistics" table.
 	StatisticsTable = &schema.Table{
-		Name:        "statistics",
-		Columns:     StatisticsColumns,
-		PrimaryKey:  []*schema.Column{StatisticsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "statistics",
+		Columns:    StatisticsColumns,
+		PrimaryKey: []*schema.Column{StatisticsColumns[0]},
 	}
 	// StripesColumns holds the columns for the "stripes" table.
 	StripesColumns = []*schema.Column{
@@ -443,10 +436,9 @@ var (
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{
-		Name:        "tasks",
-		Columns:     TasksColumns,
-		PrimaryKey:  []*schema.Column{TasksColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "tasks",
+		Columns:    TasksColumns,
+		PrimaryKey: []*schema.Column{TasksColumns[0]},
 	}
 	// TaskGroupsColumns holds the columns for the "task_groups" table.
 	TaskGroupsColumns = []*schema.Column{
@@ -457,10 +449,9 @@ var (
 	}
 	// TaskGroupsTable holds the schema information for the "task_groups" table.
 	TaskGroupsTable = &schema.Table{
-		Name:        "task_groups",
-		Columns:     TaskGroupsColumns,
-		PrimaryKey:  []*schema.Column{TaskGroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "task_groups",
+		Columns:    TaskGroupsColumns,
+		PrimaryKey: []*schema.Column{TaskGroupsColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{

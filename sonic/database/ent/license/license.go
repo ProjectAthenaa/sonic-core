@@ -4,6 +4,8 @@ package license
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,14 +34,14 @@ const (
 	EdgeStripe = "Stripe"
 	// Table holds the table name of the license in the database.
 	Table = "licenses"
-	// UserTable is the table the holds the User relation/edge.
+	// UserTable is the table that holds the User relation/edge.
 	UserTable = "licenses"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the User relation/edge.
 	UserColumn = "user_license"
-	// StripeTable is the table the holds the Stripe relation/edge.
+	// StripeTable is the table that holds the Stripe relation/edge.
 	StripeTable = "stripes"
 	// StripeInverseTable is the table name for the Stripe entity.
 	// It exists in this package in order to avoid circular dependency with the "stripe" package.
@@ -115,4 +117,22 @@ func TypeValidator(_type Type) error {
 	default:
 		return fmt.Errorf("license: invalid enum value for Type field: %q", _type)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_type Type) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_type.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_type *Type) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_type = Type(str)
+	if err := TypeValidator(*_type); err != nil {
+		return fmt.Errorf("%s is not a valid Type", str)
+	}
+	return nil
 }

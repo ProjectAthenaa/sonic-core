@@ -4,6 +4,8 @@ package metadata
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -42,7 +44,7 @@ const (
 	EdgeUser = "user"
 	// Table holds the table name of the metadata in the database.
 	Table = "metadata"
-	// UserTable is the table the holds the user relation/edge.
+	// UserTable is the table that holds the user relation/edge.
 	UserTable = "metadata"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
@@ -144,4 +146,22 @@ func ThemeValidator(_theme Theme) error {
 	default:
 		return fmt.Errorf("metadata: invalid enum value for Theme field: %q", _theme)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_theme Theme) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_theme.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_theme *Theme) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_theme = Theme(str)
+	if err := ThemeValidator(*_theme); err != nil {
+		return fmt.Errorf("%s is not a valid Theme", str)
+	}
+	return nil
 }

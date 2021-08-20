@@ -4,6 +4,8 @@ package product
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -48,17 +50,17 @@ const (
 	EdgeCalendar = "Calendar"
 	// Table holds the table name of the product in the database.
 	Table = "products"
-	// TaskTable is the table the holds the Task relation/edge. The primary key declared below.
+	// TaskTable is the table that holds the Task relation/edge. The primary key declared below.
 	TaskTable = "task_Product"
 	// TaskInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
 	TaskInverseTable = "tasks"
-	// StatisticTable is the table the holds the Statistic relation/edge. The primary key declared below.
+	// StatisticTable is the table that holds the Statistic relation/edge. The primary key declared below.
 	StatisticTable = "statistic_Product"
 	// StatisticInverseTable is the table name for the Statistic entity.
 	// It exists in this package in order to avoid circular dependency with the "statistic" package.
 	StatisticInverseTable = "statistics"
-	// CalendarTable is the table the holds the Calendar relation/edge.
+	// CalendarTable is the table that holds the Calendar relation/edge.
 	CalendarTable = "products"
 	// CalendarInverseTable is the table name for the Calendar entity.
 	// It exists in this package in order to avoid circular dependency with the "calendar" package.
@@ -193,4 +195,40 @@ func SiteValidator(_site Site) error {
 	default:
 		return fmt.Errorf("product: invalid enum value for Site field: %q", _site)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_lookuptype LookupType) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_lookuptype.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_lookuptype *LookupType) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_lookuptype = LookupType(str)
+	if err := LookupTypeValidator(*_lookuptype); err != nil {
+		return fmt.Errorf("%s is not a valid LookupType", str)
+	}
+	return nil
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_site Site) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_site.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_site *Site) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_site = Site(str)
+	if err := SiteValidator(*_site); err != nil {
+		return fmt.Errorf("%s is not a valid Site", str)
+	}
+	return nil
 }

@@ -362,8 +362,8 @@ func (sq *StatisticQuery) GroupBy(field string, fields ...string) *StatisticGrou
 //		Select(statistic.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (sq *StatisticQuery) Select(field string, fields ...string) *StatisticSelect {
-	sq.fields = append([]string{field}, fields...)
+func (sq *StatisticQuery) Select(fields ...string) *StatisticSelect {
+	sq.fields = append(sq.fields, fields...)
 	return &StatisticSelect{StatisticQuery: sq}
 }
 
@@ -434,7 +434,7 @@ func (sq *StatisticQuery) sqlAll(ctx context.Context) ([]*Statistic, error) {
 				s.Where(sql.InValues(statistic.UserPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -499,7 +499,7 @@ func (sq *StatisticQuery) sqlAll(ctx context.Context) ([]*Statistic, error) {
 				s.Where(sql.InValues(statistic.ProductPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -609,10 +609,14 @@ func (sq *StatisticQuery) querySpec() *sqlgraph.QuerySpec {
 func (sq *StatisticQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sq.driver.Dialect())
 	t1 := builder.Table(statistic.Table)
-	selector := builder.Select(t1.Columns(statistic.Columns...)...).From(t1)
+	columns := sq.fields
+	if len(columns) == 0 {
+		columns = statistic.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if sq.sql != nil {
 		selector = sq.sql
-		selector.Select(selector.Columns(statistic.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range sq.predicates {
 		p(selector)
@@ -880,13 +884,24 @@ func (sgb *StatisticGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (sgb *StatisticGroupBy) sqlQuery() *sql.Selector {
-	selector := sgb.sql
-	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
-	columns = append(columns, sgb.fields...)
+	selector := sgb.sql.Select()
+	aggregation := make([]string, 0, len(sgb.fns))
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(sgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
+		for _, f := range sgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(sgb.fields...)...)
 }
 
 // StatisticSelect is the builder for selecting fields of Statistic entities.
@@ -1102,16 +1117,10 @@ func (ss *StatisticSelect) BoolX(ctx context.Context) bool {
 
 func (ss *StatisticSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ss.sqlQuery().Query()
+	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ss *StatisticSelect) sqlQuery() sql.Querier {
-	selector := ss.sql
-	selector.Select(selector.Columns(ss.fields...)...)
-	return selector
 }

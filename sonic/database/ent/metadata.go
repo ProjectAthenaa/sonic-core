@@ -85,7 +85,7 @@ func (*Metadata) scanValues(columns []string) ([]interface{}, error) {
 		case metadata.FieldID:
 			values[i] = new(uuid.UUID)
 		case metadata.ForeignKeys[0]: // user_metadata
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Metadata", columns[i])
 		}
@@ -180,10 +180,11 @@ func (m *Metadata) assignValues(columns []string, values []interface{}) error {
 				m.DiscordExpiryTime = value.Time
 			}
 		case metadata.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field user_metadata", values[i])
-			} else if value != nil {
-				m.user_metadata = value
+			} else if value.Valid {
+				m.user_metadata = new(uuid.UUID)
+				*m.user_metadata = *value.S.(*uuid.UUID)
 			}
 		}
 	}

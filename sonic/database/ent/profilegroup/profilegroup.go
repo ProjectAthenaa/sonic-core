@@ -27,19 +27,19 @@ const (
 	EdgeTask = "Task"
 	// Table holds the table name of the profilegroup in the database.
 	Table = "profile_groups"
-	// ProfilesTable is the table the holds the Profiles relation/edge.
+	// ProfilesTable is the table that holds the Profiles relation/edge.
 	ProfilesTable = "profiles"
 	// ProfilesInverseTable is the table name for the Profile entity.
 	// It exists in this package in order to avoid circular dependency with the "profile" package.
 	ProfilesInverseTable = "profiles"
 	// ProfilesColumn is the table column denoting the Profiles relation/edge.
 	ProfilesColumn = "profile_group_profiles"
-	// AppTable is the table the holds the App relation/edge. The primary key declared below.
+	// AppTable is the table that holds the App relation/edge. The primary key declared below.
 	AppTable = "app_ProfileGroups"
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
-	// TaskTable is the table the holds the Task relation/edge. The primary key declared below.
+	// TaskTable is the table that holds the Task relation/edge. The primary key declared below.
 	TaskTable = "task_ProfileGroup"
 	// TaskInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.

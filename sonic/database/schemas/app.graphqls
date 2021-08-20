@@ -1,0 +1,8 @@
+type App{
+    ID: UUID!
+    Settings: Settings!
+    ProxyLists: [ProxyList!]
+    ProfileGroups: [ProfileGroup!]
+    TaskGroups: [TaskGroup!]
+    AccountGroups: [AccountGroup!]
+}

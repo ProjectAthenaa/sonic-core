@@ -29,22 +29,22 @@ const (
 	EdgeTaskGroup = "TaskGroup"
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
-	// ProductTable is the table the holds the Product relation/edge. The primary key declared below.
+	// ProductTable is the table that holds the Product relation/edge. The primary key declared below.
 	ProductTable = "task_Product"
 	// ProductInverseTable is the table name for the Product entity.
 	// It exists in this package in order to avoid circular dependency with the "product" package.
 	ProductInverseTable = "products"
-	// ProxyListTable is the table the holds the ProxyList relation/edge. The primary key declared below.
+	// ProxyListTable is the table that holds the ProxyList relation/edge. The primary key declared below.
 	ProxyListTable = "task_ProxyList"
 	// ProxyListInverseTable is the table name for the ProxyList entity.
 	// It exists in this package in order to avoid circular dependency with the "proxylist" package.
 	ProxyListInverseTable = "proxy_lists"
-	// ProfileGroupTable is the table the holds the ProfileGroup relation/edge. The primary key declared below.
+	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge. The primary key declared below.
 	ProfileGroupTable = "task_ProfileGroup"
 	// ProfileGroupInverseTable is the table name for the ProfileGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "profilegroup" package.
 	ProfileGroupInverseTable = "profile_groups"
-	// TaskGroupTable is the table the holds the TaskGroup relation/edge. The primary key declared below.
+	// TaskGroupTable is the table that holds the TaskGroup relation/edge. The primary key declared below.
 	TaskGroupTable = "task_group_Tasks"
 	// TaskGroupInverseTable is the table name for the TaskGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "taskgroup" package.

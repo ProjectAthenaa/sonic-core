@@ -150,11 +150,17 @@ func (sc *SettingsCreate) Save(ctx context.Context) (*Settings, error) {
 				return nil, err
 			}
 			sc.mutation = mutation
-			node, err = sc.sqlSave(ctx)
+			if node, err = sc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(sc.hooks) - 1; i >= 0; i-- {
+			if sc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = sc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
@@ -171,6 +177,19 @@ func (sc *SettingsCreate) SaveX(ctx context.Context) *Settings {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (sc *SettingsCreate) Exec(ctx context.Context) error {
+	_, err := sc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (sc *SettingsCreate) ExecX(ctx context.Context) {
+	if err := sc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -208,22 +227,22 @@ func (sc *SettingsCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (sc *SettingsCreate) check() error {
 	if _, ok := sc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := sc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
 	}
 	if _, ok := sc.mutation.SuccessWebhook(); !ok {
-		return &ValidationError{Name: "SuccessWebhook", err: errors.New("ent: missing required field \"SuccessWebhook\"")}
+		return &ValidationError{Name: "SuccessWebhook", err: errors.New(`ent: missing required field "SuccessWebhook"`)}
 	}
 	if _, ok := sc.mutation.DeclineWebhook(); !ok {
-		return &ValidationError{Name: "DeclineWebhook", err: errors.New("ent: missing required field \"DeclineWebhook\"")}
+		return &ValidationError{Name: "DeclineWebhook", err: errors.New(`ent: missing required field "DeclineWebhook"`)}
 	}
 	if _, ok := sc.mutation.CheckoutDelay(); !ok {
-		return &ValidationError{Name: "CheckoutDelay", err: errors.New("ent: missing required field \"CheckoutDelay\"")}
+		return &ValidationError{Name: "CheckoutDelay", err: errors.New(`ent: missing required field "CheckoutDelay"`)}
 	}
 	if _, ok := sc.mutation.ATCDelay(); !ok {
-		return &ValidationError{Name: "ATCDelay", err: errors.New("ent: missing required field \"ATCDelay\"")}
+		return &ValidationError{Name: "ATCDelay", err: errors.New(`ent: missing required field "ATCDelay"`)}
 	}
 	if _, ok := sc.mutation.AppID(); !ok {
 		return &ValidationError{Name: "App", err: errors.New("ent: missing required edge \"App\"")}
@@ -234,10 +253,13 @@ func (sc *SettingsCreate) check() error {
 func (sc *SettingsCreate) sqlSave(ctx context.Context) (*Settings, error) {
 	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -357,17 +379,19 @@ func (scb *SettingsCreateBulk) Save(ctx context.Context) ([]*Settings, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, scb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, scb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -391,4 +415,17 @@ func (scb *SettingsCreateBulk) SaveX(ctx context.Context) []*Settings {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (scb *SettingsCreateBulk) Exec(ctx context.Context) error {
+	_, err := scb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (scb *SettingsCreateBulk) ExecX(ctx context.Context) {
+	if err := scb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -4,6 +4,8 @@ package accountgroup
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,7 +30,7 @@ const (
 	EdgeApp = "App"
 	// Table holds the table name of the accountgroup in the database.
 	Table = "account_group"
-	// AppTable is the table the holds the App relation/edge.
+	// AppTable is the table that holds the App relation/edge.
 	AppTable = "account_group"
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
@@ -120,4 +122,22 @@ func SiteValidator(_site Site) error {
 	default:
 		return fmt.Errorf("accountgroup: invalid enum value for Site field: %q", _site)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_site Site) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_site.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_site *Site) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_site = Site(str)
+	if err := SiteValidator(*_site); err != nil {
+		return fmt.Errorf("%s is not a valid Site", str)
+	}
+	return nil
 }

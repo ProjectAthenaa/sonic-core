@@ -398,8 +398,8 @@ func (sq *ShippingQuery) GroupBy(field string, fields ...string) *ShippingGroupB
 //		Select(shipping.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (sq *ShippingQuery) Select(field string, fields ...string) *ShippingSelect {
-	sq.fields = append([]string{field}, fields...)
+func (sq *ShippingQuery) Select(fields ...string) *ShippingSelect {
+	sq.fields = append(sq.fields, fields...)
 	return &ShippingSelect{ShippingQuery: sq}
 }
 
@@ -535,7 +535,7 @@ func (sq *ShippingQuery) sqlAll(ctx context.Context) ([]*Shipping, error) {
 				s.Where(sql.InValues(shipping.BillingAddressPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -645,10 +645,14 @@ func (sq *ShippingQuery) querySpec() *sqlgraph.QuerySpec {
 func (sq *ShippingQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sq.driver.Dialect())
 	t1 := builder.Table(shipping.Table)
-	selector := builder.Select(t1.Columns(shipping.Columns...)...).From(t1)
+	columns := sq.fields
+	if len(columns) == 0 {
+		columns = shipping.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if sq.sql != nil {
 		selector = sq.sql
-		selector.Select(selector.Columns(shipping.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range sq.predicates {
 		p(selector)
@@ -916,13 +920,24 @@ func (sgb *ShippingGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (sgb *ShippingGroupBy) sqlQuery() *sql.Selector {
-	selector := sgb.sql
-	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
-	columns = append(columns, sgb.fields...)
+	selector := sgb.sql.Select()
+	aggregation := make([]string, 0, len(sgb.fns))
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(sgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
+		for _, f := range sgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(sgb.fields...)...)
 }
 
 // ShippingSelect is the builder for selecting fields of Shipping entities.
@@ -1138,16 +1153,10 @@ func (ss *ShippingSelect) BoolX(ctx context.Context) bool {
 
 func (ss *ShippingSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ss.sqlQuery().Query()
+	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ss *ShippingSelect) sqlQuery() sql.Querier {
-	selector := ss.sql
-	selector.Select(selector.Columns(ss.fields...)...)
-	return selector
 }

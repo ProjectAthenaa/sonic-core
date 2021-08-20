@@ -69,7 +69,7 @@ func (*Stripe) scanValues(columns []string) ([]interface{}, error) {
 		case stripe.FieldID:
 			values[i] = new(uuid.UUID)
 		case stripe.ForeignKeys[0]: // license_stripe
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Stripe", columns[i])
 		}
@@ -122,10 +122,11 @@ func (s *Stripe) assignValues(columns []string, values []interface{}) error {
 				s.RenewalDate = value.Time
 			}
 		case stripe.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field license_stripe", values[i])
-			} else if value != nil {
-				s.license_stripe = value
+			} else if value.Valid {
+				s.license_stripe = new(uuid.UUID)
+				*s.license_stripe = *value.S.(*uuid.UUID)
 			}
 		}
 	}

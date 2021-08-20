@@ -23,9 +23,9 @@ type ProxyUpdate struct {
 	mutation *ProxyMutation
 }
 
-// Where adds a new predicate for the ProxyUpdate builder.
+// Where appends a list predicates to the ProxyUpdate builder.
 func (pu *ProxyUpdate) Where(ps ...predicate.Proxy) *ProxyUpdate {
-	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
+	pu.mutation.Where(ps...)
 	return pu
 }
 
@@ -152,6 +152,9 @@ func (pu *ProxyUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(pu.hooks) - 1; i >= 0; i-- {
+			if pu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
@@ -301,8 +304,8 @@ func (pu *ProxyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{proxy.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -447,6 +450,9 @@ func (puo *ProxyUpdateOne) Save(ctx context.Context) (*Proxy, error) {
 			return node, err
 		})
 		for i := len(puo.hooks) - 1; i >= 0; i-- {
+			if puo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = puo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
@@ -616,8 +622,8 @@ func (puo *ProxyUpdateOne) sqlSave(ctx context.Context) (_node *Proxy, err error
 	if err = sqlgraph.UpdateNode(ctx, puo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{proxy.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

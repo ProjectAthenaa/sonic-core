@@ -20,9 +20,9 @@ type ProfileGroupDelete struct {
 	mutation *ProfileGroupMutation
 }
 
-// Where adds a new predicate to the ProfileGroupDelete builder.
+// Where appends a list predicates to the ProfileGroupDelete builder.
 func (pgd *ProfileGroupDelete) Where(ps ...predicate.ProfileGroup) *ProfileGroupDelete {
-	pgd.mutation.predicates = append(pgd.mutation.predicates, ps...)
+	pgd.mutation.Where(ps...)
 	return pgd
 }
 
@@ -46,6 +46,9 @@ func (pgd *ProfileGroupDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(pgd.hooks) - 1; i >= 0; i-- {
+			if pgd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pgd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pgd.mutation); err != nil {

@@ -101,7 +101,7 @@ func (*Shipping) scanValues(columns []string) ([]interface{}, error) {
 		case shipping.FieldID:
 			values[i] = new(uuid.UUID)
 		case shipping.ForeignKeys[0]: // profile_shipping
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Shipping", columns[i])
 		}
@@ -160,10 +160,11 @@ func (s *Shipping) assignValues(columns []string, values []interface{}) error {
 				s.BillingIsShipping = value.Bool
 			}
 		case shipping.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field profile_shipping", values[i])
-			} else if value != nil {
-				s.profile_shipping = value
+			} else if value.Valid {
+				s.profile_shipping = new(uuid.UUID)
+				*s.profile_shipping = *value.S.(*uuid.UUID)
 			}
 		}
 	}

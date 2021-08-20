@@ -1,0 +1,13 @@
+scalar UUID
+scalar Time
+
+type User{
+    ID: UUID!
+    Disabled: Boolean!
+    License: License!
+    Statistics: [Statistic!]
+    App: App!
+    Metadata: Metadata!
+    Sessions: [Session!]
+
+}

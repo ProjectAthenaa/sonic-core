@@ -89,7 +89,7 @@ func (*Profile) scanValues(columns []string) ([]interface{}, error) {
 		case profile.FieldID:
 			values[i] = new(uuid.UUID)
 		case profile.ForeignKeys[0]: // profile_group_profiles
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Profile", columns[i])
 		}
@@ -136,10 +136,11 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 				pr.Email = value.String
 			}
 		case profile.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field profile_group_profiles", values[i])
-			} else if value != nil {
-				pr.profile_group_profiles = value
+			} else if value.Valid {
+				pr.profile_group_profiles = new(uuid.UUID)
+				*pr.profile_group_profiles = *value.S.(*uuid.UUID)
 			}
 		}
 	}

@@ -88,7 +88,7 @@ func (*Address) scanValues(columns []string) ([]interface{}, error) {
 		case address.FieldID:
 			values[i] = new(uuid.UUID)
 		case address.ForeignKeys[0]: // shipping_shipping_address
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Address", columns[i])
 		}
@@ -165,10 +165,11 @@ func (a *Address) assignValues(columns []string, values []interface{}) error {
 				a.StateCode = value.String
 			}
 		case address.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field shipping_shipping_address", values[i])
-			} else if value != nil {
-				a.shipping_shipping_address = value
+			} else if value.Valid {
+				a.shipping_shipping_address = new(uuid.UUID)
+				*a.shipping_shipping_address = *value.S.(*uuid.UUID)
 			}
 		}
 	}

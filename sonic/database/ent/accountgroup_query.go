@@ -326,8 +326,8 @@ func (agq *AccountGroupQuery) GroupBy(field string, fields ...string) *AccountGr
 //		Select(accountgroup.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (agq *AccountGroupQuery) Select(field string, fields ...string) *AccountGroupSelect {
-	agq.fields = append([]string{field}, fields...)
+func (agq *AccountGroupQuery) Select(fields ...string) *AccountGroupSelect {
+	agq.fields = append(agq.fields, fields...)
 	return &AccountGroupSelect{AccountGroupQuery: agq}
 }
 
@@ -478,10 +478,14 @@ func (agq *AccountGroupQuery) querySpec() *sqlgraph.QuerySpec {
 func (agq *AccountGroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(agq.driver.Dialect())
 	t1 := builder.Table(accountgroup.Table)
-	selector := builder.Select(t1.Columns(accountgroup.Columns...)...).From(t1)
+	columns := agq.fields
+	if len(columns) == 0 {
+		columns = accountgroup.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if agq.sql != nil {
 		selector = agq.sql
-		selector.Select(selector.Columns(accountgroup.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range agq.predicates {
 		p(selector)
@@ -749,13 +753,24 @@ func (aggb *AccountGroupGroupBy) sqlScan(ctx context.Context, v interface{}) err
 }
 
 func (aggb *AccountGroupGroupBy) sqlQuery() *sql.Selector {
-	selector := aggb.sql
-	columns := make([]string, 0, len(aggb.fields)+len(aggb.fns))
-	columns = append(columns, aggb.fields...)
+	selector := aggb.sql.Select()
+	aggregation := make([]string, 0, len(aggb.fns))
 	for _, fn := range aggb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(aggb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(aggb.fields)+len(aggb.fns))
+		for _, f := range aggb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(aggb.fields...)...)
 }
 
 // AccountGroupSelect is the builder for selecting fields of AccountGroup entities.
@@ -971,16 +986,10 @@ func (ags *AccountGroupSelect) BoolX(ctx context.Context) bool {
 
 func (ags *AccountGroupSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ags.sqlQuery().Query()
+	query, args := ags.sql.Query()
 	if err := ags.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ags *AccountGroupSelect) sqlQuery() sql.Querier {
-	selector := ags.sql
-	selector.Select(selector.Columns(ags.fields...)...)
-	return selector
 }

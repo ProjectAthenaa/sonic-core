@@ -1,0 +1,18 @@
+enum ProxyListType{
+    Test
+}
+
+type ProxyList{
+    ID: UUID!
+    Name: String!
+    Type: ProxyListType!
+    Proxies: [Proxy!]
+}
+
+type Proxy{
+    ID: UUID!
+    Username: String
+    Password: String
+    IP: String!
+    Port: String!
+}

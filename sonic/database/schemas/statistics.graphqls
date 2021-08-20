@@ -1,0 +1,11 @@
+enum StatType{Test}
+
+
+type Statistic{
+    ID: UUID!
+    Type:StatType!
+    PotentialProfit: Int
+    Axis: Map!
+    Value: Int
+    Spent: Float
+}

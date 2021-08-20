@@ -29,7 +29,7 @@ const (
 	EdgeApp = "App"
 	// Table holds the table name of the settings in the database.
 	Table = "settings"
-	// AppTable is the table the holds the App relation/edge.
+	// AppTable is the table that holds the App relation/edge.
 	AppTable = "settings"
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.

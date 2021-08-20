@@ -33,40 +33,40 @@ const (
 	EdgeRelease = "Release"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// LicenseTable is the table the holds the License relation/edge.
+	// LicenseTable is the table that holds the License relation/edge.
 	LicenseTable = "licenses"
 	// LicenseInverseTable is the table name for the License entity.
 	// It exists in this package in order to avoid circular dependency with the "license" package.
 	LicenseInverseTable = "licenses"
 	// LicenseColumn is the table column denoting the License relation/edge.
 	LicenseColumn = "user_license"
-	// StatisticsTable is the table the holds the Statistics relation/edge. The primary key declared below.
+	// StatisticsTable is the table that holds the Statistics relation/edge. The primary key declared below.
 	StatisticsTable = "user_Statistics"
 	// StatisticsInverseTable is the table name for the Statistic entity.
 	// It exists in this package in order to avoid circular dependency with the "statistic" package.
 	StatisticsInverseTable = "statistics"
-	// AppTable is the table the holds the App relation/edge.
+	// AppTable is the table that holds the App relation/edge.
 	AppTable = "apps"
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
 	// AppColumn is the table column denoting the App relation/edge.
 	AppColumn = "user_app"
-	// MetadataTable is the table the holds the Metadata relation/edge.
+	// MetadataTable is the table that holds the Metadata relation/edge.
 	MetadataTable = "metadata"
 	// MetadataInverseTable is the table name for the Metadata entity.
 	// It exists in this package in order to avoid circular dependency with the "metadata" package.
 	MetadataInverseTable = "metadata"
 	// MetadataColumn is the table column denoting the Metadata relation/edge.
 	MetadataColumn = "user_metadata"
-	// SessionsTable is the table the holds the Sessions relation/edge.
+	// SessionsTable is the table that holds the Sessions relation/edge.
 	SessionsTable = "sessions"
 	// SessionsInverseTable is the table name for the Session entity.
 	// It exists in this package in order to avoid circular dependency with the "session" package.
 	SessionsInverseTable = "sessions"
 	// SessionsColumn is the table column denoting the Sessions relation/edge.
 	SessionsColumn = "user_sessions"
-	// ReleaseTable is the table the holds the Release relation/edge.
+	// ReleaseTable is the table that holds the Release relation/edge.
 	ReleaseTable = "users"
 	// ReleaseInverseTable is the table name for the Release entity.
 	// It exists in this package in order to avoid circular dependency with the "release" package.

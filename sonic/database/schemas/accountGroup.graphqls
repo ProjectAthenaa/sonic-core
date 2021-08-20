@@ -1,0 +1,8 @@
+enum Site{Test}
+
+type AccountGroup{
+    ID: UUID!
+    Name: String!
+    Site: Site!
+    Accounts: Map!
+}

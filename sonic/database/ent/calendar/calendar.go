@@ -31,7 +31,7 @@ const (
 	EdgeQuickTask = "QuickTask"
 	// Table holds the table name of the calendar in the database.
 	Table = "calendars"
-	// QuickTaskTable is the table the holds the QuickTask relation/edge.
+	// QuickTaskTable is the table that holds the QuickTask relation/edge.
 	QuickTaskTable = "products"
 	// QuickTaskInverseTable is the table name for the Product entity.
 	// It exists in this package in order to avoid circular dependency with the "product" package.

@@ -31,36 +31,36 @@ const (
 	EdgeAccountGroups = "AccountGroups"
 	// Table holds the table name of the app in the database.
 	Table = "apps"
-	// UserTable is the table the holds the User relation/edge.
+	// UserTable is the table that holds the User relation/edge.
 	UserTable = "apps"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the User relation/edge.
 	UserColumn = "user_app"
-	// SettingsTable is the table the holds the Settings relation/edge.
+	// SettingsTable is the table that holds the Settings relation/edge.
 	SettingsTable = "settings"
 	// SettingsInverseTable is the table name for the Settings entity.
 	// It exists in this package in order to avoid circular dependency with the "settings" package.
 	SettingsInverseTable = "settings"
 	// SettingsColumn is the table column denoting the Settings relation/edge.
 	SettingsColumn = "app_settings"
-	// ProxyListsTable is the table the holds the ProxyLists relation/edge. The primary key declared below.
+	// ProxyListsTable is the table that holds the ProxyLists relation/edge. The primary key declared below.
 	ProxyListsTable = "app_ProxyLists"
 	// ProxyListsInverseTable is the table name for the ProxyList entity.
 	// It exists in this package in order to avoid circular dependency with the "proxylist" package.
 	ProxyListsInverseTable = "proxy_lists"
-	// ProfileGroupsTable is the table the holds the ProfileGroups relation/edge. The primary key declared below.
+	// ProfileGroupsTable is the table that holds the ProfileGroups relation/edge. The primary key declared below.
 	ProfileGroupsTable = "app_ProfileGroups"
 	// ProfileGroupsInverseTable is the table name for the ProfileGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "profilegroup" package.
 	ProfileGroupsInverseTable = "profile_groups"
-	// TaskGroupsTable is the table the holds the TaskGroups relation/edge. The primary key declared below.
+	// TaskGroupsTable is the table that holds the TaskGroups relation/edge. The primary key declared below.
 	TaskGroupsTable = "app_TaskGroups"
 	// TaskGroupsInverseTable is the table name for the TaskGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "taskgroup" package.
 	TaskGroupsInverseTable = "task_groups"
-	// AccountGroupsTable is the table the holds the AccountGroups relation/edge.
+	// AccountGroupsTable is the table that holds the AccountGroups relation/edge.
 	AccountGroupsTable = "account_group"
 	// AccountGroupsInverseTable is the table name for the AccountGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "accountgroup" package.

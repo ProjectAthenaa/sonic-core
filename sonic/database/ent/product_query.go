@@ -399,8 +399,8 @@ func (pq *ProductQuery) GroupBy(field string, fields ...string) *ProductGroupBy 
 //		Select(product.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (pq *ProductQuery) Select(field string, fields ...string) *ProductSelect {
-	pq.fields = append([]string{field}, fields...)
+func (pq *ProductQuery) Select(fields ...string) *ProductSelect {
+	pq.fields = append(pq.fields, fields...)
 	return &ProductSelect{ProductQuery: pq}
 }
 
@@ -479,7 +479,7 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 				s.Where(sql.InValues(product.TaskPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -544,7 +544,7 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 				s.Where(sql.InValues(product.StatisticPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -683,10 +683,14 @@ func (pq *ProductQuery) querySpec() *sqlgraph.QuerySpec {
 func (pq *ProductQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
 	t1 := builder.Table(product.Table)
-	selector := builder.Select(t1.Columns(product.Columns...)...).From(t1)
+	columns := pq.fields
+	if len(columns) == 0 {
+		columns = product.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if pq.sql != nil {
 		selector = pq.sql
-		selector.Select(selector.Columns(product.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range pq.predicates {
 		p(selector)
@@ -954,13 +958,24 @@ func (pgb *ProductGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (pgb *ProductGroupBy) sqlQuery() *sql.Selector {
-	selector := pgb.sql
-	columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
-	columns = append(columns, pgb.fields...)
+	selector := pgb.sql.Select()
+	aggregation := make([]string, 0, len(pgb.fns))
 	for _, fn := range pgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(pgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
+		for _, f := range pgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(pgb.fields...)...)
 }
 
 // ProductSelect is the builder for selecting fields of Product entities.
@@ -1176,16 +1191,10 @@ func (ps *ProductSelect) BoolX(ctx context.Context) bool {
 
 func (ps *ProductSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ps.sqlQuery().Query()
+	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ps *ProductSelect) sqlQuery() sql.Querier {
-	selector := ps.sql
-	selector.Select(selector.Columns(ps.fields...)...)
-	return selector
 }

@@ -362,8 +362,8 @@ func (aq *AddressQuery) GroupBy(field string, fields ...string) *AddressGroupBy 
 //		Select(address.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (aq *AddressQuery) Select(field string, fields ...string) *AddressSelect {
-	aq.fields = append([]string{field}, fields...)
+func (aq *AddressQuery) Select(fields ...string) *AddressSelect {
+	aq.fields = append(aq.fields, fields...)
 	return &AddressSelect{AddressQuery: aq}
 }
 
@@ -470,7 +470,7 @@ func (aq *AddressQuery) sqlAll(ctx context.Context) ([]*Address, error) {
 				s.Where(sql.InValues(address.BillingAddressPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -580,10 +580,14 @@ func (aq *AddressQuery) querySpec() *sqlgraph.QuerySpec {
 func (aq *AddressQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(aq.driver.Dialect())
 	t1 := builder.Table(address.Table)
-	selector := builder.Select(t1.Columns(address.Columns...)...).From(t1)
+	columns := aq.fields
+	if len(columns) == 0 {
+		columns = address.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if aq.sql != nil {
 		selector = aq.sql
-		selector.Select(selector.Columns(address.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range aq.predicates {
 		p(selector)
@@ -851,13 +855,24 @@ func (agb *AddressGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (agb *AddressGroupBy) sqlQuery() *sql.Selector {
-	selector := agb.sql
-	columns := make([]string, 0, len(agb.fields)+len(agb.fns))
-	columns = append(columns, agb.fields...)
+	selector := agb.sql.Select()
+	aggregation := make([]string, 0, len(agb.fns))
 	for _, fn := range agb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(agb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(agb.fields)+len(agb.fns))
+		for _, f := range agb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(agb.fields...)...)
 }
 
 // AddressSelect is the builder for selecting fields of Address entities.
@@ -1073,16 +1088,10 @@ func (as *AddressSelect) BoolX(ctx context.Context) bool {
 
 func (as *AddressSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := as.sqlQuery().Query()
+	query, args := as.sql.Query()
 	if err := as.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (as *AddressSelect) sqlQuery() sql.Querier {
-	selector := as.sql
-	selector.Select(selector.Columns(as.fields...)...)
-	return selector
 }

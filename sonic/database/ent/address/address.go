@@ -37,14 +37,14 @@ const (
 	EdgeBillingAddress = "BillingAddress"
 	// Table holds the table name of the address in the database.
 	Table = "addresses"
-	// ShippingAddressTable is the table the holds the ShippingAddress relation/edge.
+	// ShippingAddressTable is the table that holds the ShippingAddress relation/edge.
 	ShippingAddressTable = "addresses"
 	// ShippingAddressInverseTable is the table name for the Shipping entity.
 	// It exists in this package in order to avoid circular dependency with the "shipping" package.
 	ShippingAddressInverseTable = "shippings"
 	// ShippingAddressColumn is the table column denoting the ShippingAddress relation/edge.
 	ShippingAddressColumn = "shipping_shipping_address"
-	// BillingAddressTable is the table the holds the BillingAddress relation/edge. The primary key declared below.
+	// BillingAddressTable is the table that holds the BillingAddress relation/edge. The primary key declared below.
 	BillingAddressTable = "shipping_BillingAddress"
 	// BillingAddressInverseTable is the table name for the Shipping entity.
 	// It exists in this package in order to avoid circular dependency with the "shipping" package.

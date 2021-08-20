@@ -363,8 +363,8 @@ func (lq *LicenseQuery) GroupBy(field string, fields ...string) *LicenseGroupBy 
 //		Select(license.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (lq *LicenseQuery) Select(field string, fields ...string) *LicenseSelect {
-	lq.fields = append([]string{field}, fields...)
+func (lq *LicenseQuery) Select(fields ...string) *LicenseSelect {
+	lq.fields = append(lq.fields, fields...)
 	return &LicenseSelect{LicenseQuery: lq}
 }
 
@@ -545,10 +545,14 @@ func (lq *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
 func (lq *LicenseQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(lq.driver.Dialect())
 	t1 := builder.Table(license.Table)
-	selector := builder.Select(t1.Columns(license.Columns...)...).From(t1)
+	columns := lq.fields
+	if len(columns) == 0 {
+		columns = license.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if lq.sql != nil {
 		selector = lq.sql
-		selector.Select(selector.Columns(license.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range lq.predicates {
 		p(selector)
@@ -816,13 +820,24 @@ func (lgb *LicenseGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (lgb *LicenseGroupBy) sqlQuery() *sql.Selector {
-	selector := lgb.sql
-	columns := make([]string, 0, len(lgb.fields)+len(lgb.fns))
-	columns = append(columns, lgb.fields...)
+	selector := lgb.sql.Select()
+	aggregation := make([]string, 0, len(lgb.fns))
 	for _, fn := range lgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(lgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(lgb.fields)+len(lgb.fns))
+		for _, f := range lgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(lgb.fields...)...)
 }
 
 // LicenseSelect is the builder for selecting fields of License entities.
@@ -1038,16 +1053,10 @@ func (ls *LicenseSelect) BoolX(ctx context.Context) bool {
 
 func (ls *LicenseSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ls.sqlQuery().Query()
+	query, args := ls.sql.Query()
 	if err := ls.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ls *LicenseSelect) sqlQuery() sql.Querier {
-	selector := ls.sql
-	selector.Select(selector.Columns(ls.fields...)...)
-	return selector
 }

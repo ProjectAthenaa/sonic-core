@@ -73,7 +73,7 @@ func (*Settings) scanValues(columns []string) ([]interface{}, error) {
 		case settings.FieldID:
 			values[i] = new(uuid.UUID)
 		case settings.ForeignKeys[0]: // app_settings
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Settings", columns[i])
 		}
@@ -132,10 +132,11 @@ func (s *Settings) assignValues(columns []string, values []interface{}) error {
 				s.ATCDelay = int32(value.Int64)
 			}
 		case settings.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field app_settings", values[i])
-			} else if value != nil {
-				s.app_settings = value
+			} else if value.Valid {
+				s.app_settings = new(uuid.UUID)
+				*s.app_settings = *value.S.(*uuid.UUID)
 			}
 		}
 	}

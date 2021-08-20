@@ -150,11 +150,17 @@ func (plc *ProxyListCreate) Save(ctx context.Context) (*ProxyList, error) {
 				return nil, err
 			}
 			plc.mutation = mutation
-			node, err = plc.sqlSave(ctx)
+			if node, err = plc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(plc.hooks) - 1; i >= 0; i-- {
+			if plc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = plc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, plc.mutation); err != nil {
@@ -171,6 +177,19 @@ func (plc *ProxyListCreate) SaveX(ctx context.Context) *ProxyList {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (plc *ProxyListCreate) Exec(ctx context.Context) error {
+	_, err := plc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (plc *ProxyListCreate) ExecX(ctx context.Context) {
+	if err := plc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -196,20 +215,20 @@ func (plc *ProxyListCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (plc *ProxyListCreate) check() error {
 	if _, ok := plc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := plc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
 	}
 	if _, ok := plc.mutation.Name(); !ok {
-		return &ValidationError{Name: "Name", err: errors.New("ent: missing required field \"Name\"")}
+		return &ValidationError{Name: "Name", err: errors.New(`ent: missing required field "Name"`)}
 	}
 	if _, ok := plc.mutation.GetType(); !ok {
-		return &ValidationError{Name: "Type", err: errors.New("ent: missing required field \"Type\"")}
+		return &ValidationError{Name: "Type", err: errors.New(`ent: missing required field "Type"`)}
 	}
 	if v, ok := plc.mutation.GetType(); ok {
 		if err := proxylist.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "Type", err: fmt.Errorf("ent: validator failed for field \"Type\": %w", err)}
+			return &ValidationError{Name: "Type", err: fmt.Errorf(`ent: validator failed for field "Type": %w`, err)}
 		}
 	}
 	return nil
@@ -218,10 +237,13 @@ func (plc *ProxyListCreate) check() error {
 func (plc *ProxyListCreate) sqlSave(ctx context.Context) (*ProxyList, error) {
 	_node, _spec := plc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, plc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -362,17 +384,19 @@ func (plcb *ProxyListCreateBulk) Save(ctx context.Context) ([]*ProxyList, error)
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, plcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, plcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, plcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -396,4 +420,17 @@ func (plcb *ProxyListCreateBulk) SaveX(ctx context.Context) []*ProxyList {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (plcb *ProxyListCreateBulk) Exec(ctx context.Context) error {
+	_, err := plcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (plcb *ProxyListCreateBulk) ExecX(ctx context.Context) {
+	if err := plcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

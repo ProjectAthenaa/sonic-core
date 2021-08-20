@@ -1,0 +1,31 @@
+scalar Map
+enum LookupType{Test}
+
+type TaskGroup{
+    ID: String!
+    Name: String!
+    Tasks: [Task!]
+}
+
+type Task{
+    ID: String!
+    StartTime: Time
+    Product: Product
+    ProxyList: ProxyList
+    ProfileGroup: ProfileGroup
+}
+
+type Product{
+    ID: String!
+    Name: String!
+    Image: String
+    LookupType: LookupType!
+    PositiveKeywords: [String!]
+    NegativeKeywords: [String!]
+    Link: String
+    Quantity: Int
+    Sizes: [String!]
+    Colors: [String!]
+    Site: Site!
+    Metadata: Map
+}

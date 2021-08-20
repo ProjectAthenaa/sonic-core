@@ -1,0 +1,7 @@
+type Settings{
+    ID: UUID!
+    SuccessWebhook: String!
+    DeclineWebhook: String!
+    CheckoutDelay: Int!
+    ATCDelay: Int!
+}
