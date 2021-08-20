@@ -109,6 +109,10 @@ type GraphQLError struct {
 }
 
 func contains(body string, subStrs ...string) bool {
+	if strings.Contains(body, "IntrospectionQuery"){
+		return true
+	}
+
 	var str string
 	if v := operationNameRe.FindStringSubmatch(body); len(v) >= 2 {
 		str = v[2]
