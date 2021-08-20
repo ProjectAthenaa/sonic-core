@@ -1701,9 +1701,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "schemas/accountGroup.graphqls", Input: `enum Site{Test}
-
-type AccountGroup{
+	{Name: "schemas/accountGroup.graphqls", Input: `type AccountGroup{
     ID: UUID!
     Name: String!
     Site: Site!
@@ -1736,7 +1734,13 @@ extend type Mutation {
 extend type Query {
     getApp: App!
 }`, BuiltIn: false},
-	{Name: "schemas/license.graphqls", Input: `enum LicenseType{Test}
+	{Name: "schemas/license.graphqls", Input: `enum LicenseType{
+    Lifetime
+    Renewal
+    Beta
+    Weekly
+    FNF
+}
 
 type License{
     ID: UUID!
@@ -1753,7 +1757,12 @@ type Stripe{
     SubscriptionID: String
     RenewalDate: Time
 }`, BuiltIn: false},
-	{Name: "schemas/metadata.graphqls", Input: `enum Theme{Test}
+	{Name: "schemas/metadata.graphqls", Input: `enum Theme{
+    Variation1
+    Variation2
+    Variation3
+    Variation4
+}
 
 type Metadata{
     ID: UUID!
@@ -1952,7 +1961,16 @@ type Mutation{
     setCheckoutDelay(Delay: Int!): Boolean!
     setATCDelay(Delay: Int!): Boolean!
 }`, BuiltIn: false},
-	{Name: "schemas/statistics.graphqls", Input: `enum StatType{Test}
+	{Name: "schemas/statistics.graphqls", Input: `enum StatType{
+    CHECKOUTS
+    DECLINES
+    ERRORS
+    FAILED
+    COOKIE_GENS
+    RECAPTCHA_USAGE
+    TASKS_RUNNING
+    MONEY_SPENT
+}
 
 
 type Statistic{
@@ -1964,7 +1982,36 @@ type Statistic{
     Spent: Float
 }`, BuiltIn: false},
 	{Name: "schemas/tasks.graphqls", Input: `scalar Map
-enum LookupType{Test}
+enum LookupType{
+    Keywords
+    Link
+    Other
+}
+enum Site{
+    FinishLine
+    JD_Sports
+    YeezySupply
+    Supreme
+    Eastbay_US
+    Champs_US
+    Footaction_US
+    Footlocker_US
+    Bestbuy
+    Pokemon_Center
+    Panini_US
+    Topss
+    Nordstorm
+    End
+    Target
+    Amazon
+    Solebox
+    Onygo
+    Snipes
+    Ssense
+    Walmart
+    Hibbet
+    NewBalance
+}
 
 type TaskGroup{
     ID: UUID!

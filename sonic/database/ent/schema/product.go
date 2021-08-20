@@ -33,6 +33,7 @@ var Sites = []string{
 	"Ssense",
 	"Walmart",
 	"Hibbet",
+	"NewBalance",
 }
 
 // Product holds the schema definition for the Product entity.

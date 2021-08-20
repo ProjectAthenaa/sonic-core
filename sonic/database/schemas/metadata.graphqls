@@ -1,4 +1,9 @@
-enum Theme{Test}
+enum Theme{
+    Variation1
+    Variation2
+    Variation3
+    Variation4
+}
 
 type Metadata{
     ID: UUID!

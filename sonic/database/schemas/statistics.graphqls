@@ -1,4 +1,13 @@
-enum StatType{Test}
+enum StatType{
+    CHECKOUTS
+    DECLINES
+    ERRORS
+    FAILED
+    COOKIE_GENS
+    RECAPTCHA_USAGE
+    TASKS_RUNNING
+    MONEY_SPENT
+}
 
 
 type Statistic{

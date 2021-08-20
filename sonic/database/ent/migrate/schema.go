@@ -15,7 +15,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
-		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet"}},
+		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet", "NewBalance"}},
 		{Name: "accounts", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "bytea"}},
 		{Name: "app_account_groups", Type: field.TypeUUID, Nullable: true},
 	}
@@ -199,7 +199,7 @@ var (
 		{Name: "quantity", Type: field.TypeInt32, Default: 1},
 		{Name: "sizes", Type: field.TypeJSON, Nullable: true},
 		{Name: "colors", Type: field.TypeJSON, Nullable: true},
-		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet"}},
+		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet", "NewBalance"}},
 		{Name: "metadata", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "bytea"}},
 		{Name: "calendar_quick_task", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}

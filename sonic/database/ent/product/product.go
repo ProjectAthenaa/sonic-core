@@ -181,6 +181,7 @@ const (
 	SiteSsense         Site = "Ssense"
 	SiteWalmart        Site = "Walmart"
 	SiteHibbet         Site = "Hibbet"
+	SiteNewBalance     Site = "NewBalance"
 )
 
 func (_site Site) String() string {
@@ -190,7 +191,7 @@ func (_site Site) String() string {
 // SiteValidator is a validator for the "Site" field enum values. It is called by the builders before save.
 func SiteValidator(_site Site) error {
 	switch _site {
-	case SiteFinishLine, SiteJD_Sports, SiteYeezySupply, SiteSupreme, SiteEastbay_US, SiteChamps_US, SiteFootaction_US, SiteFootlocker_US, SiteBestbuy, SitePokemon_Center, SitePanini_US, SiteTopss, SiteNordstorm, SiteEnd, SiteTarget, SiteAmazon, SiteSolebox, SiteOnygo, SiteSnipes, SiteSsense, SiteWalmart, SiteHibbet:
+	case SiteFinishLine, SiteJD_Sports, SiteYeezySupply, SiteSupreme, SiteEastbay_US, SiteChamps_US, SiteFootaction_US, SiteFootlocker_US, SiteBestbuy, SitePokemon_Center, SitePanini_US, SiteTopss, SiteNordstorm, SiteEnd, SiteTarget, SiteAmazon, SiteSolebox, SiteOnygo, SiteSnipes, SiteSsense, SiteWalmart, SiteHibbet, SiteNewBalance:
 		return nil
 	default:
 		return fmt.Errorf("product: invalid enum value for Site field: %q", _site)

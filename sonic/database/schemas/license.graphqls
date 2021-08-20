@@ -1,4 +1,10 @@
-enum LicenseType{Test}
+enum LicenseType{
+    Lifetime
+    Renewal
+    Beta
+    Weekly
+    FNF
+}
 
 type License{
     ID: UUID!
