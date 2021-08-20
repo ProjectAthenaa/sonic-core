@@ -68,8 +68,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 				var body []byte
 				c.Request.Body, body = sonic.NopCloserBody(c.Request.Body)
 
-				return
-
 				//check if body contains no auth resolver
 				if contains(string(body), noAuthResolverNames...) {
 					goto setRequestContext
