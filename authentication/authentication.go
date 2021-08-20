@@ -68,18 +68,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 				var body []byte
 				c.Request.Body, body = sonic.NopCloserBody(c.Request.Body)
 
-				c.JSON(200, GraphQLError{
-					Errors: []struct {
-						Message string   `json:"message"`
-						Path    []string `json:"path"`
-					}{
-						{
-							Message: "test_error",
-							Path:    []string{"test_path"},
-						},
-					},
-					Data: nil,
-				})
 				return
 
 				//check if body contains no auth resolver
@@ -126,7 +114,19 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 
 		setRequestContext:
 			c.Request = c.Request.WithContext(ctx)
-			//c.Next()
+			c.Next()
+		c.JSON(200, GraphQLError{
+			Errors: []struct {
+				Message string   `json:"message"`
+				Path    []string `json:"path"`
+			}{
+				{
+					Message: "test_error",
+					Path:    []string{"test_path"},
+				},
+			},
+			Data: nil,
+		})
 		}
 	}
 }
