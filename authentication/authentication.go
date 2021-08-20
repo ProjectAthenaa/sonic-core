@@ -63,7 +63,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 			ctx = context.WithValue(ctx, "Location", c.Request.Header.Get("cf-ipcountry"))
 			span := sentry.StartSpan(c.Request.Context(), "Authentication Middleware", sentry.TransactionName("Authentication"))
 			defer span.Finish()
-			goto setRequestContext
 			if c.Request.URL.Path == "/query" {
 				var body []byte
 				c.Request.Body, body = sonic.NopCloserBody(c.Request.Body)
@@ -75,8 +74,8 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 
 				sessionID, err := c.Cookie("session_id")
 				if err != nil && err != http.ErrNoCookie {
-					c.JSON(403, unauthorizedError)
-					return
+					ctx = context.WithValue(ctx, "error", unauthorizedError)
+					goto setRequestContext
 				}
 
 				if sessionID == "" {
@@ -87,13 +86,14 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 
 					user, err := extractTokensGin(base, c, sessionID)
 					if err != nil {
-						c.JSON(403, unauthorizedError)
-						return
+						ctx = context.WithValue(ctx, "error", unauthorizedError)
+						goto setRequestContext
 					}
 
 					if user.IP != c.Request.Header.Get("x-original-forwarded-for") {
 						c.JSON(428, ipDoesNotMatchSessionError)
-						return
+						ctx = context.WithValue(ctx, "error", ipDoesNotMatchSessionError)
+						goto setRequestContext
 					}
 
 					ctx = context.WithValue(ctx, "userID", user.UserID.String())
@@ -104,8 +104,8 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 				if sessionCallback != nil {
 					ctx, err = sessionCallback(ctx, sessionID)
 					if err != nil {
-						c.JSON(403, err)
-						return
+						ctx = context.WithValue(ctx, "error", err)
+						goto setRequestContext
 					}
 				}
 			}
@@ -113,19 +113,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 		setRequestContext:
 			c.Request = c.Request.WithContext(ctx)
 			c.Next()
-		c.Writer.Reset(c.Writer)
-		c.JSON(200, GraphQLError{
-			Errors: []struct {
-				Message string   `json:"message"`
-				Path    []string `json:"path"`
-			}{
-				{
-					Message: "test_error",
-					Path:    []string{"test_path"},
-				},
-			},
-			Data: nil,
-		})
 		}
 	}
 }
