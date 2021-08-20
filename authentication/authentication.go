@@ -72,7 +72,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 					"errors": []map[string]interface{}{
 						{
 							"message": "error_shit",
-							"path":    operationNameRe.FindStringSubmatch(string(body))[2],
+							"path":    "test",
 						},
 					},
 					"data": nil,
