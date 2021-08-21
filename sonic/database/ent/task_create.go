@@ -103,23 +103,23 @@ func (tc *TaskCreate) AddProxyList(p ...*ProxyList) *TaskCreate {
 	return tc.AddProxyListIDs(ids...)
 }
 
-// SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID.
-func (tc *TaskCreate) SetProfileGroupID(id uuid.UUID) *TaskCreate {
-	tc.mutation.SetProfileGroupID(id)
+// SetProfilesID sets the "Profiles" edge to the ProfileGroup entity by ID.
+func (tc *TaskCreate) SetProfilesID(id uuid.UUID) *TaskCreate {
+	tc.mutation.SetProfilesID(id)
 	return tc
 }
 
-// SetNillableProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID if the given value is not nil.
-func (tc *TaskCreate) SetNillableProfileGroupID(id *uuid.UUID) *TaskCreate {
+// SetNillableProfilesID sets the "Profiles" edge to the ProfileGroup entity by ID if the given value is not nil.
+func (tc *TaskCreate) SetNillableProfilesID(id *uuid.UUID) *TaskCreate {
 	if id != nil {
-		tc = tc.SetProfileGroupID(*id)
+		tc = tc.SetProfilesID(*id)
 	}
 	return tc
 }
 
-// SetProfileGroup sets the "ProfileGroup" edge to the ProfileGroup entity.
-func (tc *TaskCreate) SetProfileGroup(p *ProfileGroup) *TaskCreate {
-	return tc.SetProfileGroupID(p.ID)
+// SetProfiles sets the "Profiles" edge to the ProfileGroup entity.
+func (tc *TaskCreate) SetProfiles(p *ProfileGroup) *TaskCreate {
+	return tc.SetProfilesID(p.ID)
 }
 
 // SetTaskGroupID sets the "TaskGroup" edge to the TaskGroup entity by ID.
@@ -328,12 +328,12 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.ProfileGroupIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.ProfilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   task.ProfileGroupTable,
-			Columns: []string{task.ProfileGroupColumn},
+			Table:   task.ProfilesTable,
+			Columns: []string{task.ProfilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -345,7 +345,7 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.profile_group_profile_group = &nodes[0]
+		_node.profile_group_tasks = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.TaskGroupIDs(); len(nodes) > 0 {

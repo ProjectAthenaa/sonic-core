@@ -102,23 +102,23 @@ func (tu *TaskUpdate) AddProxyList(p ...*ProxyList) *TaskUpdate {
 	return tu.AddProxyListIDs(ids...)
 }
 
-// SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID.
-func (tu *TaskUpdate) SetProfileGroupID(id uuid.UUID) *TaskUpdate {
-	tu.mutation.SetProfileGroupID(id)
+// SetProfilesID sets the "Profiles" edge to the ProfileGroup entity by ID.
+func (tu *TaskUpdate) SetProfilesID(id uuid.UUID) *TaskUpdate {
+	tu.mutation.SetProfilesID(id)
 	return tu
 }
 
-// SetNillableProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID if the given value is not nil.
-func (tu *TaskUpdate) SetNillableProfileGroupID(id *uuid.UUID) *TaskUpdate {
+// SetNillableProfilesID sets the "Profiles" edge to the ProfileGroup entity by ID if the given value is not nil.
+func (tu *TaskUpdate) SetNillableProfilesID(id *uuid.UUID) *TaskUpdate {
 	if id != nil {
-		tu = tu.SetProfileGroupID(*id)
+		tu = tu.SetProfilesID(*id)
 	}
 	return tu
 }
 
-// SetProfileGroup sets the "ProfileGroup" edge to the ProfileGroup entity.
-func (tu *TaskUpdate) SetProfileGroup(p *ProfileGroup) *TaskUpdate {
-	return tu.SetProfileGroupID(p.ID)
+// SetProfiles sets the "Profiles" edge to the ProfileGroup entity.
+func (tu *TaskUpdate) SetProfiles(p *ProfileGroup) *TaskUpdate {
+	return tu.SetProfilesID(p.ID)
 }
 
 // SetTaskGroupID sets the "TaskGroup" edge to the TaskGroup entity by ID.
@@ -187,9 +187,9 @@ func (tu *TaskUpdate) RemoveProxyList(p ...*ProxyList) *TaskUpdate {
 	return tu.RemoveProxyListIDs(ids...)
 }
 
-// ClearProfileGroup clears the "ProfileGroup" edge to the ProfileGroup entity.
-func (tu *TaskUpdate) ClearProfileGroup() *TaskUpdate {
-	tu.mutation.ClearProfileGroup()
+// ClearProfiles clears the "Profiles" edge to the ProfileGroup entity.
+func (tu *TaskUpdate) ClearProfiles() *TaskUpdate {
+	tu.mutation.ClearProfiles()
 	return tu
 }
 
@@ -415,12 +415,12 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.ProfileGroupCleared() {
+	if tu.mutation.ProfilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   task.ProfileGroupTable,
-			Columns: []string{task.ProfileGroupColumn},
+			Table:   task.ProfilesTable,
+			Columns: []string{task.ProfilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -431,12 +431,12 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.ProfileGroupIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.ProfilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   task.ProfileGroupTable,
-			Columns: []string{task.ProfileGroupColumn},
+			Table:   task.ProfilesTable,
+			Columns: []string{task.ProfilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -574,23 +574,23 @@ func (tuo *TaskUpdateOne) AddProxyList(p ...*ProxyList) *TaskUpdateOne {
 	return tuo.AddProxyListIDs(ids...)
 }
 
-// SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID.
-func (tuo *TaskUpdateOne) SetProfileGroupID(id uuid.UUID) *TaskUpdateOne {
-	tuo.mutation.SetProfileGroupID(id)
+// SetProfilesID sets the "Profiles" edge to the ProfileGroup entity by ID.
+func (tuo *TaskUpdateOne) SetProfilesID(id uuid.UUID) *TaskUpdateOne {
+	tuo.mutation.SetProfilesID(id)
 	return tuo
 }
 
-// SetNillableProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableProfileGroupID(id *uuid.UUID) *TaskUpdateOne {
+// SetNillableProfilesID sets the "Profiles" edge to the ProfileGroup entity by ID if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableProfilesID(id *uuid.UUID) *TaskUpdateOne {
 	if id != nil {
-		tuo = tuo.SetProfileGroupID(*id)
+		tuo = tuo.SetProfilesID(*id)
 	}
 	return tuo
 }
 
-// SetProfileGroup sets the "ProfileGroup" edge to the ProfileGroup entity.
-func (tuo *TaskUpdateOne) SetProfileGroup(p *ProfileGroup) *TaskUpdateOne {
-	return tuo.SetProfileGroupID(p.ID)
+// SetProfiles sets the "Profiles" edge to the ProfileGroup entity.
+func (tuo *TaskUpdateOne) SetProfiles(p *ProfileGroup) *TaskUpdateOne {
+	return tuo.SetProfilesID(p.ID)
 }
 
 // SetTaskGroupID sets the "TaskGroup" edge to the TaskGroup entity by ID.
@@ -659,9 +659,9 @@ func (tuo *TaskUpdateOne) RemoveProxyList(p ...*ProxyList) *TaskUpdateOne {
 	return tuo.RemoveProxyListIDs(ids...)
 }
 
-// ClearProfileGroup clears the "ProfileGroup" edge to the ProfileGroup entity.
-func (tuo *TaskUpdateOne) ClearProfileGroup() *TaskUpdateOne {
-	tuo.mutation.ClearProfileGroup()
+// ClearProfiles clears the "Profiles" edge to the ProfileGroup entity.
+func (tuo *TaskUpdateOne) ClearProfiles() *TaskUpdateOne {
+	tuo.mutation.ClearProfiles()
 	return tuo
 }
 
@@ -911,12 +911,12 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.ProfileGroupCleared() {
+	if tuo.mutation.ProfilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   task.ProfileGroupTable,
-			Columns: []string{task.ProfileGroupColumn},
+			Table:   task.ProfilesTable,
+			Columns: []string{task.ProfilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -927,12 +927,12 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.ProfileGroupIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.ProfilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   task.ProfileGroupTable,
-			Columns: []string{task.ProfileGroupColumn},
+			Table:   task.ProfilesTable,
+			Columns: []string{task.ProfilesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

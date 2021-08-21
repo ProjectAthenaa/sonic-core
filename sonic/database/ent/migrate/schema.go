@@ -433,7 +433,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "start_time", Type: field.TypeTime, Nullable: true},
-		{Name: "profile_group_profile_group", Type: field.TypeUUID, Nullable: true},
+		{Name: "profile_group_tasks", Type: field.TypeUUID, Nullable: true},
 		{Name: "task_group_tasks", Type: field.TypeUUID, Nullable: true},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
@@ -443,7 +443,7 @@ var (
 		PrimaryKey: []*schema.Column{TasksColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "tasks_profile_groups_ProfileGroup",
+				Symbol:     "tasks_profile_groups_Tasks",
 				Columns:    []*schema.Column{TasksColumns[4]},
 				RefColumns: []*schema.Column{ProfileGroupsColumns[0]},
 				OnDelete:   schema.SetNull,

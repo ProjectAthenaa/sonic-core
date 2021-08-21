@@ -970,9 +970,9 @@ func (pg *ProfileGroup) Node(ctx context.Context) (node *Node, err error) {
 	}
 	node.Edges[2] = &Edge{
 		Type: "Task",
-		Name: "ProfileGroup",
+		Name: "Tasks",
 	}
-	err = pg.QueryProfileGroup().
+	err = pg.QueryTasks().
 		Select(task.FieldID).
 		Scan(ctx, &node.Edges[2].IDs)
 	if err != nil {
@@ -1645,9 +1645,9 @@ func (t *Task) Node(ctx context.Context) (node *Node, err error) {
 	}
 	node.Edges[2] = &Edge{
 		Type: "ProfileGroup",
-		Name: "ProfileGroup",
+		Name: "Profiles",
 	}
-	err = t.QueryProfileGroup().
+	err = t.QueryProfiles().
 		Select(profilegroup.FieldID).
 		Scan(ctx, &node.Edges[2].IDs)
 	if err != nil {

@@ -23,8 +23,8 @@ const (
 	EdgeProduct = "Product"
 	// EdgeProxyList holds the string denoting the proxylist edge name in mutations.
 	EdgeProxyList = "ProxyList"
-	// EdgeProfileGroup holds the string denoting the profilegroup edge name in mutations.
-	EdgeProfileGroup = "ProfileGroup"
+	// EdgeProfiles holds the string denoting the profiles edge name in mutations.
+	EdgeProfiles = "Profiles"
 	// EdgeTaskGroup holds the string denoting the taskgroup edge name in mutations.
 	EdgeTaskGroup = "TaskGroup"
 	// Table holds the table name of the task in the database.
@@ -39,13 +39,13 @@ const (
 	// ProxyListInverseTable is the table name for the ProxyList entity.
 	// It exists in this package in order to avoid circular dependency with the "proxylist" package.
 	ProxyListInverseTable = "proxy_lists"
-	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge.
-	ProfileGroupTable = "tasks"
-	// ProfileGroupInverseTable is the table name for the ProfileGroup entity.
+	// ProfilesTable is the table that holds the Profiles relation/edge.
+	ProfilesTable = "tasks"
+	// ProfilesInverseTable is the table name for the ProfileGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "profilegroup" package.
-	ProfileGroupInverseTable = "profile_groups"
-	// ProfileGroupColumn is the table column denoting the ProfileGroup relation/edge.
-	ProfileGroupColumn = "profile_group_profile_group"
+	ProfilesInverseTable = "profile_groups"
+	// ProfilesColumn is the table column denoting the Profiles relation/edge.
+	ProfilesColumn = "profile_group_tasks"
 	// TaskGroupTable is the table that holds the TaskGroup relation/edge.
 	TaskGroupTable = "tasks"
 	// TaskGroupInverseTable is the table name for the TaskGroup entity.
@@ -66,7 +66,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tasks"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"profile_group_profile_group",
+	"profile_group_tasks",
 	"task_group_tasks",
 }
 

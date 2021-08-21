@@ -23,8 +23,8 @@ const (
 	EdgeProfiles = "Profiles"
 	// EdgeApp holds the string denoting the app edge name in mutations.
 	EdgeApp = "App"
-	// EdgeProfileGroup holds the string denoting the profilegroup edge name in mutations.
-	EdgeProfileGroup = "ProfileGroup"
+	// EdgeTasks holds the string denoting the tasks edge name in mutations.
+	EdgeTasks = "Tasks"
 	// Table holds the table name of the profilegroup in the database.
 	Table = "profile_groups"
 	// ProfilesTable is the table that holds the Profiles relation/edge.
@@ -39,13 +39,13 @@ const (
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
-	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge.
-	ProfileGroupTable = "tasks"
-	// ProfileGroupInverseTable is the table name for the Task entity.
+	// TasksTable is the table that holds the Tasks relation/edge.
+	TasksTable = "tasks"
+	// TasksInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
-	ProfileGroupInverseTable = "tasks"
-	// ProfileGroupColumn is the table column denoting the ProfileGroup relation/edge.
-	ProfileGroupColumn = "profile_group_profile_group"
+	TasksInverseTable = "tasks"
+	// TasksColumn is the table column denoting the Tasks relation/edge.
+	TasksColumn = "profile_group_tasks"
 )
 
 // Columns holds all SQL columns for profilegroup fields.
