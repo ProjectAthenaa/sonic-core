@@ -111,5 +111,5 @@ extend type Mutation {
     updateTaskGroup(taskGroupID: UUID!, updatedTaskGroup: NewTaskGroup!): TaskGroup!
     deleteTaskGroup(taskGroupID: UUID!): Boolean!
 
-    updateProduct(productID: UUID, updatedProduct: ProductIn!): Product!
+    updateProduct(productID: UUID!, updatedProduct: ProductIn!): Product!
 }

@@ -142,7 +142,7 @@ type ComplexityRoot struct {
 		SetDeclineWebhook  func(childComplexity int, webhook string) int
 		SetSuccessWebhook  func(childComplexity int, webhook string) int
 		UpdateAccountGroup func(childComplexity int, accountGroupID string, updatedAccountGroup model.AccountGroupInput) int
-		UpdateProduct      func(childComplexity int, productID *string, updatedProduct model.ProductIn) int
+		UpdateProduct      func(childComplexity int, productID string, updatedProduct model.ProductIn) int
 		UpdateProfile      func(childComplexity int, profileID string, updatedProfile model.NewProfile) int
 		UpdateProfileGroup func(childComplexity int, groupID string, updatedGroup model.NewProfileGroup) int
 		UpdateProxyList    func(childComplexity int, proxyListID string, proxyList model.NewProxyList) int
@@ -333,7 +333,7 @@ type MutationResolver interface {
 	CreateTaskGroup(ctx context.Context, newTaskGroup model.NewTaskGroup) (*ent.TaskGroup, error)
 	UpdateTaskGroup(ctx context.Context, taskGroupID string, updatedTaskGroup model.NewTaskGroup) (*ent.TaskGroup, error)
 	DeleteTaskGroup(ctx context.Context, taskGroupID string) (bool, error)
-	UpdateProduct(ctx context.Context, productID *string, updatedProduct model.ProductIn) (*ent.Product, error)
+	UpdateProduct(ctx context.Context, productID string, updatedProduct model.ProductIn) (*ent.Product, error)
 }
 type ProductResolver interface {
 	ID(ctx context.Context, obj *ent.Product) (string, error)
@@ -884,7 +884,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateProduct(childComplexity, args["productID"].(*string), args["updatedProduct"].(model.ProductIn)), true
+		return e.complexity.Mutation.UpdateProduct(childComplexity, args["productID"].(string), args["updatedProduct"].(model.ProductIn)), true
 
 	case "Mutation.updateProfile":
 		if e.complexity.Mutation.UpdateProfile == nil {
@@ -2094,7 +2094,7 @@ extend type Mutation {
     updateTaskGroup(taskGroupID: UUID!, updatedTaskGroup: NewTaskGroup!): TaskGroup!
     deleteTaskGroup(taskGroupID: UUID!): Boolean!
 
-    updateProduct(productID: UUID, updatedProduct: ProductIn!): Product!
+    updateProduct(productID: UUID!, updatedProduct: ProductIn!): Product!
 }`, BuiltIn: false},
 	{Name: "schemas/user.graphqls", Input: `scalar Time
 scalar UUID
@@ -2382,10 +2382,10 @@ func (ec *executionContext) field_Mutation_updateAccountGroup_args(ctx context.C
 func (ec *executionContext) field_Mutation_updateProduct_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["productID"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("productID"))
-		arg0, err = ec.unmarshalOUUID2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -4874,7 +4874,7 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateProduct(rctx, args["productID"].(*string), args["updatedProduct"].(model.ProductIn))
+		return ec.resolvers.Mutation().UpdateProduct(rctx, args["productID"].(string), args["updatedProduct"].(model.ProductIn))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

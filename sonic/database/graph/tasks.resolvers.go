@@ -36,7 +36,7 @@ func (r *mutationResolver) DeleteTaskGroup(ctx context.Context, taskGroupID stri
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) UpdateProduct(ctx context.Context, productID *string, updatedProduct model.ProductIn) (*ent.Product, error) {
+func (r *mutationResolver) UpdateProduct(ctx context.Context, productID string, updatedProduct model.ProductIn) (*ent.Product, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
