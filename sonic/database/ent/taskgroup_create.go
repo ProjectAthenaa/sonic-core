@@ -281,10 +281,10 @@ func (tgc *TaskGroupCreate) createSpec() (*TaskGroup, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tgc.mutation.TasksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   taskgroup.TasksTable,
-			Columns: taskgroup.TasksPrimaryKey,
+			Columns: []string{taskgroup.TasksColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
