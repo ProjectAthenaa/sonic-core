@@ -17,7 +17,7 @@ func Connect(pgURL string) *ent.Client {
 		panic(err)
 	}
 
-	client.Use(
+	client.Task.Use(
 		hook.On(
 			func(next ent.Mutator) ent.Mutator {
 				return hook.TaskFunc(func(ctx context.Context, mutation *ent.TaskMutation) (ent.Value, error) {
