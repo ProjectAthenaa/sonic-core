@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
 	"github.com/google/uuid"
 )
 
@@ -26,8 +25,7 @@ type Task struct {
 	StartTime *time.Time `json:"StartTime,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TaskQuery when eager-loading is set.
-	Edges            TaskEdges `json:"edges"`
-	task_group_tasks *uuid.UUID
+	Edges TaskEdges `json:"edges"`
 }
 
 // TaskEdges holds the relations/edges for other nodes in the graph.
@@ -39,7 +37,7 @@ type TaskEdges struct {
 	// ProfileGroup holds the value of the ProfileGroup edge.
 	ProfileGroup []*ProfileGroup `json:"ProfileGroup,omitempty"`
 	// TaskGroup holds the value of the TaskGroup edge.
-	TaskGroup *TaskGroup `json:"TaskGroup,omitempty"`
+	TaskGroup []*TaskGroup `json:"TaskGroup,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -73,14 +71,9 @@ func (e TaskEdges) ProfileGroupOrErr() ([]*ProfileGroup, error) {
 }
 
 // TaskGroupOrErr returns the TaskGroup value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TaskEdges) TaskGroupOrErr() (*TaskGroup, error) {
+// was not loaded in eager-loading.
+func (e TaskEdges) TaskGroupOrErr() ([]*TaskGroup, error) {
 	if e.loadedTypes[3] {
-		if e.TaskGroup == nil {
-			// The edge TaskGroup was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: taskgroup.Label}
-		}
 		return e.TaskGroup, nil
 	}
 	return nil, &NotLoadedError{edge: "TaskGroup"}
@@ -95,8 +88,6 @@ func (*Task) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case task.FieldID:
 			values[i] = new(uuid.UUID)
-		case task.ForeignKeys[0]: // task_group_tasks
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
 		}
@@ -136,13 +127,6 @@ func (t *Task) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				t.StartTime = new(time.Time)
 				*t.StartTime = value.Time
-			}
-		case task.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field task_group_tasks", values[i])
-			} else if value.Valid {
-				t.task_group_tasks = new(uuid.UUID)
-				*t.task_group_tasks = *value.S.(*uuid.UUID)
 			}
 		}
 	}

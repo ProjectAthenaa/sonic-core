@@ -180,12 +180,12 @@ func (pg *ProfileGroup) App(ctx context.Context) ([]*App, error) {
 	return result, err
 }
 
-func (pg *ProfileGroup) Task(ctx context.Context) ([]*Task, error) {
+func (pg *ProfileGroup) Task(ctx context.Context) (*Task, error) {
 	result, err := pg.Edges.TaskOrErr()
 	if IsNotLoaded(err) {
-		result, err = pg.QueryTask().All(ctx)
+		result, err = pg.QueryTask().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
 }
 
 func (pr *Proxy) ProxyList(ctx context.Context) (*ProxyList, error) {
@@ -316,12 +316,12 @@ func (t *Task) ProfileGroup(ctx context.Context) ([]*ProfileGroup, error) {
 	return result, err
 }
 
-func (t *Task) TaskGroup(ctx context.Context) (*TaskGroup, error) {
+func (t *Task) TaskGroup(ctx context.Context) ([]*TaskGroup, error) {
 	result, err := t.Edges.TaskGroupOrErr()
 	if IsNotLoaded(err) {
-		result, err = t.QueryTaskGroup().Only(ctx)
+		result, err = t.QueryTaskGroup().All(ctx)
 	}
-	return result, MaskNotFound(err)
+	return result, err
 }
 
 func (tg *TaskGroup) App(ctx context.Context) ([]*App, error) {

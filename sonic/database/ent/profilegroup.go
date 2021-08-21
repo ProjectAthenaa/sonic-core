@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/google/uuid"
 )
 
@@ -25,7 +26,8 @@ type ProfileGroup struct {
 	Name string `json:"Name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProfileGroupQuery when eager-loading is set.
-	Edges ProfileGroupEdges `json:"edges"`
+	Edges              ProfileGroupEdges `json:"edges"`
+	task_profile_group *uuid.UUID
 }
 
 // ProfileGroupEdges holds the relations/edges for other nodes in the graph.
@@ -35,7 +37,7 @@ type ProfileGroupEdges struct {
 	// App holds the value of the App edge.
 	App []*App `json:"App,omitempty"`
 	// Task holds the value of the Task edge.
-	Task []*Task `json:"Task,omitempty"`
+	Task *Task `json:"Task,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -60,9 +62,14 @@ func (e ProfileGroupEdges) AppOrErr() ([]*App, error) {
 }
 
 // TaskOrErr returns the Task value or an error if the edge
-// was not loaded in eager-loading.
-func (e ProfileGroupEdges) TaskOrErr() ([]*Task, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProfileGroupEdges) TaskOrErr() (*Task, error) {
 	if e.loadedTypes[2] {
+		if e.Task == nil {
+			// The edge Task was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: task.Label}
+		}
 		return e.Task, nil
 	}
 	return nil, &NotLoadedError{edge: "Task"}
@@ -79,6 +86,8 @@ func (*ProfileGroup) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case profilegroup.FieldID:
 			values[i] = new(uuid.UUID)
+		case profilegroup.ForeignKeys[0]: // task_profile_group
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type ProfileGroup", columns[i])
 		}
@@ -117,6 +126,13 @@ func (pg *ProfileGroup) assignValues(columns []string, values []interface{}) err
 				return fmt.Errorf("unexpected type %T for field Name", values[i])
 			} else if value.Valid {
 				pg.Name = value.String
+			}
+		case profilegroup.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field task_profile_group", values[i])
+			} else if value.Valid {
+				pg.task_profile_group = new(uuid.UUID)
+				*pg.task_profile_group = *value.S.(*uuid.UUID)
 			}
 		}
 	}

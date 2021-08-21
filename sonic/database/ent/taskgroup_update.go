@@ -299,10 +299,10 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tgu.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   taskgroup.TasksTable,
-			Columns: []string{taskgroup.TasksColumn},
+			Columns: taskgroup.TasksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -315,10 +315,10 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tgu.mutation.RemovedTasksIDs(); len(nodes) > 0 && !tgu.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   taskgroup.TasksTable,
-			Columns: []string{taskgroup.TasksColumn},
+			Columns: taskgroup.TasksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -334,10 +334,10 @@ func (tgu *TaskGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tgu.mutation.TasksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   taskgroup.TasksTable,
-			Columns: []string{taskgroup.TasksColumn},
+			Columns: taskgroup.TasksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -663,10 +663,10 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 	}
 	if tguo.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   taskgroup.TasksTable,
-			Columns: []string{taskgroup.TasksColumn},
+			Columns: taskgroup.TasksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -679,10 +679,10 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 	}
 	if nodes := tguo.mutation.RemovedTasksIDs(); len(nodes) > 0 && !tguo.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   taskgroup.TasksTable,
-			Columns: []string{taskgroup.TasksColumn},
+			Columns: taskgroup.TasksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -698,10 +698,10 @@ func (tguo *TaskGroupUpdateOne) sqlSave(ctx context.Context) (_node *TaskGroup, 
 	}
 	if nodes := tguo.mutation.TasksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   taskgroup.TasksTable,
-			Columns: []string{taskgroup.TasksColumn},
+			Columns: taskgroup.TasksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

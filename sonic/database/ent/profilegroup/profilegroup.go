@@ -39,11 +39,13 @@ const (
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
-	// TaskTable is the table that holds the Task relation/edge. The primary key declared below.
-	TaskTable = "task_ProfileGroup"
+	// TaskTable is the table that holds the Task relation/edge.
+	TaskTable = "profile_groups"
 	// TaskInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
 	TaskInverseTable = "tasks"
+	// TaskColumn is the table column denoting the Task relation/edge.
+	TaskColumn = "task_profile_group"
 )
 
 // Columns holds all SQL columns for profilegroup fields.
@@ -54,19 +56,27 @@ var Columns = []string{
 	FieldName,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "profile_groups"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"task_profile_group",
+}
+
 var (
 	// AppPrimaryKey and AppColumn2 are the table columns denoting the
 	// primary key for the App relation (M2M).
 	AppPrimaryKey = []string{"app_id", "profile_group_id"}
-	// TaskPrimaryKey and TaskColumn2 are the table columns denoting the
-	// primary key for the Task relation (M2M).
-	TaskPrimaryKey = []string{"task_id", "profile_group_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

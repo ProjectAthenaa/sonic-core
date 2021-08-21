@@ -94,19 +94,23 @@ func (pgc *ProfileGroupCreate) AddApp(a ...*App) *ProfileGroupCreate {
 	return pgc.AddAppIDs(ids...)
 }
 
-// AddTaskIDs adds the "Task" edge to the Task entity by IDs.
-func (pgc *ProfileGroupCreate) AddTaskIDs(ids ...uuid.UUID) *ProfileGroupCreate {
-	pgc.mutation.AddTaskIDs(ids...)
+// SetTaskID sets the "Task" edge to the Task entity by ID.
+func (pgc *ProfileGroupCreate) SetTaskID(id uuid.UUID) *ProfileGroupCreate {
+	pgc.mutation.SetTaskID(id)
 	return pgc
 }
 
-// AddTask adds the "Task" edges to the Task entity.
-func (pgc *ProfileGroupCreate) AddTask(t ...*Task) *ProfileGroupCreate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTaskID sets the "Task" edge to the Task entity by ID if the given value is not nil.
+func (pgc *ProfileGroupCreate) SetNillableTaskID(id *uuid.UUID) *ProfileGroupCreate {
+	if id != nil {
+		pgc = pgc.SetTaskID(*id)
 	}
-	return pgc.AddTaskIDs(ids...)
+	return pgc
+}
+
+// SetTask sets the "Task" edge to the Task entity.
+func (pgc *ProfileGroupCreate) SetTask(t *Task) *ProfileGroupCreate {
+	return pgc.SetTaskID(t.ID)
 }
 
 // Mutation returns the ProfileGroupMutation object of the builder.
@@ -304,10 +308,10 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 	}
 	if nodes := pgc.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   profilegroup.TaskTable,
-			Columns: profilegroup.TaskPrimaryKey,
+			Columns: []string{profilegroup.TaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -319,6 +323,7 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.task_profile_group = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
