@@ -23,8 +23,8 @@ const (
 	EdgeProfiles = "Profiles"
 	// EdgeApp holds the string denoting the app edge name in mutations.
 	EdgeApp = "App"
-	// EdgeTask holds the string denoting the task edge name in mutations.
-	EdgeTask = "Task"
+	// EdgeProfileGroup holds the string denoting the profilegroup edge name in mutations.
+	EdgeProfileGroup = "ProfileGroup"
 	// Table holds the table name of the profilegroup in the database.
 	Table = "profile_groups"
 	// ProfilesTable is the table that holds the Profiles relation/edge.
@@ -39,13 +39,13 @@ const (
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
-	// TaskTable is the table that holds the Task relation/edge.
-	TaskTable = "profile_groups"
-	// TaskInverseTable is the table name for the Task entity.
+	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge.
+	ProfileGroupTable = "tasks"
+	// ProfileGroupInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
-	TaskInverseTable = "tasks"
-	// TaskColumn is the table column denoting the Task relation/edge.
-	TaskColumn = "task_profile_group"
+	ProfileGroupInverseTable = "tasks"
+	// ProfileGroupColumn is the table column denoting the ProfileGroup relation/edge.
+	ProfileGroupColumn = "profile_group_profile_group"
 )
 
 // Columns holds all SQL columns for profilegroup fields.
@@ -54,12 +54,6 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldName,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "profile_groups"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"task_profile_group",
 }
 
 var (
@@ -72,11 +66,6 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

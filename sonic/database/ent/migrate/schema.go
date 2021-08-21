@@ -246,21 +246,12 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
-		{Name: "task_profile_group", Type: field.TypeUUID, Nullable: true},
 	}
 	// ProfileGroupsTable holds the schema information for the "profile_groups" table.
 	ProfileGroupsTable = &schema.Table{
 		Name:       "profile_groups",
 		Columns:    ProfileGroupsColumns,
 		PrimaryKey: []*schema.Column{ProfileGroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "profile_groups_tasks_ProfileGroup",
-				Columns:    []*schema.Column{ProfileGroupsColumns[4]},
-				RefColumns: []*schema.Column{TasksColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// ProxiesColumns holds the columns for the "proxies" table.
 	ProxiesColumns = []*schema.Column{
@@ -442,6 +433,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "start_time", Type: field.TypeTime, Nullable: true},
+		{Name: "profile_group_profile_group", Type: field.TypeUUID, Nullable: true},
 		{Name: "task_group_tasks", Type: field.TypeUUID, Nullable: true},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
@@ -451,8 +443,14 @@ var (
 		PrimaryKey: []*schema.Column{TasksColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "tasks_task_groups_Tasks",
+				Symbol:     "tasks_profile_groups_ProfileGroup",
 				Columns:    []*schema.Column{TasksColumns[4]},
+				RefColumns: []*schema.Column{ProfileGroupsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "tasks_task_groups_Tasks",
+				Columns:    []*schema.Column{TasksColumns[5]},
 				RefColumns: []*schema.Column{TaskGroupsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -765,13 +763,13 @@ func init() {
 	MetadataTable.ForeignKeys[0].RefTable = UsersTable
 	ProductsTable.ForeignKeys[0].RefTable = CalendarsTable
 	ProfilesTable.ForeignKeys[0].RefTable = ProfileGroupsTable
-	ProfileGroupsTable.ForeignKeys[0].RefTable = TasksTable
 	ProxiesTable.ForeignKeys[0].RefTable = ProxyListsTable
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 	SettingsTable.ForeignKeys[0].RefTable = AppsTable
 	ShippingsTable.ForeignKeys[0].RefTable = ProfilesTable
 	StripesTable.ForeignKeys[0].RefTable = LicensesTable
-	TasksTable.ForeignKeys[0].RefTable = TaskGroupsTable
+	TasksTable.ForeignKeys[0].RefTable = ProfileGroupsTable
+	TasksTable.ForeignKeys[1].RefTable = TaskGroupsTable
 	UsersTable.ForeignKeys[0].RefTable = ReleasesTable
 	AppProxyListsTable.ForeignKeys[0].RefTable = AppsTable
 	AppProxyListsTable.ForeignKeys[1].RefTable = ProxyListsTable

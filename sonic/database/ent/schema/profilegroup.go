@@ -35,8 +35,6 @@ func (ProfileGroup) Edges() []ent.Edge {
 		edge.From("App", App.Type).
 			Ref("ProfileGroups").
 			Required(),
-		edge.From("Task", Task.Type).
-			Ref("ProfileGroup").
-			Unique(),
+		edge.To("ProfileGroup", Task.Type),
 	}
 }

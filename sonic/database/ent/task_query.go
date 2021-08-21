@@ -130,7 +130,7 @@ func (tq *TaskQuery) QueryProfileGroup() *ProfileGroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(task.Table, task.FieldID, selector),
 			sqlgraph.To(profilegroup.Table, profilegroup.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, task.ProfileGroupTable, task.ProfileGroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, task.ProfileGroupTable, task.ProfileGroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -468,7 +468,7 @@ func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 			tq.withTaskGroup != nil,
 		}
 	)
-	if tq.withTaskGroup != nil {
+	if tq.withProfileGroup != nil || tq.withTaskGroup != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -625,31 +625,31 @@ func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 	}
 
 	if query := tq.withProfileGroup; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Task)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Task)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.ProfileGroup = []*ProfileGroup{}
+			if nodes[i].profile_group_profile_group == nil {
+				continue
+			}
+			fk := *nodes[i].profile_group_profile_group
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.ProfileGroup(func(s *sql.Selector) {
-			s.Where(sql.InValues(task.ProfileGroupColumn, fks...))
-		}))
+		query.Where(profilegroup.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.task_profile_group
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "task_profile_group" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "task_profile_group" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "profile_group_profile_group" returned %v`, n.ID)
 			}
-			node.Edges.ProfileGroup = append(node.Edges.ProfileGroup, n)
+			for i := range nodes {
+				nodes[i].Edges.ProfileGroup = n
+			}
 		}
 	}
 

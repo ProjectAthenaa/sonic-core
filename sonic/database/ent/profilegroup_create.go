@@ -94,23 +94,19 @@ func (pgc *ProfileGroupCreate) AddApp(a ...*App) *ProfileGroupCreate {
 	return pgc.AddAppIDs(ids...)
 }
 
-// SetTaskID sets the "Task" edge to the Task entity by ID.
-func (pgc *ProfileGroupCreate) SetTaskID(id uuid.UUID) *ProfileGroupCreate {
-	pgc.mutation.SetTaskID(id)
+// AddProfileGroupIDs adds the "ProfileGroup" edge to the Task entity by IDs.
+func (pgc *ProfileGroupCreate) AddProfileGroupIDs(ids ...uuid.UUID) *ProfileGroupCreate {
+	pgc.mutation.AddProfileGroupIDs(ids...)
 	return pgc
 }
 
-// SetNillableTaskID sets the "Task" edge to the Task entity by ID if the given value is not nil.
-func (pgc *ProfileGroupCreate) SetNillableTaskID(id *uuid.UUID) *ProfileGroupCreate {
-	if id != nil {
-		pgc = pgc.SetTaskID(*id)
+// AddProfileGroup adds the "ProfileGroup" edges to the Task entity.
+func (pgc *ProfileGroupCreate) AddProfileGroup(t ...*Task) *ProfileGroupCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return pgc
-}
-
-// SetTask sets the "Task" edge to the Task entity.
-func (pgc *ProfileGroupCreate) SetTask(t *Task) *ProfileGroupCreate {
-	return pgc.SetTaskID(t.ID)
+	return pgc.AddProfileGroupIDs(ids...)
 }
 
 // Mutation returns the ProfileGroupMutation object of the builder.
@@ -306,12 +302,12 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pgc.mutation.TaskIDs(); len(nodes) > 0 {
+	if nodes := pgc.mutation.ProfileGroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   profilegroup.TaskTable,
-			Columns: []string{profilegroup.TaskColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profilegroup.ProfileGroupTable,
+			Columns: []string{profilegroup.ProfileGroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -323,7 +319,6 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.task_profile_group = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

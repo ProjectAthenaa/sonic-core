@@ -40,12 +40,12 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "proxylist" package.
 	ProxyListInverseTable = "proxy_lists"
 	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge.
-	ProfileGroupTable = "profile_groups"
+	ProfileGroupTable = "tasks"
 	// ProfileGroupInverseTable is the table name for the ProfileGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "profilegroup" package.
 	ProfileGroupInverseTable = "profile_groups"
 	// ProfileGroupColumn is the table column denoting the ProfileGroup relation/edge.
-	ProfileGroupColumn = "task_profile_group"
+	ProfileGroupColumn = "profile_group_profile_group"
 	// TaskGroupTable is the table that holds the TaskGroup relation/edge.
 	TaskGroupTable = "tasks"
 	// TaskGroupInverseTable is the table name for the TaskGroup entity.
@@ -66,6 +66,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tasks"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"profile_group_profile_group",
 	"task_group_tasks",
 }
 

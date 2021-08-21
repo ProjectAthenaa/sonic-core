@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/google/uuid"
 )
 
@@ -26,8 +25,7 @@ type ProfileGroup struct {
 	Name string `json:"Name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProfileGroupQuery when eager-loading is set.
-	Edges              ProfileGroupEdges `json:"edges"`
-	task_profile_group *uuid.UUID
+	Edges ProfileGroupEdges `json:"edges"`
 }
 
 // ProfileGroupEdges holds the relations/edges for other nodes in the graph.
@@ -36,8 +34,8 @@ type ProfileGroupEdges struct {
 	Profiles []*Profile `json:"Profiles,omitempty"`
 	// App holds the value of the App edge.
 	App []*App `json:"App,omitempty"`
-	// Task holds the value of the Task edge.
-	Task *Task `json:"Task,omitempty"`
+	// ProfileGroup holds the value of the ProfileGroup edge.
+	ProfileGroup []*Task `json:"ProfileGroup,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -61,18 +59,13 @@ func (e ProfileGroupEdges) AppOrErr() ([]*App, error) {
 	return nil, &NotLoadedError{edge: "App"}
 }
 
-// TaskOrErr returns the Task value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e ProfileGroupEdges) TaskOrErr() (*Task, error) {
+// ProfileGroupOrErr returns the ProfileGroup value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProfileGroupEdges) ProfileGroupOrErr() ([]*Task, error) {
 	if e.loadedTypes[2] {
-		if e.Task == nil {
-			// The edge Task was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: task.Label}
-		}
-		return e.Task, nil
+		return e.ProfileGroup, nil
 	}
-	return nil, &NotLoadedError{edge: "Task"}
+	return nil, &NotLoadedError{edge: "ProfileGroup"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -86,8 +79,6 @@ func (*ProfileGroup) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case profilegroup.FieldID:
 			values[i] = new(uuid.UUID)
-		case profilegroup.ForeignKeys[0]: // task_profile_group
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type ProfileGroup", columns[i])
 		}
@@ -127,13 +118,6 @@ func (pg *ProfileGroup) assignValues(columns []string, values []interface{}) err
 			} else if value.Valid {
 				pg.Name = value.String
 			}
-		case profilegroup.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field task_profile_group", values[i])
-			} else if value.Valid {
-				pg.task_profile_group = new(uuid.UUID)
-				*pg.task_profile_group = *value.S.(*uuid.UUID)
-			}
 		}
 	}
 	return nil
@@ -149,9 +133,9 @@ func (pg *ProfileGroup) QueryApp() *AppQuery {
 	return (&ProfileGroupClient{config: pg.config}).QueryApp(pg)
 }
 
-// QueryTask queries the "Task" edge of the ProfileGroup entity.
-func (pg *ProfileGroup) QueryTask() *TaskQuery {
-	return (&ProfileGroupClient{config: pg.config}).QueryTask(pg)
+// QueryProfileGroup queries the "ProfileGroup" edge of the ProfileGroup entity.
+func (pg *ProfileGroup) QueryProfileGroup() *TaskQuery {
+	return (&ProfileGroupClient{config: pg.config}).QueryProfileGroup(pg)
 }
 
 // Update returns a builder for updating this ProfileGroup.

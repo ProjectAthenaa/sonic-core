@@ -30,10 +30,9 @@ type ProfileGroupQuery struct {
 	fields     []string
 	predicates []predicate.ProfileGroup
 	// eager-loading edges.
-	withProfiles *ProfileQuery
-	withApp      *AppQuery
-	withTask     *TaskQuery
-	withFKs      bool
+	withProfiles     *ProfileQuery
+	withApp          *AppQuery
+	withProfileGroup *TaskQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -114,8 +113,8 @@ func (pgq *ProfileGroupQuery) QueryApp() *AppQuery {
 	return query
 }
 
-// QueryTask chains the current query on the "Task" edge.
-func (pgq *ProfileGroupQuery) QueryTask() *TaskQuery {
+// QueryProfileGroup chains the current query on the "ProfileGroup" edge.
+func (pgq *ProfileGroupQuery) QueryProfileGroup() *TaskQuery {
 	query := &TaskQuery{config: pgq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pgq.prepareQuery(ctx); err != nil {
@@ -128,7 +127,7 @@ func (pgq *ProfileGroupQuery) QueryTask() *TaskQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(profilegroup.Table, profilegroup.FieldID, selector),
 			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, profilegroup.TaskTable, profilegroup.TaskColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, profilegroup.ProfileGroupTable, profilegroup.ProfileGroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pgq.driver.Dialect(), step)
 		return fromU, nil
@@ -312,14 +311,14 @@ func (pgq *ProfileGroupQuery) Clone() *ProfileGroupQuery {
 		return nil
 	}
 	return &ProfileGroupQuery{
-		config:       pgq.config,
-		limit:        pgq.limit,
-		offset:       pgq.offset,
-		order:        append([]OrderFunc{}, pgq.order...),
-		predicates:   append([]predicate.ProfileGroup{}, pgq.predicates...),
-		withProfiles: pgq.withProfiles.Clone(),
-		withApp:      pgq.withApp.Clone(),
-		withTask:     pgq.withTask.Clone(),
+		config:           pgq.config,
+		limit:            pgq.limit,
+		offset:           pgq.offset,
+		order:            append([]OrderFunc{}, pgq.order...),
+		predicates:       append([]predicate.ProfileGroup{}, pgq.predicates...),
+		withProfiles:     pgq.withProfiles.Clone(),
+		withApp:          pgq.withApp.Clone(),
+		withProfileGroup: pgq.withProfileGroup.Clone(),
 		// clone intermediate query.
 		sql:  pgq.sql.Clone(),
 		path: pgq.path,
@@ -348,14 +347,14 @@ func (pgq *ProfileGroupQuery) WithApp(opts ...func(*AppQuery)) *ProfileGroupQuer
 	return pgq
 }
 
-// WithTask tells the query-builder to eager-load the nodes that are connected to
-// the "Task" edge. The optional arguments are used to configure the query builder of the edge.
-func (pgq *ProfileGroupQuery) WithTask(opts ...func(*TaskQuery)) *ProfileGroupQuery {
+// WithProfileGroup tells the query-builder to eager-load the nodes that are connected to
+// the "ProfileGroup" edge. The optional arguments are used to configure the query builder of the edge.
+func (pgq *ProfileGroupQuery) WithProfileGroup(opts ...func(*TaskQuery)) *ProfileGroupQuery {
 	query := &TaskQuery{config: pgq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	pgq.withTask = query
+	pgq.withProfileGroup = query
 	return pgq
 }
 
@@ -423,20 +422,13 @@ func (pgq *ProfileGroupQuery) prepareQuery(ctx context.Context) error {
 func (pgq *ProfileGroupQuery) sqlAll(ctx context.Context) ([]*ProfileGroup, error) {
 	var (
 		nodes       = []*ProfileGroup{}
-		withFKs     = pgq.withFKs
 		_spec       = pgq.querySpec()
 		loadedTypes = [3]bool{
 			pgq.withProfiles != nil,
 			pgq.withApp != nil,
-			pgq.withTask != nil,
+			pgq.withProfileGroup != nil,
 		}
 	)
-	if pgq.withTask != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, profilegroup.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &ProfileGroup{config: pgq.config}
 		nodes = append(nodes, node)
@@ -551,32 +543,32 @@ func (pgq *ProfileGroupQuery) sqlAll(ctx context.Context) ([]*ProfileGroup, erro
 		}
 	}
 
-	if query := pgq.withTask; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*ProfileGroup)
+	if query := pgq.withProfileGroup; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*ProfileGroup)
 		for i := range nodes {
-			if nodes[i].task_profile_group == nil {
-				continue
-			}
-			fk := *nodes[i].task_profile_group
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.ProfileGroup = []*Task{}
 		}
-		query.Where(task.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Task(func(s *sql.Selector) {
+			s.Where(sql.InValues(profilegroup.ProfileGroupColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.profile_group_profile_group
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "profile_group_profile_group" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "task_profile_group" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "profile_group_profile_group" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Task = n
-			}
+			node.Edges.ProfileGroup = append(node.Edges.ProfileGroup, n)
 		}
 	}
 
