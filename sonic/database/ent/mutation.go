@@ -14810,8 +14810,7 @@ type TaskMutation struct {
 	_ProfileGroup        map[uuid.UUID]struct{}
 	removed_ProfileGroup map[uuid.UUID]struct{}
 	cleared_ProfileGroup bool
-	_TaskGroup           map[uuid.UUID]struct{}
-	removed_TaskGroup    map[uuid.UUID]struct{}
+	_TaskGroup           *uuid.UUID
 	cleared_TaskGroup    bool
 	done                 bool
 	oldValue             func(context.Context) (*Task, error)
@@ -15186,14 +15185,9 @@ func (m *TaskMutation) ResetProfileGroup() {
 	m.removed_ProfileGroup = nil
 }
 
-// AddTaskGroupIDs adds the "TaskGroup" edge to the TaskGroup entity by ids.
-func (m *TaskMutation) AddTaskGroupIDs(ids ...uuid.UUID) {
-	if m._TaskGroup == nil {
-		m._TaskGroup = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m._TaskGroup[ids[i]] = struct{}{}
-	}
+// SetTaskGroupID sets the "TaskGroup" edge to the TaskGroup entity by id.
+func (m *TaskMutation) SetTaskGroupID(id uuid.UUID) {
+	m._TaskGroup = &id
 }
 
 // ClearTaskGroup clears the "TaskGroup" edge to the TaskGroup entity.
@@ -15206,29 +15200,20 @@ func (m *TaskMutation) TaskGroupCleared() bool {
 	return m.cleared_TaskGroup
 }
 
-// RemoveTaskGroupIDs removes the "TaskGroup" edge to the TaskGroup entity by IDs.
-func (m *TaskMutation) RemoveTaskGroupIDs(ids ...uuid.UUID) {
-	if m.removed_TaskGroup == nil {
-		m.removed_TaskGroup = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m._TaskGroup, ids[i])
-		m.removed_TaskGroup[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTaskGroup returns the removed IDs of the "TaskGroup" edge to the TaskGroup entity.
-func (m *TaskMutation) RemovedTaskGroupIDs() (ids []uuid.UUID) {
-	for id := range m.removed_TaskGroup {
-		ids = append(ids, id)
+// TaskGroupID returns the "TaskGroup" edge ID in the mutation.
+func (m *TaskMutation) TaskGroupID() (id uuid.UUID, exists bool) {
+	if m._TaskGroup != nil {
+		return *m._TaskGroup, true
 	}
 	return
 }
 
 // TaskGroupIDs returns the "TaskGroup" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TaskGroupID instead. It exists only for internal usage by the builders.
 func (m *TaskMutation) TaskGroupIDs() (ids []uuid.UUID) {
-	for id := range m._TaskGroup {
-		ids = append(ids, id)
+	if id := m._TaskGroup; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -15237,7 +15222,6 @@ func (m *TaskMutation) TaskGroupIDs() (ids []uuid.UUID) {
 func (m *TaskMutation) ResetTaskGroup() {
 	m._TaskGroup = nil
 	m.cleared_TaskGroup = false
-	m.removed_TaskGroup = nil
 }
 
 // Where appends a list predicates to the TaskMutation builder.
@@ -15440,11 +15424,9 @@ func (m *TaskMutation) AddedIDs(name string) []ent.Value {
 		}
 		return ids
 	case task.EdgeTaskGroup:
-		ids := make([]ent.Value, 0, len(m._TaskGroup))
-		for id := range m._TaskGroup {
-			ids = append(ids, id)
+		if id := m._TaskGroup; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -15460,9 +15442,6 @@ func (m *TaskMutation) RemovedEdges() []string {
 	}
 	if m.removed_ProfileGroup != nil {
 		edges = append(edges, task.EdgeProfileGroup)
-	}
-	if m.removed_TaskGroup != nil {
-		edges = append(edges, task.EdgeTaskGroup)
 	}
 	return edges
 }
@@ -15486,12 +15465,6 @@ func (m *TaskMutation) RemovedIDs(name string) []ent.Value {
 	case task.EdgeProfileGroup:
 		ids := make([]ent.Value, 0, len(m.removed_ProfileGroup))
 		for id := range m.removed_ProfileGroup {
-			ids = append(ids, id)
-		}
-		return ids
-	case task.EdgeTaskGroup:
-		ids := make([]ent.Value, 0, len(m.removed_TaskGroup))
-		for id := range m.removed_TaskGroup {
 			ids = append(ids, id)
 		}
 		return ids
@@ -15537,6 +15510,9 @@ func (m *TaskMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TaskMutation) ClearEdge(name string) error {
 	switch name {
+	case task.EdgeTaskGroup:
+		m.ClearTaskGroup()
+		return nil
 	}
 	return fmt.Errorf("unknown Task unique edge %s", name)
 }

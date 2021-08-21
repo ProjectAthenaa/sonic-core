@@ -316,12 +316,12 @@ func (t *Task) ProfileGroup(ctx context.Context) ([]*ProfileGroup, error) {
 	return result, err
 }
 
-func (t *Task) TaskGroup(ctx context.Context) ([]*TaskGroup, error) {
+func (t *Task) TaskGroup(ctx context.Context) (*TaskGroup, error) {
 	result, err := t.Edges.TaskGroupOrErr()
 	if IsNotLoaded(err) {
-		result, err = t.QueryTaskGroup().All(ctx)
+		result, err = t.QueryTaskGroup().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
 }
 
 func (tg *TaskGroup) App(ctx context.Context) ([]*App, error) {

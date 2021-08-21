@@ -2697,7 +2697,7 @@ func (c *TaskClient) QueryTaskGroup(t *Task) *TaskGroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(task.Table, task.FieldID, id),
 			sqlgraph.To(taskgroup.Table, taskgroup.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, task.TaskGroupTable, task.TaskGroupPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, task.TaskGroupTable, task.TaskGroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -2819,7 +2819,7 @@ func (c *TaskGroupClient) QueryTasks(tg *TaskGroup) *TaskQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taskgroup.Table, taskgroup.FieldID, id),
 			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, taskgroup.TasksTable, taskgroup.TasksPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, taskgroup.TasksTable, taskgroup.TasksColumn),
 		)
 		fromV = sqlgraph.Neighbors(tg.driver.Dialect(), step)
 		return fromV, nil
