@@ -8,9 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/profilegroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
 	"github.com/google/uuid"
 )
 
@@ -27,9 +25,7 @@ type Task struct {
 	StartTime *time.Time `json:"StartTime,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TaskQuery when eager-loading is set.
-	Edges               TaskEdges `json:"edges"`
-	profile_group_tasks *uuid.UUID
-	task_group_tasks    *uuid.UUID
+	Edges TaskEdges `json:"edges"`
 }
 
 // TaskEdges holds the relations/edges for other nodes in the graph.
@@ -38,10 +34,10 @@ type TaskEdges struct {
 	Product []*Product `json:"Product,omitempty"`
 	// ProxyList holds the value of the ProxyList edge.
 	ProxyList []*ProxyList `json:"ProxyList,omitempty"`
-	// Profiles holds the value of the Profiles edge.
-	Profiles *ProfileGroup `json:"Profiles,omitempty"`
+	// ProfileGroup holds the value of the ProfileGroup edge.
+	ProfileGroup []*ProfileGroup `json:"ProfileGroup,omitempty"`
 	// TaskGroup holds the value of the TaskGroup edge.
-	TaskGroup *TaskGroup `json:"TaskGroup,omitempty"`
+	TaskGroup []*TaskGroup `json:"TaskGroup,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -65,29 +61,19 @@ func (e TaskEdges) ProxyListOrErr() ([]*ProxyList, error) {
 	return nil, &NotLoadedError{edge: "ProxyList"}
 }
 
-// ProfilesOrErr returns the Profiles value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TaskEdges) ProfilesOrErr() (*ProfileGroup, error) {
+// ProfileGroupOrErr returns the ProfileGroup value or an error if the edge
+// was not loaded in eager-loading.
+func (e TaskEdges) ProfileGroupOrErr() ([]*ProfileGroup, error) {
 	if e.loadedTypes[2] {
-		if e.Profiles == nil {
-			// The edge Profiles was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: profilegroup.Label}
-		}
-		return e.Profiles, nil
+		return e.ProfileGroup, nil
 	}
-	return nil, &NotLoadedError{edge: "Profiles"}
+	return nil, &NotLoadedError{edge: "ProfileGroup"}
 }
 
 // TaskGroupOrErr returns the TaskGroup value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TaskEdges) TaskGroupOrErr() (*TaskGroup, error) {
+// was not loaded in eager-loading.
+func (e TaskEdges) TaskGroupOrErr() ([]*TaskGroup, error) {
 	if e.loadedTypes[3] {
-		if e.TaskGroup == nil {
-			// The edge TaskGroup was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: taskgroup.Label}
-		}
 		return e.TaskGroup, nil
 	}
 	return nil, &NotLoadedError{edge: "TaskGroup"}
@@ -102,10 +88,6 @@ func (*Task) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case task.FieldID:
 			values[i] = new(uuid.UUID)
-		case task.ForeignKeys[0]: // profile_group_tasks
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case task.ForeignKeys[1]: // task_group_tasks
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
 		}
@@ -146,20 +128,6 @@ func (t *Task) assignValues(columns []string, values []interface{}) error {
 				t.StartTime = new(time.Time)
 				*t.StartTime = value.Time
 			}
-		case task.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field profile_group_tasks", values[i])
-			} else if value.Valid {
-				t.profile_group_tasks = new(uuid.UUID)
-				*t.profile_group_tasks = *value.S.(*uuid.UUID)
-			}
-		case task.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field task_group_tasks", values[i])
-			} else if value.Valid {
-				t.task_group_tasks = new(uuid.UUID)
-				*t.task_group_tasks = *value.S.(*uuid.UUID)
-			}
 		}
 	}
 	return nil
@@ -175,9 +143,9 @@ func (t *Task) QueryProxyList() *ProxyListQuery {
 	return (&TaskClient{config: t.config}).QueryProxyList(t)
 }
 
-// QueryProfiles queries the "Profiles" edge of the Task entity.
-func (t *Task) QueryProfiles() *ProfileGroupQuery {
-	return (&TaskClient{config: t.config}).QueryProfiles(t)
+// QueryProfileGroup queries the "ProfileGroup" edge of the Task entity.
+func (t *Task) QueryProfileGroup() *ProfileGroupQuery {
+	return (&TaskClient{config: t.config}).QueryProfileGroup(t)
 }
 
 // QueryTaskGroup queries the "TaskGroup" edge of the Task entity.

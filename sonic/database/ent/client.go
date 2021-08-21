@@ -1607,15 +1607,15 @@ func (c *ProfileGroupClient) QueryApp(pg *ProfileGroup) *AppQuery {
 	return query
 }
 
-// QueryTasks queries the Tasks edge of a ProfileGroup.
-func (c *ProfileGroupClient) QueryTasks(pg *ProfileGroup) *TaskQuery {
+// QueryTask queries the Task edge of a ProfileGroup.
+func (c *ProfileGroupClient) QueryTask(pg *ProfileGroup) *TaskQuery {
 	query := &TaskQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := pg.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(profilegroup.Table, profilegroup.FieldID, id),
 			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, profilegroup.TasksTable, profilegroup.TasksColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, profilegroup.TaskTable, profilegroup.TaskPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(pg.driver.Dialect(), step)
 		return fromV, nil
@@ -2673,15 +2673,15 @@ func (c *TaskClient) QueryProxyList(t *Task) *ProxyListQuery {
 	return query
 }
 
-// QueryProfiles queries the Profiles edge of a Task.
-func (c *TaskClient) QueryProfiles(t *Task) *ProfileGroupQuery {
+// QueryProfileGroup queries the ProfileGroup edge of a Task.
+func (c *TaskClient) QueryProfileGroup(t *Task) *ProfileGroupQuery {
 	query := &ProfileGroupQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(task.Table, task.FieldID, id),
 			sqlgraph.To(profilegroup.Table, profilegroup.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, task.ProfilesTable, task.ProfilesColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, task.ProfileGroupTable, task.ProfileGroupPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -2697,7 +2697,7 @@ func (c *TaskClient) QueryTaskGroup(t *Task) *TaskGroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(task.Table, task.FieldID, id),
 			sqlgraph.To(taskgroup.Table, taskgroup.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, task.TaskGroupTable, task.TaskGroupColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, task.TaskGroupTable, task.TaskGroupPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -2819,7 +2819,7 @@ func (c *TaskGroupClient) QueryTasks(tg *TaskGroup) *TaskQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taskgroup.Table, taskgroup.FieldID, id),
 			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, taskgroup.TasksTable, taskgroup.TasksColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, taskgroup.TasksTable, taskgroup.TasksPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(tg.driver.Dialect(), step)
 		return fromV, nil

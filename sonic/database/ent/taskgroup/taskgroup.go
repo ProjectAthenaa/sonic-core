@@ -30,13 +30,11 @@ const (
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
-	// TasksTable is the table that holds the Tasks relation/edge.
-	TasksTable = "tasks"
+	// TasksTable is the table that holds the Tasks relation/edge. The primary key declared below.
+	TasksTable = "task_group_Tasks"
 	// TasksInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
 	TasksInverseTable = "tasks"
-	// TasksColumn is the table column denoting the Tasks relation/edge.
-	TasksColumn = "task_group_tasks"
 )
 
 // Columns holds all SQL columns for taskgroup fields.
@@ -51,6 +49,9 @@ var (
 	// AppPrimaryKey and AppColumn2 are the table columns denoting the
 	// primary key for the App relation (M2M).
 	AppPrimaryKey = []string{"app_id", "task_group_id"}
+	// TasksPrimaryKey and TasksColumn2 are the table columns denoting the
+	// primary key for the Tasks relation (M2M).
+	TasksPrimaryKey = []string{"task_group_id", "task_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

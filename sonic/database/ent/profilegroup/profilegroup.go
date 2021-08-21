@@ -23,8 +23,8 @@ const (
 	EdgeProfiles = "Profiles"
 	// EdgeApp holds the string denoting the app edge name in mutations.
 	EdgeApp = "App"
-	// EdgeTasks holds the string denoting the tasks edge name in mutations.
-	EdgeTasks = "Tasks"
+	// EdgeTask holds the string denoting the task edge name in mutations.
+	EdgeTask = "Task"
 	// Table holds the table name of the profilegroup in the database.
 	Table = "profile_groups"
 	// ProfilesTable is the table that holds the Profiles relation/edge.
@@ -39,13 +39,11 @@ const (
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
-	// TasksTable is the table that holds the Tasks relation/edge.
-	TasksTable = "tasks"
-	// TasksInverseTable is the table name for the Task entity.
+	// TaskTable is the table that holds the Task relation/edge. The primary key declared below.
+	TaskTable = "task_ProfileGroup"
+	// TaskInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
-	TasksInverseTable = "tasks"
-	// TasksColumn is the table column denoting the Tasks relation/edge.
-	TasksColumn = "profile_group_tasks"
+	TaskInverseTable = "tasks"
 )
 
 // Columns holds all SQL columns for profilegroup fields.
@@ -60,6 +58,9 @@ var (
 	// AppPrimaryKey and AppColumn2 are the table columns denoting the
 	// primary key for the App relation (M2M).
 	AppPrimaryKey = []string{"app_id", "profile_group_id"}
+	// TaskPrimaryKey and TaskColumn2 are the table columns denoting the
+	// primary key for the Task relation (M2M).
+	TaskPrimaryKey = []string{"task_id", "profile_group_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -23,8 +23,8 @@ const (
 	EdgeProduct = "Product"
 	// EdgeProxyList holds the string denoting the proxylist edge name in mutations.
 	EdgeProxyList = "ProxyList"
-	// EdgeProfiles holds the string denoting the profiles edge name in mutations.
-	EdgeProfiles = "Profiles"
+	// EdgeProfileGroup holds the string denoting the profilegroup edge name in mutations.
+	EdgeProfileGroup = "ProfileGroup"
 	// EdgeTaskGroup holds the string denoting the taskgroup edge name in mutations.
 	EdgeTaskGroup = "TaskGroup"
 	// Table holds the table name of the task in the database.
@@ -39,20 +39,16 @@ const (
 	// ProxyListInverseTable is the table name for the ProxyList entity.
 	// It exists in this package in order to avoid circular dependency with the "proxylist" package.
 	ProxyListInverseTable = "proxy_lists"
-	// ProfilesTable is the table that holds the Profiles relation/edge.
-	ProfilesTable = "tasks"
-	// ProfilesInverseTable is the table name for the ProfileGroup entity.
+	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge. The primary key declared below.
+	ProfileGroupTable = "task_ProfileGroup"
+	// ProfileGroupInverseTable is the table name for the ProfileGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "profilegroup" package.
-	ProfilesInverseTable = "profile_groups"
-	// ProfilesColumn is the table column denoting the Profiles relation/edge.
-	ProfilesColumn = "profile_group_tasks"
-	// TaskGroupTable is the table that holds the TaskGroup relation/edge.
-	TaskGroupTable = "tasks"
+	ProfileGroupInverseTable = "profile_groups"
+	// TaskGroupTable is the table that holds the TaskGroup relation/edge. The primary key declared below.
+	TaskGroupTable = "task_group_Tasks"
 	// TaskGroupInverseTable is the table name for the TaskGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "taskgroup" package.
 	TaskGroupInverseTable = "task_groups"
-	// TaskGroupColumn is the table column denoting the TaskGroup relation/edge.
-	TaskGroupColumn = "task_group_tasks"
 )
 
 // Columns holds all SQL columns for task fields.
@@ -63,13 +59,6 @@ var Columns = []string{
 	FieldStartTime,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "tasks"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"profile_group_tasks",
-	"task_group_tasks",
-}
-
 var (
 	// ProductPrimaryKey and ProductColumn2 are the table columns denoting the
 	// primary key for the Product relation (M2M).
@@ -77,17 +66,18 @@ var (
 	// ProxyListPrimaryKey and ProxyListColumn2 are the table columns denoting the
 	// primary key for the ProxyList relation (M2M).
 	ProxyListPrimaryKey = []string{"task_id", "proxy_list_id"}
+	// ProfileGroupPrimaryKey and ProfileGroupColumn2 are the table columns denoting the
+	// primary key for the ProfileGroup relation (M2M).
+	ProfileGroupPrimaryKey = []string{"task_id", "profile_group_id"}
+	// TaskGroupPrimaryKey and TaskGroupColumn2 are the table columns denoting the
+	// primary key for the TaskGroup relation (M2M).
+	TaskGroupPrimaryKey = []string{"task_group_id", "task_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

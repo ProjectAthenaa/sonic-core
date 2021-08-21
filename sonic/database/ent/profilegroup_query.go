@@ -32,7 +32,7 @@ type ProfileGroupQuery struct {
 	// eager-loading edges.
 	withProfiles *ProfileQuery
 	withApp      *AppQuery
-	withTasks    *TaskQuery
+	withTask     *TaskQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -113,8 +113,8 @@ func (pgq *ProfileGroupQuery) QueryApp() *AppQuery {
 	return query
 }
 
-// QueryTasks chains the current query on the "Tasks" edge.
-func (pgq *ProfileGroupQuery) QueryTasks() *TaskQuery {
+// QueryTask chains the current query on the "Task" edge.
+func (pgq *ProfileGroupQuery) QueryTask() *TaskQuery {
 	query := &TaskQuery{config: pgq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pgq.prepareQuery(ctx); err != nil {
@@ -127,7 +127,7 @@ func (pgq *ProfileGroupQuery) QueryTasks() *TaskQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(profilegroup.Table, profilegroup.FieldID, selector),
 			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, profilegroup.TasksTable, profilegroup.TasksColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, profilegroup.TaskTable, profilegroup.TaskPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(pgq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,7 +318,7 @@ func (pgq *ProfileGroupQuery) Clone() *ProfileGroupQuery {
 		predicates:   append([]predicate.ProfileGroup{}, pgq.predicates...),
 		withProfiles: pgq.withProfiles.Clone(),
 		withApp:      pgq.withApp.Clone(),
-		withTasks:    pgq.withTasks.Clone(),
+		withTask:     pgq.withTask.Clone(),
 		// clone intermediate query.
 		sql:  pgq.sql.Clone(),
 		path: pgq.path,
@@ -347,14 +347,14 @@ func (pgq *ProfileGroupQuery) WithApp(opts ...func(*AppQuery)) *ProfileGroupQuer
 	return pgq
 }
 
-// WithTasks tells the query-builder to eager-load the nodes that are connected to
-// the "Tasks" edge. The optional arguments are used to configure the query builder of the edge.
-func (pgq *ProfileGroupQuery) WithTasks(opts ...func(*TaskQuery)) *ProfileGroupQuery {
+// WithTask tells the query-builder to eager-load the nodes that are connected to
+// the "Task" edge. The optional arguments are used to configure the query builder of the edge.
+func (pgq *ProfileGroupQuery) WithTask(opts ...func(*TaskQuery)) *ProfileGroupQuery {
 	query := &TaskQuery{config: pgq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	pgq.withTasks = query
+	pgq.withTask = query
 	return pgq
 }
 
@@ -426,7 +426,7 @@ func (pgq *ProfileGroupQuery) sqlAll(ctx context.Context) ([]*ProfileGroup, erro
 		loadedTypes = [3]bool{
 			pgq.withProfiles != nil,
 			pgq.withApp != nil,
-			pgq.withTasks != nil,
+			pgq.withTask != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -543,32 +543,68 @@ func (pgq *ProfileGroupQuery) sqlAll(ctx context.Context) ([]*ProfileGroup, erro
 		}
 	}
 
-	if query := pgq.withTasks; query != nil {
+	if query := pgq.withTask; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*ProfileGroup)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Tasks = []*Task{}
+		ids := make(map[uuid.UUID]*ProfileGroup, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Task = []*Task{}
 		}
-		query.withFKs = true
-		query.Where(predicate.Task(func(s *sql.Selector) {
-			s.Where(sql.InValues(profilegroup.TasksColumn, fks...))
-		}))
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*ProfileGroup)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   profilegroup.TaskTable,
+				Columns: profilegroup.TaskPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(profilegroup.TaskPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, pgq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "Task": %w`, err)
+		}
+		query.Where(task.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.profile_group_tasks
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "profile_group_tasks" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "profile_group_tasks" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "Task" node returned %v`, n.ID)
 			}
-			node.Edges.Tasks = append(node.Edges.Tasks, n)
+			for i := range nodes {
+				nodes[i].Edges.Task = append(nodes[i].Edges.Task, n)
+			}
 		}
 	}
 

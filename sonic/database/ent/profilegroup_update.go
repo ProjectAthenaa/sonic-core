@@ -87,14 +87,14 @@ func (pgu *ProfileGroupUpdate) AddApp(a ...*App) *ProfileGroupUpdate {
 	return pgu.AddAppIDs(ids...)
 }
 
-// AddTaskIDs adds the "Tasks" edge to the Task entity by IDs.
+// AddTaskIDs adds the "Task" edge to the Task entity by IDs.
 func (pgu *ProfileGroupUpdate) AddTaskIDs(ids ...uuid.UUID) *ProfileGroupUpdate {
 	pgu.mutation.AddTaskIDs(ids...)
 	return pgu
 }
 
-// AddTasks adds the "Tasks" edges to the Task entity.
-func (pgu *ProfileGroupUpdate) AddTasks(t ...*Task) *ProfileGroupUpdate {
+// AddTask adds the "Task" edges to the Task entity.
+func (pgu *ProfileGroupUpdate) AddTask(t ...*Task) *ProfileGroupUpdate {
 	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -149,20 +149,20 @@ func (pgu *ProfileGroupUpdate) RemoveApp(a ...*App) *ProfileGroupUpdate {
 	return pgu.RemoveAppIDs(ids...)
 }
 
-// ClearTasks clears all "Tasks" edges to the Task entity.
-func (pgu *ProfileGroupUpdate) ClearTasks() *ProfileGroupUpdate {
-	pgu.mutation.ClearTasks()
+// ClearTask clears all "Task" edges to the Task entity.
+func (pgu *ProfileGroupUpdate) ClearTask() *ProfileGroupUpdate {
+	pgu.mutation.ClearTask()
 	return pgu
 }
 
-// RemoveTaskIDs removes the "Tasks" edge to Task entities by IDs.
+// RemoveTaskIDs removes the "Task" edge to Task entities by IDs.
 func (pgu *ProfileGroupUpdate) RemoveTaskIDs(ids ...uuid.UUID) *ProfileGroupUpdate {
 	pgu.mutation.RemoveTaskIDs(ids...)
 	return pgu
 }
 
-// RemoveTasks removes "Tasks" edges to Task entities.
-func (pgu *ProfileGroupUpdate) RemoveTasks(t ...*Task) *ProfileGroupUpdate {
+// RemoveTask removes "Task" edges to Task entities.
+func (pgu *ProfileGroupUpdate) RemoveTask(t ...*Task) *ProfileGroupUpdate {
 	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -380,12 +380,12 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pgu.mutation.TasksCleared() {
+	if pgu.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profilegroup.TasksTable,
-			Columns: []string{profilegroup.TasksColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   profilegroup.TaskTable,
+			Columns: profilegroup.TaskPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -396,12 +396,12 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pgu.mutation.RemovedTasksIDs(); len(nodes) > 0 && !pgu.mutation.TasksCleared() {
+	if nodes := pgu.mutation.RemovedTaskIDs(); len(nodes) > 0 && !pgu.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profilegroup.TasksTable,
-			Columns: []string{profilegroup.TasksColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   profilegroup.TaskTable,
+			Columns: profilegroup.TaskPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -415,12 +415,12 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pgu.mutation.TasksIDs(); len(nodes) > 0 {
+	if nodes := pgu.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profilegroup.TasksTable,
-			Columns: []string{profilegroup.TasksColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   profilegroup.TaskTable,
+			Columns: profilegroup.TaskPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -509,14 +509,14 @@ func (pguo *ProfileGroupUpdateOne) AddApp(a ...*App) *ProfileGroupUpdateOne {
 	return pguo.AddAppIDs(ids...)
 }
 
-// AddTaskIDs adds the "Tasks" edge to the Task entity by IDs.
+// AddTaskIDs adds the "Task" edge to the Task entity by IDs.
 func (pguo *ProfileGroupUpdateOne) AddTaskIDs(ids ...uuid.UUID) *ProfileGroupUpdateOne {
 	pguo.mutation.AddTaskIDs(ids...)
 	return pguo
 }
 
-// AddTasks adds the "Tasks" edges to the Task entity.
-func (pguo *ProfileGroupUpdateOne) AddTasks(t ...*Task) *ProfileGroupUpdateOne {
+// AddTask adds the "Task" edges to the Task entity.
+func (pguo *ProfileGroupUpdateOne) AddTask(t ...*Task) *ProfileGroupUpdateOne {
 	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -571,20 +571,20 @@ func (pguo *ProfileGroupUpdateOne) RemoveApp(a ...*App) *ProfileGroupUpdateOne {
 	return pguo.RemoveAppIDs(ids...)
 }
 
-// ClearTasks clears all "Tasks" edges to the Task entity.
-func (pguo *ProfileGroupUpdateOne) ClearTasks() *ProfileGroupUpdateOne {
-	pguo.mutation.ClearTasks()
+// ClearTask clears all "Task" edges to the Task entity.
+func (pguo *ProfileGroupUpdateOne) ClearTask() *ProfileGroupUpdateOne {
+	pguo.mutation.ClearTask()
 	return pguo
 }
 
-// RemoveTaskIDs removes the "Tasks" edge to Task entities by IDs.
+// RemoveTaskIDs removes the "Task" edge to Task entities by IDs.
 func (pguo *ProfileGroupUpdateOne) RemoveTaskIDs(ids ...uuid.UUID) *ProfileGroupUpdateOne {
 	pguo.mutation.RemoveTaskIDs(ids...)
 	return pguo
 }
 
-// RemoveTasks removes "Tasks" edges to Task entities.
-func (pguo *ProfileGroupUpdateOne) RemoveTasks(t ...*Task) *ProfileGroupUpdateOne {
+// RemoveTask removes "Task" edges to Task entities.
+func (pguo *ProfileGroupUpdateOne) RemoveTask(t ...*Task) *ProfileGroupUpdateOne {
 	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -826,12 +826,12 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pguo.mutation.TasksCleared() {
+	if pguo.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profilegroup.TasksTable,
-			Columns: []string{profilegroup.TasksColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   profilegroup.TaskTable,
+			Columns: profilegroup.TaskPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -842,12 +842,12 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pguo.mutation.RemovedTasksIDs(); len(nodes) > 0 && !pguo.mutation.TasksCleared() {
+	if nodes := pguo.mutation.RemovedTaskIDs(); len(nodes) > 0 && !pguo.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profilegroup.TasksTable,
-			Columns: []string{profilegroup.TasksColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   profilegroup.TaskTable,
+			Columns: profilegroup.TaskPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -861,12 +861,12 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pguo.mutation.TasksIDs(); len(nodes) > 0 {
+	if nodes := pguo.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profilegroup.TasksTable,
-			Columns: []string{profilegroup.TasksColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   profilegroup.TaskTable,
+			Columns: profilegroup.TaskPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

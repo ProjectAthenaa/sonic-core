@@ -34,11 +34,8 @@ func (Task) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("Product", Product.Type),
 		edge.To("ProxyList", ProxyList.Type),
-		edge.From("Profiles", ProfileGroup.Type).
-			Ref("Tasks").
-			Unique(),
+		edge.To("ProfileGroup", ProfileGroup.Type),
 		edge.From("TaskGroup", TaskGroup.Type).
-			Ref("Tasks").
-			Unique(),
+			Ref("Tasks"),
 	}
 }

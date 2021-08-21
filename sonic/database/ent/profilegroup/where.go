@@ -434,25 +434,25 @@ func HasAppWith(preds ...predicate.App) predicate.ProfileGroup {
 	})
 }
 
-// HasTasks applies the HasEdge predicate on the "Tasks" edge.
-func HasTasks() predicate.ProfileGroup {
+// HasTask applies the HasEdge predicate on the "Task" edge.
+func HasTask() predicate.ProfileGroup {
 	return predicate.ProfileGroup(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TasksTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TasksTable, TasksColumn),
+			sqlgraph.To(TaskTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TaskTable, TaskPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTasksWith applies the HasEdge predicate on the "Tasks" edge with a given conditions (other predicates).
-func HasTasksWith(preds ...predicate.Task) predicate.ProfileGroup {
+// HasTaskWith applies the HasEdge predicate on the "Task" edge with a given conditions (other predicates).
+func HasTaskWith(preds ...predicate.Task) predicate.ProfileGroup {
 	return predicate.ProfileGroup(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TasksInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TasksTable, TasksColumn),
+			sqlgraph.To(TaskInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TaskTable, TaskPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

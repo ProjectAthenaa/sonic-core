@@ -34,8 +34,8 @@ type ProfileGroupEdges struct {
 	Profiles []*Profile `json:"Profiles,omitempty"`
 	// App holds the value of the App edge.
 	App []*App `json:"App,omitempty"`
-	// Tasks holds the value of the Tasks edge.
-	Tasks []*Task `json:"Tasks,omitempty"`
+	// Task holds the value of the Task edge.
+	Task []*Task `json:"Task,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -59,13 +59,13 @@ func (e ProfileGroupEdges) AppOrErr() ([]*App, error) {
 	return nil, &NotLoadedError{edge: "App"}
 }
 
-// TasksOrErr returns the Tasks value or an error if the edge
+// TaskOrErr returns the Task value or an error if the edge
 // was not loaded in eager-loading.
-func (e ProfileGroupEdges) TasksOrErr() ([]*Task, error) {
+func (e ProfileGroupEdges) TaskOrErr() ([]*Task, error) {
 	if e.loadedTypes[2] {
-		return e.Tasks, nil
+		return e.Task, nil
 	}
-	return nil, &NotLoadedError{edge: "Tasks"}
+	return nil, &NotLoadedError{edge: "Task"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -133,9 +133,9 @@ func (pg *ProfileGroup) QueryApp() *AppQuery {
 	return (&ProfileGroupClient{config: pg.config}).QueryApp(pg)
 }
 
-// QueryTasks queries the "Tasks" edge of the ProfileGroup entity.
-func (pg *ProfileGroup) QueryTasks() *TaskQuery {
-	return (&ProfileGroupClient{config: pg.config}).QueryTasks(pg)
+// QueryTask queries the "Task" edge of the ProfileGroup entity.
+func (pg *ProfileGroup) QueryTask() *TaskQuery {
+	return (&ProfileGroupClient{config: pg.config}).QueryTask(pg)
 }
 
 // Update returns a builder for updating this ProfileGroup.

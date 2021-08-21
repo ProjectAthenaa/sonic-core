@@ -103,42 +103,34 @@ func (tc *TaskCreate) AddProxyList(p ...*ProxyList) *TaskCreate {
 	return tc.AddProxyListIDs(ids...)
 }
 
-// SetProfilesID sets the "Profiles" edge to the ProfileGroup entity by ID.
-func (tc *TaskCreate) SetProfilesID(id uuid.UUID) *TaskCreate {
-	tc.mutation.SetProfilesID(id)
+// AddProfileGroupIDs adds the "ProfileGroup" edge to the ProfileGroup entity by IDs.
+func (tc *TaskCreate) AddProfileGroupIDs(ids ...uuid.UUID) *TaskCreate {
+	tc.mutation.AddProfileGroupIDs(ids...)
 	return tc
 }
 
-// SetNillableProfilesID sets the "Profiles" edge to the ProfileGroup entity by ID if the given value is not nil.
-func (tc *TaskCreate) SetNillableProfilesID(id *uuid.UUID) *TaskCreate {
-	if id != nil {
-		tc = tc.SetProfilesID(*id)
+// AddProfileGroup adds the "ProfileGroup" edges to the ProfileGroup entity.
+func (tc *TaskCreate) AddProfileGroup(p ...*ProfileGroup) *TaskCreate {
+	ids := make([]uuid.UUID, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
+	return tc.AddProfileGroupIDs(ids...)
+}
+
+// AddTaskGroupIDs adds the "TaskGroup" edge to the TaskGroup entity by IDs.
+func (tc *TaskCreate) AddTaskGroupIDs(ids ...uuid.UUID) *TaskCreate {
+	tc.mutation.AddTaskGroupIDs(ids...)
 	return tc
 }
 
-// SetProfiles sets the "Profiles" edge to the ProfileGroup entity.
-func (tc *TaskCreate) SetProfiles(p *ProfileGroup) *TaskCreate {
-	return tc.SetProfilesID(p.ID)
-}
-
-// SetTaskGroupID sets the "TaskGroup" edge to the TaskGroup entity by ID.
-func (tc *TaskCreate) SetTaskGroupID(id uuid.UUID) *TaskCreate {
-	tc.mutation.SetTaskGroupID(id)
-	return tc
-}
-
-// SetNillableTaskGroupID sets the "TaskGroup" edge to the TaskGroup entity by ID if the given value is not nil.
-func (tc *TaskCreate) SetNillableTaskGroupID(id *uuid.UUID) *TaskCreate {
-	if id != nil {
-		tc = tc.SetTaskGroupID(*id)
+// AddTaskGroup adds the "TaskGroup" edges to the TaskGroup entity.
+func (tc *TaskCreate) AddTaskGroup(t ...*TaskGroup) *TaskCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tc
-}
-
-// SetTaskGroup sets the "TaskGroup" edge to the TaskGroup entity.
-func (tc *TaskCreate) SetTaskGroup(t *TaskGroup) *TaskCreate {
-	return tc.SetTaskGroupID(t.ID)
+	return tc.AddTaskGroupIDs(ids...)
 }
 
 // Mutation returns the TaskMutation object of the builder.
@@ -328,12 +320,12 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.ProfilesIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.ProfileGroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   task.ProfilesTable,
-			Columns: []string{task.ProfilesColumn},
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   task.ProfileGroupTable,
+			Columns: task.ProfileGroupPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -345,15 +337,14 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.profile_group_tasks = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.TaskGroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   task.TaskGroupTable,
-			Columns: []string{task.TaskGroupColumn},
+			Columns: task.TaskGroupPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -365,7 +356,6 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.task_group_tasks = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

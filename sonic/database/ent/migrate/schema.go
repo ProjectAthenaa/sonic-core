@@ -433,28 +433,12 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "start_time", Type: field.TypeTime, Nullable: true},
-		{Name: "profile_group_tasks", Type: field.TypeUUID, Nullable: true},
-		{Name: "task_group_tasks", Type: field.TypeUUID, Nullable: true},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{
 		Name:       "tasks",
 		Columns:    TasksColumns,
 		PrimaryKey: []*schema.Column{TasksColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "tasks_profile_groups_Tasks",
-				Columns:    []*schema.Column{TasksColumns[4]},
-				RefColumns: []*schema.Column{ProfileGroupsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "tasks_task_groups_Tasks",
-				Columns:    []*schema.Column{TasksColumns[5]},
-				RefColumns: []*schema.Column{TaskGroupsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
 	}
 	// TaskGroupsColumns holds the columns for the "task_groups" table.
 	TaskGroupsColumns = []*schema.Column{
@@ -691,6 +675,56 @@ var (
 			},
 		},
 	}
+	// TaskProfileGroupColumns holds the columns for the "task_ProfileGroup" table.
+	TaskProfileGroupColumns = []*schema.Column{
+		{Name: "task_id", Type: field.TypeUUID},
+		{Name: "profile_group_id", Type: field.TypeUUID},
+	}
+	// TaskProfileGroupTable holds the schema information for the "task_ProfileGroup" table.
+	TaskProfileGroupTable = &schema.Table{
+		Name:       "task_ProfileGroup",
+		Columns:    TaskProfileGroupColumns,
+		PrimaryKey: []*schema.Column{TaskProfileGroupColumns[0], TaskProfileGroupColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "task_ProfileGroup_task_id",
+				Columns:    []*schema.Column{TaskProfileGroupColumns[0]},
+				RefColumns: []*schema.Column{TasksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "task_ProfileGroup_profile_group_id",
+				Columns:    []*schema.Column{TaskProfileGroupColumns[1]},
+				RefColumns: []*schema.Column{ProfileGroupsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// TaskGroupTasksColumns holds the columns for the "task_group_Tasks" table.
+	TaskGroupTasksColumns = []*schema.Column{
+		{Name: "task_group_id", Type: field.TypeUUID},
+		{Name: "task_id", Type: field.TypeUUID},
+	}
+	// TaskGroupTasksTable holds the schema information for the "task_group_Tasks" table.
+	TaskGroupTasksTable = &schema.Table{
+		Name:       "task_group_Tasks",
+		Columns:    TaskGroupTasksColumns,
+		PrimaryKey: []*schema.Column{TaskGroupTasksColumns[0], TaskGroupTasksColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "task_group_Tasks_task_group_id",
+				Columns:    []*schema.Column{TaskGroupTasksColumns[0]},
+				RefColumns: []*schema.Column{TaskGroupsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "task_group_Tasks_task_id",
+				Columns:    []*schema.Column{TaskGroupTasksColumns[1]},
+				RefColumns: []*schema.Column{TasksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// UserStatisticsColumns holds the columns for the "user_Statistics" table.
 	UserStatisticsColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeUUID},
@@ -748,6 +782,8 @@ var (
 		StatisticProductTable,
 		TaskProductTable,
 		TaskProxyListTable,
+		TaskProfileGroupTable,
+		TaskGroupTasksTable,
 		UserStatisticsTable,
 	}
 )
@@ -768,8 +804,6 @@ func init() {
 	SettingsTable.ForeignKeys[0].RefTable = AppsTable
 	ShippingsTable.ForeignKeys[0].RefTable = ProfilesTable
 	StripesTable.ForeignKeys[0].RefTable = LicensesTable
-	TasksTable.ForeignKeys[0].RefTable = ProfileGroupsTable
-	TasksTable.ForeignKeys[1].RefTable = TaskGroupsTable
 	UsersTable.ForeignKeys[0].RefTable = ReleasesTable
 	AppProxyListsTable.ForeignKeys[0].RefTable = AppsTable
 	AppProxyListsTable.ForeignKeys[1].RefTable = ProxyListsTable
@@ -787,6 +821,10 @@ func init() {
 	TaskProductTable.ForeignKeys[1].RefTable = ProductsTable
 	TaskProxyListTable.ForeignKeys[0].RefTable = TasksTable
 	TaskProxyListTable.ForeignKeys[1].RefTable = ProxyListsTable
+	TaskProfileGroupTable.ForeignKeys[0].RefTable = TasksTable
+	TaskProfileGroupTable.ForeignKeys[1].RefTable = ProfileGroupsTable
+	TaskGroupTasksTable.ForeignKeys[0].RefTable = TaskGroupsTable
+	TaskGroupTasksTable.ForeignKeys[1].RefTable = TasksTable
 	UserStatisticsTable.ForeignKeys[0].RefTable = UsersTable
 	UserStatisticsTable.ForeignKeys[1].RefTable = StatisticsTable
 }
