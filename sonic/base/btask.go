@@ -3,10 +3,10 @@ package base
 import (
 	"context"
 	"fmt"
+	fasttls "github.com/ProjectAthenaa/fasttls"
 	module "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/prometheus/common/log"
-	http "github.com/useflyent/fhttp"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -16,7 +16,7 @@ type BTask struct {
 	ID       string
 	Frontend module.Module_TaskServer
 	Ctx      context.Context
-	Client   http.Client
+	Client   *fasttls.Client
 
 	Data     *module.Data
 	Callback face.ICallback
