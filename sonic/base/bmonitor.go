@@ -19,8 +19,6 @@ import (
 	"time"
 )
 
-//TODO Add Godtoy's http client
-//TODO test proxy sync validity
 
 var (
 	json         = jsoniter.ConfigCompatibleWithStandardLibrary

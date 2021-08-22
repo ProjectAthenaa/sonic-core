@@ -345,6 +345,8 @@ var (
 		{Name: "decline_webhook", Type: field.TypeString, Default: ""},
 		{Name: "checkout_delay", Type: field.TypeInt32, Default: 0},
 		{Name: "atc_delay", Type: field.TypeInt32, Default: 0},
+		{Name: "captcha_solver", Type: field.TypeEnum, Enums: []string{"AYCD_Autosolve", "2Captcha", "CapMonster", "Harvester", "Disabled"}, Default: "Disabled"},
+		{Name: "captcha_details", Type: field.TypeJSON},
 		{Name: "app_settings", Type: field.TypeUUID, Nullable: true},
 	}
 	// SettingsTable holds the schema information for the "settings" table.
@@ -355,7 +357,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "settings_apps_Settings",
-				Columns:    []*schema.Column{SettingsColumns[7]},
+				Columns:    []*schema.Column{SettingsColumns[9]},
 				RefColumns: []*schema.Column{AppsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

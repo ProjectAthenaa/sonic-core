@@ -64,12 +64,9 @@ message Data{
   Proxy Proxy = 3;
   string MonitorChannel = 4;
   TaskData TaskData = 5;
-  map<string, ParamValue> Params = 6;
+  map<string, string> Params = 6;
 }
-message ParamValue {
-  //  string  Key = 1;
-  repeated string Value = 1;
-}
+
 message TaskData{
   bool RandomSize = 1;
   bool RandomColor = 2;

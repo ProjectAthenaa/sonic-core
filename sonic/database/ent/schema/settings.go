@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/google/uuid"
 	"time"
 )
@@ -27,6 +28,10 @@ func (Settings) Fields() []ent.Field {
 		field.String("DeclineWebhook").Default(""),
 		field.Int32("CheckoutDelay").Default(0),
 		field.Int32("ATCDelay").Default(0),
+		field.Enum("CaptchaSolver").
+			Values("AYCD_Autosolve", "2Captcha", "CapMonster", "Harvester", "Disabled").
+			Default("Disabled"),
+		field.JSON("CaptchaDetails", sonic.Map{}).SchemaType(sonic.Map{}),
 	}
 }
 
@@ -39,4 +44,3 @@ func (Settings) Edges() []ent.Edge {
 			Unique(),
 	}
 }
-

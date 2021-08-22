@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/google/uuid"
@@ -103,6 +104,26 @@ func (sc *SettingsCreate) SetNillableATCDelay(i *int32) *SettingsCreate {
 	if i != nil {
 		sc.SetATCDelay(*i)
 	}
+	return sc
+}
+
+// SetCaptchaSolver sets the "CaptchaSolver" field.
+func (sc *SettingsCreate) SetCaptchaSolver(ss settings.CaptchaSolver) *SettingsCreate {
+	sc.mutation.SetCaptchaSolver(ss)
+	return sc
+}
+
+// SetNillableCaptchaSolver sets the "CaptchaSolver" field if the given value is not nil.
+func (sc *SettingsCreate) SetNillableCaptchaSolver(ss *settings.CaptchaSolver) *SettingsCreate {
+	if ss != nil {
+		sc.SetCaptchaSolver(*ss)
+	}
+	return sc
+}
+
+// SetCaptchaDetails sets the "CaptchaDetails" field.
+func (sc *SettingsCreate) SetCaptchaDetails(s sonic.Map) *SettingsCreate {
+	sc.mutation.SetCaptchaDetails(s)
 	return sc
 }
 
@@ -218,6 +239,10 @@ func (sc *SettingsCreate) defaults() {
 		v := settings.DefaultATCDelay
 		sc.mutation.SetATCDelay(v)
 	}
+	if _, ok := sc.mutation.CaptchaSolver(); !ok {
+		v := settings.DefaultCaptchaSolver
+		sc.mutation.SetCaptchaSolver(v)
+	}
 	if _, ok := sc.mutation.ID(); !ok {
 		v := settings.DefaultID()
 		sc.mutation.SetID(v)
@@ -243,6 +268,17 @@ func (sc *SettingsCreate) check() error {
 	}
 	if _, ok := sc.mutation.ATCDelay(); !ok {
 		return &ValidationError{Name: "ATCDelay", err: errors.New(`ent: missing required field "ATCDelay"`)}
+	}
+	if _, ok := sc.mutation.CaptchaSolver(); !ok {
+		return &ValidationError{Name: "CaptchaSolver", err: errors.New(`ent: missing required field "CaptchaSolver"`)}
+	}
+	if v, ok := sc.mutation.CaptchaSolver(); ok {
+		if err := settings.CaptchaSolverValidator(v); err != nil {
+			return &ValidationError{Name: "CaptchaSolver", err: fmt.Errorf(`ent: validator failed for field "CaptchaSolver": %w`, err)}
+		}
+	}
+	if _, ok := sc.mutation.CaptchaDetails(); !ok {
+		return &ValidationError{Name: "CaptchaDetails", err: errors.New(`ent: missing required field "CaptchaDetails"`)}
 	}
 	if _, ok := sc.mutation.AppID(); !ok {
 		return &ValidationError{Name: "App", err: errors.New("ent: missing required edge \"App\"")}
@@ -326,6 +362,22 @@ func (sc *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 			Column: settings.FieldATCDelay,
 		})
 		_node.ATCDelay = value
+	}
+	if value, ok := sc.mutation.CaptchaSolver(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: settings.FieldCaptchaSolver,
+		})
+		_node.CaptchaSolver = value
+	}
+	if value, ok := sc.mutation.CaptchaDetails(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: settings.FieldCaptchaDetails,
+		})
+		_node.CaptchaDetails = value
 	}
 	if nodes := sc.mutation.AppIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

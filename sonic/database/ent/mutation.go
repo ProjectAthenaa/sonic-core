@@ -11733,6 +11733,8 @@ type SettingsMutation struct {
 	add_CheckoutDelay *int32
 	_ATCDelay         *int32
 	add_ATCDelay      *int32
+	_CaptchaSolver    *settings.CaptchaSolver
+	_CaptchaDetails   *sonic.Map
 	clearedFields     map[string]struct{}
 	_App              *uuid.UUID
 	cleared_App       bool
@@ -12082,6 +12084,78 @@ func (m *SettingsMutation) ResetATCDelay() {
 	m.add_ATCDelay = nil
 }
 
+// SetCaptchaSolver sets the "CaptchaSolver" field.
+func (m *SettingsMutation) SetCaptchaSolver(ss settings.CaptchaSolver) {
+	m._CaptchaSolver = &ss
+}
+
+// CaptchaSolver returns the value of the "CaptchaSolver" field in the mutation.
+func (m *SettingsMutation) CaptchaSolver() (r settings.CaptchaSolver, exists bool) {
+	v := m._CaptchaSolver
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCaptchaSolver returns the old "CaptchaSolver" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldCaptchaSolver(ctx context.Context) (v settings.CaptchaSolver, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCaptchaSolver is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCaptchaSolver requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCaptchaSolver: %w", err)
+	}
+	return oldValue.CaptchaSolver, nil
+}
+
+// ResetCaptchaSolver resets all changes to the "CaptchaSolver" field.
+func (m *SettingsMutation) ResetCaptchaSolver() {
+	m._CaptchaSolver = nil
+}
+
+// SetCaptchaDetails sets the "CaptchaDetails" field.
+func (m *SettingsMutation) SetCaptchaDetails(s sonic.Map) {
+	m._CaptchaDetails = &s
+}
+
+// CaptchaDetails returns the value of the "CaptchaDetails" field in the mutation.
+func (m *SettingsMutation) CaptchaDetails() (r sonic.Map, exists bool) {
+	v := m._CaptchaDetails
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCaptchaDetails returns the old "CaptchaDetails" field's value of the Settings entity.
+// If the Settings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SettingsMutation) OldCaptchaDetails(ctx context.Context) (v sonic.Map, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCaptchaDetails is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCaptchaDetails requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCaptchaDetails: %w", err)
+	}
+	return oldValue.CaptchaDetails, nil
+}
+
+// ResetCaptchaDetails resets all changes to the "CaptchaDetails" field.
+func (m *SettingsMutation) ResetCaptchaDetails() {
+	m._CaptchaDetails = nil
+}
+
 // SetAppID sets the "App" edge to the App entity by id.
 func (m *SettingsMutation) SetAppID(id uuid.UUID) {
 	m._App = &id
@@ -12140,7 +12214,7 @@ func (m *SettingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SettingsMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, settings.FieldCreatedAt)
 	}
@@ -12158,6 +12232,12 @@ func (m *SettingsMutation) Fields() []string {
 	}
 	if m._ATCDelay != nil {
 		fields = append(fields, settings.FieldATCDelay)
+	}
+	if m._CaptchaSolver != nil {
+		fields = append(fields, settings.FieldCaptchaSolver)
+	}
+	if m._CaptchaDetails != nil {
+		fields = append(fields, settings.FieldCaptchaDetails)
 	}
 	return fields
 }
@@ -12179,6 +12259,10 @@ func (m *SettingsMutation) Field(name string) (ent.Value, bool) {
 		return m.CheckoutDelay()
 	case settings.FieldATCDelay:
 		return m.ATCDelay()
+	case settings.FieldCaptchaSolver:
+		return m.CaptchaSolver()
+	case settings.FieldCaptchaDetails:
+		return m.CaptchaDetails()
 	}
 	return nil, false
 }
@@ -12200,6 +12284,10 @@ func (m *SettingsMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCheckoutDelay(ctx)
 	case settings.FieldATCDelay:
 		return m.OldATCDelay(ctx)
+	case settings.FieldCaptchaSolver:
+		return m.OldCaptchaSolver(ctx)
+	case settings.FieldCaptchaDetails:
+		return m.OldCaptchaDetails(ctx)
 	}
 	return nil, fmt.Errorf("unknown Settings field %s", name)
 }
@@ -12250,6 +12338,20 @@ func (m *SettingsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetATCDelay(v)
+		return nil
+	case settings.FieldCaptchaSolver:
+		v, ok := value.(settings.CaptchaSolver)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCaptchaSolver(v)
+		return nil
+	case settings.FieldCaptchaDetails:
+		v, ok := value.(sonic.Map)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCaptchaDetails(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)
@@ -12344,6 +12446,12 @@ func (m *SettingsMutation) ResetField(name string) error {
 		return nil
 	case settings.FieldATCDelay:
 		m.ResetATCDelay()
+		return nil
+	case settings.FieldCaptchaSolver:
+		m.ResetCaptchaSolver()
+		return nil
+	case settings.FieldCaptchaDetails:
+		m.ResetCaptchaDetails()
 		return nil
 	}
 	return fmt.Errorf("unknown Settings field %s", name)

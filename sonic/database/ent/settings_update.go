@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
@@ -120,6 +121,26 @@ func (su *SettingsUpdate) AddATCDelay(i int32) *SettingsUpdate {
 	return su
 }
 
+// SetCaptchaSolver sets the "CaptchaSolver" field.
+func (su *SettingsUpdate) SetCaptchaSolver(ss settings.CaptchaSolver) *SettingsUpdate {
+	su.mutation.SetCaptchaSolver(ss)
+	return su
+}
+
+// SetNillableCaptchaSolver sets the "CaptchaSolver" field if the given value is not nil.
+func (su *SettingsUpdate) SetNillableCaptchaSolver(ss *settings.CaptchaSolver) *SettingsUpdate {
+	if ss != nil {
+		su.SetCaptchaSolver(*ss)
+	}
+	return su
+}
+
+// SetCaptchaDetails sets the "CaptchaDetails" field.
+func (su *SettingsUpdate) SetCaptchaDetails(s sonic.Map) *SettingsUpdate {
+	su.mutation.SetCaptchaDetails(s)
+	return su
+}
+
 // SetAppID sets the "App" edge to the App entity by ID.
 func (su *SettingsUpdate) SetAppID(id uuid.UUID) *SettingsUpdate {
 	su.mutation.SetAppID(id)
@@ -213,6 +234,11 @@ func (su *SettingsUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (su *SettingsUpdate) check() error {
+	if v, ok := su.mutation.CaptchaSolver(); ok {
+		if err := settings.CaptchaSolverValidator(v); err != nil {
+			return &ValidationError{Name: "CaptchaSolver", err: fmt.Errorf("ent: validator failed for field \"CaptchaSolver\": %w", err)}
+		}
+	}
 	if _, ok := su.mutation.AppID(); su.mutation.AppCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"App\"")
 	}
@@ -291,6 +317,20 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldATCDelay,
+		})
+	}
+	if value, ok := su.mutation.CaptchaSolver(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: settings.FieldCaptchaSolver,
+		})
+	}
+	if value, ok := su.mutation.CaptchaDetails(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: settings.FieldCaptchaDetails,
 		})
 	}
 	if su.mutation.AppCleared() {
@@ -437,6 +477,26 @@ func (suo *SettingsUpdateOne) AddATCDelay(i int32) *SettingsUpdateOne {
 	return suo
 }
 
+// SetCaptchaSolver sets the "CaptchaSolver" field.
+func (suo *SettingsUpdateOne) SetCaptchaSolver(ss settings.CaptchaSolver) *SettingsUpdateOne {
+	suo.mutation.SetCaptchaSolver(ss)
+	return suo
+}
+
+// SetNillableCaptchaSolver sets the "CaptchaSolver" field if the given value is not nil.
+func (suo *SettingsUpdateOne) SetNillableCaptchaSolver(ss *settings.CaptchaSolver) *SettingsUpdateOne {
+	if ss != nil {
+		suo.SetCaptchaSolver(*ss)
+	}
+	return suo
+}
+
+// SetCaptchaDetails sets the "CaptchaDetails" field.
+func (suo *SettingsUpdateOne) SetCaptchaDetails(s sonic.Map) *SettingsUpdateOne {
+	suo.mutation.SetCaptchaDetails(s)
+	return suo
+}
+
 // SetAppID sets the "App" edge to the App entity by ID.
 func (suo *SettingsUpdateOne) SetAppID(id uuid.UUID) *SettingsUpdateOne {
 	suo.mutation.SetAppID(id)
@@ -537,6 +597,11 @@ func (suo *SettingsUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (suo *SettingsUpdateOne) check() error {
+	if v, ok := suo.mutation.CaptchaSolver(); ok {
+		if err := settings.CaptchaSolverValidator(v); err != nil {
+			return &ValidationError{Name: "CaptchaSolver", err: fmt.Errorf("ent: validator failed for field \"CaptchaSolver\": %w", err)}
+		}
+	}
 	if _, ok := suo.mutation.AppID(); suo.mutation.AppCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"App\"")
 	}
@@ -632,6 +697,20 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			Type:   field.TypeInt32,
 			Value:  value,
 			Column: settings.FieldATCDelay,
+		})
+	}
+	if value, ok := suo.mutation.CaptchaSolver(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: settings.FieldCaptchaSolver,
+		})
+	}
+	if value, ok := suo.mutation.CaptchaDetails(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: settings.FieldCaptchaDetails,
 		})
 	}
 	if suo.mutation.AppCleared() {

@@ -1289,7 +1289,7 @@ func (s *Settings) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     s.ID,
 		Type:   "Settings",
-		Fields: make([]*Field, 6),
+		Fields: make([]*Field, 8),
 		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
@@ -1339,6 +1339,22 @@ func (s *Settings) Node(ctx context.Context) (node *Node, err error) {
 	node.Fields[5] = &Field{
 		Type:  "int32",
 		Name:  "ATCDelay",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.CaptchaSolver); err != nil {
+		return nil, err
+	}
+	node.Fields[6] = &Field{
+		Type:  "settings.CaptchaSolver",
+		Name:  "CaptchaSolver",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.CaptchaDetails); err != nil {
+		return nil, err
+	}
+	node.Fields[7] = &Field{
+		Type:  "sonic.Map",
+		Name:  "CaptchaDetails",
 		Value: string(buf),
 	}
 	node.Edges[0] = &Edge{

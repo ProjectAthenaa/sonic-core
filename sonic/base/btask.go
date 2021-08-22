@@ -4,9 +4,15 @@ import (
 	"context"
 	"fmt"
 	module "github.com/ProjectAthenaa/sonic-core/protos"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
+	"github.com/ProjectAthenaa/sonic-core/sonic/core"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
+	"github.com/godtoy/autosolve"
+	"github.com/google/uuid"
 	"github.com/prometheus/common/log"
 	http "github.com/useflyent/fhttp"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -17,7 +23,6 @@ type BTask struct {
 	Frontend module.Module_TaskServer
 	Ctx      context.Context
 	Client   http.Client
-
 	Data     *module.Data
 	Callback face.ICallback
 
@@ -26,6 +31,7 @@ type BTask struct {
 	_statusLocker      sync.Mutex
 	_runningChan       chan int32 //for stop command
 	_pauseContinueChan chan int8  //for pause/continue command
+	_cancelFunc        context.CancelFunc
 
 	//props
 	quitChan chan int32
@@ -34,6 +40,12 @@ type BTask struct {
 	stopping bool
 	state    module.STATUS //tag state
 	message  string        //tag more message
+
+	//captcha specific fields
+	autosolveClient   *autosolve.Client
+	autosolveChannels map[string]chan autosolve.CaptchaTokenResponse
+	siteURL           string
+	siteKey           string
 
 	//returnFields
 	ReturningFields *returningFields
@@ -50,8 +62,46 @@ type returningFields struct {
 func (tk *BTask) Init(server module.Module_TaskServer) {
 	tk.ID = tk.Data.TaskID
 	tk.Frontend = server
-	//add 2 hour timeout, a task cannot consume resources for more than an hour
-	tk.Ctx, _ = context.WithDeadline(server.Context(), time.Now().Add(time.Hour))
+	//add 1 hour timeout, a task cannot consume resources for more than an hour
+	tk.Ctx, tk._cancelFunc = context.WithDeadline(server.Context(), time.Now().Add(time.Hour))
+
+	settings, _ := core.Base.GetPg("pg").
+		Task.
+		Query().
+		Where(
+			task.ID(
+				sonic.UUIDParser(tk.ID),
+			),
+		).
+		QueryTaskGroup().
+		QueryApp().
+		QuerySettings().
+		First(tk.Ctx)
+
+	tk.autosolveClient = autosolve.NewClient(autosolve.Options{ClientId: os.Getenv("AYCD_CLIENT_ID")})
+	tk.autosolveClient.Set(settings.CaptchaDetails["aycd_autosolve_access_token"], settings.CaptchaDetails["aycd_autosolve_api_key"])
+	tk.autosolveChannels = make(map[string]chan autosolve.CaptchaTokenResponse)
+	tk.autosolveClient.Load(tk)
+
+	res, err := tk.autosolveClient.Connect(settings.CaptchaDetails["aycd_autosolve_access_token"], settings.CaptchaDetails["aycd_autosolve_api_key"])
+	if err != nil {
+		tk.SetStatus(module.STATUS_ERROR, "Error Connecting To Autosolve")
+	}
+
+	switch res {
+	case autosolve.InvalidClientId:
+		tk.SetStatus(module.STATUS_ERROR, "Invalid Autosolve Client Key")
+		tk.Stop()
+	case autosolve.InvalidAccessToken:
+		tk.SetStatus(module.STATUS_ERROR, "Invalid Autosolve access token")
+		tk.Stop()
+	case autosolve.InvalidApiKey:
+		tk.SetStatus(module.STATUS_ERROR, "Invalid Autosolve Api Key")
+		tk.Stop()
+	case autosolve.InvalidCredentials:
+		tk.SetStatus(module.STATUS_ERROR, "Invalid Autosolve Credentials")
+		tk.Stop()
+	}
 
 	//default padding
 	tk.SetStatus(module.STATUS_PADDING, "")
@@ -153,7 +203,6 @@ func (tk *BTask) Start(data *module.Data) error {
 	return nil
 }
 
-//if stop invoke, need stop task and close connection
 func (tk *BTask) Stop() error {
 	tk._locker.Lock()
 	defer tk._locker.Unlock()
@@ -161,10 +210,7 @@ func (tk *BTask) Stop() error {
 		return face.ErrTaskIsNotRunning
 	}
 
-	var cancel context.CancelFunc
-
-	tk.Ctx, cancel = context.WithDeadline(tk.Ctx, time.Now())
-	defer cancel()
+	defer tk._cancelFunc()
 
 	close(tk._runningChan) //stop
 
@@ -178,7 +224,6 @@ func (tk *BTask) Stop() error {
 	return nil
 }
 
-//keep connect
 func (tk *BTask) Pause() error {
 	tk._locker.Lock()
 	defer tk._locker.Unlock()
@@ -346,6 +391,41 @@ func (tk *BTask) Restart() {
 		tk.Stop()
 		return
 	}
+}
+
+func (tk *BTask) SetCaptchaDetails(siteURL, siteKey string) {
+	tk.siteKey = siteKey
+	tk.siteURL = siteURL
+}
+
+func (tk *BTask) SolveCaptcha(url string, captchaType CaptchaType, userAgent string, opts ...Opts) (chan autosolve.CaptchaTokenResponse, error) {
+	captchaID := uuid.NewString() + tk.ID
+	var req = autosolve.CaptchaTokenRequest{
+		TaskId:        captchaID,
+		CreatedAt:     time.Now().Unix(),
+		Url:           url,
+		SiteKey:       tk.siteKey,
+		Version:       int(captchaType),
+		MinScore:      0,
+		Proxy:         tk.FormatProxy()[7:],
+		ProxyRequired: true,
+		UserAgent:     userAgent,
+	}
+
+	if len(opts) > 0 {
+		req.Action = opts[0].ReCaptchaAction
+		req.MinScore = opts[0].ReCaptchaMinScore
+	}
+
+	responseChan := make(chan autosolve.CaptchaTokenResponse)
+
+	if err := tk.autosolveClient.SendTokenRequest(req); err != nil {
+		log.Error("error sending token request: ", err)
+		return nil, err
+	}
+
+	tk.autosolveChannels[captchaID] = responseChan
+	return responseChan, nil
 }
 
 //#region need override methods by callback
