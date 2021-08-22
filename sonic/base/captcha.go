@@ -3,7 +3,6 @@ package base
 import (
 	module "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/godtoy/autosolve"
-	"log"
 )
 
 type CaptchaType int
@@ -35,7 +34,9 @@ func (tk *BTask) CaptchaTokenCancelResponseListener(response autosolve.CaptchaTo
 }
 
 func (tk *BTask) CaptchaTokenResponseListener(response autosolve.CaptchaTokenResponse) {
-	log.Printf("Resp: %v \n", response)
-	tk.autosolveChannels[response.TaskId] <- response
-	close(tk.autosolveChannels[response.TaskId])
+	callbackChannel, loaded := tk.autosolveChannels.LoadAndDelete(response.TaskId)
+	if loaded {
+		defer close(callbackChannel.(chan autosolve.CaptchaTokenResponse))
+		callbackChannel.(chan autosolve.CaptchaTokenResponse) <- response
+	}
 }

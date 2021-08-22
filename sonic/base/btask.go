@@ -43,7 +43,7 @@ type BTask struct {
 
 	//captcha specific fields
 	autosolveClient   *autosolve.Client
-	autosolveChannels map[string]chan autosolve.CaptchaTokenResponse
+	autosolveChannels sync.Map
 	siteURL           string
 	siteKey           string
 
@@ -80,7 +80,7 @@ func (tk *BTask) Init(server module.Module_TaskServer) {
 
 	tk.autosolveClient = autosolve.NewClient(autosolve.Options{ClientId: os.Getenv("AYCD_CLIENT_ID")})
 	tk.autosolveClient.Set(settings.CaptchaDetails["aycd_autosolve_access_token"], settings.CaptchaDetails["aycd_autosolve_api_key"])
-	tk.autosolveChannels = make(map[string]chan autosolve.CaptchaTokenResponse)
+	tk.autosolveChannels = sync.Map{}
 	tk.autosolveClient.Load(tk)
 
 	res, err := tk.autosolveClient.Connect(settings.CaptchaDetails["aycd_autosolve_access_token"], settings.CaptchaDetails["aycd_autosolve_api_key"])
@@ -423,8 +423,7 @@ func (tk *BTask) SolveCaptcha(url string, captchaType CaptchaType, userAgent str
 		log.Error("error sending token request: ", err)
 		return nil, err
 	}
-
-	tk.autosolveChannels[captchaID] = responseChan
+	tk.autosolveChannels.Store(captchaID, responseChan)
 	return responseChan, nil
 }
 
