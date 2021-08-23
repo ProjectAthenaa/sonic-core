@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	"fmt"
+	"github.com/ProjectAthenaa/fasttls"
 	module "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
@@ -11,7 +12,6 @@ import (
 	"github.com/godtoy/autosolve"
 	"github.com/google/uuid"
 	"github.com/prometheus/common/log"
-	http "github.com/useflyent/fhttp"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -22,7 +22,7 @@ type BTask struct {
 	ID       string
 	Frontend module.Module_TaskServer
 	Ctx      context.Context
-	Client   http.Client
+	Client   *fasttls.Client
 	Data     *module.Data
 	Callback face.ICallback
 
@@ -406,7 +406,6 @@ func (tk *BTask) SolveCaptcha(url string, captchaType CaptchaType, userAgent str
 		Url:           url,
 		SiteKey:       tk.siteKey,
 		Version:       int(captchaType),
-		MinScore:      0,
 		Proxy:         tk.FormatProxy()[7:],
 		ProxyRequired: true,
 		UserAgent:     userAgent,
