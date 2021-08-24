@@ -21,7 +21,6 @@ require (
 	github.com/lib/pq v1.10.2
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/prometheus/common v0.4.0
-	github.com/refraction-networking/utls v0.0.0-20210713165636-0b2885c8c0d4 // indirect
 	github.com/thoas/go-funk v0.9.0
 	github.com/vektah/gqlparser/v2 v2.1.0
 	github.com/viney-shih/go-lock v1.1.1
