@@ -107,15 +107,16 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 					goto setRequestContext
 				}
 
+				//if sessionCallback != nil {
+				//	ctx, err = sessionCallback(ctx, sessionID)
+				//	if err != nil {
+				//		ctx = context.WithValue(ctx, "error", err)
+				//		goto setRequestContext
+				//	}
+				//}
 			}
 
 		setRequestContext:
-			if sessionCallback != nil {
-				ctx, err := sessionCallback(ctx, sessionID)
-				if err != nil {
-					ctx = context.WithValue(ctx, "error", err)
-				}
-			}
 			c.Request = c.Request.WithContext(ctx)
 			c.Next()
 		}
