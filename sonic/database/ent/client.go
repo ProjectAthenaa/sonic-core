@@ -1615,7 +1615,7 @@ func (c *ProfileGroupClient) QueryTask(pg *ProfileGroup) *TaskQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(profilegroup.Table, profilegroup.FieldID, id),
 			sqlgraph.To(task.Table, task.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, profilegroup.TaskTable, profilegroup.TaskPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, true, profilegroup.TaskTable, profilegroup.TaskColumn),
 		)
 		fromV = sqlgraph.Neighbors(pg.driver.Dialect(), step)
 		return fromV, nil
@@ -2681,7 +2681,7 @@ func (c *TaskClient) QueryProfileGroup(t *Task) *ProfileGroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(task.Table, task.FieldID, id),
 			sqlgraph.To(profilegroup.Table, profilegroup.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, task.ProfileGroupTable, task.ProfileGroupPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, false, task.ProfileGroupTable, task.ProfileGroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil

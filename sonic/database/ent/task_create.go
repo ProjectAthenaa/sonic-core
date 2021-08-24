@@ -103,19 +103,23 @@ func (tc *TaskCreate) AddProxyList(p ...*ProxyList) *TaskCreate {
 	return tc.AddProxyListIDs(ids...)
 }
 
-// AddProfileGroupIDs adds the "ProfileGroup" edge to the ProfileGroup entity by IDs.
-func (tc *TaskCreate) AddProfileGroupIDs(ids ...uuid.UUID) *TaskCreate {
-	tc.mutation.AddProfileGroupIDs(ids...)
+// SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID.
+func (tc *TaskCreate) SetProfileGroupID(id uuid.UUID) *TaskCreate {
+	tc.mutation.SetProfileGroupID(id)
 	return tc
 }
 
-// AddProfileGroup adds the "ProfileGroup" edges to the ProfileGroup entity.
-func (tc *TaskCreate) AddProfileGroup(p ...*ProfileGroup) *TaskCreate {
-	ids := make([]uuid.UUID, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillableProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by ID if the given value is not nil.
+func (tc *TaskCreate) SetNillableProfileGroupID(id *uuid.UUID) *TaskCreate {
+	if id != nil {
+		tc = tc.SetProfileGroupID(*id)
 	}
-	return tc.AddProfileGroupIDs(ids...)
+	return tc
+}
+
+// SetProfileGroup sets the "ProfileGroup" edge to the ProfileGroup entity.
+func (tc *TaskCreate) SetProfileGroup(p *ProfileGroup) *TaskCreate {
+	return tc.SetProfileGroupID(p.ID)
 }
 
 // SetTaskGroupID sets the "TaskGroup" edge to the TaskGroup entity by ID.
@@ -326,10 +330,10 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tc.mutation.ProfileGroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   task.ProfileGroupTable,
-			Columns: task.ProfileGroupPrimaryKey,
+			Columns: []string{task.ProfileGroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -341,6 +345,7 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.task_profile_group = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.TaskGroupIDs(); len(nodes) > 0 {

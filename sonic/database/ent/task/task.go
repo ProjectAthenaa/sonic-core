@@ -39,11 +39,13 @@ const (
 	// ProxyListInverseTable is the table name for the ProxyList entity.
 	// It exists in this package in order to avoid circular dependency with the "proxylist" package.
 	ProxyListInverseTable = "proxy_lists"
-	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge. The primary key declared below.
-	ProfileGroupTable = "task_ProfileGroup"
+	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge.
+	ProfileGroupTable = "tasks"
 	// ProfileGroupInverseTable is the table name for the ProfileGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "profilegroup" package.
 	ProfileGroupInverseTable = "profile_groups"
+	// ProfileGroupColumn is the table column denoting the ProfileGroup relation/edge.
+	ProfileGroupColumn = "task_profile_group"
 	// TaskGroupTable is the table that holds the TaskGroup relation/edge.
 	TaskGroupTable = "tasks"
 	// TaskGroupInverseTable is the table name for the TaskGroup entity.
@@ -64,6 +66,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tasks"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"task_profile_group",
 	"task_group_tasks",
 }
 
@@ -74,9 +77,6 @@ var (
 	// ProxyListPrimaryKey and ProxyListColumn2 are the table columns denoting the
 	// primary key for the ProxyList relation (M2M).
 	ProxyListPrimaryKey = []string{"task_id", "proxy_list_id"}
-	// ProfileGroupPrimaryKey and ProfileGroupColumn2 are the table columns denoting the
-	// primary key for the ProfileGroup relation (M2M).
-	ProfileGroupPrimaryKey = []string{"task_id", "profile_group_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

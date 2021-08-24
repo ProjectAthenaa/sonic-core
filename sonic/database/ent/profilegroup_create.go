@@ -304,10 +304,10 @@ func (pgc *ProfileGroupCreate) createSpec() (*ProfileGroup, *sqlgraph.CreateSpec
 	}
 	if nodes := pgc.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   profilegroup.TaskTable,
-			Columns: profilegroup.TaskPrimaryKey,
+			Columns: []string{profilegroup.TaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

@@ -308,12 +308,12 @@ func (t *Task) ProxyList(ctx context.Context) ([]*ProxyList, error) {
 	return result, err
 }
 
-func (t *Task) ProfileGroup(ctx context.Context) ([]*ProfileGroup, error) {
+func (t *Task) ProfileGroup(ctx context.Context) (*ProfileGroup, error) {
 	result, err := t.Edges.ProfileGroupOrErr()
 	if IsNotLoaded(err) {
-		result, err = t.QueryProfileGroup().All(ctx)
+		result, err = t.QueryProfileGroup().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
 }
 
 func (t *Task) TaskGroup(ctx context.Context) (*TaskGroup, error) {

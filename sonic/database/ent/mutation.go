@@ -14915,8 +14915,7 @@ type TaskMutation struct {
 	_ProxyList           map[uuid.UUID]struct{}
 	removed_ProxyList    map[uuid.UUID]struct{}
 	cleared_ProxyList    bool
-	_ProfileGroup        map[uuid.UUID]struct{}
-	removed_ProfileGroup map[uuid.UUID]struct{}
+	_ProfileGroup        *uuid.UUID
 	cleared_ProfileGroup bool
 	_TaskGroup           *uuid.UUID
 	cleared_TaskGroup    bool
@@ -15239,14 +15238,9 @@ func (m *TaskMutation) ResetProxyList() {
 	m.removed_ProxyList = nil
 }
 
-// AddProfileGroupIDs adds the "ProfileGroup" edge to the ProfileGroup entity by ids.
-func (m *TaskMutation) AddProfileGroupIDs(ids ...uuid.UUID) {
-	if m._ProfileGroup == nil {
-		m._ProfileGroup = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m._ProfileGroup[ids[i]] = struct{}{}
-	}
+// SetProfileGroupID sets the "ProfileGroup" edge to the ProfileGroup entity by id.
+func (m *TaskMutation) SetProfileGroupID(id uuid.UUID) {
+	m._ProfileGroup = &id
 }
 
 // ClearProfileGroup clears the "ProfileGroup" edge to the ProfileGroup entity.
@@ -15259,29 +15253,20 @@ func (m *TaskMutation) ProfileGroupCleared() bool {
 	return m.cleared_ProfileGroup
 }
 
-// RemoveProfileGroupIDs removes the "ProfileGroup" edge to the ProfileGroup entity by IDs.
-func (m *TaskMutation) RemoveProfileGroupIDs(ids ...uuid.UUID) {
-	if m.removed_ProfileGroup == nil {
-		m.removed_ProfileGroup = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m._ProfileGroup, ids[i])
-		m.removed_ProfileGroup[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedProfileGroup returns the removed IDs of the "ProfileGroup" edge to the ProfileGroup entity.
-func (m *TaskMutation) RemovedProfileGroupIDs() (ids []uuid.UUID) {
-	for id := range m.removed_ProfileGroup {
-		ids = append(ids, id)
+// ProfileGroupID returns the "ProfileGroup" edge ID in the mutation.
+func (m *TaskMutation) ProfileGroupID() (id uuid.UUID, exists bool) {
+	if m._ProfileGroup != nil {
+		return *m._ProfileGroup, true
 	}
 	return
 }
 
 // ProfileGroupIDs returns the "ProfileGroup" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ProfileGroupID instead. It exists only for internal usage by the builders.
 func (m *TaskMutation) ProfileGroupIDs() (ids []uuid.UUID) {
-	for id := range m._ProfileGroup {
-		ids = append(ids, id)
+	if id := m._ProfileGroup; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -15290,7 +15275,6 @@ func (m *TaskMutation) ProfileGroupIDs() (ids []uuid.UUID) {
 func (m *TaskMutation) ResetProfileGroup() {
 	m._ProfileGroup = nil
 	m.cleared_ProfileGroup = false
-	m.removed_ProfileGroup = nil
 }
 
 // SetTaskGroupID sets the "TaskGroup" edge to the TaskGroup entity by id.
@@ -15526,11 +15510,9 @@ func (m *TaskMutation) AddedIDs(name string) []ent.Value {
 		}
 		return ids
 	case task.EdgeProfileGroup:
-		ids := make([]ent.Value, 0, len(m._ProfileGroup))
-		for id := range m._ProfileGroup {
-			ids = append(ids, id)
+		if id := m._ProfileGroup; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case task.EdgeTaskGroup:
 		if id := m._TaskGroup; id != nil {
 			return []ent.Value{*id}
@@ -15548,9 +15530,6 @@ func (m *TaskMutation) RemovedEdges() []string {
 	if m.removed_ProxyList != nil {
 		edges = append(edges, task.EdgeProxyList)
 	}
-	if m.removed_ProfileGroup != nil {
-		edges = append(edges, task.EdgeProfileGroup)
-	}
 	return edges
 }
 
@@ -15567,12 +15546,6 @@ func (m *TaskMutation) RemovedIDs(name string) []ent.Value {
 	case task.EdgeProxyList:
 		ids := make([]ent.Value, 0, len(m.removed_ProxyList))
 		for id := range m.removed_ProxyList {
-			ids = append(ids, id)
-		}
-		return ids
-	case task.EdgeProfileGroup:
-		ids := make([]ent.Value, 0, len(m.removed_ProfileGroup))
-		for id := range m.removed_ProfileGroup {
 			ids = append(ids, id)
 		}
 		return ids
@@ -15618,6 +15591,9 @@ func (m *TaskMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TaskMutation) ClearEdge(name string) error {
 	switch name {
+	case task.EdgeProfileGroup:
+		m.ClearProfileGroup()
+		return nil
 	case task.EdgeTaskGroup:
 		m.ClearTaskGroup()
 		return nil

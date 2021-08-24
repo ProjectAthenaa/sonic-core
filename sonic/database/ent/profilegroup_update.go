@@ -382,10 +382,10 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pgu.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   profilegroup.TaskTable,
-			Columns: profilegroup.TaskPrimaryKey,
+			Columns: []string{profilegroup.TaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -398,10 +398,10 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := pgu.mutation.RemovedTaskIDs(); len(nodes) > 0 && !pgu.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   profilegroup.TaskTable,
-			Columns: profilegroup.TaskPrimaryKey,
+			Columns: []string{profilegroup.TaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -417,10 +417,10 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := pgu.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   profilegroup.TaskTable,
-			Columns: profilegroup.TaskPrimaryKey,
+			Columns: []string{profilegroup.TaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -828,10 +828,10 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 	}
 	if pguo.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   profilegroup.TaskTable,
-			Columns: profilegroup.TaskPrimaryKey,
+			Columns: []string{profilegroup.TaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -844,10 +844,10 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 	}
 	if nodes := pguo.mutation.RemovedTaskIDs(); len(nodes) > 0 && !pguo.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   profilegroup.TaskTable,
-			Columns: profilegroup.TaskPrimaryKey,
+			Columns: []string{profilegroup.TaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -863,10 +863,10 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 	}
 	if nodes := pguo.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   profilegroup.TaskTable,
-			Columns: profilegroup.TaskPrimaryKey,
+			Columns: []string{profilegroup.TaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
