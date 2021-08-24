@@ -45,7 +45,7 @@ func GenAuthenticationFunc(base face.ICoreContext) func(ctx context.Context) (co
 	}
 }
 
-func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessionCallback, noAuthResolvers ...interface{}) func() gin.HandlerFunc {
+func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, sessionCallback sessionCallback, noAuthResolvers ...interface{}) func() gin.HandlerFunc {
 	var noAuthResolverNames []string
 
 	for _, fun := range noAuthResolvers {
@@ -63,7 +63,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, sessionCallback sessio
 			ctx = context.WithValue(ctx, "Location", c.Request.Header.Get("cf-ipcountry"))
 			span := sentry.StartSpan(c.Request.Context(), "Authentication Middleware", sentry.TransactionName("Authentication"))
 			defer span.Finish()
-			if c.Request.URL.Path == "/query" {
+			if strings.Contains(c.Request.URL.Path, graphEndpoint) {
 				var body []byte
 				c.Request.Body, body = sonic.NopCloserBody(c.Request.Body)
 
