@@ -399,54 +399,6 @@ func (x *Data) GetParams() map[string]string {
 	return nil
 }
 
-type ParamValue struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	//  string  Key = 1;
-	Value []string `protobuf:"bytes,1,rep,name=Value,proto3" json:"Value,omitempty"`
-}
-
-func (x *ParamValue) Reset() {
-	*x = ParamValue{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_Module_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ParamValue) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ParamValue) ProtoMessage() {}
-
-func (x *ParamValue) ProtoReflect() protoreflect.Message {
-	mi := &file_Module_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ParamValue.ProtoReflect.Descriptor instead.
-func (*ParamValue) Descriptor() ([]byte, []int) {
-	return file_Module_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *ParamValue) GetValue() []string {
-	if x != nil {
-		return x.Value
-	}
-	return nil
-}
-
 type TaskData struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -461,7 +413,7 @@ type TaskData struct {
 func (x *TaskData) Reset() {
 	*x = TaskData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Module_proto_msgTypes[4]
+		mi := &file_Module_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -474,7 +426,7 @@ func (x *TaskData) String() string {
 func (*TaskData) ProtoMessage() {}
 
 func (x *TaskData) ProtoReflect() protoreflect.Message {
-	mi := &file_Module_proto_msgTypes[4]
+	mi := &file_Module_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -487,7 +439,7 @@ func (x *TaskData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TaskData.ProtoReflect.Descriptor instead.
 func (*TaskData) Descriptor() ([]byte, []int) {
-	return file_Module_proto_rawDescGZIP(), []int{4}
+	return file_Module_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *TaskData) GetRandomSize() bool {
@@ -530,7 +482,7 @@ type SizeColor struct {
 func (x *SizeColor) Reset() {
 	*x = SizeColor{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Module_proto_msgTypes[5]
+		mi := &file_Module_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -543,7 +495,7 @@ func (x *SizeColor) String() string {
 func (*SizeColor) ProtoMessage() {}
 
 func (x *SizeColor) ProtoReflect() protoreflect.Message {
-	mi := &file_Module_proto_msgTypes[5]
+	mi := &file_Module_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -556,7 +508,7 @@ func (x *SizeColor) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SizeColor.ProtoReflect.Descriptor instead.
 func (*SizeColor) Descriptor() ([]byte, []int) {
-	return file_Module_proto_rawDescGZIP(), []int{5}
+	return file_Module_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SizeColor) GetColor() []string {
@@ -586,7 +538,7 @@ type Profile struct {
 func (x *Profile) Reset() {
 	*x = Profile{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Module_proto_msgTypes[6]
+		mi := &file_Module_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -599,7 +551,7 @@ func (x *Profile) String() string {
 func (*Profile) ProtoMessage() {}
 
 func (x *Profile) ProtoReflect() protoreflect.Message {
-	mi := &file_Module_proto_msgTypes[6]
+	mi := &file_Module_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -612,7 +564,7 @@ func (x *Profile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Profile.ProtoReflect.Descriptor instead.
 func (*Profile) Descriptor() ([]byte, []int) {
-	return file_Module_proto_rawDescGZIP(), []int{6}
+	return file_Module_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Profile) GetEmail() string {
@@ -652,7 +604,7 @@ type Shipping struct {
 func (x *Shipping) Reset() {
 	*x = Shipping{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Module_proto_msgTypes[7]
+		mi := &file_Module_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -665,7 +617,7 @@ func (x *Shipping) String() string {
 func (*Shipping) ProtoMessage() {}
 
 func (x *Shipping) ProtoReflect() protoreflect.Message {
-	mi := &file_Module_proto_msgTypes[7]
+	mi := &file_Module_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -678,7 +630,7 @@ func (x *Shipping) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Shipping.ProtoReflect.Descriptor instead.
 func (*Shipping) Descriptor() ([]byte, []int) {
-	return file_Module_proto_rawDescGZIP(), []int{7}
+	return file_Module_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Shipping) GetFirstName() string {
@@ -740,7 +692,7 @@ type Address struct {
 func (x *Address) Reset() {
 	*x = Address{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Module_proto_msgTypes[8]
+		mi := &file_Module_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -753,7 +705,7 @@ func (x *Address) String() string {
 func (*Address) ProtoMessage() {}
 
 func (x *Address) ProtoReflect() protoreflect.Message {
-	mi := &file_Module_proto_msgTypes[8]
+	mi := &file_Module_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -766,7 +718,7 @@ func (x *Address) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Address.ProtoReflect.Descriptor instead.
 func (*Address) Descriptor() ([]byte, []int) {
-	return file_Module_proto_rawDescGZIP(), []int{8}
+	return file_Module_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Address) GetAddressLine() string {
@@ -832,7 +784,7 @@ type Billing struct {
 func (x *Billing) Reset() {
 	*x = Billing{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Module_proto_msgTypes[9]
+		mi := &file_Module_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -845,7 +797,7 @@ func (x *Billing) String() string {
 func (*Billing) ProtoMessage() {}
 
 func (x *Billing) ProtoReflect() protoreflect.Message {
-	mi := &file_Module_proto_msgTypes[9]
+	mi := &file_Module_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -858,7 +810,7 @@ func (x *Billing) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Billing.ProtoReflect.Descriptor instead.
 func (*Billing) Descriptor() ([]byte, []int) {
-	return file_Module_proto_rawDescGZIP(), []int{9}
+	return file_Module_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Billing) GetNumber() string {
@@ -903,7 +855,7 @@ type Proxy struct {
 func (x *Proxy) Reset() {
 	*x = Proxy{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_Module_proto_msgTypes[10]
+		mi := &file_Module_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -916,7 +868,7 @@ func (x *Proxy) String() string {
 func (*Proxy) ProtoMessage() {}
 
 func (x *Proxy) ProtoReflect() protoreflect.Message {
-	mi := &file_Module_proto_msgTypes[10]
+	mi := &file_Module_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -929,7 +881,7 @@ func (x *Proxy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Proxy.ProtoReflect.Descriptor instead.
 func (*Proxy) Descriptor() ([]byte, []int) {
-	return file_Module_proto_rawDescGZIP(), []int{10}
+	return file_Module_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *Proxy) GetUsername() string {
@@ -1129,27 +1081,26 @@ func file_Module_proto_rawDescGZIP() []byte {
 }
 
 var file_Module_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_Module_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_Module_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_Module_proto_goTypes = []interface{}{
 	(COMMAND)(0),       // 0: module.COMMAND
 	(STATUS)(0),        // 1: module.STATUS
 	(*Status)(nil),     // 2: module.Status
 	(*Controller)(nil), // 3: module.Controller
 	(*Data)(nil),       // 4: module.Data
-	(*ParamValue)(nil), // 5: module.ParamValue
-	(*TaskData)(nil),   // 6: module.TaskData
-	(*SizeColor)(nil),  // 7: module.SizeColor
-	(*Profile)(nil),    // 8: module.Profile
-	(*Shipping)(nil),   // 9: module.Shipping
-	(*Address)(nil),    // 10: module.Address
-	(*Billing)(nil),    // 11: module.Billing
-	(*Proxy)(nil),      // 12: module.Proxy
-	nil,                // 13: module.Status.InformationEntry
-	nil,                // 14: module.Data.ParamsEntry
+	(*TaskData)(nil),   // 5: module.TaskData
+	(*SizeColor)(nil),  // 6: module.SizeColor
+	(*Profile)(nil),    // 7: module.Profile
+	(*Shipping)(nil),   // 8: module.Shipping
+	(*Address)(nil),    // 9: module.Address
+	(*Billing)(nil),    // 10: module.Billing
+	(*Proxy)(nil),      // 11: module.Proxy
+	nil,                // 12: module.Status.InformationEntry
+	nil,                // 13: module.Data.ParamsEntry
 }
 var file_Module_proto_depIdxs = []int32{
 	1,  // 0: module.Status.Status:type_name -> module.STATUS
-	13, // 1: module.Status.Information:type_name -> module.Status.InformationEntry
+	12, // 1: module.Status.Information:type_name -> module.Status.InformationEntry
 	0,  // 2: module.Controller.Command:type_name -> module.COMMAND
 	4,  // 3: module.Controller.Data:type_name -> module.Data
 	8,  // 4: module.Data.Profile:type_name -> module.Profile
@@ -1212,18 +1163,6 @@ func file_Module_proto_init() {
 			}
 		}
 		file_Module_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ParamValue); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_Module_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*TaskData); i {
 			case 0:
 				return &v.state
@@ -1235,7 +1174,7 @@ func file_Module_proto_init() {
 				return nil
 			}
 		}
-		file_Module_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_Module_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SizeColor); i {
 			case 0:
 				return &v.state
@@ -1247,7 +1186,7 @@ func file_Module_proto_init() {
 				return nil
 			}
 		}
-		file_Module_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_Module_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Profile); i {
 			case 0:
 				return &v.state
@@ -1259,7 +1198,7 @@ func file_Module_proto_init() {
 				return nil
 			}
 		}
-		file_Module_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_Module_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Shipping); i {
 			case 0:
 				return &v.state
@@ -1271,7 +1210,7 @@ func file_Module_proto_init() {
 				return nil
 			}
 		}
-		file_Module_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_Module_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Address); i {
 			case 0:
 				return &v.state
@@ -1283,7 +1222,7 @@ func file_Module_proto_init() {
 				return nil
 			}
 		}
-		file_Module_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_Module_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Billing); i {
 			case 0:
 				return &v.state
@@ -1295,7 +1234,7 @@ func file_Module_proto_init() {
 				return nil
 			}
 		}
-		file_Module_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_Module_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Proxy); i {
 			case 0:
 				return &v.state
@@ -1310,16 +1249,16 @@ func file_Module_proto_init() {
 	}
 	file_Module_proto_msgTypes[0].OneofWrappers = []interface{}{}
 	file_Module_proto_msgTypes[1].OneofWrappers = []interface{}{}
+	file_Module_proto_msgTypes[6].OneofWrappers = []interface{}{}
 	file_Module_proto_msgTypes[7].OneofWrappers = []interface{}{}
-	file_Module_proto_msgTypes[8].OneofWrappers = []interface{}{}
-	file_Module_proto_msgTypes[10].OneofWrappers = []interface{}{}
+	file_Module_proto_msgTypes[9].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_Module_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   13,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

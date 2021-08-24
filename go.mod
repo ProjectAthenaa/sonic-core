@@ -8,6 +8,7 @@ require (
 	github.com/99designs/gqlgen v0.13.0
 	github.com/ProjectAthenaa/fasttls v0.0.0-20210822190030-8bc3c8f6f9fc
 	github.com/arsmn/fastgql v0.14.0
+	github.com/ProjectAthenaa/fasttls v0.0.0-20210822190030-8bc3c8f6f9fc
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
