@@ -15,7 +15,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
-		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet"}},
+		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet", "NewBalance"}},
 		{Name: "accounts", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "bytea"}},
 		{Name: "app_account_groups", Type: field.TypeUUID, Nullable: true},
 	}
@@ -95,10 +95,9 @@ var (
 	}
 	// BillingsTable holds the schema information for the "billings" table.
 	BillingsTable = &schema.Table{
-		Name:        "billings",
-		Columns:     BillingsColumns,
-		PrimaryKey:  []*schema.Column{BillingsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "billings",
+		Columns:    BillingsColumns,
+		PrimaryKey: []*schema.Column{BillingsColumns[0]},
 	}
 	// CalendarsColumns holds the columns for the "calendars" table.
 	CalendarsColumns = []*schema.Column{
@@ -113,10 +112,9 @@ var (
 	}
 	// CalendarsTable holds the schema information for the "calendars" table.
 	CalendarsTable = &schema.Table{
-		Name:        "calendars",
-		Columns:     CalendarsColumns,
-		PrimaryKey:  []*schema.Column{CalendarsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "calendars",
+		Columns:    CalendarsColumns,
+		PrimaryKey: []*schema.Column{CalendarsColumns[0]},
 	}
 	// DevicesColumns holds the columns for the "devices" table.
 	DevicesColumns = []*schema.Column{
@@ -127,10 +125,9 @@ var (
 	}
 	// DevicesTable holds the schema information for the "devices" table.
 	DevicesTable = &schema.Table{
-		Name:        "devices",
-		Columns:     DevicesColumns,
-		PrimaryKey:  []*schema.Column{DevicesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "devices",
+		Columns:    DevicesColumns,
+		PrimaryKey: []*schema.Column{DevicesColumns[0]},
 	}
 	// LicensesColumns holds the columns for the "licenses" table.
 	LicensesColumns = []*schema.Column{
@@ -202,7 +199,7 @@ var (
 		{Name: "quantity", Type: field.TypeInt32, Default: 1},
 		{Name: "sizes", Type: field.TypeJSON, Nullable: true},
 		{Name: "colors", Type: field.TypeJSON, Nullable: true},
-		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet"}},
+		{Name: "site", Type: field.TypeEnum, Enums: []string{"FinishLine", "JD_Sports", "YeezySupply", "Supreme", "Eastbay_US", "Champs_US", "Footaction_US", "Footlocker_US", "Bestbuy", "Pokemon_Center", "Panini_US", "Topss", "Nordstorm", "End", "Target", "Amazon", "Solebox", "Onygo", "Snipes", "Ssense", "Walmart", "Hibbet", "NewBalance"}},
 		{Name: "metadata", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "bytea"}},
 		{Name: "calendar_quick_task", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
@@ -252,10 +249,9 @@ var (
 	}
 	// ProfileGroupsTable holds the schema information for the "profile_groups" table.
 	ProfileGroupsTable = &schema.Table{
-		Name:        "profile_groups",
-		Columns:     ProfileGroupsColumns,
-		PrimaryKey:  []*schema.Column{ProfileGroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "profile_groups",
+		Columns:    ProfileGroupsColumns,
+		PrimaryKey: []*schema.Column{ProfileGroupsColumns[0]},
 	}
 	// ProxiesColumns holds the columns for the "proxies" table.
 	ProxiesColumns = []*schema.Column{
@@ -292,10 +288,9 @@ var (
 	}
 	// ProxyListsTable holds the schema information for the "proxy_lists" table.
 	ProxyListsTable = &schema.Table{
-		Name:        "proxy_lists",
-		Columns:     ProxyListsColumns,
-		PrimaryKey:  []*schema.Column{ProxyListsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "proxy_lists",
+		Columns:    ProxyListsColumns,
+		PrimaryKey: []*schema.Column{ProxyListsColumns[0]},
 	}
 	// ReleasesColumns holds the columns for the "releases" table.
 	ReleasesColumns = []*schema.Column{
@@ -312,10 +307,9 @@ var (
 	}
 	// ReleasesTable holds the schema information for the "releases" table.
 	ReleasesTable = &schema.Table{
-		Name:        "releases",
-		Columns:     ReleasesColumns,
-		PrimaryKey:  []*schema.Column{ReleasesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "releases",
+		Columns:    ReleasesColumns,
+		PrimaryKey: []*schema.Column{ReleasesColumns[0]},
 	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
@@ -351,6 +345,8 @@ var (
 		{Name: "decline_webhook", Type: field.TypeString, Default: ""},
 		{Name: "checkout_delay", Type: field.TypeInt32, Default: 0},
 		{Name: "atc_delay", Type: field.TypeInt32, Default: 0},
+		{Name: "captcha_solver", Type: field.TypeEnum, Enums: []string{"AYCD_Autosolve", "2Captcha", "CapMonster", "Harvester", "Disabled"}, Default: "Disabled"},
+		{Name: "captcha_details", Type: field.TypeJSON},
 		{Name: "app_settings", Type: field.TypeUUID, Nullable: true},
 	}
 	// SettingsTable holds the schema information for the "settings" table.
@@ -361,7 +357,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "settings_apps_Settings",
-				Columns:    []*schema.Column{SettingsColumns[7]},
+				Columns:    []*schema.Column{SettingsColumns[9]},
 				RefColumns: []*schema.Column{AppsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -405,10 +401,9 @@ var (
 	}
 	// StatisticsTable holds the schema information for the "statistics" table.
 	StatisticsTable = &schema.Table{
-		Name:        "statistics",
-		Columns:     StatisticsColumns,
-		PrimaryKey:  []*schema.Column{StatisticsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "statistics",
+		Columns:    StatisticsColumns,
+		PrimaryKey: []*schema.Column{StatisticsColumns[0]},
 	}
 	// StripesColumns holds the columns for the "stripes" table.
 	StripesColumns = []*schema.Column{
@@ -443,10 +438,9 @@ var (
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{
-		Name:        "tasks",
-		Columns:     TasksColumns,
-		PrimaryKey:  []*schema.Column{TasksColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "tasks",
+		Columns:    TasksColumns,
+		PrimaryKey: []*schema.Column{TasksColumns[0]},
 	}
 	// TaskGroupsColumns holds the columns for the "task_groups" table.
 	TaskGroupsColumns = []*schema.Column{
@@ -457,10 +451,9 @@ var (
 	}
 	// TaskGroupsTable holds the schema information for the "task_groups" table.
 	TaskGroupsTable = &schema.Table{
-		Name:        "task_groups",
-		Columns:     TaskGroupsColumns,
-		PrimaryKey:  []*schema.Column{TaskGroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "task_groups",
+		Columns:    TaskGroupsColumns,
+		PrimaryKey: []*schema.Column{TaskGroupsColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{

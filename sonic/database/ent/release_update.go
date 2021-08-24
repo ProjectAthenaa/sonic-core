@@ -23,9 +23,9 @@ type ReleaseUpdate struct {
 	mutation *ReleaseMutation
 }
 
-// Where adds a new predicate for the ReleaseUpdate builder.
+// Where appends a list predicates to the ReleaseUpdate builder.
 func (ru *ReleaseUpdate) Where(ps ...predicate.Release) *ReleaseUpdate {
-	ru.mutation.predicates = append(ru.mutation.predicates, ps...)
+	ru.mutation.Where(ps...)
 	return ru
 }
 
@@ -247,6 +247,9 @@ func (ru *ReleaseUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ru.hooks) - 1; i >= 0; i-- {
+			if ru.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ru.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ru.mutation); err != nil {
@@ -459,8 +462,8 @@ func (ru *ReleaseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{release.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -700,6 +703,9 @@ func (ruo *ReleaseUpdateOne) Save(ctx context.Context) (*Release, error) {
 			return node, err
 		})
 		for i := len(ruo.hooks) - 1; i >= 0; i-- {
+			if ruo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ruo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ruo.mutation); err != nil {
@@ -932,8 +938,8 @@ func (ruo *ReleaseUpdateOne) sqlSave(ctx context.Context) (_node *Release, err e
 	if err = sqlgraph.UpdateNode(ctx, ruo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{release.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

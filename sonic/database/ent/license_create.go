@@ -150,11 +150,17 @@ func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
 				return nil, err
 			}
 			lc.mutation = mutation
-			node, err = lc.sqlSave(ctx)
+			if node, err = lc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(lc.hooks) - 1; i >= 0; i-- {
+			if lc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = lc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, lc.mutation); err != nil {
@@ -171,6 +177,19 @@ func (lc *LicenseCreate) SaveX(ctx context.Context) *License {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (lc *LicenseCreate) Exec(ctx context.Context) error {
+	_, err := lc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (lc *LicenseCreate) ExecX(ctx context.Context) {
+	if err := lc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -192,20 +211,20 @@ func (lc *LicenseCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (lc *LicenseCreate) check() error {
 	if _, ok := lc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := lc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
 	}
 	if _, ok := lc.mutation.Key(); !ok {
-		return &ValidationError{Name: "Key", err: errors.New("ent: missing required field \"Key\"")}
+		return &ValidationError{Name: "Key", err: errors.New(`ent: missing required field "Key"`)}
 	}
 	if _, ok := lc.mutation.GetType(); !ok {
-		return &ValidationError{Name: "Type", err: errors.New("ent: missing required field \"Type\"")}
+		return &ValidationError{Name: "Type", err: errors.New(`ent: missing required field "Type"`)}
 	}
 	if v, ok := lc.mutation.GetType(); ok {
 		if err := license.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "Type", err: fmt.Errorf("ent: validator failed for field \"Type\": %w", err)}
+			return &ValidationError{Name: "Type", err: fmt.Errorf(`ent: validator failed for field "Type": %w`, err)}
 		}
 	}
 	if _, ok := lc.mutation.UserID(); !ok {
@@ -217,10 +236,13 @@ func (lc *LicenseCreate) check() error {
 func (lc *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
 	_node, _spec := lc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, lc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -359,17 +381,19 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, lcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, lcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, lcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -393,4 +417,17 @@ func (lcb *LicenseCreateBulk) SaveX(ctx context.Context) []*License {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (lcb *LicenseCreateBulk) Exec(ctx context.Context) error {
+	_, err := lcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (lcb *LicenseCreateBulk) ExecX(ctx context.Context) {
+	if err := lcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

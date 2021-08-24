@@ -1,0 +1,54 @@
+enum ProxyListType{
+    Test
+}
+
+enum ProxyTestStatus{
+    Pinging
+    NotPinging
+}
+
+type ProxyList{
+    ID: UUID!
+    Name: String!
+    Type: ProxyListType!
+    Proxies: [Proxy!]
+}
+
+type Proxy{
+    ID: UUID!
+    Username: String
+    Password: String
+    IP: String!
+    Port: String!
+}
+
+type ProxyTest{
+    Latency: Int!
+    Status: ProxyTestStatus!
+    ProxyID: String!
+}
+
+input NewProxyList{
+    Name: String!
+    Type: ProxyListType!
+    Proxies: [NewProxy!]
+}
+
+input NewProxy{
+    Username: String
+    Password: String
+    IP: String!
+    Port: String!
+}
+
+extend type Query{
+    getProxyList(proxyListID: UUID!): ProxyList!
+    testProxyList(proxyListID: UUID!): [ProxyTest!]!
+    getAllProxyLists: [ProxyList!]
+}
+
+extend type Mutation {
+    createProxyList(proxyList: NewProxyList!): ProxyList!
+    updateProxyList(proxyListID: UUID!, proxyList: NewProxyList!): ProxyList!
+    deleteProxyList(proxyListID: UUID!): Boolean!
+}

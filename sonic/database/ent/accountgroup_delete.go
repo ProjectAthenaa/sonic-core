@@ -20,9 +20,9 @@ type AccountGroupDelete struct {
 	mutation *AccountGroupMutation
 }
 
-// Where adds a new predicate to the AccountGroupDelete builder.
+// Where appends a list predicates to the AccountGroupDelete builder.
 func (agd *AccountGroupDelete) Where(ps ...predicate.AccountGroup) *AccountGroupDelete {
-	agd.mutation.predicates = append(agd.mutation.predicates, ps...)
+	agd.mutation.Where(ps...)
 	return agd
 }
 
@@ -46,6 +46,9 @@ func (agd *AccountGroupDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(agd.hooks) - 1; i >= 0; i-- {
+			if agd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = agd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, agd.mutation); err != nil {

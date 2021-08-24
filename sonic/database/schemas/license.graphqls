@@ -1,0 +1,23 @@
+enum LicenseType{
+    Lifetime
+    Renewal
+    Beta
+    Weekly
+    FNF
+}
+
+type License{
+    ID: UUID!
+    CreatedAt: Time!
+    Key: String!
+    HardwareID: String
+    MobileHardwareID: String
+    Type: LicenseType!
+}
+
+type Stripe{
+    ID: UUID!
+    CustomerID: String!
+    SubscriptionID: String
+    RenewalDate: Time
+}

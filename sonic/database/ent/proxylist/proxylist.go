@@ -4,6 +4,8 @@ package proxylist
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,19 +32,19 @@ const (
 	EdgeTask = "Task"
 	// Table holds the table name of the proxylist in the database.
 	Table = "proxy_lists"
-	// AppTable is the table the holds the App relation/edge. The primary key declared below.
+	// AppTable is the table that holds the App relation/edge. The primary key declared below.
 	AppTable = "app_ProxyLists"
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
-	// ProxiesTable is the table the holds the Proxies relation/edge.
+	// ProxiesTable is the table that holds the Proxies relation/edge.
 	ProxiesTable = "proxies"
 	// ProxiesInverseTable is the table name for the Proxy entity.
 	// It exists in this package in order to avoid circular dependency with the "proxy" package.
 	ProxiesInverseTable = "proxies"
 	// ProxiesColumn is the table column denoting the Proxies relation/edge.
 	ProxiesColumn = "proxy_list_proxies"
-	// TaskTable is the table the holds the Task relation/edge. The primary key declared below.
+	// TaskTable is the table that holds the Task relation/edge. The primary key declared below.
 	TaskTable = "task_ProxyList"
 	// TaskInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
@@ -112,4 +114,22 @@ func TypeValidator(_type Type) error {
 	default:
 		return fmt.Errorf("proxylist: invalid enum value for Type field: %q", _type)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_type Type) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_type.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_type *Type) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_type = Type(str)
+	if err := TypeValidator(*_type); err != nil {
+		return fmt.Errorf("%s is not a valid Type", str)
+	}
+	return nil
 }

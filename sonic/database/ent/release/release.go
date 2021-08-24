@@ -4,6 +4,8 @@ package release
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,7 +38,7 @@ const (
 	EdgeCustomers = "Customers"
 	// Table holds the table name of the release in the database.
 	Table = "releases"
-	// CustomersTable is the table the holds the Customers relation/edge.
+	// CustomersTable is the table that holds the Customers relation/edge.
 	CustomersTable = "users"
 	// CustomersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
@@ -113,4 +115,22 @@ func TypeValidator(_type Type) error {
 	default:
 		return fmt.Errorf("release: invalid enum value for Type field: %q", _type)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_type Type) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_type.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_type *Type) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_type = Type(str)
+	if err := TypeValidator(*_type); err != nil {
+		return fmt.Errorf("%s is not a valid Type", str)
+	}
+	return nil
 }

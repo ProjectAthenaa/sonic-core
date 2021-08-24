@@ -3,6 +3,9 @@
 package settings
 
 import (
+	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,11 +28,15 @@ const (
 	FieldCheckoutDelay = "checkout_delay"
 	// FieldATCDelay holds the string denoting the atcdelay field in the database.
 	FieldATCDelay = "atc_delay"
+	// FieldCaptchaSolver holds the string denoting the captchasolver field in the database.
+	FieldCaptchaSolver = "captcha_solver"
+	// FieldCaptchaDetails holds the string denoting the captchadetails field in the database.
+	FieldCaptchaDetails = "captcha_details"
 	// EdgeApp holds the string denoting the app edge name in mutations.
 	EdgeApp = "App"
 	// Table holds the table name of the settings in the database.
 	Table = "settings"
-	// AppTable is the table the holds the App relation/edge.
+	// AppTable is the table that holds the App relation/edge.
 	AppTable = "settings"
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
@@ -47,6 +54,8 @@ var Columns = []string{
 	FieldDeclineWebhook,
 	FieldCheckoutDelay,
 	FieldATCDelay,
+	FieldCaptchaSolver,
+	FieldCaptchaDetails,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "settings"
@@ -88,3 +97,50 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// CaptchaSolver defines the type for the "CaptchaSolver" enum field.
+type CaptchaSolver string
+
+// CaptchaSolverDisabled is the default value of the CaptchaSolver enum.
+const DefaultCaptchaSolver = CaptchaSolverDisabled
+
+// CaptchaSolver values.
+const (
+	CaptchaSolverAYCD_Autosolve CaptchaSolver = "AYCD_Autosolve"
+	CaptchaSolver2Captcha       CaptchaSolver = "2Captcha"
+	CaptchaSolverCapMonster     CaptchaSolver = "CapMonster"
+	CaptchaSolverHarvester      CaptchaSolver = "Harvester"
+	CaptchaSolverDisabled       CaptchaSolver = "Disabled"
+)
+
+func (_captchasolver CaptchaSolver) String() string {
+	return string(_captchasolver)
+}
+
+// CaptchaSolverValidator is a validator for the "CaptchaSolver" field enum values. It is called by the builders before save.
+func CaptchaSolverValidator(_captchasolver CaptchaSolver) error {
+	switch _captchasolver {
+	case CaptchaSolverAYCD_Autosolve, CaptchaSolver2Captcha, CaptchaSolverCapMonster, CaptchaSolverHarvester, CaptchaSolverDisabled:
+		return nil
+	default:
+		return fmt.Errorf("settings: invalid enum value for CaptchaSolver field: %q", _captchasolver)
+	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_captchasolver CaptchaSolver) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_captchasolver.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_captchasolver *CaptchaSolver) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_captchasolver = CaptchaSolver(str)
+	if err := CaptchaSolverValidator(*_captchasolver); err != nil {
+		return fmt.Errorf("%s is not a valid CaptchaSolver", str)
+	}
+	return nil
+}

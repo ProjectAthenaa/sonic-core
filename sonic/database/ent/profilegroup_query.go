@@ -398,8 +398,8 @@ func (pgq *ProfileGroupQuery) GroupBy(field string, fields ...string) *ProfileGr
 //		Select(profilegroup.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (pgq *ProfileGroupQuery) Select(field string, fields ...string) *ProfileGroupSelect {
-	pgq.fields = append([]string{field}, fields...)
+func (pgq *ProfileGroupQuery) Select(fields ...string) *ProfileGroupSelect {
+	pgq.fields = append(pgq.fields, fields...)
 	return &ProfileGroupSelect{ProfileGroupQuery: pgq}
 }
 
@@ -500,7 +500,7 @@ func (pgq *ProfileGroupQuery) sqlAll(ctx context.Context) ([]*ProfileGroup, erro
 				s.Where(sql.InValues(profilegroup.AppPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -565,7 +565,7 @@ func (pgq *ProfileGroupQuery) sqlAll(ctx context.Context) ([]*ProfileGroup, erro
 				s.Where(sql.InValues(profilegroup.TaskPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -675,10 +675,14 @@ func (pgq *ProfileGroupQuery) querySpec() *sqlgraph.QuerySpec {
 func (pgq *ProfileGroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pgq.driver.Dialect())
 	t1 := builder.Table(profilegroup.Table)
-	selector := builder.Select(t1.Columns(profilegroup.Columns...)...).From(t1)
+	columns := pgq.fields
+	if len(columns) == 0 {
+		columns = profilegroup.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if pgq.sql != nil {
 		selector = pgq.sql
-		selector.Select(selector.Columns(profilegroup.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range pgq.predicates {
 		p(selector)
@@ -946,13 +950,24 @@ func (pggb *ProfileGroupGroupBy) sqlScan(ctx context.Context, v interface{}) err
 }
 
 func (pggb *ProfileGroupGroupBy) sqlQuery() *sql.Selector {
-	selector := pggb.sql
-	columns := make([]string, 0, len(pggb.fields)+len(pggb.fns))
-	columns = append(columns, pggb.fields...)
+	selector := pggb.sql.Select()
+	aggregation := make([]string, 0, len(pggb.fns))
 	for _, fn := range pggb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(pggb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(pggb.fields)+len(pggb.fns))
+		for _, f := range pggb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(pggb.fields...)...)
 }
 
 // ProfileGroupSelect is the builder for selecting fields of ProfileGroup entities.
@@ -1168,16 +1183,10 @@ func (pgs *ProfileGroupSelect) BoolX(ctx context.Context) bool {
 
 func (pgs *ProfileGroupSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := pgs.sqlQuery().Query()
+	query, args := pgs.sql.Query()
 	if err := pgs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (pgs *ProfileGroupSelect) sqlQuery() sql.Querier {
-	selector := pgs.sql
-	selector.Select(selector.Columns(pgs.fields...)...)
-	return selector
 }

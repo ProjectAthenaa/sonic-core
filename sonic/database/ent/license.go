@@ -82,7 +82,7 @@ func (*License) scanValues(columns []string) ([]interface{}, error) {
 		case license.FieldID:
 			values[i] = new(uuid.UUID)
 		case license.ForeignKeys[0]: // user_license
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type License", columns[i])
 		}
@@ -141,10 +141,11 @@ func (l *License) assignValues(columns []string, values []interface{}) error {
 				l.Type = license.Type(value.String)
 			}
 		case license.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field user_license", values[i])
-			} else if value != nil {
-				l.user_license = value
+			} else if value.Valid {
+				l.user_license = new(uuid.UUID)
+				*l.user_license = *value.S.(*uuid.UUID)
 			}
 		}
 	}

@@ -662,6 +662,54 @@ func ATCDelayLTE(v int32) predicate.Settings {
 	})
 }
 
+// CaptchaSolverEQ applies the EQ predicate on the "CaptchaSolver" field.
+func CaptchaSolverEQ(v CaptchaSolver) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCaptchaSolver), v))
+	})
+}
+
+// CaptchaSolverNEQ applies the NEQ predicate on the "CaptchaSolver" field.
+func CaptchaSolverNEQ(v CaptchaSolver) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCaptchaSolver), v))
+	})
+}
+
+// CaptchaSolverIn applies the In predicate on the "CaptchaSolver" field.
+func CaptchaSolverIn(vs ...CaptchaSolver) predicate.Settings {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Settings(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCaptchaSolver), v...))
+	})
+}
+
+// CaptchaSolverNotIn applies the NotIn predicate on the "CaptchaSolver" field.
+func CaptchaSolverNotIn(vs ...CaptchaSolver) predicate.Settings {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Settings(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCaptchaSolver), v...))
+	})
+}
+
 // HasApp applies the HasEdge predicate on the "App" edge.
 func HasApp() predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {

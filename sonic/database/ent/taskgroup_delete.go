@@ -20,9 +20,9 @@ type TaskGroupDelete struct {
 	mutation *TaskGroupMutation
 }
 
-// Where adds a new predicate to the TaskGroupDelete builder.
+// Where appends a list predicates to the TaskGroupDelete builder.
 func (tgd *TaskGroupDelete) Where(ps ...predicate.TaskGroup) *TaskGroupDelete {
-	tgd.mutation.predicates = append(tgd.mutation.predicates, ps...)
+	tgd.mutation.Where(ps...)
 	return tgd
 }
 
@@ -46,6 +46,9 @@ func (tgd *TaskGroupDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(tgd.hooks) - 1; i >= 0; i-- {
+			if tgd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tgd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tgd.mutation); err != nil {

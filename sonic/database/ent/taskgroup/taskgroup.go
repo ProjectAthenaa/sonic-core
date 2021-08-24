@@ -25,12 +25,12 @@ const (
 	EdgeTasks = "Tasks"
 	// Table holds the table name of the taskgroup in the database.
 	Table = "task_groups"
-	// AppTable is the table the holds the App relation/edge. The primary key declared below.
+	// AppTable is the table that holds the App relation/edge. The primary key declared below.
 	AppTable = "app_TaskGroups"
 	// AppInverseTable is the table name for the App entity.
 	// It exists in this package in order to avoid circular dependency with the "app" package.
 	AppInverseTable = "apps"
-	// TasksTable is the table the holds the Tasks relation/edge. The primary key declared below.
+	// TasksTable is the table that holds the Tasks relation/edge. The primary key declared below.
 	TasksTable = "task_group_Tasks"
 	// TasksInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.

@@ -1,0 +1,18 @@
+scalar Time
+scalar UUID
+
+type User{
+    ID: UUID!
+    Disabled: Boolean!
+    License: License!
+    Statistics: [Statistic!]
+    App: App!
+    Metadata: Metadata!
+    Sessions: [Session!]
+}
+
+extend type Query {
+    getUserData: Metadata!
+    getUserStatistics: [Statistic!]!
+    getUserLicense: License!
+}

@@ -29,7 +29,7 @@ const (
 	EdgeProxyList = "ProxyList"
 	// Table holds the table name of the proxy in the database.
 	Table = "proxies"
-	// ProxyListTable is the table the holds the ProxyList relation/edge.
+	// ProxyListTable is the table that holds the ProxyList relation/edge.
 	ProxyListTable = "proxies"
 	// ProxyListInverseTable is the table name for the ProxyList entity.
 	// It exists in this package in order to avoid circular dependency with the "proxylist" package.

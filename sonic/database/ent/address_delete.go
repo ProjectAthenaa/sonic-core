@@ -20,9 +20,9 @@ type AddressDelete struct {
 	mutation *AddressMutation
 }
 
-// Where adds a new predicate to the AddressDelete builder.
+// Where appends a list predicates to the AddressDelete builder.
 func (ad *AddressDelete) Where(ps ...predicate.Address) *AddressDelete {
-	ad.mutation.predicates = append(ad.mutation.predicates, ps...)
+	ad.mutation.Where(ps...)
 	return ad
 }
 
@@ -46,6 +46,9 @@ func (ad *AddressDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ad.hooks) - 1; i >= 0; i-- {
+			if ad.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ad.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ad.mutation); err != nil {

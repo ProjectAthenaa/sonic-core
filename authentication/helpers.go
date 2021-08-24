@@ -109,7 +109,7 @@ type GraphQLError struct {
 }
 
 func contains(body string, subStrs ...string) bool {
-	if strings.Contains(body, "IntrospectionQuery"){
+	if strings.Contains(body, "IntrospectionQuery") {
 		return true
 	}
 
@@ -139,4 +139,17 @@ func contains(body string, subStrs ...string) bool {
 		}
 	}
 	return true
+}
+
+func ExtractFromCtx(ctx context.Context) (*uuid.UUID, error) {
+	if e := ctx.Value("error"); e != nil {
+		return nil, e.(error)
+	}
+
+	if userID := ctx.Value("userID"); userID != nil {
+		id := userID.(uuid.UUID)
+		return &id, nil
+	}
+
+	return nil, errors.New("user_not_found")
 }

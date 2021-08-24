@@ -31,10 +31,10 @@ func (*Device) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case device.FieldAdevice:
+			values[i] = &sql.NullScanner{S: new(sonic.Map)}
 		case device.FieldPlugins:
 			values[i] = new([]byte)
-		case device.FieldAdevice:
-			values[i] = new(sonic.Map)
 		case device.FieldGpuVendor:
 			values[i] = new(sql.NullString)
 		case device.FieldID:
@@ -67,7 +67,6 @@ func (d *Device) assignValues(columns []string, values []interface{}) error {
 				d.GpuVendor = value.String
 			}
 		case device.FieldPlugins:
-
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field plugins", values[i])
 			} else if value != nil && len(*value) > 0 {
@@ -76,10 +75,11 @@ func (d *Device) assignValues(columns []string, values []interface{}) error {
 				}
 			}
 		case device.FieldAdevice:
-			if value, ok := values[i].(*sonic.Map); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field adevice", values[i])
-			} else if value != nil {
-				d.Adevice = value
+			} else if value.Valid {
+				d.Adevice = new(sonic.Map)
+				*d.Adevice = *value.S.(*sonic.Map)
 			}
 		}
 	}

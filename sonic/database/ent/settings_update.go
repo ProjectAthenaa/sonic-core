@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
@@ -24,9 +25,9 @@ type SettingsUpdate struct {
 	mutation *SettingsMutation
 }
 
-// Where adds a new predicate for the SettingsUpdate builder.
+// Where appends a list predicates to the SettingsUpdate builder.
 func (su *SettingsUpdate) Where(ps ...predicate.Settings) *SettingsUpdate {
-	su.mutation.predicates = append(su.mutation.predicates, ps...)
+	su.mutation.Where(ps...)
 	return su
 }
 
@@ -120,6 +121,26 @@ func (su *SettingsUpdate) AddATCDelay(i int32) *SettingsUpdate {
 	return su
 }
 
+// SetCaptchaSolver sets the "CaptchaSolver" field.
+func (su *SettingsUpdate) SetCaptchaSolver(ss settings.CaptchaSolver) *SettingsUpdate {
+	su.mutation.SetCaptchaSolver(ss)
+	return su
+}
+
+// SetNillableCaptchaSolver sets the "CaptchaSolver" field if the given value is not nil.
+func (su *SettingsUpdate) SetNillableCaptchaSolver(ss *settings.CaptchaSolver) *SettingsUpdate {
+	if ss != nil {
+		su.SetCaptchaSolver(*ss)
+	}
+	return su
+}
+
+// SetCaptchaDetails sets the "CaptchaDetails" field.
+func (su *SettingsUpdate) SetCaptchaDetails(s sonic.Map) *SettingsUpdate {
+	su.mutation.SetCaptchaDetails(s)
+	return su
+}
+
 // SetAppID sets the "App" edge to the App entity by ID.
 func (su *SettingsUpdate) SetAppID(id uuid.UUID) *SettingsUpdate {
 	su.mutation.SetAppID(id)
@@ -169,6 +190,9 @@ func (su *SettingsUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(su.hooks) - 1; i >= 0; i-- {
+			if su.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = su.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, su.mutation); err != nil {
@@ -210,6 +234,11 @@ func (su *SettingsUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (su *SettingsUpdate) check() error {
+	if v, ok := su.mutation.CaptchaSolver(); ok {
+		if err := settings.CaptchaSolverValidator(v); err != nil {
+			return &ValidationError{Name: "CaptchaSolver", err: fmt.Errorf("ent: validator failed for field \"CaptchaSolver\": %w", err)}
+		}
+	}
 	if _, ok := su.mutation.AppID(); su.mutation.AppCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"App\"")
 	}
@@ -290,6 +319,20 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: settings.FieldATCDelay,
 		})
 	}
+	if value, ok := su.mutation.CaptchaSolver(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: settings.FieldCaptchaSolver,
+		})
+	}
+	if value, ok := su.mutation.CaptchaDetails(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: settings.FieldCaptchaDetails,
+		})
+	}
 	if su.mutation.AppCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -328,8 +371,8 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{settings.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -434,6 +477,26 @@ func (suo *SettingsUpdateOne) AddATCDelay(i int32) *SettingsUpdateOne {
 	return suo
 }
 
+// SetCaptchaSolver sets the "CaptchaSolver" field.
+func (suo *SettingsUpdateOne) SetCaptchaSolver(ss settings.CaptchaSolver) *SettingsUpdateOne {
+	suo.mutation.SetCaptchaSolver(ss)
+	return suo
+}
+
+// SetNillableCaptchaSolver sets the "CaptchaSolver" field if the given value is not nil.
+func (suo *SettingsUpdateOne) SetNillableCaptchaSolver(ss *settings.CaptchaSolver) *SettingsUpdateOne {
+	if ss != nil {
+		suo.SetCaptchaSolver(*ss)
+	}
+	return suo
+}
+
+// SetCaptchaDetails sets the "CaptchaDetails" field.
+func (suo *SettingsUpdateOne) SetCaptchaDetails(s sonic.Map) *SettingsUpdateOne {
+	suo.mutation.SetCaptchaDetails(s)
+	return suo
+}
+
 // SetAppID sets the "App" edge to the App entity by ID.
 func (suo *SettingsUpdateOne) SetAppID(id uuid.UUID) *SettingsUpdateOne {
 	suo.mutation.SetAppID(id)
@@ -490,6 +553,9 @@ func (suo *SettingsUpdateOne) Save(ctx context.Context) (*Settings, error) {
 			return node, err
 		})
 		for i := len(suo.hooks) - 1; i >= 0; i-- {
+			if suo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = suo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, suo.mutation); err != nil {
@@ -531,6 +597,11 @@ func (suo *SettingsUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (suo *SettingsUpdateOne) check() error {
+	if v, ok := suo.mutation.CaptchaSolver(); ok {
+		if err := settings.CaptchaSolverValidator(v); err != nil {
+			return &ValidationError{Name: "CaptchaSolver", err: fmt.Errorf("ent: validator failed for field \"CaptchaSolver\": %w", err)}
+		}
+	}
 	if _, ok := suo.mutation.AppID(); suo.mutation.AppCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"App\"")
 	}
@@ -628,6 +699,20 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 			Column: settings.FieldATCDelay,
 		})
 	}
+	if value, ok := suo.mutation.CaptchaSolver(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: settings.FieldCaptchaSolver,
+		})
+	}
+	if value, ok := suo.mutation.CaptchaDetails(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: settings.FieldCaptchaDetails,
+		})
+	}
 	if suo.mutation.AppCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -669,8 +754,8 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 	if err = sqlgraph.UpdateNode(ctx, suo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{settings.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

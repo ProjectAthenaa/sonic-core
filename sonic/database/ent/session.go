@@ -73,7 +73,7 @@ func (*Session) scanValues(columns []string) ([]interface{}, error) {
 		case session.FieldID:
 			values[i] = new(uuid.UUID)
 		case session.ForeignKeys[0]: // user_sessions
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Session", columns[i])
 		}
@@ -132,10 +132,11 @@ func (s *Session) assignValues(columns []string, values []interface{}) error {
 				s.Expired = value.Bool
 			}
 		case session.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field user_sessions", values[i])
-			} else if value != nil {
-				s.user_sessions = value
+			} else if value.Valid {
+				s.user_sessions = new(uuid.UUID)
+				*s.user_sessions = *value.S.(*uuid.UUID)
 			}
 		}
 	}

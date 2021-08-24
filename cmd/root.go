@@ -32,7 +32,7 @@ func Execute() {
 
 	client := database.Connect(os.Getenv("PG_URL"))
 
-	client.Schema.Create(context.Background())
+	//client.Schema.Create(context.Background())
 
 	discordId := flag.String("discord_id", "none", "Discord ID of the user to bind")
 	licenseType := flag.String("type", "lifetime", "License type")

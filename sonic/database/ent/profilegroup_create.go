@@ -136,11 +136,17 @@ func (pgc *ProfileGroupCreate) Save(ctx context.Context) (*ProfileGroup, error) 
 				return nil, err
 			}
 			pgc.mutation = mutation
-			node, err = pgc.sqlSave(ctx)
+			if node, err = pgc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(pgc.hooks) - 1; i >= 0; i-- {
+			if pgc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pgc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pgc.mutation); err != nil {
@@ -157,6 +163,19 @@ func (pgc *ProfileGroupCreate) SaveX(ctx context.Context) *ProfileGroup {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (pgc *ProfileGroupCreate) Exec(ctx context.Context) error {
+	_, err := pgc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (pgc *ProfileGroupCreate) ExecX(ctx context.Context) {
+	if err := pgc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -178,13 +197,13 @@ func (pgc *ProfileGroupCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pgc *ProfileGroupCreate) check() error {
 	if _, ok := pgc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := pgc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
 	}
 	if _, ok := pgc.mutation.Name(); !ok {
-		return &ValidationError{Name: "Name", err: errors.New("ent: missing required field \"Name\"")}
+		return &ValidationError{Name: "Name", err: errors.New(`ent: missing required field "Name"`)}
 	}
 	if len(pgc.mutation.AppIDs()) == 0 {
 		return &ValidationError{Name: "App", err: errors.New("ent: missing required edge \"App\"")}
@@ -195,10 +214,13 @@ func (pgc *ProfileGroupCreate) check() error {
 func (pgc *ProfileGroupCreate) sqlSave(ctx context.Context) (*ProfileGroup, error) {
 	_node, _spec := pgc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pgc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -331,17 +353,19 @@ func (pgcb *ProfileGroupCreateBulk) Save(ctx context.Context) ([]*ProfileGroup, 
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, pgcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pgcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, pgcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -365,4 +389,17 @@ func (pgcb *ProfileGroupCreateBulk) SaveX(ctx context.Context) []*ProfileGroup {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (pgcb *ProfileGroupCreateBulk) Exec(ctx context.Context) error {
+	_, err := pgcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (pgcb *ProfileGroupCreateBulk) ExecX(ctx context.Context) {
+	if err := pgcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

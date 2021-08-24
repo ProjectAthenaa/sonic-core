@@ -31,7 +31,7 @@ const (
 	EdgeProfile = "Profile"
 	// Table holds the table name of the billing in the database.
 	Table = "billings"
-	// ProfileTable is the table the holds the Profile relation/edge. The primary key declared below.
+	// ProfileTable is the table that holds the Profile relation/edge. The primary key declared below.
 	ProfileTable = "profile_Billing"
 	// ProfileInverseTable is the table name for the Profile entity.
 	// It exists in this package in order to avoid circular dependency with the "profile" package.

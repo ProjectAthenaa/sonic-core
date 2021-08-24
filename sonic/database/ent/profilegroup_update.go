@@ -25,9 +25,9 @@ type ProfileGroupUpdate struct {
 	mutation *ProfileGroupMutation
 }
 
-// Where adds a new predicate for the ProfileGroupUpdate builder.
+// Where appends a list predicates to the ProfileGroupUpdate builder.
 func (pgu *ProfileGroupUpdate) Where(ps ...predicate.ProfileGroup) *ProfileGroupUpdate {
-	pgu.mutation.predicates = append(pgu.mutation.predicates, ps...)
+	pgu.mutation.Where(ps...)
 	return pgu
 }
 
@@ -191,6 +191,9 @@ func (pgu *ProfileGroupUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(pgu.hooks) - 1; i >= 0; i-- {
+			if pgu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pgu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pgu.mutation); err != nil {
@@ -434,8 +437,8 @@ func (pgu *ProfileGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, pgu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{profilegroup.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -617,6 +620,9 @@ func (pguo *ProfileGroupUpdateOne) Save(ctx context.Context) (*ProfileGroup, err
 			return node, err
 		})
 		for i := len(pguo.hooks) - 1; i >= 0; i-- {
+			if pguo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pguo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pguo.mutation); err != nil {
@@ -880,8 +886,8 @@ func (pguo *ProfileGroupUpdateOne) sqlSave(ctx context.Context) (_node *ProfileG
 	if err = sqlgraph.UpdateNode(ctx, pguo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{profilegroup.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

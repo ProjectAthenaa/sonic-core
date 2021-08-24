@@ -71,7 +71,7 @@ func (*Proxy) scanValues(columns []string) ([]interface{}, error) {
 		case proxy.FieldID:
 			values[i] = new(uuid.UUID)
 		case proxy.ForeignKeys[0]: // proxy_list_proxies
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Proxy", columns[i])
 		}
@@ -130,10 +130,11 @@ func (pr *Proxy) assignValues(columns []string, values []interface{}) error {
 				pr.Port = value.String
 			}
 		case proxy.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field proxy_list_proxies", values[i])
-			} else if value != nil {
-				pr.proxy_list_proxies = value
+			} else if value.Valid {
+				pr.proxy_list_proxies = new(uuid.UUID)
+				*pr.proxy_list_proxies = *value.S.(*uuid.UUID)
 			}
 		}
 	}

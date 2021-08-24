@@ -4,6 +4,8 @@ package session
 
 import (
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,7 +32,7 @@ const (
 	EdgeUser = "user"
 	// Table holds the table name of the session in the database.
 	Table = "sessions"
-	// UserTable is the table the holds the user relation/edge.
+	// UserTable is the table that holds the user relation/edge.
 	UserTable = "sessions"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
@@ -113,4 +115,22 @@ func DeviceTypeValidator(_devicetype DeviceType) error {
 	default:
 		return fmt.Errorf("session: invalid enum value for DeviceType field: %q", _devicetype)
 	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (_devicetype DeviceType) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(_devicetype.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (_devicetype *DeviceType) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*_devicetype = DeviceType(str)
+	if err := DeviceTypeValidator(*_devicetype); err != nil {
+		return fmt.Errorf("%s is not a valid DeviceType", str)
+	}
+	return nil
 }

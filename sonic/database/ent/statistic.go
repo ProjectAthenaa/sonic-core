@@ -131,7 +131,6 @@ func (s *Statistic) assignValues(columns []string, values []interface{}) error {
 				*s.PotentialProfit = int(value.Int64)
 			}
 		case statistic.FieldAxis:
-
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field Axis", values[i])
 			} else if value != nil && len(*value) > 0 {

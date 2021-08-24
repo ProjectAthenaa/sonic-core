@@ -20,9 +20,9 @@ type ProxyListDelete struct {
 	mutation *ProxyListMutation
 }
 
-// Where adds a new predicate to the ProxyListDelete builder.
+// Where appends a list predicates to the ProxyListDelete builder.
 func (pld *ProxyListDelete) Where(ps ...predicate.ProxyList) *ProxyListDelete {
-	pld.mutation.predicates = append(pld.mutation.predicates, ps...)
+	pld.mutation.Where(ps...)
 	return pld
 }
 
@@ -46,6 +46,9 @@ func (pld *ProxyListDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(pld.hooks) - 1; i >= 0; i-- {
+			if pld.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pld.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pld.mutation); err != nil {

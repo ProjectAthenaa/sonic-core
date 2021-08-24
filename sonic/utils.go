@@ -95,3 +95,13 @@ func GetMonitorProxy(site Site) (proxy *url.URL, authorization string, err error
 func GrabValueFromHTMLName(name string, html *[]byte) string {
 	return strings.ReplaceAll(strings.Split(strings.Split(strings.Split(string(*html), name)[1], "/>")[0], "value=")[1], "\"", "")
 }
+
+func MapConverter(m map[string]interface{}) map[string]string {
+	m2 := make(map[string]string, len(m))
+	for k, v := range m {
+		if v, ok := v.(string); ok {
+			m2[k] = v
+		}
+	}
+	return m2
+}

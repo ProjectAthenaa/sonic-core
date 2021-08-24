@@ -25,9 +25,9 @@ type LicenseUpdate struct {
 	mutation *LicenseMutation
 }
 
-// Where adds a new predicate for the LicenseUpdate builder.
+// Where appends a list predicates to the LicenseUpdate builder.
 func (lu *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
-	lu.mutation.predicates = append(lu.mutation.predicates, ps...)
+	lu.mutation.Where(ps...)
 	return lu
 }
 
@@ -188,6 +188,9 @@ func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(lu.hooks) - 1; i >= 0; i-- {
+			if lu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = lu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, lu.mutation); err != nil {
@@ -404,8 +407,8 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{license.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -584,6 +587,9 @@ func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
 			return node, err
 		})
 		for i := len(luo.hooks) - 1; i >= 0; i-- {
+			if luo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = luo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, luo.mutation); err != nil {
@@ -820,8 +826,8 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 	if err = sqlgraph.UpdateNode(ctx, luo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{license.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

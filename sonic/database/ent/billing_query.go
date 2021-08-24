@@ -326,8 +326,8 @@ func (bq *BillingQuery) GroupBy(field string, fields ...string) *BillingGroupBy 
 //		Select(billing.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (bq *BillingQuery) Select(field string, fields ...string) *BillingSelect {
-	bq.fields = append([]string{field}, fields...)
+func (bq *BillingQuery) Select(fields ...string) *BillingSelect {
+	bq.fields = append(bq.fields, fields...)
 	return &BillingSelect{BillingQuery: bq}
 }
 
@@ -397,7 +397,7 @@ func (bq *BillingQuery) sqlAll(ctx context.Context) ([]*Billing, error) {
 				s.Where(sql.InValues(billing.ProfilePrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -507,10 +507,14 @@ func (bq *BillingQuery) querySpec() *sqlgraph.QuerySpec {
 func (bq *BillingQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(bq.driver.Dialect())
 	t1 := builder.Table(billing.Table)
-	selector := builder.Select(t1.Columns(billing.Columns...)...).From(t1)
+	columns := bq.fields
+	if len(columns) == 0 {
+		columns = billing.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if bq.sql != nil {
 		selector = bq.sql
-		selector.Select(selector.Columns(billing.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range bq.predicates {
 		p(selector)
@@ -778,13 +782,24 @@ func (bgb *BillingGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (bgb *BillingGroupBy) sqlQuery() *sql.Selector {
-	selector := bgb.sql
-	columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
-	columns = append(columns, bgb.fields...)
+	selector := bgb.sql.Select()
+	aggregation := make([]string, 0, len(bgb.fns))
 	for _, fn := range bgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(bgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
+		for _, f := range bgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(bgb.fields...)...)
 }
 
 // BillingSelect is the builder for selecting fields of Billing entities.
@@ -1000,16 +1015,10 @@ func (bs *BillingSelect) BoolX(ctx context.Context) bool {
 
 func (bs *BillingSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := bs.sqlQuery().Query()
+	query, args := bs.sql.Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (bs *BillingSelect) sqlQuery() sql.Querier {
-	selector := bs.sql
-	selector.Select(selector.Columns(bs.fields...)...)
-	return selector
 }

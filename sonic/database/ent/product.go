@@ -115,7 +115,7 @@ func (*Product) scanValues(columns []string) ([]interface{}, error) {
 		case product.FieldID:
 			values[i] = new(uuid.UUID)
 		case product.ForeignKeys[0]: // calendar_quick_task
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Product", columns[i])
 		}
@@ -168,7 +168,6 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				pr.LookupType = product.LookupType(value.String)
 			}
 		case product.FieldPositiveKeywords:
-
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field PositiveKeywords", values[i])
 			} else if value != nil && len(*value) > 0 {
@@ -177,7 +176,6 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				}
 			}
 		case product.FieldNegativeKeywords:
-
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field NegativeKeywords", values[i])
 			} else if value != nil && len(*value) > 0 {
@@ -198,7 +196,6 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				pr.Quantity = int32(value.Int64)
 			}
 		case product.FieldSizes:
-
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field Sizes", values[i])
 			} else if value != nil && len(*value) > 0 {
@@ -207,7 +204,6 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				}
 			}
 		case product.FieldColors:
-
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field Colors", values[i])
 			} else if value != nil && len(*value) > 0 {
@@ -228,10 +224,11 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				pr.Metadata = *value
 			}
 		case product.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field calendar_quick_task", values[i])
-			} else if value != nil {
-				pr.calendar_quick_task = value
+			} else if value.Valid {
+				pr.calendar_quick_task = new(uuid.UUID)
+				*pr.calendar_quick_task = *value.S.(*uuid.UUID)
 			}
 		}
 	}

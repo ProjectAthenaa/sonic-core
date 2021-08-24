@@ -398,8 +398,8 @@ func (plq *ProxyListQuery) GroupBy(field string, fields ...string) *ProxyListGro
 //		Select(proxylist.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (plq *ProxyListQuery) Select(field string, fields ...string) *ProxyListSelect {
-	plq.fields = append([]string{field}, fields...)
+func (plq *ProxyListQuery) Select(fields ...string) *ProxyListSelect {
+	plq.fields = append(plq.fields, fields...)
 	return &ProxyListSelect{ProxyListQuery: plq}
 }
 
@@ -471,7 +471,7 @@ func (plq *ProxyListQuery) sqlAll(ctx context.Context) ([]*ProxyList, error) {
 				s.Where(sql.InValues(proxylist.AppPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -565,7 +565,7 @@ func (plq *ProxyListQuery) sqlAll(ctx context.Context) ([]*ProxyList, error) {
 				s.Where(sql.InValues(proxylist.TaskPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -675,10 +675,14 @@ func (plq *ProxyListQuery) querySpec() *sqlgraph.QuerySpec {
 func (plq *ProxyListQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(plq.driver.Dialect())
 	t1 := builder.Table(proxylist.Table)
-	selector := builder.Select(t1.Columns(proxylist.Columns...)...).From(t1)
+	columns := plq.fields
+	if len(columns) == 0 {
+		columns = proxylist.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if plq.sql != nil {
 		selector = plq.sql
-		selector.Select(selector.Columns(proxylist.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range plq.predicates {
 		p(selector)
@@ -946,13 +950,24 @@ func (plgb *ProxyListGroupBy) sqlScan(ctx context.Context, v interface{}) error 
 }
 
 func (plgb *ProxyListGroupBy) sqlQuery() *sql.Selector {
-	selector := plgb.sql
-	columns := make([]string, 0, len(plgb.fields)+len(plgb.fns))
-	columns = append(columns, plgb.fields...)
+	selector := plgb.sql.Select()
+	aggregation := make([]string, 0, len(plgb.fns))
 	for _, fn := range plgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(plgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(plgb.fields)+len(plgb.fns))
+		for _, f := range plgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(plgb.fields...)...)
 }
 
 // ProxyListSelect is the builder for selecting fields of ProxyList entities.
@@ -1168,16 +1183,10 @@ func (pls *ProxyListSelect) BoolX(ctx context.Context) bool {
 
 func (pls *ProxyListSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := pls.sqlQuery().Query()
+	query, args := pls.sql.Query()
 	if err := pls.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (pls *ProxyListSelect) sqlQuery() sql.Querier {
-	selector := pls.sql
-	selector.Select(selector.Columns(pls.fields...)...)
-	return selector
 }

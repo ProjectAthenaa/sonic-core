@@ -362,8 +362,8 @@ func (tgq *TaskGroupQuery) GroupBy(field string, fields ...string) *TaskGroupGro
 //		Select(taskgroup.FieldCreatedAt).
 //		Scan(ctx, &v)
 //
-func (tgq *TaskGroupQuery) Select(field string, fields ...string) *TaskGroupSelect {
-	tgq.fields = append([]string{field}, fields...)
+func (tgq *TaskGroupQuery) Select(fields ...string) *TaskGroupSelect {
+	tgq.fields = append(tgq.fields, fields...)
 	return &TaskGroupSelect{TaskGroupQuery: tgq}
 }
 
@@ -434,7 +434,7 @@ func (tgq *TaskGroupQuery) sqlAll(ctx context.Context) ([]*TaskGroup, error) {
 				s.Where(sql.InValues(taskgroup.AppPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -499,7 +499,7 @@ func (tgq *TaskGroupQuery) sqlAll(ctx context.Context) ([]*TaskGroup, error) {
 				s.Where(sql.InValues(taskgroup.TasksPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -609,10 +609,14 @@ func (tgq *TaskGroupQuery) querySpec() *sqlgraph.QuerySpec {
 func (tgq *TaskGroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tgq.driver.Dialect())
 	t1 := builder.Table(taskgroup.Table)
-	selector := builder.Select(t1.Columns(taskgroup.Columns...)...).From(t1)
+	columns := tgq.fields
+	if len(columns) == 0 {
+		columns = taskgroup.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if tgq.sql != nil {
 		selector = tgq.sql
-		selector.Select(selector.Columns(taskgroup.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range tgq.predicates {
 		p(selector)
@@ -880,13 +884,24 @@ func (tggb *TaskGroupGroupBy) sqlScan(ctx context.Context, v interface{}) error 
 }
 
 func (tggb *TaskGroupGroupBy) sqlQuery() *sql.Selector {
-	selector := tggb.sql
-	columns := make([]string, 0, len(tggb.fields)+len(tggb.fns))
-	columns = append(columns, tggb.fields...)
+	selector := tggb.sql.Select()
+	aggregation := make([]string, 0, len(tggb.fns))
 	for _, fn := range tggb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(tggb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(tggb.fields)+len(tggb.fns))
+		for _, f := range tggb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(tggb.fields...)...)
 }
 
 // TaskGroupSelect is the builder for selecting fields of TaskGroup entities.
@@ -1102,16 +1117,10 @@ func (tgs *TaskGroupSelect) BoolX(ctx context.Context) bool {
 
 func (tgs *TaskGroupSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := tgs.sqlQuery().Query()
+	query, args := tgs.sql.Query()
 	if err := tgs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (tgs *TaskGroupSelect) sqlQuery() sql.Querier {
-	selector := tgs.sql
-	selector.Select(selector.Columns(tgs.fields...)...)
-	return selector
 }

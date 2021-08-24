@@ -27,7 +27,7 @@ const (
 	EdgeLicense = "License"
 	// Table holds the table name of the stripe in the database.
 	Table = "stripes"
-	// LicenseTable is the table the holds the License relation/edge.
+	// LicenseTable is the table that holds the License relation/edge.
 	LicenseTable = "stripes"
 	// LicenseInverseTable is the table name for the License entity.
 	// It exists in this package in order to avoid circular dependency with the "license" package.

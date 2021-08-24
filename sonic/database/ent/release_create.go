@@ -188,11 +188,17 @@ func (rc *ReleaseCreate) Save(ctx context.Context) (*Release, error) {
 				return nil, err
 			}
 			rc.mutation = mutation
-			node, err = rc.sqlSave(ctx)
+			if node, err = rc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(rc.hooks) - 1; i >= 0; i-- {
+			if rc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = rc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, rc.mutation); err != nil {
@@ -209,6 +215,19 @@ func (rc *ReleaseCreate) SaveX(ctx context.Context) *Release {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (rc *ReleaseCreate) Exec(ctx context.Context) error {
+	_, err := rc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (rc *ReleaseCreate) ExecX(ctx context.Context) {
+	if err := rc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -250,30 +269,30 @@ func (rc *ReleaseCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (rc *ReleaseCreate) check() error {
 	if _, ok := rc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := rc.mutation.ReleaseDate(); !ok {
-		return &ValidationError{Name: "ReleaseDate", err: errors.New("ent: missing required field \"ReleaseDate\"")}
+		return &ValidationError{Name: "ReleaseDate", err: errors.New(`ent: missing required field "ReleaseDate"`)}
 	}
 	if _, ok := rc.mutation.StockLevel(); !ok {
-		return &ValidationError{Name: "StockLevel", err: errors.New("ent: missing required field \"StockLevel\"")}
+		return &ValidationError{Name: "StockLevel", err: errors.New(`ent: missing required field "StockLevel"`)}
 	}
 	if _, ok := rc.mutation.Code(); !ok {
-		return &ValidationError{Name: "Code", err: errors.New("ent: missing required field \"Code\"")}
+		return &ValidationError{Name: "Code", err: errors.New(`ent: missing required field "Code"`)}
 	}
 	if _, ok := rc.mutation.GetType(); !ok {
-		return &ValidationError{Name: "Type", err: errors.New("ent: missing required field \"Type\"")}
+		return &ValidationError{Name: "Type", err: errors.New(`ent: missing required field "Type"`)}
 	}
 	if v, ok := rc.mutation.GetType(); ok {
 		if err := release.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "Type", err: fmt.Errorf("ent: validator failed for field \"Type\": %w", err)}
+			return &ValidationError{Name: "Type", err: fmt.Errorf(`ent: validator failed for field "Type": %w`, err)}
 		}
 	}
 	if _, ok := rc.mutation.OneTimeFeeAmount(); !ok {
-		return &ValidationError{Name: "OneTimeFeeAmount", err: errors.New("ent: missing required field \"OneTimeFeeAmount\"")}
+		return &ValidationError{Name: "OneTimeFeeAmount", err: errors.New(`ent: missing required field "OneTimeFeeAmount"`)}
 	}
 	if _, ok := rc.mutation.ProductPriceID(); !ok {
-		return &ValidationError{Name: "ProductPriceID", err: errors.New("ent: missing required field \"ProductPriceID\"")}
+		return &ValidationError{Name: "ProductPriceID", err: errors.New(`ent: missing required field "ProductPriceID"`)}
 	}
 	return nil
 }
@@ -281,10 +300,13 @@ func (rc *ReleaseCreate) check() error {
 func (rc *ReleaseCreate) sqlSave(ctx context.Context) (*Release, error) {
 	_node, _spec := rc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -427,17 +449,19 @@ func (rcb *ReleaseCreateBulk) Save(ctx context.Context) ([]*Release, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, rcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, rcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -461,4 +485,17 @@ func (rcb *ReleaseCreateBulk) SaveX(ctx context.Context) []*Release {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (rcb *ReleaseCreateBulk) Exec(ctx context.Context) error {
+	_, err := rcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (rcb *ReleaseCreateBulk) ExecX(ctx context.Context) {
+	if err := rcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

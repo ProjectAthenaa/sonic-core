@@ -29,21 +29,21 @@ const (
 	EdgeBilling = "Billing"
 	// Table holds the table name of the profile in the database.
 	Table = "profiles"
-	// ProfileGroupTable is the table the holds the ProfileGroup relation/edge.
+	// ProfileGroupTable is the table that holds the ProfileGroup relation/edge.
 	ProfileGroupTable = "profiles"
 	// ProfileGroupInverseTable is the table name for the ProfileGroup entity.
 	// It exists in this package in order to avoid circular dependency with the "profilegroup" package.
 	ProfileGroupInverseTable = "profile_groups"
 	// ProfileGroupColumn is the table column denoting the ProfileGroup relation/edge.
 	ProfileGroupColumn = "profile_group_profiles"
-	// ShippingTable is the table the holds the Shipping relation/edge.
+	// ShippingTable is the table that holds the Shipping relation/edge.
 	ShippingTable = "shippings"
 	// ShippingInverseTable is the table name for the Shipping entity.
 	// It exists in this package in order to avoid circular dependency with the "shipping" package.
 	ShippingInverseTable = "shippings"
 	// ShippingColumn is the table column denoting the Shipping relation/edge.
 	ShippingColumn = "profile_shipping"
-	// BillingTable is the table the holds the Billing relation/edge. The primary key declared below.
+	// BillingTable is the table that holds the Billing relation/edge. The primary key declared below.
 	BillingTable = "profile_Billing"
 	// BillingInverseTable is the table name for the Billing entity.
 	// It exists in this package in order to avoid circular dependency with the "billing" package.

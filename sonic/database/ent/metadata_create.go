@@ -234,11 +234,17 @@ func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 				return nil, err
 			}
 			mc.mutation = mutation
-			node, err = mc.sqlSave(ctx)
+			if node, err = mc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(mc.hooks) - 1; i >= 0; i-- {
+			if mc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = mc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mc.mutation); err != nil {
@@ -255,6 +261,19 @@ func (mc *MetadataCreate) SaveX(ctx context.Context) *Metadata {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (mc *MetadataCreate) Exec(ctx context.Context) error {
+	_, err := mc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mc *MetadataCreate) ExecX(ctx context.Context) {
+	if err := mc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -316,45 +335,45 @@ func (mc *MetadataCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (mc *MetadataCreate) check() error {
 	if _, ok := mc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := mc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
 	}
 	if _, ok := mc.mutation.FirstLogin(); !ok {
-		return &ValidationError{Name: "FirstLogin", err: errors.New("ent: missing required field \"FirstLogin\"")}
+		return &ValidationError{Name: "FirstLogin", err: errors.New(`ent: missing required field "FirstLogin"`)}
 	}
 	if _, ok := mc.mutation.FirstLoginMobile(); !ok {
-		return &ValidationError{Name: "FirstLoginMobile", err: errors.New("ent: missing required field \"FirstLoginMobile\"")}
+		return &ValidationError{Name: "FirstLoginMobile", err: errors.New(`ent: missing required field "FirstLoginMobile"`)}
 	}
 	if _, ok := mc.mutation.Theme(); !ok {
-		return &ValidationError{Name: "Theme", err: errors.New("ent: missing required field \"Theme\"")}
+		return &ValidationError{Name: "Theme", err: errors.New(`ent: missing required field "Theme"`)}
 	}
 	if v, ok := mc.mutation.Theme(); ok {
 		if err := metadata.ThemeValidator(v); err != nil {
-			return &ValidationError{Name: "Theme", err: fmt.Errorf("ent: validator failed for field \"Theme\": %w", err)}
+			return &ValidationError{Name: "Theme", err: fmt.Errorf(`ent: validator failed for field "Theme": %w`, err)}
 		}
 	}
 	if _, ok := mc.mutation.DiscordID(); !ok {
-		return &ValidationError{Name: "DiscordID", err: errors.New("ent: missing required field \"DiscordID\"")}
+		return &ValidationError{Name: "DiscordID", err: errors.New(`ent: missing required field "DiscordID"`)}
 	}
 	if _, ok := mc.mutation.DiscordAccessToken(); !ok {
-		return &ValidationError{Name: "DiscordAccessToken", err: errors.New("ent: missing required field \"DiscordAccessToken\"")}
+		return &ValidationError{Name: "DiscordAccessToken", err: errors.New(`ent: missing required field "DiscordAccessToken"`)}
 	}
 	if _, ok := mc.mutation.DiscordRefreshToken(); !ok {
-		return &ValidationError{Name: "DiscordRefreshToken", err: errors.New("ent: missing required field \"DiscordRefreshToken\"")}
+		return &ValidationError{Name: "DiscordRefreshToken", err: errors.New(`ent: missing required field "DiscordRefreshToken"`)}
 	}
 	if _, ok := mc.mutation.DiscordUsername(); !ok {
-		return &ValidationError{Name: "DiscordUsername", err: errors.New("ent: missing required field \"DiscordUsername\"")}
+		return &ValidationError{Name: "DiscordUsername", err: errors.New(`ent: missing required field "DiscordUsername"`)}
 	}
 	if _, ok := mc.mutation.DiscordAvatar(); !ok {
-		return &ValidationError{Name: "DiscordAvatar", err: errors.New("ent: missing required field \"DiscordAvatar\"")}
+		return &ValidationError{Name: "DiscordAvatar", err: errors.New(`ent: missing required field "DiscordAvatar"`)}
 	}
 	if _, ok := mc.mutation.DiscordDiscriminator(); !ok {
-		return &ValidationError{Name: "DiscordDiscriminator", err: errors.New("ent: missing required field \"DiscordDiscriminator\"")}
+		return &ValidationError{Name: "DiscordDiscriminator", err: errors.New(`ent: missing required field "DiscordDiscriminator"`)}
 	}
 	if _, ok := mc.mutation.DiscordExpiryTime(); !ok {
-		return &ValidationError{Name: "DiscordExpiryTime", err: errors.New("ent: missing required field \"DiscordExpiryTime\"")}
+		return &ValidationError{Name: "DiscordExpiryTime", err: errors.New(`ent: missing required field "DiscordExpiryTime"`)}
 	}
 	if _, ok := mc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
@@ -365,10 +384,13 @@ func (mc *MetadataCreate) check() error {
 func (mc *MetadataCreate) sqlSave(ctx context.Context) (*Metadata, error) {
 	_node, _spec := mc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -536,17 +558,19 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -570,4 +594,17 @@ func (mcb *MetadataCreateBulk) SaveX(ctx context.Context) []*Metadata {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (mcb *MetadataCreateBulk) Exec(ctx context.Context) error {
+	_, err := mcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mcb *MetadataCreateBulk) ExecX(ctx context.Context) {
+	if err := mcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

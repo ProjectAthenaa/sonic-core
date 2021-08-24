@@ -3,11 +3,13 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/google/uuid"
@@ -30,6 +32,10 @@ type Settings struct {
 	CheckoutDelay int32 `json:"CheckoutDelay,omitempty"`
 	// ATCDelay holds the value of the "ATCDelay" field.
 	ATCDelay int32 `json:"ATCDelay,omitempty"`
+	// CaptchaSolver holds the value of the "CaptchaSolver" field.
+	CaptchaSolver settings.CaptchaSolver `json:"CaptchaSolver,omitempty"`
+	// CaptchaDetails holds the value of the "CaptchaDetails" field.
+	CaptchaDetails sonic.Map `json:"CaptchaDetails,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SettingsQuery when eager-loading is set.
 	Edges        SettingsEdges `json:"edges"`
@@ -64,16 +70,18 @@ func (*Settings) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case settings.FieldCaptchaDetails:
+			values[i] = new(sonic.Map)
 		case settings.FieldCheckoutDelay, settings.FieldATCDelay:
 			values[i] = new(sql.NullInt64)
-		case settings.FieldSuccessWebhook, settings.FieldDeclineWebhook:
+		case settings.FieldSuccessWebhook, settings.FieldDeclineWebhook, settings.FieldCaptchaSolver:
 			values[i] = new(sql.NullString)
 		case settings.FieldCreatedAt, settings.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case settings.FieldID:
 			values[i] = new(uuid.UUID)
 		case settings.ForeignKeys[0]: // app_settings
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Settings", columns[i])
 		}
@@ -131,11 +139,26 @@ func (s *Settings) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				s.ATCDelay = int32(value.Int64)
 			}
+		case settings.FieldCaptchaSolver:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field CaptchaSolver", values[i])
+			} else if value.Valid {
+				s.CaptchaSolver = settings.CaptchaSolver(value.String)
+			}
+		case settings.FieldCaptchaDetails:
+			if value, ok := values[i].(*sonic.Map); !ok {
+				return fmt.Errorf("unexpected type %T for field CaptchaDetails", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &s.CaptchaDetails); err != nil {
+					return fmt.Errorf("unmarshal field CaptchaDetails: %w", err)
+				}
+			}
 		case settings.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field app_settings", values[i])
-			} else if value != nil {
-				s.app_settings = value
+			} else if value.Valid {
+				s.app_settings = new(uuid.UUID)
+				*s.app_settings = *value.S.(*uuid.UUID)
 			}
 		}
 	}
@@ -182,6 +205,10 @@ func (s *Settings) String() string {
 	builder.WriteString(fmt.Sprintf("%v", s.CheckoutDelay))
 	builder.WriteString(", ATCDelay=")
 	builder.WriteString(fmt.Sprintf("%v", s.ATCDelay))
+	builder.WriteString(", CaptchaSolver=")
+	builder.WriteString(fmt.Sprintf("%v", s.CaptchaSolver))
+	builder.WriteString(", CaptchaDetails=")
+	builder.WriteString(fmt.Sprintf("%v", s.CaptchaDetails))
 	builder.WriteByte(')')
 	return builder.String()
 }

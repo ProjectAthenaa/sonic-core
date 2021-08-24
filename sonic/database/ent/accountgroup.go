@@ -72,7 +72,7 @@ func (*AccountGroup) scanValues(columns []string) ([]interface{}, error) {
 		case accountgroup.FieldID:
 			values[i] = new(uuid.UUID)
 		case accountgroup.ForeignKeys[0]: // app_account_groups
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type AccountGroup", columns[i])
 		}
@@ -125,10 +125,11 @@ func (ag *AccountGroup) assignValues(columns []string, values []interface{}) err
 				ag.Accounts = *value
 			}
 		case accountgroup.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field app_account_groups", values[i])
-			} else if value != nil {
-				ag.app_account_groups = value
+			} else if value.Valid {
+				ag.app_account_groups = new(uuid.UUID)
+				*ag.app_account_groups = *value.S.(*uuid.UUID)
 			}
 		}
 	}
