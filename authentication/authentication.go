@@ -101,7 +101,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 					}
 					log.Info("Passed ip check")
 
-					ctx = context.WithValue(ctx, "userID", user.UserID.String())
+					ctx = context.WithValue(ctx, "userID", user.UserID)
 					ctx = context.WithValue(ctx, "discordID", user.DiscordID)
 					log.Info("Added everything to context")
 					goto setRequestContext
