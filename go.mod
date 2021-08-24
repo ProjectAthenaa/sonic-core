@@ -6,7 +6,7 @@ require (
 	entgo.io/contrib v0.1.0
 	entgo.io/ent v0.9.1
 	github.com/99designs/gqlgen v0.13.0
-	github.com/ProjectAthenaa/fasttls v0.0.0-20210822190030-8bc3c8f6f9fc
+	github.com/ProjectAthenaa/fasttls v0.0.0-20210823071241-6317f7bb5a29
 	github.com/arsmn/fastgql v0.14.0
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/gin-gonic/gin v1.7.4
@@ -51,7 +51,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/graphql-go/graphql v0.7.10-0.20210411022516-8a92e977c10b // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/klauspost/compress v1.12.2 // indirect
+	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
