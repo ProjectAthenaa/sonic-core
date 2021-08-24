@@ -97,10 +97,8 @@ const DefaultDeviceType = DeviceTypeUnknown
 // DeviceType values.
 const (
 	DeviceTypeUnknown DeviceType = "Unknown"
-	DeviceTypePhone   DeviceType = "Phone"
-	DeviceTypeTablet  DeviceType = "Tablet"
-	DeviceTypePC      DeviceType = "PC"
-	DeviceTypeLaptop  DeviceType = "Laptop"
+	DeviceTypeMobile  DeviceType = "Mobile"
+	DeviceTypeDesktop DeviceType = "Desktop"
 )
 
 func (_devicetype DeviceType) String() string {
@@ -110,7 +108,7 @@ func (_devicetype DeviceType) String() string {
 // DeviceTypeValidator is a validator for the "DeviceType" field enum values. It is called by the builders before save.
 func DeviceTypeValidator(_devicetype DeviceType) error {
 	switch _devicetype {
-	case DeviceTypeUnknown, DeviceTypePhone, DeviceTypeTablet, DeviceTypePC, DeviceTypeLaptop:
+	case DeviceTypeUnknown, DeviceTypeMobile, DeviceTypeDesktop:
 		return nil
 	default:
 		return fmt.Errorf("session: invalid enum value for DeviceType field: %q", _devicetype)

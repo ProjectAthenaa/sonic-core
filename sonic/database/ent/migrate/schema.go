@@ -317,7 +317,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "device_name", Type: field.TypeString, Default: "Unknown"},
 		{Name: "os", Type: field.TypeString, Default: "Unknown"},
-		{Name: "device_type", Type: field.TypeEnum, Enums: []string{"Unknown", "Phone", "Tablet", "PC", "Laptop"}, Default: "Unknown"},
+		{Name: "device_type", Type: field.TypeEnum, Enums: []string{"Unknown", "Mobile", "Desktop"}, Default: "Unknown"},
 		{Name: "ip", Type: field.TypeString, Default: "Unknown"},
 		{Name: "expired", Type: field.TypeBool, Default: false},
 		{Name: "user_sessions", Type: field.TypeUUID, Nullable: true},

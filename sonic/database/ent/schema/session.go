@@ -25,7 +25,7 @@ func (Session) Fields() []ent.Field {
 		field.String("OS").
 			Default("Unknown"),
 		field.Enum("DeviceType").
-			Values("Unknown", "Phone", "Tablet", "PC", "Laptop").
+			Values("Unknown", "Mobile", "Desktop").
 			Default("Unknown"),
 		field.String("IP").Default("Unknown"),
 		field.Bool("Expired").Default(false),
