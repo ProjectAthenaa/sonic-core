@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -133,6 +134,13 @@ func CheckoutDelay(v int32) predicate.Settings {
 func ATCDelay(v int32) predicate.Settings {
 	return predicate.Settings(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldATCDelay), v))
+	})
+}
+
+// CaptchaDetails applies equality check predicate on the "CaptchaDetails" field. It's identical to CaptchaDetailsEQ.
+func CaptchaDetails(v sonic.Map) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCaptchaDetails), v))
 	})
 }
 
@@ -707,6 +715,82 @@ func CaptchaSolverNotIn(vs ...CaptchaSolver) predicate.Settings {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldCaptchaSolver), v...))
+	})
+}
+
+// CaptchaDetailsEQ applies the EQ predicate on the "CaptchaDetails" field.
+func CaptchaDetailsEQ(v sonic.Map) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCaptchaDetails), v))
+	})
+}
+
+// CaptchaDetailsNEQ applies the NEQ predicate on the "CaptchaDetails" field.
+func CaptchaDetailsNEQ(v sonic.Map) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCaptchaDetails), v))
+	})
+}
+
+// CaptchaDetailsIn applies the In predicate on the "CaptchaDetails" field.
+func CaptchaDetailsIn(vs ...sonic.Map) predicate.Settings {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Settings(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCaptchaDetails), v...))
+	})
+}
+
+// CaptchaDetailsNotIn applies the NotIn predicate on the "CaptchaDetails" field.
+func CaptchaDetailsNotIn(vs ...sonic.Map) predicate.Settings {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Settings(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCaptchaDetails), v...))
+	})
+}
+
+// CaptchaDetailsGT applies the GT predicate on the "CaptchaDetails" field.
+func CaptchaDetailsGT(v sonic.Map) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCaptchaDetails), v))
+	})
+}
+
+// CaptchaDetailsGTE applies the GTE predicate on the "CaptchaDetails" field.
+func CaptchaDetailsGTE(v sonic.Map) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCaptchaDetails), v))
+	})
+}
+
+// CaptchaDetailsLT applies the LT predicate on the "CaptchaDetails" field.
+func CaptchaDetailsLT(v sonic.Map) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCaptchaDetails), v))
+	})
+}
+
+// CaptchaDetailsLTE applies the LTE predicate on the "CaptchaDetails" field.
+func CaptchaDetailsLTE(v sonic.Map) predicate.Settings {
+	return predicate.Settings(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCaptchaDetails), v))
 	})
 }
 

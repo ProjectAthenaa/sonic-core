@@ -328,7 +328,7 @@ func (su *SettingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.CaptchaDetails(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeOther,
 			Value:  value,
 			Column: settings.FieldCaptchaDetails,
 		})
@@ -708,7 +708,7 @@ func (suo *SettingsUpdateOne) sqlSave(ctx context.Context) (_node *Settings, err
 	}
 	if value, ok := suo.mutation.CaptchaDetails(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeOther,
 			Value:  value,
 			Column: settings.FieldCaptchaDetails,
 		})

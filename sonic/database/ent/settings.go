@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -148,10 +147,8 @@ func (s *Settings) assignValues(columns []string, values []interface{}) error {
 		case settings.FieldCaptchaDetails:
 			if value, ok := values[i].(*sonic.Map); !ok {
 				return fmt.Errorf("unexpected type %T for field CaptchaDetails", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &s.CaptchaDetails); err != nil {
-					return fmt.Errorf("unmarshal field CaptchaDetails: %w", err)
-				}
+			} else if value != nil {
+				s.CaptchaDetails = *value
 			}
 		case settings.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {

@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
@@ -31,7 +32,7 @@ func (Settings) Fields() []ent.Field {
 		field.Enum("CaptchaSolver").
 			Values("AYCD_Autosolve", "2Captcha", "CapMonster", "Harvester", "Disabled").
 			Default("Disabled"),
-		field.JSON("CaptchaDetails", sonic.Map{}).SchemaType(sonic.Map{}),
+		field.Other("CaptchaDetails", sonic.Map{}).SchemaType(map[string]string{dialect.Postgres: "bytea"}),
 	}
 }
 

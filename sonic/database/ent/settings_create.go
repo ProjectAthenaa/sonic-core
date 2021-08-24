@@ -373,7 +373,7 @@ func (sc *SettingsCreate) createSpec() (*Settings, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := sc.mutation.CaptchaDetails(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
+			Type:   field.TypeOther,
 			Value:  value,
 			Column: settings.FieldCaptchaDetails,
 		})

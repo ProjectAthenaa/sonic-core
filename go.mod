@@ -7,6 +7,7 @@ require (
 	entgo.io/ent v0.9.1
 	github.com/99designs/gqlgen v0.13.0
 	github.com/ProjectAthenaa/fasttls v0.0.0-20210822190030-8bc3c8f6f9fc
+	github.com/Z-M-Huang/gqlgen-scalar v0.0.0-20210221012440-e92e7a134366 // indirect
 	github.com/arsmn/fastgql v0.14.0
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/gin-gonic/gin v1.7.4

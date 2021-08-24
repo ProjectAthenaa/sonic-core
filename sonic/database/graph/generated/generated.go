@@ -1714,6 +1714,7 @@ input AccountGroupInput{
     Accounts: Map!
 }
 
+
 extend type Query {
     getAllAccountGroups: [AccountGroup!]
 }

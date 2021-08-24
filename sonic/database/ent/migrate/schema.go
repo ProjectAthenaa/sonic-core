@@ -346,7 +346,7 @@ var (
 		{Name: "checkout_delay", Type: field.TypeInt32, Default: 0},
 		{Name: "atc_delay", Type: field.TypeInt32, Default: 0},
 		{Name: "captcha_solver", Type: field.TypeEnum, Enums: []string{"AYCD_Autosolve", "2Captcha", "CapMonster", "Harvester", "Disabled"}, Default: "Disabled"},
-		{Name: "captcha_details", Type: field.TypeJSON},
+		{Name: "captcha_details", Type: field.TypeOther, SchemaType: map[string]string{"postgres": "bytea"}},
 		{Name: "app_settings", Type: field.TypeUUID, Nullable: true},
 	}
 	// SettingsTable holds the schema information for the "settings" table.
