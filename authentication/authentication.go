@@ -59,6 +59,8 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 
 	return func() gin.HandlerFunc {
 		return func(c *gin.Context) {
+			log.Info(c.Request.RemoteAddr)
+			//log.Info(c.Request.)
 			ip := c.Request.Header.Get("cf-connecting-ip")
 			ctx := context.WithValue(c.Request.Context(), "IP", ip)
 			ctx = context.WithValue(ctx, "Location", c.Request.Header.Get("cf-ipcountry"))
