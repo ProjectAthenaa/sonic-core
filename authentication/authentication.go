@@ -59,7 +59,8 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 
 	return func() gin.HandlerFunc {
 		return func(c *gin.Context) {
-			ctx := context.WithValue(c.Request.Context(), "IP", c.Request.Header.Get("x-original-forwarded-for"))
+			ip := c.Request.Header.Get("x-original-forwarded-for")
+			ctx := context.WithValue(c.Request.Context(), "IP", ip)
 			ctx = context.WithValue(ctx, "Location", c.Request.Header.Get("cf-ipcountry"))
 			span := sentry.StartSpan(c.Request.Context(), "Authentication Middleware", sentry.TransactionName("Authentication"))
 			defer span.Finish()
@@ -86,34 +87,34 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 						sessionID = strings.Split(headerSession, "Bearer ")[1]
 					}
 				}
-					log.Info("Retrieved session from headers")
+				log.Info("Retrieved session from headers")
 
-					user, err := extractTokensGin(base, c, sessionID)
-					if err != nil {
-						ctx = context.WithValue(ctx, "error", unauthorizedError)
-						goto setRequestContext
-					}
-					log.Info("Extracted user from session")
-
-					if user.IP != c.Request.Header.Get("x-original-forwarded-for") {
-						ctx = context.WithValue(ctx, "error", ipDoesNotMatchSessionError)
-						goto setRequestContext
-					}
-					log.Info("Passed ip check")
-
-					ctx = context.WithValue(ctx, "userID", user.UserID)
-					ctx = context.WithValue(ctx, "discordID", user.DiscordID)
-					log.Info("Added everything to context")
+				user, err := extractTokensGin(base, c, sessionID)
+				if err != nil {
+					ctx = context.WithValue(ctx, "error", unauthorizedError)
 					goto setRequestContext
 				}
+				log.Info("Extracted user from session")
 
-				//if sessionCallback != nil {
-				//	ctx, err = sessionCallback(ctx, sessionID)
-				//	if err != nil {
-				//		ctx = context.WithValue(ctx, "error", err)
-				//		goto setRequestContext
-				//	}
-				//}
+				if user.IP != ip {
+					ctx = context.WithValue(ctx, "error", ipDoesNotMatchSessionError)
+					goto setRequestContext
+				}
+				log.Info("Passed ip check")
+
+				ctx = context.WithValue(ctx, "userID", user.UserID)
+				ctx = context.WithValue(ctx, "discordID", user.DiscordID)
+				log.Info("Added everything to context")
+				goto setRequestContext
+			}
+
+			//if sessionCallback != nil {
+			//	ctx, err = sessionCallback(ctx, sessionID)
+			//	if err != nil {
+			//		ctx = context.WithValue(ctx, "error", err)
+			//		goto setRequestContext
+			//	}
+			//}
 
 		setRequestContext:
 			c.Request = c.Request.WithContext(ctx)
