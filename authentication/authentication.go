@@ -65,21 +65,18 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 			span := sentry.StartSpan(c.Request.Context(), "Authentication Middleware", sentry.TransactionName("Authentication"))
 			defer span.Finish()
 			if strings.Contains(c.Request.URL.Path, graphEndpoint) {
-				log.Info("Entered if statement")
 				var body []byte
 				c.Request.Body, body = sonic.NopCloserBody(c.Request.Body)
 				//check if body contains no auth resolver
 				if contains(string(body), noAuthResolverNames...) {
 					goto setRequestContext
 				}
-				log.Info("Passed auth resolver exclusion check")
 
 				sessionID, err := c.Cookie("session_id")
 				if err != nil && err != http.ErrNoCookie {
 					ctx = context.WithValue(ctx, "error", unauthorizedError)
 					goto setRequestContext
 				}
-				log.Info("Retrieved session is from cookies")
 
 				if sessionID == "" {
 					headerSession := c.GetHeader("Authorization")
@@ -87,7 +84,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 						sessionID = strings.Split(headerSession, "Bearer ")[1]
 					}
 				}
-				log.Info("Retrieved session from headers")
 
 				user, err := extractTokensGin(base, c, sessionID)
 				if err != nil {
@@ -95,20 +91,14 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 					ctx = context.WithValue(ctx, "error", unauthorizedError)
 					goto setRequestContext
 				}
-				log.Info("Extracted user from session")
-
-				log.Info(user.IP + " " + ip)
-				log.Info(user.IP == ip)
 
 				if user.IP != ip {
 					ctx = context.WithValue(ctx, "error", ipDoesNotMatchSessionError)
 					goto setRequestContext
 				}
-				log.Info("Passed ip check")
 
 				ctx = context.WithValue(ctx, "userID", user.UserID)
 				ctx = context.WithValue(ctx, "discordID", user.DiscordID)
-				log.Info("Added everything to context")
 				goto setRequestContext
 			}
 
