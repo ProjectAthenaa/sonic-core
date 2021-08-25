@@ -84,6 +84,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 					if strings.Contains(headerSession, "Bearer") {
 						sessionID = strings.Split(headerSession, "Bearer ")[1]
 					}
+				}
 					//log.Info("Retrieved session from headers")
 
 					user, err := extractTokensGin(base, c, sessionID)
@@ -113,7 +114,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 				//		goto setRequestContext
 				//	}
 				//}
-			}
 
 		setRequestContext:
 			c.Request = c.Request.WithContext(ctx)

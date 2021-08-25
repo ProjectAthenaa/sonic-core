@@ -3,7 +3,7 @@ package base
 import (
 	"context"
 	"fmt"
-	"github.com/ProjectAthenaa/fasttls"
+	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	module "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"

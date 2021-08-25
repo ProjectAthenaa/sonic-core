@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
@@ -72,6 +73,10 @@ func Execute() {
 
 	key := "ATH-" + uuid.NewString()
 
+	if l, _ := u.QueryLicense().First(context.Background()); l != nil{
+		client.License.DeleteOne(l).Exec(context.Background())
+	}
+
 	lic, err := client.
 		License.
 		Create().
@@ -107,11 +112,10 @@ func Execute() {
 		log.Fatal(err)
 	}
 
-	_, err = client.Settings.Create().SetApp(app).Save(context.Background())
+	_, err = client.Settings.Create().SetCaptchaDetails(sonic.Map{}).SetApp(app).Save(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Printf("User has been created\nID: %s\nKey: %s\n", u.ID.String(), lic.Key)
-
 }
