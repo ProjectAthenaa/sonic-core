@@ -96,6 +96,9 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 				}
 				log.Info("Extracted user from session")
 
+				log.Info(user.IP, ip)
+				log.Info(user.IP == ip)
+
 				if user.IP != ip {
 					ctx = context.WithValue(ctx, "error", ipDoesNotMatchSessionError)
 					goto setRequestContext
