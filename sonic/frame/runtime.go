@@ -13,9 +13,8 @@ import (
 	"time"
 )
 
-var _ = startRuntimeStats()
 
-func startRuntimeStats() error {
+func StartRuntimeStats() error {
 	log.Info("Initializing runtime info streams")
 	ctx, cancel := context.WithCancel(context.Background())
 
