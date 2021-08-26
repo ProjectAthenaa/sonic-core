@@ -48,7 +48,7 @@ func startRuntimeStats() {
 
 	podType := os.Getenv("POD_TYPE")
 
-	Base.GetRedis("cache").Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), -1)
+	log.Info(Base.GetRedis("cache").Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), -1).Result())
 
 	go func() {
 		var m runtime.MemStats
