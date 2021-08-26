@@ -5,4 +5,4 @@ type stats struct {
 }
 
 //monitor container stats
-var Statics = &stats{}
+var Statistics = &stats{}
