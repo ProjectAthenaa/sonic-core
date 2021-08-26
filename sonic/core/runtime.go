@@ -16,6 +16,13 @@ import (
 
 var json = jsoniter.ConfigFastest
 
+
+type RuntimeStats struct {
+	TasksRunning     int32  `json:"tasks_running"`
+	MemoryAllocation string `json:"memory_allocation"`
+	Goroutines       int    `json:"goroutines"`
+}
+
 func startRuntimeStats() {
 	log.Info("Initializing runtime info streams")
 	ctx, cancel := context.WithCancel(context.Background())
@@ -39,11 +46,6 @@ func startRuntimeStats() {
 
 	podType := os.Getenv("POD_TYPE")
 
-	type RuntimeStats struct {
-		TasksRunning     int32  `json:"tasks_running"`
-		MemoryAllocation string `json:"memory_allocation"`
-		Goroutines       int    `json:"goroutines"`
-	}
 
 	go func() {
 		var m runtime.MemStats
