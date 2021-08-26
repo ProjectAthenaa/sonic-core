@@ -8,17 +8,12 @@ import (
 )
 
 var (
-	coreInit int
 	Base = &frame.CoreContext{}
 )
 
 
 
 func init() {
-	coreInit = 1
-	defer func() {
-		coreInit = 0
-	}()
 	log.Infoln("start connect core databases")
 
 	//pgql

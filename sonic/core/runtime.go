@@ -26,9 +26,9 @@ type RuntimeStats struct {
 }
 
 func startRuntimeStats() {
-	for coreInit != 0{
+	opts, _ := redis.ParseURL(os.Getenv("REDIS_URL"))
 
-	}
+	rdb := redis.NewClient(opts)
 
 	log.Info("Initializing runtime info streams")
 	ctx, cancel := context.WithCancel(context.Background())
@@ -38,7 +38,7 @@ func startRuntimeStats() {
 		defer close(c)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
-		Base.GetRedis("cache").Del(context.Background(), fmt.Sprintf("runtime:channels:%s", os.Getenv("POD_NAME")))
+		rdb.Del(context.Background(), fmt.Sprintf("runtime:channels:%s", os.Getenv("POD_NAME")))
 		cancel()
 	}()
 
@@ -53,7 +53,7 @@ func startRuntimeStats() {
 
 	podType := os.Getenv("POD_TYPE")
 
-	Base.GetRedis("cache").Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), redis.KeepTTL)
+	rdb.Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), redis.KeepTTL)
 
 	go func() {
 		var m runtime.MemStats
@@ -71,7 +71,7 @@ func startRuntimeStats() {
 
 			data, _ := json.Marshal(&stats)
 
-			Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s", deploymentName, podName), data)
+			rdb.Publish(ctx, fmt.Sprintf("runtime:%s:%s", deploymentName, podName), data)
 		}
 	}()
 
