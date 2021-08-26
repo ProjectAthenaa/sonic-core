@@ -91,9 +91,17 @@ outer:
 			case "STOP":
 				return tk.Stop()
 			case "PAUSE":
-				return tk.Pause()
+				if err = tk.Pause(); err != nil {
+					log.Error("calling pause: ", err)
+					return tk.Stop()
+				}
+				continue
 			case "CONTINUE":
-				return tk.Continue()
+				if err = tk.Continue(); err != nil {
+					log.Error("calling continue: ", err)
+					return tk.Stop()
+				}
+				continue
 			}
 		case <-tk.Ctx.Done():
 		case <-tk._runningChan:
