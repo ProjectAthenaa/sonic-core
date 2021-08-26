@@ -134,6 +134,7 @@ func (tk *BTask) Start(data *module.Data) error {
 	}
 	tk.startTime = time.Now()
 
+	go tk.Listen()
 	go tk.Callback.OnStarting()
 	tk.SetStatus(module.STATUS_STARTING, "")
 
