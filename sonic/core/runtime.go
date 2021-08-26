@@ -6,7 +6,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/go-redis/redis/v8"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/prometheus/common/log"
 	"os"
 	"os/signal"
 	"runtime"
@@ -32,7 +31,6 @@ func startRuntimeStats() {
 	}
 	rdb := redis.NewClient(opts)
 
-	log.Info("Initializing runtime info streams")
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
@@ -45,19 +43,14 @@ func startRuntimeStats() {
 	}()
 
 	podName := os.Getenv("POD_NAME")
-	log.Info("pod name: ", podName)
-	//if podName == "" {
-	//	log.Info("closing now")
-	//	cancel()
-	//	return
-	//}
+	if podName == "" {
+		cancel()
+		return
+	}
 
 	deploymentName := strings.Split(podName, "-")[0]
 
-	log.Info(rdb.Ping(context.Background()))
-
 	rdb.Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), redis.KeepTTL)
-	log.Info("SET CHANNEL EXISTENCE")
 	podType := os.Getenv("POD_TYPE")
 
 	go func() {
