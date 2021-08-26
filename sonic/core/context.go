@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent"
-	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/go-redis/redis/v8"
 	"sync"
 )
@@ -26,7 +25,13 @@ func (c *CoreContext) NewRedis(name string, dsn string) (redis.UniversalClient, 
 	if _, ok := c.store.Load(name); ok {
 		return nil, errKeyExists
 	}
-	rds := frame.ConnectRedis(dsn)
+
+	opts, err := redis.ParseURL(dsn)
+	if err != nil {
+		return nil, errNotConnect
+	}
+
+	rds := redis.NewClient(opts)
 	if rds == nil {
 		return nil, errNotConnect
 	}
