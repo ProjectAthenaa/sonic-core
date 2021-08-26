@@ -243,6 +243,10 @@ func (sc *SettingsCreate) defaults() {
 		v := settings.DefaultCaptchaSolver
 		sc.mutation.SetCaptchaSolver(v)
 	}
+	if _, ok := sc.mutation.CaptchaDetails(); !ok {
+		v := settings.DefaultCaptchaDetails
+		sc.mutation.SetCaptchaDetails(v)
+	}
 	if _, ok := sc.mutation.ID(); !ok {
 		v := settings.DefaultID()
 		sc.mutation.SetID(v)

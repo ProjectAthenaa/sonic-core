@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
+	"github.com/hedwigz/entviz"
 	"entgo.io/contrib/entgql"
 )
 
@@ -16,7 +17,7 @@ func main() {
 		log.Fatalf("creating entgql extension: %v", err)
 	}
 	opts := []entc.Option{
-		entc.Extensions(ex),
+		entc.Extensions(ex, entviz.Extension{}),
 	}
 	if err := entc.Generate("./schema", &gen.Config{}, opts...); err != nil {
 		log.Fatalf("running ent codegen: %v", err)
