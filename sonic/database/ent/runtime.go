@@ -5,7 +5,6 @@ package ent
 import (
 	"time"
 
-	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/address"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
@@ -366,10 +365,6 @@ func init() {
 	settingsDescATCDelay := settingsFields[6].Descriptor()
 	// settings.DefaultATCDelay holds the default value on creation for the ATCDelay field.
 	settings.DefaultATCDelay = settingsDescATCDelay.Default.(int32)
-	// settingsDescCaptchaDetails is the schema descriptor for CaptchaDetails field.
-	settingsDescCaptchaDetails := settingsFields[8].Descriptor()
-	// settings.DefaultCaptchaDetails holds the default value on creation for the CaptchaDetails field.
-	settings.DefaultCaptchaDetails = sonic.Map(settingsDescCaptchaDetails.Default.(other))
 	// settingsDescID is the schema descriptor for id field.
 	settingsDescID := settingsFields[0].Descriptor()
 	// settings.DefaultID holds the default value on creation for the id field.

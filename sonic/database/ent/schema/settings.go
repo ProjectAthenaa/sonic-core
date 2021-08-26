@@ -32,7 +32,7 @@ func (Settings) Fields() []ent.Field {
 		field.Enum("CaptchaSolver").
 			Values("AYCD_Autosolve", "2Captcha", "CapMonster", "Harvester", "Disabled").
 			Default("Disabled"),
-		field.Other("CaptchaDetails", sonic.Map{}).SchemaType(map[string]string{dialect.Postgres: "bytea"}).Default(sonic.Map{}),
+		field.Other("CaptchaDetails", sonic.Map{}).SchemaType(map[string]string{dialect.Postgres: "bytea"}),
 	}
 }
 
