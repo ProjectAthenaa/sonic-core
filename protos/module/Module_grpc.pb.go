@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ModuleClient interface {
-	Task(ctx context.Context, opts ...grpc.CallOption) (Module_TaskClient, error)
+	Task(ctx context.Context, in *Data, opts ...grpc.CallOption) (*StartResponse, error)
 }
 
 type moduleClient struct {
@@ -29,42 +29,20 @@ func NewModuleClient(cc grpc.ClientConnInterface) ModuleClient {
 	return &moduleClient{cc}
 }
 
-func (c *moduleClient) Task(ctx context.Context, opts ...grpc.CallOption) (Module_TaskClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Module_ServiceDesc.Streams[0], "/module.Module/Task", opts...)
+func (c *moduleClient) Task(ctx context.Context, in *Data, opts ...grpc.CallOption) (*StartResponse, error) {
+	out := new(StartResponse)
+	err := c.cc.Invoke(ctx, "/module.Module/Task", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &moduleTaskClient{stream}
-	return x, nil
-}
-
-type Module_TaskClient interface {
-	Send(*Controller) error
-	Recv() (*Status, error)
-	grpc.ClientStream
-}
-
-type moduleTaskClient struct {
-	grpc.ClientStream
-}
-
-func (x *moduleTaskClient) Send(m *Controller) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *moduleTaskClient) Recv() (*Status, error) {
-	m := new(Status)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 // ModuleServer is the server API for Module service.
 // All implementations must embed UnimplementedModuleServer
 // for forward compatibility
 type ModuleServer interface {
-	Task(Module_TaskServer) error
+	Task(context.Context, *Data) (*StartResponse, error)
 	mustEmbedUnimplementedModuleServer()
 }
 
@@ -72,8 +50,8 @@ type ModuleServer interface {
 type UnimplementedModuleServer struct {
 }
 
-func (UnimplementedModuleServer) Task(Module_TaskServer) error {
-	return status.Errorf(codes.Unimplemented, "method Task not implemented")
+func (UnimplementedModuleServer) Task(context.Context, *Data) (*StartResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Task not implemented")
 }
 func (UnimplementedModuleServer) mustEmbedUnimplementedModuleServer() {}
 
@@ -88,30 +66,22 @@ func RegisterModuleServer(s grpc.ServiceRegistrar, srv ModuleServer) {
 	s.RegisterService(&Module_ServiceDesc, srv)
 }
 
-func _Module_Task_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ModuleServer).Task(&moduleTaskServer{stream})
-}
-
-type Module_TaskServer interface {
-	Send(*Status) error
-	Recv() (*Controller, error)
-	grpc.ServerStream
-}
-
-type moduleTaskServer struct {
-	grpc.ServerStream
-}
-
-func (x *moduleTaskServer) Send(m *Status) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *moduleTaskServer) Recv() (*Controller, error) {
-	m := new(Controller)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _Module_Task_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Data)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(ModuleServer).Task(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/module.Module/Task",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).Task(ctx, req.(*Data))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // Module_ServiceDesc is the grpc.ServiceDesc for Module service.
@@ -120,14 +90,12 @@ func (x *moduleTaskServer) Recv() (*Controller, error) {
 var Module_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "module.Module",
 	HandlerType: (*ModuleServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams: []grpc.StreamDesc{
+	Methods: []grpc.MethodDesc{
 		{
-			StreamName:    "Task",
-			Handler:       _Module_Task_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
+			MethodName: "Task",
+			Handler:    _Module_Task_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "Module.proto",
 }

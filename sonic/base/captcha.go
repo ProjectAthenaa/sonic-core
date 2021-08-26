@@ -1,7 +1,7 @@
 package base
 
 import (
-	module "github.com/ProjectAthenaa/sonic-core/protos"
+	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	"github.com/godtoy/autosolve"
 )
 

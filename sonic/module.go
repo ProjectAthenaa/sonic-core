@@ -1,6 +1,8 @@
 package sonic
 
-import module "github.com/ProjectAthenaa/sonic-core/protos"
+import (
+	"github.com/ProjectAthenaa/sonic-core/protos/module"
+)
 
 //Module defines the generic interface, each new module should comply to
 type Module interface {

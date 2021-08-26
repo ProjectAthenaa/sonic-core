@@ -139,8 +139,8 @@ type Task struct {
 	// Types that are assignable to Lookup:
 	//	*Task_Keywords
 	//	*Task_Link
-	Lookup           isTask_Lookup     `protobuf_oneof:"Lookup"`
-	Metadata         map[string]string `protobuf:"bytes,4,rep,name=Metadata,proto3" json:"Metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Lookup   isTask_Lookup     `protobuf_oneof:"Lookup"`
+	Metadata map[string]string `protobuf:"bytes,4,rep,name=Metadata,proto3" json:"Metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	Size             *string           `protobuf:"bytes,5,opt,name=Size,proto3,oneof" json:"Size,omitempty"`
 	ColorWay         *string           `protobuf:"bytes,6,opt,name=ColorWay,proto3,oneof" json:"ColorWay,omitempty"`
 	RedisChannelName string            `protobuf:"bytes,7,opt,name=RedisChannelName,proto3" json:"RedisChannelName,omitempty"`

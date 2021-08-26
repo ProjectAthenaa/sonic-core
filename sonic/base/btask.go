@@ -4,23 +4,22 @@ import (
 	"context"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
-	module "github.com/ProjectAthenaa/sonic-core/protos"
-	"github.com/ProjectAthenaa/sonic-core/sonic"
+	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
-	"github.com/godtoy/autosolve"
-	"github.com/google/uuid"
+	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/prometheus/common/log"
 	"os"
+	"os/signal"
+	"strconv"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 )
 
 type BTask struct {
 	ID       string
-	Frontend module.Module_TaskServer
 	Ctx      context.Context
 	Client   *fasttls.Client
 	Data     *module.Data
@@ -34,18 +33,13 @@ type BTask struct {
 	_cancelFunc        context.CancelFunc
 
 	//props
-	quitChan chan int32
-	running  bool
-	paused   bool
-	stopping bool
-	state    module.STATUS //tag state
-	message  string        //tag more message
-
-	//captcha specific fields
-	autosolveClient   *autosolve.Client
-	autosolveChannels sync.Map
-	siteURL           string
-	siteKey           string
+	quitChan  chan int32
+	running   bool
+	paused    bool
+	stopping  bool
+	state     module.STATUS //tag state
+	message   string        //tag more message
+	startTime time.Time
 
 	//returnFields
 	ReturningFields *returningFields
@@ -59,49 +53,10 @@ type returningFields struct {
 	ProductImage string
 }
 
-func (tk *BTask) Init(server module.Module_TaskServer) {
+func (tk *BTask) Init() {
 	tk.ID = tk.Data.TaskID
-	tk.Frontend = server
 	//add 1 hour timeout, a task cannot consume resources for more than an hour
-	tk.Ctx, tk._cancelFunc = context.WithDeadline(server.Context(), time.Now().Add(time.Hour))
-
-	settings, _ := core.Base.GetPg("pg").
-		Task.
-		Query().
-		Where(
-			task.ID(
-				sonic.UUIDParser(tk.ID),
-			),
-		).
-		QueryTaskGroup().
-		QueryApp().
-		QuerySettings().
-		First(tk.Ctx)
-
-	tk.autosolveClient = autosolve.NewClient(autosolve.Options{ClientId: os.Getenv("AYCD_CLIENT_ID")})
-	tk.autosolveClient.Set(settings.CaptchaDetails["aycd_autosolve_access_token"], settings.CaptchaDetails["aycd_autosolve_api_key"])
-	tk.autosolveChannels = sync.Map{}
-	tk.autosolveClient.Load(tk)
-
-	res, err := tk.autosolveClient.Connect(settings.CaptchaDetails["aycd_autosolve_access_token"], settings.CaptchaDetails["aycd_autosolve_api_key"])
-	if err != nil {
-		tk.SetStatus(module.STATUS_ERROR, "Error Connecting To Autosolve")
-	}
-
-	switch res {
-	case autosolve.InvalidClientId:
-		tk.SetStatus(module.STATUS_ERROR, "Invalid Autosolve Client Key")
-		tk.Stop()
-	case autosolve.InvalidAccessToken:
-		tk.SetStatus(module.STATUS_ERROR, "Invalid Autosolve access token")
-		tk.Stop()
-	case autosolve.InvalidApiKey:
-		tk.SetStatus(module.STATUS_ERROR, "Invalid Autosolve Api Key")
-		tk.Stop()
-	case autosolve.InvalidCredentials:
-		tk.SetStatus(module.STATUS_ERROR, "Invalid Autosolve Credentials")
-		tk.Stop()
-	}
+	tk.Ctx, tk._cancelFunc = context.WithDeadline(context.Background(), time.Now().Add(time.Hour))
 
 	//default padding
 	tk.SetStatus(module.STATUS_PADDING, "")
@@ -113,62 +68,44 @@ func (tk *BTask) Init(server module.Module_TaskServer) {
 
 func (tk *BTask) Listen() error {
 	defer func() {
-		log.Info("task listen broken: ", tk.ID)
+		log.Info("command listener stopped: ", tk.ID)
 	}()
-	updates := tk.commandListener()
+
+	pubSub, err := frame.SubscribeToChannel(fmt.Sprintf("tasks:commands:%s", tk.Data.Channels.CommandsChannel))
+	if err != nil {
+		tk.SetStatus(module.STATUS_ERROR, "error starting command listener")
+		return tk.Stop()
+	}
+
+	defer pubSub.Close()
+
+	processExit := make(chan os.Signal, 1)
+	defer close(processExit)
+	signal.Notify(processExit, os.Interrupt, syscall.SIGTERM)
+
+outer:
 	for {
 		select {
-		case <-tk._runningChan:
-			return tk.Stop()
+		case cmd := <-pubSub.Channel:
+			switch cmd.Payload {
+			case "STOP":
+				return tk.Stop()
+			case "PAUSE":
+				return tk.Pause()
+			case "CONTINUE":
+				return tk.Continue()
+			}
 		case <-tk.Ctx.Done():
+		case <-tk._runningChan:
+			break outer
+		case <-processExit:
 			return tk.Stop()
-		case cmd, ok := <-updates:
-			if !ok {
-				return tk.Stop()
-			}
-			var err error
-			log.Info("task recv command:", tk.ID, cmd, err)
-			if err != nil {
-				//connection break need to stop task
-				return tk.Stop()
-			}
-			if cmd.Command == module.COMMAND_STOP {
-				return tk.Stop()
-			}
-
-			if cmd.Command == module.COMMAND_PAUSE {
-				err = tk.Pause()
-			}
-
-			if cmd.Command == module.COMMAND_CONTINUE {
-				err = tk.Continue()
-			}
-
-			if err != nil {
-				log.Error("error processing command: ", err)
-			}
-			break
+		default:
+			continue
 		}
 	}
-}
 
-func (tk *BTask) commandListener() chan *module.Controller {
-	updates := make(chan *module.Controller)
-	go func() {
-		defer close(updates)
-		for {
-			cmd, err := tk.Frontend.Recv()
-			if err != nil {
-				log.Error("task listen err: ", tk.ID)
-				if tk.Stop() != nil {
-					log.Error("task stop err: ", tk.ID)
-				}
-				break
-			}
-			updates <- cmd
-		}
-	}()
-	return updates
+	return nil
 }
 
 func (tk *BTask) Start(data *module.Data) error {
@@ -195,6 +132,7 @@ func (tk *BTask) Start(data *module.Data) error {
 		Color:        tk.Data.TaskData.Color[0],
 		ProductImage: "",
 	}
+	tk.startTime = time.Now()
 
 	go tk.Callback.OnStarting()
 	tk.SetStatus(module.STATUS_STARTING, "")
@@ -294,9 +232,11 @@ func (tk *BTask) UpdateData(data *module.Data) {
 	tk.Data = data
 }
 
-func (tk *BTask) Process() {
+func (tk *BTask) Process(err ...string) {
+	var payload *module.Status
+
 	if tk.state == module.STATUS_CHECKED_OUT {
-		if err := tk.Frontend.Send(&module.Status{
+		payload = &module.Status{
 			Status: module.STATUS_CHECKED_OUT,
 			Information: map[string]string{
 				"size":         tk.ReturningFields.Size,
@@ -307,12 +247,9 @@ func (tk *BTask) Process() {
 				"message":      tk.message,
 				"running":      fmt.Sprintf("%v", tk.running),
 			},
-		}); err != nil {
-			log.Error("err sending status to frontend: ", err)
 		}
-		return
 	} else if tk.state == module.STATUS_CHECKOUT_DECLINE {
-		if err := tk.Frontend.Send(&module.Status{
+		payload = &module.Status{
 			Status: module.STATUS_CHECKED_OUT,
 			Information: map[string]string{
 				"size":         tk.ReturningFields.Size,
@@ -322,18 +259,24 @@ func (tk *BTask) Process() {
 				"message":      tk.message,
 				"running":      fmt.Sprintf("%v", tk.running),
 			},
-		}); err != nil {
-			log.Error("err sending status to frontend: ", err)
 		}
-		return
+	} else {
+		payload = tk.GetStatus()
 	}
 
-	if err := tk.Frontend.Send(tk.GetStatus()); err != nil {
-		log.Error("err sending status to frontend: ", err)
+	payload.Information["timestamp"] = strconv.Itoa(int(time.Now().Unix()))
+	payload.Information["taskID"] = tk.ID
+	payload.Information["startedAt"] = strconv.Itoa(int(tk.startTime.Unix()))
+
+	if len(err) > 0 {
+		payload.Information["err"] = err[0]
 	}
+
+	data, _ := json.Marshal(&payload)
+
+	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
 
-//TODO make task status
 func (tk *BTask) GetStatus() *module.Status {
 	data := &module.Status{
 		Status: tk.state,
@@ -347,7 +290,7 @@ func (tk *BTask) GetStatus() *module.Status {
 	return data
 }
 
-func (tk *BTask) SetStatus(s module.STATUS, msg string) {
+func (tk *BTask) SetStatus(s module.STATUS, msg string, err ...string) {
 	go func() {
 		tk._statusLocker.Lock()
 		defer tk._statusLocker.Unlock()
@@ -357,7 +300,7 @@ func (tk *BTask) SetStatus(s module.STATUS, msg string) {
 		if msg != "" {
 			tk.message = msg
 		}
-		tk.Process()
+		tk.Process(err...)
 	}()
 }
 
@@ -384,46 +327,13 @@ func (tk *BTask) Restart() {
 	defer tk._statusLocker.Unlock()
 	tk.SetStatus(module.STATUS_RESTARTING, "")
 
-	tk.Init(tk.Frontend)
+	tk.Init()
 	if err := tk.Start(tk.Data); err != nil {
 		log.Error("error starting task", err)
 		tk.SetStatus(module.STATUS_ERROR, "error restarting task")
 		tk.Stop()
 		return
 	}
-}
-
-func (tk *BTask) SetCaptchaDetails(siteURL, siteKey string) {
-	tk.siteKey = siteKey
-	tk.siteURL = siteURL
-}
-
-func (tk *BTask) SolveCaptcha(url string, captchaType CaptchaType, userAgent string, opts ...Opts) (chan autosolve.CaptchaTokenResponse, error) {
-	captchaID := uuid.NewString() + tk.ID
-	var req = autosolve.CaptchaTokenRequest{
-		TaskId:        captchaID,
-		CreatedAt:     time.Now().Unix(),
-		Url:           url,
-		SiteKey:       tk.siteKey,
-		Version:       int(captchaType),
-		Proxy:         tk.FormatProxy()[7:],
-		ProxyRequired: true,
-		UserAgent:     userAgent,
-	}
-
-	if len(opts) > 0 {
-		req.Action = opts[0].ReCaptchaAction
-		req.MinScore = opts[0].ReCaptchaMinScore
-	}
-
-	responseChan := make(chan autosolve.CaptchaTokenResponse)
-
-	if err := tk.autosolveClient.SendTokenRequest(req); err != nil {
-		log.Error("error sending token request: ", err)
-		return nil, err
-	}
-	tk.autosolveChannels.Store(captchaID, responseChan)
-	return responseChan, nil
 }
 
 //#region need override methods by callback

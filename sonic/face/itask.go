@@ -1,6 +1,8 @@
 package face
 
-import module "github.com/ProjectAthenaa/sonic-core/protos"
+import (
+	"github.com/ProjectAthenaa/sonic-core/protos/module"
+)
 
 type ICallback interface {
 	OnInit()
@@ -20,8 +22,8 @@ type ITask interface {
 	Restart()
 
 	GetStatus() *module.Status
-	SetStatus(s module.STATUS, msg string)
-	Process()
+	SetStatus(s module.STATUS, msg string, err ...string)
+	Process(err ...string)
 	QuitChan() chan int32
 	FormatProxy() string
 }

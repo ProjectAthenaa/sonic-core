@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	sonic "github.com/ProjectAthenaa/sonic-core/protos"
+	sonic "github.com/ProjectAthenaa/sonic-core/protos/module"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"

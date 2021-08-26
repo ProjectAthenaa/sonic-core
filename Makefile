@@ -1,8 +1,8 @@
 moduleCompile:
-	protoc --go_out=./protos --go_opt=paths=source_relative --go-grpc_out=./protos --go-grpc_opt=paths=source_relative ./Module.proto
+	cd ./protos && protoc --go_out=./module --go_opt=paths=source_relative --go-grpc_out=./module --go-grpc_opt=paths=source_relative ./Module.proto
 
 monitorCompile:
-	protoc --go_out=./monitors --go_opt=paths=source_relative --go-grpc_out=./monitors --go-grpc_opt=paths=source_relative ./Monitor.proto
+	cd ./protos && protoc --go_out=./monitor --go_opt=paths=source_relative --go-grpc_out=./monitor --go-grpc_opt=paths=source_relative ./Monitor.proto
 
 dbCompile:
 	cd ./sonic/database && go generate .
@@ -11,16 +11,10 @@ compileEnt:
 	set REDIS_URL=rediss://default:n6luoc78ac44pgs0@test-redis-do-user-9223163-0.b.db.ondigitalocean.com:25061 && cd ./sonic/database && go generate ./ent
 
 monitorControllerCompile:
-	protoc --go_out=./monitor_controller --go_opt=paths=source_relative --go-grpc_out=./monitor_controller --go-grpc_opt=paths=source_relative ./MonitorController.proto
-
-authCompile:
-	protoc --go_out=./authentication/protos --go_opt=paths=source_relative --go-grpc_out=./authentication/protos --go-grpc_opt=paths=source_relative ./Authentication.proto
-
-webhookCompile:
-	protoc --go_out=./webhooks --go_opt=paths=source_relative --go-grpc_out=./webhooks --go-grpc_opt=paths=source_relative ./Webhooks.proto
+	cd ./protos && protoc --go_out=./monitorController --go_opt=paths=source_relative --go-grpc_out=./monitorController --go-grpc_opt=paths=source_relative ./MonitorController.proto
 
 shapeCompile:
 	cd sonic/antibots/shape && protoc --go_out=./ --go_opt=paths=source_relative --go-grpc_out=./ --go-grpc_opt=paths=source_relative ./Shape.proto
 
 taskControllerCompile:
-	protoc --go_out=./task_controller --go_opt=paths=source_relative --go-grpc_out=./task_controller --go-grpc_opt=paths=source_relative ./Module.proto ./TasksController.proto
+	cd ./protos && protoc --go_out=./taskController --go_opt=paths=source_relative --go-grpc_out=./taskController --go-grpc_opt=paths=source_relative ./Module.proto ./TasksController.proto

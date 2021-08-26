@@ -2,7 +2,7 @@ package sonic
 
 import (
 	"encoding/json"
-	module "github.com/ProjectAthenaa/sonic-core/protos"
+	"github.com/ProjectAthenaa/sonic-core/protos/module"
 )
 
 //All gRPC acceptable statuses redefined as simple variables instead of unreadable capitalized variables

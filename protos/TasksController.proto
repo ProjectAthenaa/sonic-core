@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package tasks;
+
+import "Module.proto";
+
+option go_package = "main/tasks";
+
+
+service Tasks{
+  rpc Task(StartRequest) returns (StartResponse);
+}
+
+message StartRequest{
+  string TaskID = 2;
+  module.Channels Channels = 3;
+}
+
+message StartResponse{
+  bool Started = 1;
+}

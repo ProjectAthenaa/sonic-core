@@ -4,7 +4,7 @@
 // 	protoc        v3.15.6
 // source: MonitorController.proto
 
-package monitor_controller
+package monitorController
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -85,8 +85,8 @@ type Task struct {
 	//	*Task_Keywords
 	//	*Task_Link
 	//	*Task_Other
-	Lookup       isTask_Lookup     `protobuf_oneof:"Lookup"`
-	RedisChannel string            `protobuf:"bytes,5,opt,name=RedisChannel,proto3" json:"RedisChannel,omitempty"`
+	Lookup       isTask_Lookup `protobuf_oneof:"Lookup"`
+	RedisChannel string        `protobuf:"bytes,5,opt,name=RedisChannel,proto3" json:"RedisChannel,omitempty"`
 	Metadata     map[string]string `protobuf:"bytes,6,rep,name=Metadata,proto3" json:"Metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 

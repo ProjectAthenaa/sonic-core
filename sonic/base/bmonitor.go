@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	monitor "github.com/ProjectAthenaa/sonic-core/monitors"
+	"github.com/ProjectAthenaa/sonic-core/protos/monitor"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/go-redis/redis/v8"
 	"github.com/json-iterator/go"

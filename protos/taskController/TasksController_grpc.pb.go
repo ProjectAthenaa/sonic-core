@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TasksClient interface {
-	Task(ctx context.Context, opts ...grpc.CallOption) (Tasks_TaskClient, error)
+	Task(ctx context.Context, in *StartRequest, opts ...grpc.CallOption) (*StartResponse, error)
 }
 
 type tasksClient struct {
@@ -29,42 +29,20 @@ func NewTasksClient(cc grpc.ClientConnInterface) TasksClient {
 	return &tasksClient{cc}
 }
 
-func (c *tasksClient) Task(ctx context.Context, opts ...grpc.CallOption) (Tasks_TaskClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Tasks_ServiceDesc.Streams[0], "/tasks.Tasks/Task", opts...)
+func (c *tasksClient) Task(ctx context.Context, in *StartRequest, opts ...grpc.CallOption) (*StartResponse, error) {
+	out := new(StartResponse)
+	err := c.cc.Invoke(ctx, "/tasks.Tasks/Task", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &tasksTaskClient{stream}
-	return x, nil
-}
-
-type Tasks_TaskClient interface {
-	Send(*Client) error
-	Recv() (*Status, error)
-	grpc.ClientStream
-}
-
-type tasksTaskClient struct {
-	grpc.ClientStream
-}
-
-func (x *tasksTaskClient) Send(m *Client) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *tasksTaskClient) Recv() (*Status, error) {
-	m := new(Status)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 // TasksServer is the server API for Tasks service.
 // All implementations must embed UnimplementedTasksServer
 // for forward compatibility
 type TasksServer interface {
-	Task(Tasks_TaskServer) error
+	Task(context.Context, *StartRequest) (*StartResponse, error)
 	mustEmbedUnimplementedTasksServer()
 }
 
@@ -72,8 +50,8 @@ type TasksServer interface {
 type UnimplementedTasksServer struct {
 }
 
-func (UnimplementedTasksServer) Task(Tasks_TaskServer) error {
-	return status.Errorf(codes.Unimplemented, "method Task not implemented")
+func (UnimplementedTasksServer) Task(context.Context, *StartRequest) (*StartResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Task not implemented")
 }
 func (UnimplementedTasksServer) mustEmbedUnimplementedTasksServer() {}
 
@@ -88,30 +66,22 @@ func RegisterTasksServer(s grpc.ServiceRegistrar, srv TasksServer) {
 	s.RegisterService(&Tasks_ServiceDesc, srv)
 }
 
-func _Tasks_Task_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(TasksServer).Task(&tasksTaskServer{stream})
-}
-
-type Tasks_TaskServer interface {
-	Send(*Status) error
-	Recv() (*Client, error)
-	grpc.ServerStream
-}
-
-type tasksTaskServer struct {
-	grpc.ServerStream
-}
-
-func (x *tasksTaskServer) Send(m *Status) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *tasksTaskServer) Recv() (*Client, error) {
-	m := new(Client)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _Tasks_Task_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartRequest)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
+	if interceptor == nil {
+		return srv.(TasksServer).Task(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tasks.Tasks/Task",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TasksServer).Task(ctx, req.(*StartRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // Tasks_ServiceDesc is the grpc.ServiceDesc for Tasks service.
@@ -120,14 +90,12 @@ func (x *tasksTaskServer) Recv() (*Client, error) {
 var Tasks_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "tasks.Tasks",
 	HandlerType: (*TasksServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams: []grpc.StreamDesc{
+	Methods: []grpc.MethodDesc{
 		{
-			StreamName:    "Task",
-			Handler:       _Tasks_Task_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
+			MethodName: "Task",
+			Handler:    _Tasks_Task_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "TasksController.proto",
 }
