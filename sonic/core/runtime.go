@@ -1,9 +1,9 @@
-package frame
+package core
 
 import (
 	"context"
 	"fmt"
-	"github.com/ProjectAthenaa/sonic-core/sonic/core"
+	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/prometheus/common/log"
 	"os"
 	"os/signal"
@@ -14,7 +14,7 @@ import (
 )
 
 
-func StartRuntimeStats() error {
+func startRuntimeStats()  {
 	log.Info("Initializing runtime info streams")
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -30,7 +30,7 @@ func StartRuntimeStats() error {
 
 	if podName == "" {
 		cancel()
-		return nil
+		return
 	}
 
 	deploymentName := strings.Split(podName, "-")[0]
@@ -41,19 +41,19 @@ func StartRuntimeStats() error {
 		var m runtime.MemStats
 		for range time.Tick(time.Second) {
 			if podType == "MODULE" {
-				core.Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:tasks", deploymentName, podName), Statistics.Running)
+				Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:tasks", deploymentName, podName), frame.Statistics.Running)
 			}
 
 			runtime.ReadMemStats(&m)
 
-			core.Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:memory_allocation", deploymentName, podName), bToMb(m.Alloc))
+			Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:memory_allocation", deploymentName, podName), bToMb(m.Alloc))
 
 			count := runtime.NumGoroutine() - 2
-			core.Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:goroutines", deploymentName, podName), count)
+			Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:goroutines", deploymentName, podName), count)
 		}
 	}()
 
-	return nil
+	return
 }
 
 func bToMb(b uint64) uint64 {

@@ -1,12 +1,13 @@
 package core
 
 import (
+	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/ProjectAthenaa/sonic-core/sonic/tools"
 	"github.com/prometheus/common/log"
 	"os"
 )
 
-var Base = &CoreContext{}
+var Base = &frame.CoreContext{}
 
 func init() {
 	log.Infoln("start connect core databases")
@@ -26,4 +27,5 @@ func init() {
 	if err != nil {
 		log.Fatalln("redis.connect", rdbURL, err)
 	}
+	startRuntimeStats()
 }
