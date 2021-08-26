@@ -137,7 +137,7 @@ func (tk *BTask) Start(data *module.Data) error {
 	go tk.Callback.OnStarting()
 	tk.SetStatus(module.STATUS_STARTING, "")
 
-	atomic.AddInt32(&Statistics.Running, 1)
+	atomic.AddInt32(&frame.Statistics.Running, 1)
 	return nil
 }
 
@@ -158,7 +158,7 @@ func (tk *BTask) Stop() error {
 	tk.Callback.OnStopping()
 	tk.SetStatus(module.STATUS_STOPPED, "")
 
-	atomic.AddInt32(&Statistics.Running, -1)
+	atomic.AddInt32(&frame.Statistics.Running, -1)
 	return nil
 }
 

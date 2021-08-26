@@ -3,7 +3,6 @@ package frame
 import (
 	"context"
 	"fmt"
-	"github.com/ProjectAthenaa/sonic-core/sonic/base"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/prometheus/common/log"
 	"os"
@@ -41,7 +40,7 @@ func init() {
 		var m runtime.MemStats
 		for range time.Tick(time.Second) {
 			if podType == "MODULE" {
-				core.Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:tasks", deploymentName, podName), base.Statistics.Running)
+				core.Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:tasks", deploymentName, podName), Statistics.Running)
 			}
 
 			runtime.ReadMemStats(&m)

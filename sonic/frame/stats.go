@@ -1,4 +1,4 @@
-package base
+package frame
 
 type stats struct {
 	Running int32 `json:"running"`
