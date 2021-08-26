@@ -56,7 +56,7 @@ func startRuntimeStats() {
 			stats.MemoryAllocation = fmt.Sprintf("%d MBs", bToMb(m.Alloc))
 			stats.Goroutines = runtime.NumGoroutine() - 2
 
-			data, _ := json.Marshal(&m)
+			data, _ := json.Marshal(&stats)
 
 			Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s", deploymentName, podName), data)
 		}
