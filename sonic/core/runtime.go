@@ -43,8 +43,9 @@ func startRuntimeStats() {
 	}()
 
 	podName := os.Getenv("POD_NAME")
-
+	log.Info("pod name: ", podName)
 	if podName == "" {
+		log.Info("closing now")
 		cancel()
 		return
 	}
