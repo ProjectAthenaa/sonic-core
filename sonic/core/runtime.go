@@ -48,7 +48,7 @@ func startRuntimeStats() {
 	go func() {
 		var m runtime.MemStats
 		var stats RuntimeStats
-		for range time.Tick(time.Second) {
+		for range time.Tick(time.Second * 3) {
 			if podType == "MODULE" {
 				stats.TasksRunning = frame.Statistics.Running
 			}
