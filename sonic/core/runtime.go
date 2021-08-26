@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
+	"github.com/go-redis/redis/v8"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/prometheus/common/log"
 	"os"
@@ -25,6 +26,10 @@ type RuntimeStats struct {
 }
 
 func startRuntimeStats() {
+	for coreInit != 0{
+
+	}
+
 	log.Info("Initializing runtime info streams")
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -48,7 +53,7 @@ func startRuntimeStats() {
 
 	podType := os.Getenv("POD_TYPE")
 
-	log.Info(Base.GetRedis("cache").Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), -1).Result())
+	Base.GetRedis("cache").Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), redis.KeepTTL)
 
 	go func() {
 		var m runtime.MemStats
