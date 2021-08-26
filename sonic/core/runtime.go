@@ -33,6 +33,7 @@ func startRuntimeStats() {
 		defer close(c)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
+		Base.GetRedis("cache").Del(context.Background(), fmt.Sprintf("runtime:channels:%s", os.Getenv("POD_NAME")))
 		cancel()
 	}()
 
