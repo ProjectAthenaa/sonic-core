@@ -13,7 +13,9 @@ import (
 	"time"
 )
 
-func init() {
+var _ = startRuntimeStats()
+
+func startRuntimeStats() error {
 	log.Info("Initializing runtime info streams")
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -29,7 +31,7 @@ func init() {
 
 	if podName == "" {
 		cancel()
-		return
+		return nil
 	}
 
 	deploymentName := strings.Split(podName, "-")[0]
@@ -52,6 +54,7 @@ func init() {
 		}
 	}()
 
+	return nil
 }
 
 func bToMb(b uint64) uint64 {
