@@ -369,7 +369,7 @@ func init() {
 	// settingsDescCaptchaDetails is the schema descriptor for CaptchaDetails field.
 	settingsDescCaptchaDetails := settingsFields[8].Descriptor()
 	// settings.DefaultCaptchaDetails holds the default value on creation for the CaptchaDetails field.
-	settings.DefaultCaptchaDetails = sonic.Map(settingsDescCaptchaDetails.Default.(other))
+	settings.DefaultCaptchaDetails = sonic.Map(settingsDescCaptchaDetails.Default.(map[string]string))
 	// settingsDescID is the schema descriptor for id field.
 	settingsDescID := settingsFields[0].Descriptor()
 	// settings.DefaultID holds the default value on creation for the id field.
