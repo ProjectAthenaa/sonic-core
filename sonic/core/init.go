@@ -1,13 +1,12 @@
 package core
 
 import (
-	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/ProjectAthenaa/sonic-core/sonic/tools"
 	"github.com/prometheus/common/log"
 	"os"
 )
 
-var Base = &frame.CoreContext{}
+var Base = &CoreContext{}
 
 func init() {
 	log.Infoln("start connect core databases")
