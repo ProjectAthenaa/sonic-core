@@ -9,6 +9,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/prometheus/common/log"
+	http "github.com/useflyent/fhttp"
 	"os"
 	"os/signal"
 	"strconv"
@@ -19,11 +20,12 @@ import (
 )
 
 type BTask struct {
-	ID       string
-	Ctx      context.Context
-	Client   *fasttls.Client
-	Data     *module.Data
-	Callback face.ICallback
+	ID         string
+	Ctx        context.Context
+	Client     http.Client
+	FastClient *fasttls.Client
+	Data       *module.Data
+	Callback   face.ICallback
 
 	//prv
 	_locker            sync.Mutex

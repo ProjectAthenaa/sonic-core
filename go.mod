@@ -26,6 +26,7 @@ require (
 	github.com/prometheus/common v0.4.0
 	github.com/refraction-networking/utls v0.0.0-20210713165636-0b2885c8c0d4
 	github.com/thoas/go-funk v0.9.0
+	github.com/useflyent/fhttp v0.0.0-20210801005649-f160dd923789
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/valyala/fastrand v1.0.0
 	github.com/valyala/tcplisten v1.0.0
