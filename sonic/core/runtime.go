@@ -16,8 +16,9 @@ import (
 
 var json = jsoniter.ConfigFastest
 
-
 type RuntimeStats struct {
+	Pod              string
+	Deployment       string
 	TasksRunning     int32  `json:"tasks_running"`
 	MemoryAllocation string `json:"memory_allocation"`
 	Goroutines       int    `json:"goroutines"`
@@ -46,10 +47,12 @@ func startRuntimeStats() {
 
 	podType := os.Getenv("POD_TYPE")
 
-
 	go func() {
 		var m runtime.MemStats
-		var stats RuntimeStats
+		var stats = RuntimeStats{
+			Pod:        podName,
+			Deployment: deploymentName,
+		}
 		for range time.Tick(time.Second * 3) {
 			if podType == "MODULE" {
 				stats.TasksRunning = frame.Statistics.Running
