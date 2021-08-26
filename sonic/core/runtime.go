@@ -55,6 +55,7 @@ func startRuntimeStats() {
 	podType := os.Getenv("POD_TYPE")
 
 	rdb.Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), redis.KeepTTL)
+	log.Info("SET CHANNEL EXISTENCE")
 
 	go func() {
 		var m runtime.MemStats
