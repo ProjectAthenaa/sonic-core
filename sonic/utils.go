@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	sonic "github.com/ProjectAthenaa/sonic-core/protos"
 	"github.com/google/uuid"
@@ -104,4 +105,8 @@ func MapConverter(m map[string]interface{}) map[string]string {
 		}
 	}
 	return m2
+}
+
+func EntErr(err error) error  {
+	return errors.New(strings.ReplaceAll(fmt.Sprint(err)[4:], " ", "_"))
 }
