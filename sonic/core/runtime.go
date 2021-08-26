@@ -44,18 +44,18 @@ func startRuntimeStats() {
 
 	podName := os.Getenv("POD_NAME")
 	log.Info("pod name: ", podName)
-	if podName == "" {
-		log.Info("closing now")
-		cancel()
-		return
-	}
+	//if podName == "" {
+	//	log.Info("closing now")
+	//	cancel()
+	//	return
+	//}
 
 	deploymentName := strings.Split(podName, "-")[0]
 
-	podType := os.Getenv("POD_TYPE")
 
 	rdb.Set(context.Background(), fmt.Sprintf("runtime:channels:%s", podName), fmt.Sprintf("%s:%s", deploymentName, podName), redis.KeepTTL)
 	log.Info("SET CHANNEL EXISTENCE")
+	podType := os.Getenv("POD_TYPE")
 
 	go func() {
 		var m runtime.MemStats
