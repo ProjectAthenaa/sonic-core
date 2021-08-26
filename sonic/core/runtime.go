@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/prometheus/common/log"
 	"os"
 	"os/signal"
@@ -13,8 +14,9 @@ import (
 	"time"
 )
 
+var json = jsoniter.ConfigFastest
 
-func startRuntimeStats()  {
+func startRuntimeStats() {
 	log.Info("Initializing runtime info streams")
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -37,19 +39,26 @@ func startRuntimeStats()  {
 
 	podType := os.Getenv("POD_TYPE")
 
+	type RuntimeStats struct {
+		TasksRunning     int32  `json:"tasks_running"`
+		MemoryAllocation string `json:"memory_allocation"`
+		Goroutines       int    `json:"goroutines"`
+	}
+
 	go func() {
 		var m runtime.MemStats
+		var stats RuntimeStats
 		for range time.Tick(time.Second) {
 			if podType == "MODULE" {
-				Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:tasks", deploymentName, podName), frame.Statistics.Running)
+				stats.TasksRunning = frame.Statistics.Running
 			}
-
 			runtime.ReadMemStats(&m)
+			stats.MemoryAllocation = fmt.Sprintf("%d MBs", bToMb(m.Alloc))
+			stats.Goroutines = runtime.NumGoroutine() - 2
 
-			Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:memory_allocation", deploymentName, podName), bToMb(m.Alloc))
+			data, _ := json.Marshal(&m)
 
-			count := runtime.NumGoroutine() - 2
-			Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s:goroutines", deploymentName, podName), count)
+			Base.GetRedis("cache").Publish(ctx, fmt.Sprintf("runtime:%s:%s", deploymentName, podName), data)
 		}
 	}()
 
