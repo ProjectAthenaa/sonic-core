@@ -26,8 +26,10 @@ type RuntimeStats struct {
 }
 
 func startRuntimeStats() {
-	opts, _ := redis.ParseURL("rediss://default:kulqkv6en3um9u09@athena-redis-do-user-9223163-0.b.db.ondigitalocean.com:25061")
-
+	opts, err := redis.ParseURL("rediss://default:kulqkv6en3um9u09@athena-redis-do-user-9223163-0.b.db.ondigitalocean.com:25061")
+	if err != nil{
+		panic(err)
+	}
 	rdb := redis.NewClient(opts)
 
 	log.Info("Initializing runtime info streams")
