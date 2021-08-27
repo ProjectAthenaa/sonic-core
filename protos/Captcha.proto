@@ -26,9 +26,10 @@ message Details{
   float MinScore = 7;
   bool ProxyRequired = 8;
   string Cookies = 9;
-  string UserAgent = 10;
-  map<string, string> RenderParameters = 11;
-  Credentials Credentials = 12;
+  string Proxy = 10;
+  string UserAgent = 11;
+  map<string, string> RenderParameters = 12;
+  Credentials Credentials = 13;
 }
 
 message Token{
