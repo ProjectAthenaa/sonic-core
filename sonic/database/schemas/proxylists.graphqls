@@ -1,5 +1,7 @@
 enum ProxyListType{
-    Test
+    Residential
+    Datacenter
+    ISP
 }
 
 enum ProxyTestStatus{

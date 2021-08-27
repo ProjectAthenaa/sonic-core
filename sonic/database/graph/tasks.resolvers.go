@@ -80,10 +80,6 @@ func (r *taskResolver) ProxyList(ctx context.Context, obj *ent.Task) (*ent.Proxy
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *taskResolver) ProfileGroup(ctx context.Context, obj *ent.Task) (*ent.ProfileGroup, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *taskGroupResolver) ID(ctx context.Context, obj *ent.TaskGroup) (string, error) {
 	panic(fmt.Errorf("not implemented"))
 }
@@ -100,3 +96,13 @@ func (r *Resolver) TaskGroup() generated.TaskGroupResolver { return &taskGroupRe
 type productResolver struct{ *Resolver }
 type taskResolver struct{ *Resolver }
 type taskGroupResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *taskResolver) ProfileGroup(ctx context.Context, obj *ent.Task) (*ent.ProfileGroup, error) {
+	panic(fmt.Errorf("not implemented"))
+}
