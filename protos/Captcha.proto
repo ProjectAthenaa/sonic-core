@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option go_package="github.com/ProjectAthenaa/sonic-core/protos/captcha";
+
+enum CaptchaVersion{
+  ReCaptchaV2Checkbox = 0;
+  ReCaptchaV2Invisible = 1;
+  ReCaptchaV3 = 2;
+  HCaptchaCheckbox = 3;
+  HCaptchaInvisible = 4;
+  GeeTest = 5;
+  ReCaptchaV3Enterprise = 6;
+}
+
+service Captcha{
+  rpc GetToken(Details) returns (stream Token){};
+}
+
+message Details{
+  string TaskID = 1;
+  string ApiKey = 2;
+  int64 CreatedAt = 3;
+  string Url = 4;
+  string SiteKey = 5;
+  int32 Version = 6;
+  CaptchaVersion Action = 7;
+  float MinScore = 8;
+  bool ProxyRequired = 9;
+  string Cookies = 10;
+  map<string, string> RenderParameters = 11;
+}
+
+message Token{
+  string TaskID = 1;
+  string ApiKey = 2;
+  string Token = 3;
+  int64 CreatedAt = 4;
+  Details Details = 12;
+}

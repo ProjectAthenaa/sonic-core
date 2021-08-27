@@ -18,3 +18,6 @@ shapeCompile:
 
 taskControllerCompile:
 	cd ./protos && protoc --go_out=./taskController --go_opt=paths=source_relative --go-grpc_out=./taskController --go-grpc_opt=paths=source_relative ./Module.proto ./TasksController.proto
+
+captchaCompile:
+	cd ./protos && protoc --go_out=./captcha --go_opt=paths=source_relative --go-grpc_out=./captcha --go-grpc_opt=paths=source_relative ./Captcha.proto
