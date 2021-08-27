@@ -21,8 +21,8 @@ message Details{
   int64 CreatedAt = 2;
   string Url = 3;
   string SiteKey = 4;
-  int32 Version = 5;
-  CaptchaVersion Action = 6;
+  CaptchaVersion Version = 5;
+  string Action = 6;
   float MinScore = 7;
   bool ProxyRequired = 8;
   string Cookies = 9;
