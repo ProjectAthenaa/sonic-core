@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package="github.com/ProjectAthenaa/sonic-core/protos/captcha";
+option go_package = "github.com/ProjectAthenaa/sonic-core/protos/captcha";
 
 enum CaptchaVersion{
   ReCaptchaV2Checkbox = 0;
@@ -18,22 +18,26 @@ service Captcha{
 
 message Details{
   string TaskID = 1;
-  string ApiKey = 2;
-  int64 CreatedAt = 3;
-  string Url = 4;
-  string SiteKey = 5;
-  int32 Version = 6;
-  CaptchaVersion Action = 7;
-  float MinScore = 8;
-  bool ProxyRequired = 9;
-  string Cookies = 10;
-  map<string, string> RenderParameters = 11;
+  int64 CreatedAt = 2;
+  string Url = 3;
+  string SiteKey = 4;
+  int32 Version = 5;
+  CaptchaVersion Action = 6;
+  float MinScore = 7;
+  bool ProxyRequired = 8;
+  string Cookies = 9;
+  map<string, string> RenderParameters = 10;
+  Credentials Credentials = 11;
 }
 
 message Token{
   string TaskID = 1;
-  string ApiKey = 2;
   string Token = 3;
   int64 CreatedAt = 4;
-  Details Details = 12;
+//  Credentials Credentials = 5;
+}
+
+message Credentials{
+  string AccessToken = 1;
+  string ApiKey = 2;
 }
