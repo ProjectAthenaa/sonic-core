@@ -77,6 +77,7 @@ func extractTokensGin(base face.ICoreContext, ctx *gin.Context, sessionID string
 		if err != nil {
 			return nil, err
 		}
+		base.GetRedis("cache").Del(ctx, sessionID)
 		return nil, sessionExpiredError
 	}
 
