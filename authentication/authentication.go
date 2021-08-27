@@ -87,7 +87,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 
 				user, err := extractTokensGin(base, c, sessionID)
 				if err != nil {
-					log.Error(err)
+					log.Error(err, sessionID)
 					ctx = context.WithValue(ctx, "error", unauthorizedError)
 					goto setRequestContext
 				}
