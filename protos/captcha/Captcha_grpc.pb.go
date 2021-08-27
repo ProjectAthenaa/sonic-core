@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CaptchaClient interface {
-	GetToken(ctx context.Context, in *Details, opts ...grpc.CallOption) (Captcha_GetTokenClient, error)
+	GetToken(ctx context.Context, in *Details, opts ...grpc.CallOption) (*Token, error)
 }
 
 type captchaClient struct {
@@ -29,43 +29,20 @@ func NewCaptchaClient(cc grpc.ClientConnInterface) CaptchaClient {
 	return &captchaClient{cc}
 }
 
-func (c *captchaClient) GetToken(ctx context.Context, in *Details, opts ...grpc.CallOption) (Captcha_GetTokenClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Captcha_ServiceDesc.Streams[0], "/Captcha/GetToken", opts...)
+func (c *captchaClient) GetToken(ctx context.Context, in *Details, opts ...grpc.CallOption) (*Token, error) {
+	out := new(Token)
+	err := c.cc.Invoke(ctx, "/Captcha/GetToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &captchaGetTokenClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Captcha_GetTokenClient interface {
-	Recv() (*Token, error)
-	grpc.ClientStream
-}
-
-type captchaGetTokenClient struct {
-	grpc.ClientStream
-}
-
-func (x *captchaGetTokenClient) Recv() (*Token, error) {
-	m := new(Token)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 // CaptchaServer is the server API for Captcha service.
 // All implementations must embed UnimplementedCaptchaServer
 // for forward compatibility
 type CaptchaServer interface {
-	GetToken(*Details, Captcha_GetTokenServer) error
+	GetToken(context.Context, *Details) (*Token, error)
 	mustEmbedUnimplementedCaptchaServer()
 }
 
@@ -73,8 +50,8 @@ type CaptchaServer interface {
 type UnimplementedCaptchaServer struct {
 }
 
-func (UnimplementedCaptchaServer) GetToken(*Details, Captcha_GetTokenServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetToken not implemented")
+func (UnimplementedCaptchaServer) GetToken(context.Context, *Details) (*Token, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetToken not implemented")
 }
 func (UnimplementedCaptchaServer) mustEmbedUnimplementedCaptchaServer() {}
 
@@ -89,25 +66,22 @@ func RegisterCaptchaServer(s grpc.ServiceRegistrar, srv CaptchaServer) {
 	s.RegisterService(&Captcha_ServiceDesc, srv)
 }
 
-func _Captcha_GetToken_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Details)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _Captcha_GetToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Details)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(CaptchaServer).GetToken(m, &captchaGetTokenServer{stream})
-}
-
-type Captcha_GetTokenServer interface {
-	Send(*Token) error
-	grpc.ServerStream
-}
-
-type captchaGetTokenServer struct {
-	grpc.ServerStream
-}
-
-func (x *captchaGetTokenServer) Send(m *Token) error {
-	return x.ServerStream.SendMsg(m)
+	if interceptor == nil {
+		return srv.(CaptchaServer).GetToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Captcha/GetToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CaptchaServer).GetToken(ctx, req.(*Details))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // Captcha_ServiceDesc is the grpc.ServiceDesc for Captcha service.
@@ -116,13 +90,12 @@ func (x *captchaGetTokenServer) Send(m *Token) error {
 var Captcha_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "Captcha",
 	HandlerType: (*CaptchaServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams: []grpc.StreamDesc{
+	Methods: []grpc.MethodDesc{
 		{
-			StreamName:    "GetToken",
-			Handler:       _Captcha_GetToken_Handler,
-			ServerStreams: true,
+			MethodName: "GetToken",
+			Handler:    _Captcha_GetToken_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "Captcha.proto",
 }

@@ -13,7 +13,7 @@ enum CaptchaVersion{
 }
 
 service Captcha{
-  rpc GetToken(Details) returns (stream Token){};
+  rpc GetToken(Details) returns (Token){};
 }
 
 message Details{
