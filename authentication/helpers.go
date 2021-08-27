@@ -98,6 +98,7 @@ type CachedUser struct {
 	LastRefresh time.Time `json:"last_refresh"`
 	HardwareID  string    `json:"hardware_id"`
 	IP          string    `json:"ip"`
+	Mobile      bool      `json:"mobile"`
 }
 
 type GraphQLError struct {
