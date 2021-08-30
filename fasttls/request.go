@@ -97,20 +97,33 @@ func checkIfHttp2IsSupported(requestObj *Request) {
 }
 
 func (c *Client) setupDialer(requestObj *Request, hc *fasthttp.HostClient) {
+	cacheKey := "localhost"
+	if requestObj.Proxy != nil {
+		cacheKey = *requestObj.Proxy
+	}
+	if requestObj.ServerName != "" {
+		cacheKey += "-" + requestObj.ServerName
+	} else {
+		cacheKey += "-" + requestObj.parsedURL.Host
+	}
+	if requestObj.UseHttp2 {
+		cacheKey += "-http2"
+	}
 	if requestObj.UseHttp2 {
 		if requestObj.Proxy != nil {
-			if v, ok := connections.Load(*requestObj.Proxy); ok {
+			if v, ok := connections.Load(cacheKey); ok {
 				hc.Dial = v.(fasthttp.DialFunc)
 				return
 			}
 			hc.Dial = CustomDialHttp2WithProxy(c.helloID, *requestObj.Proxy, requestObj.ServerName, requestObj.SSLCertVerifyCallback, 30*time.Second)
+			connections.Store(cacheKey, hc.Dial)
 		} else {
-			if v, ok := connections.Load("localhost"); ok {
+			if v, ok := connections.Load(cacheKey); ok {
 				hc.Dial = v.(fasthttp.DialFunc)
 				return
 			}
 			hc.Dial = CustomDialHttp2(c.helloID, requestObj.ServerName, requestObj.SSLCertVerifyCallback)
-			connections.Store("localhost", hc.Dial)
+			connections.Store(cacheKey, hc.Dial)
 		}
 	} else {
 		if requestObj.Proxy != nil {
@@ -119,8 +132,30 @@ func (c *Client) setupDialer(requestObj *Request, hc *fasthttp.HostClient) {
 				return
 			}
 			hc.Dial = fasthttpproxy.FasthttpHTTPDialer(*requestObj.Proxy)
-			connections.Store(*requestObj.Proxy, hc.Dial)
+			connections.Store(cacheKey, hc.Dial)
 		}
+	}
+}
+
+func setRequestPseudoHeaders(req *fasthttp.Request, headers Headers) {
+	if pKeyOrder, ok := headers[PseudoHeaderOrderKey]; ok {
+		for _, key := range pKeyOrder {
+			switch key {
+			case PseudoAuthority:
+				req.Header.Set(key, string(req.URI().Host()))
+			case PseudoMethod:
+				req.Header.Set(key, string(req.Header.Method()))
+			case PseudoPath:
+				req.Header.Set(key, string(req.URI().RequestURI()))
+			case PseudoScheme:
+				req.Header.Set(key, string(req.URI().Scheme()))
+			}
+		}
+	} else {
+		req.Header.Set(PseudoAuthority, string(req.URI().Host()))
+		req.Header.Set(PseudoMethod, string(req.Header.Method()))
+		req.Header.Set(PseudoPath, string(req.URI().RequestURI()))
+		req.Header.Set(PseudoScheme, string(req.URI().Scheme()))
 	}
 }
 
@@ -131,6 +166,11 @@ func setupRequest(req *fasthttp.Request, requestObj *Request) {
 	if requestObj.ServerName != "" {
 		req.SetHost(requestObj.ServerName)
 	}
+
+	if requestObj.UseHttp2 {
+		setRequestPseudoHeaders(req, requestObj.Headers)
+	}
+
 	if requestObj.Headers != nil {
 		setRequestHeaders(req, requestObj.Headers)
 	}

@@ -439,6 +439,11 @@ func (c *Conn) writeRequest(req *fasthttp.Request) (uint32, error) {
 		if bytes.EqualFold(k, StringUserAgent) {
 			return
 		}
+
+		if bytes.EqualFold(k, StringConnection) { // We must not send a "connection: close" to http2
+			return
+		}
+
 		hf.SetBytes(ToLower(k), v)
 		enc.AppendHeaderField(h, hf, k[0] == ':')
 	})

@@ -10,6 +10,7 @@ var (
 	StringContentLength = []byte("content-length")
 	StringContentType   = []byte("content-type")
 	StringUserAgent     = []byte("user-agent")
+	StringConnection    = []byte("connection")
 	StringGzip          = []byte("gzip")
 	StringGET           = []byte("GET")
 	StringHEAD          = []byte("HEAD")
