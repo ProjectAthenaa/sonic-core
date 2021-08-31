@@ -1,10 +1,11 @@
-syntax="proto3";
+syntax = "proto3";
 
+import "MonitorController.proto";
 
-option go_package="sonic/monitor";
+option go_package = "sonic/monitor";
 
 service Monitor{
-  rpc Start(Task) returns (BoolResponse);
+  rpc Start(monitor_controller.Task) returns (BoolResponse);
 }
 
 message BoolResponse{
@@ -15,16 +16,4 @@ message BoolResponse{
 message Keywords{
   repeated string Positive = 1;
   repeated string Negative = 2;
-}
-
-message Task{
-  string Site = 1;
-  oneof Lookup {
-    Keywords Keywords = 2;
-    string Link = 3;
-  }
-  map<string, string> Metadata = 4;
-  optional string Size = 5;
-  optional string ColorWay = 6;
-  string RedisChannelName = 7;
 }

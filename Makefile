@@ -2,7 +2,7 @@ moduleCompile:
 	cd ./protos && protoc --go_out=./module --go_opt=paths=source_relative --go-grpc_out=./module --go-grpc_opt=paths=source_relative ./Module.proto
 
 monitorCompile:
-	cd ./protos && protoc --go_out=./monitor --go_opt=paths=source_relative --go-grpc_out=./monitor --go-grpc_opt=paths=source_relative ./Monitor.proto
+	cd ./protos && protoc --go_out=./monitor --go_opt=paths=source_relative --go-grpc_out=./monitor --go-grpc_opt=paths=source_relative ./Monitor.proto ./MonitorController.proto
 
 dbCompile:
 	cd ./sonic/database && go generate .

@@ -7,6 +7,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	monitor_controller "main/monitor_controller"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -18,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MonitorClient interface {
-	Start(ctx context.Context, in *Task, opts ...grpc.CallOption) (*BoolResponse, error)
+	Start(ctx context.Context, in *monitor_controller.Task, opts ...grpc.CallOption) (*BoolResponse, error)
 }
 
 type monitorClient struct {
@@ -29,7 +30,7 @@ func NewMonitorClient(cc grpc.ClientConnInterface) MonitorClient {
 	return &monitorClient{cc}
 }
 
-func (c *monitorClient) Start(ctx context.Context, in *Task, opts ...grpc.CallOption) (*BoolResponse, error) {
+func (c *monitorClient) Start(ctx context.Context, in *monitor_controller.Task, opts ...grpc.CallOption) (*BoolResponse, error) {
 	out := new(BoolResponse)
 	err := c.cc.Invoke(ctx, "/Monitor/Start", in, out, opts...)
 	if err != nil {
@@ -42,7 +43,7 @@ func (c *monitorClient) Start(ctx context.Context, in *Task, opts ...grpc.CallOp
 // All implementations must embed UnimplementedMonitorServer
 // for forward compatibility
 type MonitorServer interface {
-	Start(context.Context, *Task) (*BoolResponse, error)
+	Start(context.Context, *monitor_controller.Task) (*BoolResponse, error)
 	mustEmbedUnimplementedMonitorServer()
 }
 
@@ -50,7 +51,7 @@ type MonitorServer interface {
 type UnimplementedMonitorServer struct {
 }
 
-func (UnimplementedMonitorServer) Start(context.Context, *Task) (*BoolResponse, error) {
+func (UnimplementedMonitorServer) Start(context.Context, *monitor_controller.Task) (*BoolResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
 }
 func (UnimplementedMonitorServer) mustEmbedUnimplementedMonitorServer() {}
@@ -67,7 +68,7 @@ func RegisterMonitorServer(s grpc.ServiceRegistrar, srv MonitorServer) {
 }
 
 func _Monitor_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Task)
+	in := new(monitor_controller.Task)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func _Monitor_Start_Handler(srv interface{}, ctx context.Context, dec func(inter
 		FullMethod: "/Monitor/Start",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MonitorServer).Start(ctx, req.(*Task))
+		return srv.(MonitorServer).Start(ctx, req.(*monitor_controller.Task))
 	}
 	return interceptor(ctx, in, info, handler)
 }
