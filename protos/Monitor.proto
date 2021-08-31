@@ -5,15 +5,5 @@ import "MonitorController.proto";
 option go_package = "sonic/monitor";
 
 service Monitor{
-  rpc Start(monitor_controller.Task) returns (BoolResponse);
-}
-
-message BoolResponse{
-  bool Started = 1;
-  optional string Error = 2;
-}
-
-message Keywords{
-  repeated string Positive = 1;
-  repeated string Negative = 2;
+  rpc Start(monitor_controller.Task) returns (monitor_controller.BoolResponse);
 }

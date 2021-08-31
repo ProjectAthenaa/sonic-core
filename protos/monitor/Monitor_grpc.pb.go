@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MonitorClient interface {
-	Start(ctx context.Context, in *monitor_controller.Task, opts ...grpc.CallOption) (*BoolResponse, error)
+	Start(ctx context.Context, in *monitor_controller.Task, opts ...grpc.CallOption) (*monitor_controller.BoolResponse, error)
 }
 
 type monitorClient struct {
@@ -30,8 +30,8 @@ func NewMonitorClient(cc grpc.ClientConnInterface) MonitorClient {
 	return &monitorClient{cc}
 }
 
-func (c *monitorClient) Start(ctx context.Context, in *monitor_controller.Task, opts ...grpc.CallOption) (*BoolResponse, error) {
-	out := new(BoolResponse)
+func (c *monitorClient) Start(ctx context.Context, in *monitor_controller.Task, opts ...grpc.CallOption) (*monitor_controller.BoolResponse, error) {
+	out := new(monitor_controller.BoolResponse)
 	err := c.cc.Invoke(ctx, "/Monitor/Start", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (c *monitorClient) Start(ctx context.Context, in *monitor_controller.Task, 
 // All implementations must embed UnimplementedMonitorServer
 // for forward compatibility
 type MonitorServer interface {
-	Start(context.Context, *monitor_controller.Task) (*BoolResponse, error)
+	Start(context.Context, *monitor_controller.Task) (*monitor_controller.BoolResponse, error)
 	mustEmbedUnimplementedMonitorServer()
 }
 
@@ -51,7 +51,7 @@ type MonitorServer interface {
 type UnimplementedMonitorServer struct {
 }
 
-func (UnimplementedMonitorServer) Start(context.Context, *monitor_controller.Task) (*BoolResponse, error) {
+func (UnimplementedMonitorServer) Start(context.Context, *monitor_controller.Task) (*monitor_controller.BoolResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
 }
 func (UnimplementedMonitorServer) mustEmbedUnimplementedMonitorServer() {}
