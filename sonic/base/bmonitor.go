@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"github.com/ProjectAthenaa/sonic-core/protos/monitor"
+	monitor "github.com/ProjectAthenaa/sonic-core/protos/monitorController"
+	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/go-redis/redis/v8"
 	"github.com/json-iterator/go"
@@ -14,11 +15,12 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"strconv"
 	"sync"
+	"syscall"
 	"time"
 )
-
 
 var (
 	json         = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -57,26 +59,23 @@ type proxy struct {
 }
 
 func (tk *BMonitor) Listen() {
-	pubSub := tk.rdb.Subscribe(tk.Ctx, tk.redisKey)
-	channel := pubSub.Channel()
-	defer func() {
-		if err := pubSub.Close(); err != nil {
-			log.Error("error closing pubsub", err)
-		}
-	}()
+	c := make(chan os.Signal, 1)
+	defer close(c)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 	for {
 		select {
-		case <-tk.Ctx.Done():
-			log.Info("monitor context timeout")
+		case <-c:
+			tk.Stop()
 			return
-		case msg := <-channel:
-			if msg.Payload == "STOP" {
-				log.Info("stop command received, stopping..")
+		case <-tk.Ctx.Done():
+			return
+		default:
+			count := core.Base.GetRedis("cache").PubSubNumSub(tk.Ctx, tk.Data.RedisChannel).Val()
+			if v, ok := count[tk.Data.RedisChannel]; v == 0 || !ok {
 				tk.Stop()
 			}
-		default:
-			continue
+			time.Sleep(time.Second)
 		}
 	}
 }
@@ -97,7 +96,7 @@ func (tk *BMonitor) Start() error {
 		tk.Client = http.DefaultClient
 	}
 
-	tk.redisKey = fmt.Sprintf("monitors:%s", tk.Data.RedisChannelName)
+	tk.redisKey = fmt.Sprintf(tk.Data.RedisChannel)
 	tk.proxyRedisKey = fmt.Sprintf("proxies:monitors:%s", tk.Data.Site)
 	tk._proxyLocker = lock.NewCASMutex()
 
@@ -196,7 +195,6 @@ func (tk *BMonitor) NewRequest(method, url string, body io.Reader) (*http.Reques
 		log.Error("error creating request", err)
 		return nil, err
 	}
-
 
 	if tk.proxy.Username != nil && tk.proxy.Password != nil && tk._proxyLocker.TryLockWithContext(tk.Ctx) {
 		req.Header.Set("Proxy-Authorization", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *tk.proxy.Username, *tk.proxy.Password))))
