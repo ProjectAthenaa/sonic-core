@@ -7,7 +7,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	monitor_controller "main/monitor_controller"
+	monitor_controller "github.com/ProjectAthenaa/sonic-core/protos/monitorController"
 )
 
 // This is a compile-time assertion to ensure that this generated file
