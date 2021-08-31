@@ -243,7 +243,7 @@ func (tk *BTask) UpdateData(data *module.Data) {
 	tk.Data = data
 }
 
-func (tk *BTask) Process(err ...string) {
+func (tk *BTask) Process() {
 	var payload *module.Status
 
 	if tk.state == module.STATUS_CHECKED_OUT {
@@ -301,17 +301,20 @@ func (tk *BTask) GetStatus() *module.Status {
 	return data
 }
 
-func (tk *BTask) SetStatus(s module.STATUS, msg string, err ...string) {
+func (tk *BTask) SetStatus(s module.STATUS, msg interface{}) {
 	go func() {
 		tk._statusLocker.Lock()
 		defer tk._statusLocker.Unlock()
 		if s != tk.state {
 			tk.state = s
 		}
+
+		data, _ := json.Marshal(&msg)
+
 		if msg != "" {
-			tk.message = msg
+			tk.message = string(data)
 		}
-		tk.Process(err...)
+		tk.Process()
 	}()
 }
 

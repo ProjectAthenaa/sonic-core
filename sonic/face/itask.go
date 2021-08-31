@@ -22,8 +22,8 @@ type ITask interface {
 	Restart()
 
 	GetStatus() *module.Status
-	SetStatus(s module.STATUS, msg string, err ...string)
-	Process(err ...string)
+	SetStatus(s module.STATUS, msg interface{})
+	Process()
 	QuitChan() chan int32
 	FormatProxy() string
 }
