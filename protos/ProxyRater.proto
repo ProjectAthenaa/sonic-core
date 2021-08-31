@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proxy_rater;
+
+option go_package="github.com/ProjectAthenaa/sonic-core/protos/proxy_rater";
+
+service ProxyRater{
+  rpc GetProxy(Site) returns (Proxy);
+}
+
+message Site{
+  string Value = 1;
+}
+
+message Proxy{
+  string Value = 2;
+}
+

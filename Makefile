@@ -21,3 +21,6 @@ taskControllerCompile:
 
 captchaCompile:
 	cd ./protos && protoc --go_out=./captcha --go_opt=paths=source_relative --go-grpc_out=./captcha --go-grpc_opt=paths=source_relative ./Captcha.proto
+
+proxyRaterCompile:
+		cd ./protos && protoc --go_out=./proxy-rater --go_opt=paths=source_relative --go-grpc_out=./proxy-rater --go-grpc_opt=paths=source_relative ./ProxyRater.proto
