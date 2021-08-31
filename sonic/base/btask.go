@@ -279,10 +279,6 @@ func (tk *BTask) Process() {
 	payload.Information["taskID"] = tk.ID
 	payload.Information["startedAt"] = strconv.Itoa(int(tk.startTime.Unix()))
 
-	if len(err) > 0 {
-		payload.Information["err"] = err[0]
-	}
-
 	data, _ := json.Marshal(&payload)
 
 	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
