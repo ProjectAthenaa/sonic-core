@@ -13,6 +13,7 @@ message Site{
 }
 
 message Proxy{
-  string Value = 2;
+  string Value = 1;
+  string Authorization = 2;
 }
 
