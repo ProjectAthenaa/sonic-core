@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
+	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
@@ -144,6 +145,7 @@ func (tk *BTask) Start(data *module.Data) error {
 		ProductImage: "",
 	}
 	tk.startTime = time.Now()
+	tk.FastClient = fasttls.NewClient(tls.HelloChrome_91, tk.FormatProxy())
 
 	go tk.Listen()
 	go tk.Callback.OnStarting()
@@ -355,7 +357,6 @@ func (tk *BTask) NewRequest(method, url string, body []byte, useHttp2 ...bool) (
 }
 
 func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
-	req.Proxy = tk.FormatProxy()
 	return tk.FastClient.DoCtx(tk.Ctx, req)
 }
 
