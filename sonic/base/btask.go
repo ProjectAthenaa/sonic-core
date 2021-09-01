@@ -35,13 +35,13 @@ type BTask struct {
 	_cancelFunc        context.CancelFunc
 
 	//props
-	quitChan  chan int32
-	running   bool
-	paused    bool
-	stopping  bool
-	state     module.STATUS //tag state
-	message   string        //tag more message
-	startTime time.Time
+	quitChan    chan int32
+	running     bool
+	paused      bool
+	stopping    bool
+	state       module.STATUS //tag state
+	message     string        //tag more message
+	startTime   time.Time
 
 	//returnFields
 	ReturningFields *returningFields

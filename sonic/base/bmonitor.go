@@ -2,21 +2,20 @@ package base
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
+	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	monitor "github.com/ProjectAthenaa/sonic-core/protos/monitorController"
+	proxy_rater "github.com/ProjectAthenaa/sonic-core/protos/proxy-rater"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/go-redis/redis/v8"
 	"github.com/json-iterator/go"
 	"github.com/prometheus/common/log"
 	"github.com/viney-shih/go-lock"
-	"io"
-	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -27,16 +26,11 @@ var (
 	monitorCount = os.Getenv("MONITOR_TASK_COUNT")
 )
 
-const (
-	posInf = "+inf"
-	negInf = "-inf"
-)
-
 type BMonitor struct {
 	Data     *monitor.Task
 	Ctx      context.Context
 	Callback face.MonitorCallback
-	Client   *http.Client
+	Client   *fasttls.Client
 
 	cancel context.CancelFunc
 
@@ -45,6 +39,7 @@ type BMonitor struct {
 	site          string
 	rdb           *redis.Client
 	proxy         proxy
+	proxyClient   proxy_rater.ProxyRaterClient
 
 	//prv
 	_proxyLocker lock.Mutex //mutex lock to avoid mismatches between authorization proxy and transport proxy
@@ -52,10 +47,8 @@ type BMonitor struct {
 
 //used for proxies
 type proxy struct {
-	Username *string `json:"username"`
-	Password *string `json:"password"`
-	IP       string  `json:"ip"`
-	Port     string  `json:"port"`
+	address    string
+	authHeader string
 }
 
 func (tk *BMonitor) Listen() {
@@ -80,7 +73,7 @@ func (tk *BMonitor) Listen() {
 	}
 }
 
-func (tk *BMonitor) Start() error {
+func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
 	if tk.Data == nil {
 		return face.ErrTaskHasNoData
 	}
@@ -93,12 +86,13 @@ func (tk *BMonitor) Start() error {
 	tk.Callback.OnStarting()
 
 	if tk.Client == nil {
-		tk.Client = http.DefaultClient
+		tk.Client = fasttls.DefaultClient
 	}
 
 	tk.redisKey = fmt.Sprintf(tk.Data.RedisChannel)
 	tk.proxyRedisKey = fmt.Sprintf("proxies:monitors:%s", tk.Data.Site)
 	tk._proxyLocker = lock.NewCASMutex()
+	tk.proxyClient = client
 
 	if tk.cancel == nil {
 		tk.Ctx, tk.cancel = context.WithCancel(tk.Ctx)
@@ -134,49 +128,20 @@ func (tk *BMonitor) Submit(data map[string]interface{}) error {
 }
 
 func (tk *BMonitor) proxyRefresher(wg *sync.WaitGroup) {
-	var currentIndex int
-	var maxIndex = tk.rdb.ZCount(tk.Ctx, tk.proxyRedisKey, negInf, posInf).Val()
-
-	var pr proxy
-	var proxyUrl *url.URL
-
 	var firstCalculated bool
 
 	for range time.Tick(time.Second) {
-		currentIndex++
-		if currentIndex > int(maxIndex) {
-			currentIndex = 1
-		}
-
-		proxyData, err := tk.rdb.ZRange(tk.Ctx, tk.proxyRedisKey, maxIndex-1, maxIndex).Result()
+		tk._proxyLocker.Lock()
+		proxyResp, err := tk.proxyClient.GetProxy(tk.Ctx, &proxy_rater.Site{Value: tk.site})
 		if err != nil {
-			log.Error("error completing zrange func", err)
-			continue
-		}
-
-		tk._proxyLocker.TryLockWithContext(tk.Ctx)
-		if err = json.Unmarshal([]byte(proxyData[0]), &pr); err != nil {
-			log.Error("error unmarshaling proxy data", err)
+			log.Error("get proxy req: ", err)
 			goto onErrorContinue
 		}
 
-		if pr.Username != nil && pr.Password != nil {
-			proxyUrl, err = url.Parse(fmt.Sprintf("http://%s:%s@%s:%s", *pr.Username, *pr.Password, pr.IP, pr.Port))
-		} else {
-			proxyUrl, err = url.Parse(fmt.Sprintf("http://%s:%s", pr.IP, pr.Port))
+		tk.proxy = proxy{
+			address:    proxyResp.Value,
+			authHeader: proxyResp.Authorization,
 		}
-
-		if err != nil {
-			log.Error("error parsing proxy", err)
-			goto onErrorContinue
-		}
-
-		tk.Client.Transport = &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
-
-		tk.proxy = pr
-		tk._proxyLocker.Unlock()
 
 		if !firstCalculated {
 			wg.Done()
@@ -189,16 +154,16 @@ func (tk *BMonitor) proxyRefresher(wg *sync.WaitGroup) {
 	}
 }
 
-func (tk *BMonitor) NewRequest(method, url string, body io.Reader) (*http.Request, error) {
-	req, err := http.NewRequestWithContext(tk.Ctx, method, url, body)
-	if err != nil {
-		log.Error("error creating request", err)
-		return nil, err
+func (tk *BMonitor) NewRequest(method, url string, body []byte) (*fasttls.Request, error) {
+	return tk.Client.NewRequest(fasttls.Method(strings.ToUpper(method)), url, body)
+}
+
+func (tk *BMonitor) Do(req *fasttls.Request) (*fasttls.Response, error) {
+	if _, ok := req.Headers["Proxy-Authorization"]; !ok && tk.proxy.authHeader != "" {
+		if tk._proxyLocker.TryLockWithContext(tk.Ctx) {
+			req.Headers["Proxy-Authorization"] = []string{fmt.Sprintf("Basic %s", tk.proxy.authHeader)}
+		}
 	}
 
-	if tk.proxy.Username != nil && tk.proxy.Password != nil && tk._proxyLocker.TryLockWithContext(tk.Ctx) {
-		req.Header.Set("Proxy-Authorization", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *tk.proxy.Username, *tk.proxy.Password))))
-		tk._proxyLocker.Unlock()
-	}
-	return req, err
+	return tk.Client.DoCtx(tk.Ctx, req)
 }
