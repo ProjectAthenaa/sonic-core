@@ -2,6 +2,7 @@ package base
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
@@ -343,6 +344,17 @@ func (tk *BTask) Restart() {
 		tk.Stop()
 		return
 	}
+}
+
+func (tk *BTask) NewRequest(method, url string, body []byte) (*fasttls.Request, error) {
+	return tk.FastClient.NewRequest(fasttls.Method(method), url, body)
+}
+
+func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
+	if tk.Data.Proxy.Username != nil && tk.Data.Proxy.Password != nil {
+		req.Headers["Proxy-Authorization"] = []string{"Basic " + string(base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password))))}
+	}
+	return tk.FastClient.DoCtx(tk.Ctx, req)
 }
 
 //#region need override methods by callback
