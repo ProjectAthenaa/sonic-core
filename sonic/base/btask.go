@@ -13,6 +13,7 @@ import (
 	http "github.com/useflyent/fhttp"
 	"os"
 	"os/signal"
+	"reflect"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -58,6 +59,8 @@ type returningFields struct {
 func (tk *BTask) Init() {
 	//add 1 hour timeout, a task cannot consume resources for more than an hour
 	ctx, cancelFunc := context.WithDeadline(context.Background(), time.Now().Add(time.Hour))
+	log.Info(tk.Ctx, reflect.TypeOf(tk.Ctx))
+	log.Info(tk._cancelFunc, reflect.TypeOf(tk._cancelFunc))
 	tk.Ctx, tk._cancelFunc = ctx, cancelFunc
 
 	//default padding
