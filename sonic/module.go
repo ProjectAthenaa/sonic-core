@@ -1,12 +1,52 @@
 package sonic
 
 import (
-	"github.com/ProjectAthenaa/sonic-core/protos/module"
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/ProjectAthenaa/sonic-core/sonic/core"
+	"github.com/go-redis/redis/v8"
+	"os"
+	"os/signal"
+	"regexp"
+	"syscall"
+	"time"
 )
 
-//Module defines the generic interface, each new module should comply to
-type Module interface {
-	Start(data *module.Data) (updates chan *module.Status, commands chan *module.COMMAND, err error)
-	Stop() (stopped bool, err error)
-	Pause() (paused bool, err error)
+type Module struct {
+	Name   string
+	Fields []InputField
+}
+
+type InputField struct {
+	Validation  *regexp.Regexp `json:"validation"`
+	Label       string         `json:"label"`
+	Property    string         `json:"property"`
+	FormElement string         `json:"formElement"`
+}
+
+func RegisterModule(module *Module) error {
+	val, err := json.Marshal(&module)
+	if err != nil {
+		return err
+	}
+
+	var ctx, cancel = context.WithCancel(context.Background())
+
+	go func() {
+		for range time.Tick(time.Second * 5) {
+			core.Base.GetRedis("cache").SetNX(ctx, fmt.Sprintf("modules:%s", module.Name), string(val), redis.KeepTTL)
+		}
+	}()
+
+	go func() {
+		c := make(chan os.Signal, 1)
+		defer close(c)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		<-c
+		cancel()
+		core.Base.GetRedis("cache").Del(ctx, fmt.Sprintf("modules:%s", module.Name))
+	}()
+
+	return nil
 }
