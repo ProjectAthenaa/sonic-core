@@ -318,18 +318,21 @@ func (tk *BTask) QuitChan() chan int32 {
 	return tk.quitChan
 }
 
-func (tk *BTask) FormatProxy() string {
+func (tk *BTask) FormatProxy() *string {
 	if tk.Data.Proxy == nil {
 		tk.SetStatus(module.STATUS_ERROR, "no proxy set")
 		tk.Stop()
-		return ""
+		return nil
 	}
 
 	if tk.Data.Proxy.Username != nil && tk.Data.Proxy.Password != nil {
-		return fmt.Sprintf("http://%s:%s@%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password, tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+		dt := fmt.Sprintf("http://%s:%s@%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password, tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+		return &dt
 	}
 
-	return fmt.Sprintf("http://%s:%s", tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+	dt := fmt.Sprintf("http://%s:%s", tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+
+	return &dt
 }
 
 func (tk *BTask) Restart() {
@@ -354,6 +357,9 @@ func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
 	if tk.Data.Proxy.Username != nil && tk.Data.Proxy.Password != nil {
 		req.Headers["Proxy-Authorization"] = []string{"Basic " + string(base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password))))}
 	}
+
+	req.Proxy = tk.FormatProxy()
+
 	return tk.FastClient.DoCtx(tk.Ctx, req)
 }
 
