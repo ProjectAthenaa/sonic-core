@@ -143,6 +143,15 @@ func (tk *BMonitor) submit() {
 func (tk *BMonitor) proxyRefresher(wg *sync.WaitGroup) {
 	var firstCalculated bool
 
+	switch data := tk.Data.Lookup.(type) {
+	case *monitor.Task_Keywords:
+		fmt.Println(data.Keywords.Negative)
+		fmt.Println(data.Keywords.Positive)
+	case *monitor.Task_Link:
+		fmt.Println(data.Link)
+		fmt.Println(data.Link)
+	}
+
 	for range time.Tick(time.Second) {
 		tk._proxyLocker.Lock()
 		proxyResp, err := tk.proxyClient.GetProxy(tk.Ctx, &proxy_rater.Site{Value: tk.site})

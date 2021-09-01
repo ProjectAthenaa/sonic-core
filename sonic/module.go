@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/go-redis/redis/v8"
 	"os"
 	"os/signal"
@@ -26,6 +25,13 @@ type InputField struct {
 }
 
 func RegisterModule(module *Module) error {
+	opts, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+	if err != nil {
+		return err
+	}
+
+	rdb := redis.NewClient(opts)
+
 	val, err := json.Marshal(&module)
 	if err != nil {
 		return err
@@ -35,7 +41,7 @@ func RegisterModule(module *Module) error {
 
 	go func() {
 		for range time.Tick(time.Second * 5) {
-			core.Base.GetRedis("cache").SetNX(ctx, fmt.Sprintf("modules:%s", module.Name), string(val), redis.KeepTTL)
+			rdb.SetNX(ctx, fmt.Sprintf("modules:%s", module.Name), string(val), redis.KeepTTL)
 		}
 	}()
 
@@ -45,7 +51,7 @@ func RegisterModule(module *Module) error {
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
 		cancel()
-		core.Base.GetRedis("cache").Del(ctx, fmt.Sprintf("modules:%s", module.Name))
+		rdb.Del(ctx, fmt.Sprintf("modules:%s", module.Name))
 	}()
 
 	return nil
