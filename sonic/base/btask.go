@@ -2,7 +2,6 @@ package base
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
@@ -356,18 +355,7 @@ func (tk *BTask) NewRequest(method, url string, body []byte, useHttp2 ...bool) (
 }
 
 func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
-	if tk.Data.Proxy.Username != nil && tk.Data.Proxy.Password != nil {
-		if req.Headers == nil {
-			req.Headers = fasttls.Headers{
-				"Proxy-Authorization": []string{"Basic " + string(base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password))))},
-			}
-		} else {
-			req.Headers["Proxy-Authorization"] = []string{"Basic " + string(base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password))))}
-		}
-	}
-
 	req.Proxy = tk.FormatProxy()
-
 	return tk.FastClient.DoCtx(tk.Ctx, req)
 }
 
