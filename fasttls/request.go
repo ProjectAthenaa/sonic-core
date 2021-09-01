@@ -320,6 +320,7 @@ func (c *Client) doRequest(requestObj *Request) (*Response, error) {
 		IsHttp2:         requestObj.UseHttp2,
 		Http2Connection: persistedConnection,
 		ContentLength:   int64(len(responseBytes)),
+		Original:        resp,
 	}, nil
 }
 
