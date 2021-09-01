@@ -328,11 +328,11 @@ func (tk *BTask) FormatProxy() *string {
 	}
 
 	if tk.Data.Proxy.Username != nil && tk.Data.Proxy.Password != nil {
-		dt := fmt.Sprintf("http://%s:%s@%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password, tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+		dt := fmt.Sprintf("%s:%s@%s:%s", *tk.Data.Proxy.Username, *tk.Data.Proxy.Password, tk.Data.Proxy.IP, tk.Data.Proxy.Port)
 		return &dt
 	}
 
-	dt := fmt.Sprintf("http://%s:%s", tk.Data.Proxy.IP, tk.Data.Proxy.Port)
+	dt := fmt.Sprintf("%s:%s", tk.Data.Proxy.IP, tk.Data.Proxy.Port)
 
 	return &dt
 }
