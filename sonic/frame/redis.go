@@ -56,7 +56,6 @@ func (p *PubSub) Chan(ctx context.Context) <-chan map[string]interface{} {
 			default:
 				continue
 			}
-
 		}
 	}()
 

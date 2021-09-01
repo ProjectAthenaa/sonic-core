@@ -66,6 +66,7 @@ message TaskData{
   bool RandomColor = 2;
   repeated string Color = 3;
   repeated string Size = 4;
+  optional string Link = 5;
 }
 
 message SizeColor{
