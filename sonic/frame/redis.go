@@ -2,6 +2,7 @@ package frame
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"os"
 )
@@ -34,6 +35,32 @@ type PubSub struct {
 //Close closes the underlying pub/sub stream as well as the channel attached to it
 func (p *PubSub) Close() error {
 	return p.redisPS.Close()
+}
+
+func (p *PubSub) Chan(ctx context.Context) <-chan map[string]interface{} {
+	data := make(chan map[string]interface{})
+
+	go func() {
+		defer close(data)
+		defer p.Close()
+		for {
+			select {
+			case msg := <-p.Channel:
+				var dt map[string]interface{}
+				if err := json.Unmarshal([]byte(msg.Payload), &dt); err != nil {
+					continue
+				}
+				data <- dt
+			case <-ctx.Done():
+				return
+			default:
+				continue
+			}
+
+		}
+	}()
+
+	return data
 }
 
 func ConnectRedis(dsn string) *redis.Client {
