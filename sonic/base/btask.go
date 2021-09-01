@@ -349,8 +349,8 @@ func (tk *BTask) Restart() {
 	}
 }
 
-func (tk *BTask) NewRequest(method, url string, body []byte) (*fasttls.Request, error) {
-	return tk.FastClient.NewRequest(fasttls.Method(method), url, body)
+func (tk *BTask) NewRequest(method, url string, body []byte, useHttp2 ...bool) (*fasttls.Request, error) {
+	return tk.FastClient.NewRequest(fasttls.Method(method), url, body, useHttp2...)
 }
 
 func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
