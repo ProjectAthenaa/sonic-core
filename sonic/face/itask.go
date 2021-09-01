@@ -27,6 +27,6 @@ type ITask interface {
 	Process()
 	QuitChan() chan int32
 	FormatProxy() *string
-	NewRequest(method, url string, body []byte) (*fasttls.Request, error)
+	NewRequest(method, url string, body []byte, useHttp2 ...bool) (*fasttls.Request, error)
 	Do(req *fasttls.Request) (*fasttls.Response, error)
 }
