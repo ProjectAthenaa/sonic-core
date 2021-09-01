@@ -31,6 +31,9 @@ type BMonitor struct {
 	Ctx      context.Context
 	Callback face.MonitorCallback
 	Client   *fasttls.Client
+	Monitor  struct {
+		Channel chan map[string]interface{}
+	}
 
 	cancel context.CancelFunc
 
@@ -93,6 +96,7 @@ func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
 	tk.proxyRedisKey = fmt.Sprintf("proxies:monitors:%s", tk.Data.Site)
 	tk._proxyLocker = lock.NewCASMutex()
 	tk.proxyClient = client
+	tk.Monitor.Channel = make(chan map[string]interface{})
 
 	if tk.cancel == nil {
 		tk.Ctx, tk.cancel = context.WithCancel(tk.Ctx)
@@ -108,6 +112,7 @@ func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
 	}
 
 	go tk.Listen()
+	go tk.submit()
 	return nil
 }
 
@@ -116,15 +121,23 @@ func (tk *BMonitor) Stop() {
 	tk.Callback.OnStopping()
 }
 
-func (tk *BMonitor) Submit(data map[string]interface{}) error {
-	payload, err := json.Marshal(&data)
-	if err != nil {
-		log.Error("error serialising data", err)
-		return err
-	}
+func (tk *BMonitor) submit() {
+	for {
+		select {
+		case msg := <-tk.Monitor.Channel:
+			payload, err := json.Marshal(&msg)
+			if err != nil {
+				log.Error("error serialising data", err)
+				continue
+			}
 
-	tk.rdb.Publish(tk.Ctx, tk.redisKey, string(payload))
-	return nil
+			tk.rdb.Publish(tk.Ctx, tk.redisKey, string(payload))
+		case <-tk.Ctx.Done():
+			return
+		default:
+			continue
+		}
+	}
 }
 
 func (tk *BMonitor) proxyRefresher(wg *sync.WaitGroup) {
@@ -154,7 +167,6 @@ func (tk *BMonitor) proxyRefresher(wg *sync.WaitGroup) {
 	}
 
 }
-
 
 func (tk *BMonitor) NewRequest(method, url string, body []byte) (*fasttls.Request, error) {
 	return tk.Client.NewRequest(fasttls.Method(strings.ToUpper(method)), url, body)
