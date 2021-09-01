@@ -1,8 +1,8 @@
 package face
 
 import (
-	"io"
-	"net/http"
+	"github.com/ProjectAthenaa/sonic-core/fasttls"
+	proxy_rater "github.com/ProjectAthenaa/sonic-core/protos/proxy-rater"
 )
 
 type MonitorCallback interface {
@@ -13,8 +13,9 @@ type MonitorCallback interface {
 
 type IMonitor interface {
 	Listen()
-	Start() error
+	Start(client proxy_rater.ProxyRaterClient) error
 	Stop()
 	Submit(data map[string]interface{}) error
-	NewRequest(method, url string, body io.Reader) (*http.Request, error)
+	NewRequest(method, url string, body []byte) (*fasttls.Request, error)
+	Do(req *fasttls.Request) (*fasttls.Response, error)
 }

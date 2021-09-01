@@ -152,7 +152,9 @@ func (tk *BMonitor) proxyRefresher(wg *sync.WaitGroup) {
 		tk._proxyLocker.Unlock()
 		continue
 	}
+
 }
+
 
 func (tk *BMonitor) NewRequest(method, url string, body []byte) (*fasttls.Request, error) {
 	return tk.Client.NewRequest(fasttls.Method(strings.ToUpper(method)), url, body)
