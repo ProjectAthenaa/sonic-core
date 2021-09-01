@@ -309,10 +309,8 @@ func (tk *BTask) SetStatus(s module.STATUS, msg interface{}) {
 		}
 
 		data, _ := json.Marshal(&msg)
+		tk.message = string(data)
 
-		if msg != "" {
-			tk.message = string(data)
-		}
 		tk.Process()
 	}()
 }
