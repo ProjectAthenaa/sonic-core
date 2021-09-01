@@ -58,7 +58,7 @@ type returningFields struct {
 func (tk *BTask) Init() {
 	tk.ID = tk.Data.TaskID
 	//add 1 hour timeout, a task cannot consume resources for more than an hour
-	tk.Ctx, tk._cancelFunc = context.WithDeadline(context.Background(), time.Now().Add(time.Hour))
+	tk.Ctx, tk._cancelFunc = context.WithCancel(context.Background())
 
 	//default padding
 	tk.SetStatus(module.STATUS_PADDING, "")
