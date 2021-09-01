@@ -1,6 +1,7 @@
 package face
 
 import (
+	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
 )
 
@@ -25,5 +26,7 @@ type ITask interface {
 	SetStatus(s module.STATUS, msg interface{})
 	Process()
 	QuitChan() chan int32
-	FormatProxy() string
+	FormatProxy() *string
+	NewRequest(method, url string, body []byte) (*fasttls.Request, error)
+	Do(req *fasttls.Request) (*fasttls.Response, error)
 }
