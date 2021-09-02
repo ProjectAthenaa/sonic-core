@@ -2,6 +2,7 @@ package cookiejar
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"sync"
 	"time"
@@ -165,9 +166,11 @@ func (cj *CookieJar) FillRequest(r *fasthttp.Request) {
 
 		cookieDomain := c.Domain()
 		requestDomain := r.Host()
+		fmt.Println(string(cookieDomain), " ", string(requestDomain))
 		if !bytes.Equal(cookieDomain, requestDomain) {
 			continue
 		}
+
 		r.Header.SetCookieBytesKV(c.Key(), c.Value())
 	}
 }
