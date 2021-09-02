@@ -18,9 +18,9 @@ type Module struct {
 
 type InputField struct {
 	Validation  string `json:"validation"`
-	Label       string         `json:"label"`
-	Property    string         `json:"property"`
-	FormElement string         `json:"formElement"`
+	Label       string `json:"label"`
+	Property    string `json:"property"`
+	FormElement string `json:"formElement"`
 }
 
 func RegisterModule(module *Module) error {
@@ -39,6 +39,7 @@ func RegisterModule(module *Module) error {
 	var ctx, cancel = context.WithCancel(context.Background())
 
 	go func() {
+		rdb.Set(ctx, fmt.Sprintf("modules:%s", module.Name), string(val), redis.KeepTTL)
 		for range time.Tick(time.Second * 5) {
 			rdb.SetNX(ctx, fmt.Sprintf("modules:%s", module.Name), string(val), redis.KeepTTL)
 		}

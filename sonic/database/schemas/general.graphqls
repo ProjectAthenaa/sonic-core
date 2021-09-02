@@ -1,0 +1,27 @@
+type Module{
+    Name: String!
+    Status: Status!
+    Fields: [ModuleField!]!
+}
+
+enum Status{
+    FUNCTIONAL
+    DEGRADED
+    DOWN
+}
+
+enum FieldType{
+    KEYWORDS
+    TEXT
+    NUMBER
+}
+
+type ModuleField{
+    Validation: String!
+    Type: FieldType!
+    FieldKey: String
+}
+
+extend type Query {
+    getModules: [Module!]!
+}
