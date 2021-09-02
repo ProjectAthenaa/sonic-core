@@ -63,7 +63,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 			ctx := context.WithValue(c.Request.Context(), "IP", ip)
 			ctx = context.WithValue(ctx, "Location", c.Request.Header.Get("cf-ipcountry"))
 			span := sentry.StartSpan(c.Request.Context(), "Authentication Middleware", sentry.TransactionName("Authentication"))
-			defer span.Finish()
 			if strings.Contains(c.Request.URL.Path, graphEndpoint) {
 				var body []byte
 				c.Request.Body, body = sonic.NopCloserBody(c.Request.Body)
@@ -113,6 +112,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 
 		setRequestContext:
 			c.Request = c.Request.WithContext(ctx)
+			span.Finish()
 			c.Next()
 		}
 	}
