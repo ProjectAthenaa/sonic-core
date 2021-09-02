@@ -423,7 +423,7 @@ type StripeResolver interface {
 	ID(ctx context.Context, obj *ent.Stripe) (string, error)
 }
 type SubscriptionResolver interface {
-	ModuleInformation(ctx context.Context) (<-chan []*model.Module, error)
+	ModuleInformation(ctx context.Context) (<-chan *model.Module, error)
 }
 type TaskResolver interface {
 	ID(ctx context.Context, obj *ent.Task) (string, error)
@@ -1890,7 +1890,7 @@ type ModuleField{
 }
 
 type Subscription{
-    moduleInformation: [Module!]!
+    moduleInformation: Module!
 }`, BuiltIn: false},
 	{Name: "schemas/license.graphqls", Input: `enum LicenseType{
     Lifetime
@@ -8226,7 +8226,7 @@ func (ec *executionContext) _Subscription_moduleInformation(ctx context.Context,
 		return nil
 	}
 	return func() graphql.Marshaler {
-		res, ok := <-resTmp.(<-chan []*model.Module)
+		res, ok := <-resTmp.(<-chan *model.Module)
 		if !ok {
 			return nil
 		}
@@ -8234,7 +8234,7 @@ func (ec *executionContext) _Subscription_moduleInformation(ctx context.Context,
 			w.Write([]byte{'{'})
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
-			ec.marshalNModule2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐModuleᚄ(ctx, field.Selections, res).MarshalGQL(w)
+			ec.marshalNModule2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐModule(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -12692,41 +12692,8 @@ func (ec *executionContext) marshalNMetadata2ᚖgithubᚗcomᚋProjectAthenaaᚋ
 	return ec._Metadata(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNModule2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐModuleᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Module) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNModule2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐModule(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
+func (ec *executionContext) marshalNModule2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐModule(ctx context.Context, sel ast.SelectionSet, v model.Module) graphql.Marshaler {
+	return ec._Module(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNModule2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐModule(ctx context.Context, sel ast.SelectionSet, v *model.Module) graphql.Marshaler {
