@@ -1873,7 +1873,7 @@ input NewShipping{
 
 input NewAddress{
     AddressLine: String!
-    AdressLine2: String
+    AddressLine2: String
     Country: String!
     State: String!
     StateCode: String
@@ -9472,11 +9472,11 @@ func (ec *executionContext) unmarshalInputNewAddress(ctx context.Context, obj in
 			if err != nil {
 				return it, err
 			}
-		case "AdressLine2":
+		case "AddressLine2":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("AdressLine2"))
-			it.AdressLine2, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("AddressLine2"))
+			it.AddressLine2, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}

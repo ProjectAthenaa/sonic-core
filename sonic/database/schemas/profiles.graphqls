@@ -68,7 +68,7 @@ input NewShipping{
 
 input NewAddress{
     AddressLine: String!
-    AdressLine2: String
+    AddressLine2: String
     Country: String!
     State: String!
     StateCode: String

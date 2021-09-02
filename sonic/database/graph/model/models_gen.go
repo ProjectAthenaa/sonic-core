@@ -19,13 +19,13 @@ type AccountGroupInput struct {
 }
 
 type NewAddress struct {
-	AddressLine string  `json:"AddressLine"`
-	AdressLine2 *string `json:"AdressLine2"`
-	Country     string  `json:"Country"`
-	State       string  `json:"State"`
-	StateCode   *string `json:"StateCode"`
-	City        string  `json:"City"`
-	Zip         string  `json:"ZIP"`
+	AddressLine  string  `json:"AddressLine"`
+	AddressLine2 *string `json:"AddressLine2"`
+	Country      string  `json:"Country"`
+	State        string  `json:"State"`
+	StateCode    *string `json:"StateCode"`
+	City         string  `json:"City"`
+	Zip          string  `json:"ZIP"`
 }
 
 type NewBilling struct {
