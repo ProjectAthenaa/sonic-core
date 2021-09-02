@@ -43,14 +43,15 @@ enum STATUS{
   SUBMITTING_SHIPPING = 23;
   SUBMITTING_PAYMENT = 24;
   SUBMITTING_CHECKOUT = 25;
+  ADDED_TO_CART = 26;
 
   //need set this status to client
-  STOPPED = 26;
-  PAUSING = 27;
-  PAUSED = 28;
-  CONTINUING = 29;
-  CONTINUED = 30;
-  RESTARTING = 31;
+  STOPPED = 27;
+  PAUSING = 28;
+  PAUSED = 29;
+  CONTINUING = 30;
+  CONTINUED = 31;
+  RESTARTING = 32;
 }
 
 message StartResponse{
