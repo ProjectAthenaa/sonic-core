@@ -17,8 +17,9 @@ enum FieldType{
 }
 
 type ModuleField{
-    Validation: String!
     Type: FieldType!
+    Label: String!
+    Validation: String
     FieldKey: String
 }
 

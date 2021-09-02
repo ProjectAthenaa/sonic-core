@@ -16,6 +16,10 @@ func (r *moduleFieldResolver) Type(ctx context.Context, obj *sonic.ModuleField) 
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *moduleFieldResolver) Label(ctx context.Context, obj *sonic.ModuleField) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) GetModules(ctx context.Context) ([]*model.Module, error) {
 	panic(fmt.Errorf("not implemented"))
 }

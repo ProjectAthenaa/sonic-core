@@ -19,6 +19,7 @@ type Module struct {
 type ModuleField struct {
 	Validation string    `json:"Validation"`
 	Type       FieldType `json:"Type"`
+	Label      string    `json:"Label"`
 	FieldKey   *string   `json:"FieldKey"`
 }
 
