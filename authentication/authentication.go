@@ -62,6 +62,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 			ip := c.Request.Header.Get("x-original-forwarded-for")
 			ctx := context.WithValue(c.Request.Context(), "IP", ip)
 			ctx = context.WithValue(ctx, "Location", c.Request.Header.Get("cf-ipcountry"))
+			ctx = context.WithValue(ctx, "headers", c.Request.Header)
 			span := sentry.StartSpan(c.Request.Context(), "Authentication Middleware", sentry.TransactionName("Authentication"))
 			if strings.Contains(c.Request.URL.Path, graphEndpoint) {
 				var body []byte
@@ -99,7 +100,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 
 				ctx = context.WithValue(ctx, "userID", user.UserID)
 				ctx = context.WithValue(ctx, "discordID", user.DiscordID)
-				ctx = context.WithValue(ctx, "headers", c.Request.Header)
 				goto setRequestContext
 			}
 
