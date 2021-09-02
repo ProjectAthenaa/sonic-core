@@ -7,7 +7,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"os"
 	"os/signal"
-	"regexp"
 	"syscall"
 	"time"
 )
@@ -18,7 +17,7 @@ type Module struct {
 }
 
 type InputField struct {
-	Validation  *regexp.Regexp `json:"validation"`
+	Validation  string `json:"validation"`
 	Label       string         `json:"label"`
 	Property    string         `json:"property"`
 	FormElement string         `json:"formElement"`
