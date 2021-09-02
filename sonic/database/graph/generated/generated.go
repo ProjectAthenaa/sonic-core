@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -63,6 +64,7 @@ type ResolverRoot interface {
 	Shipping() ShippingResolver
 	Statistic() StatisticResolver
 	Stripe() StripeResolver
+	Subscription() SubscriptionResolver
 	Task() TaskResolver
 	TaskGroup() TaskGroupResolver
 	User() UserResolver
@@ -222,7 +224,6 @@ type ComplexityRoot struct {
 		GetAllTaskGroups    func(childComplexity int) int
 		GetAllTasks         func(childComplexity int, taskGroupID string) int
 		GetApp              func(childComplexity int) int
-		GetModules          func(childComplexity int) int
 		GetProduct          func(childComplexity int, productID string) int
 		GetProfile          func(childComplexity int, profileID string) int
 		GetProfileGroup     func(childComplexity int, profileGroupID string) int
@@ -280,6 +281,10 @@ type ComplexityRoot struct {
 		ID             func(childComplexity int) int
 		RenewalDate    func(childComplexity int) int
 		SubscriptionID func(childComplexity int) int
+	}
+
+	Subscription struct {
+		ModuleInformation func(childComplexity int) int
 	}
 
 	Task struct {
@@ -383,7 +388,6 @@ type QueryResolver interface {
 	GetAllAccountGroups(ctx context.Context) ([]*ent.AccountGroup, error)
 	GetAccountGroup(ctx context.Context, accountGroupID string) (*ent.AccountGroup, error)
 	GetApp(ctx context.Context) (*ent.App, error)
-	GetModules(ctx context.Context) ([]*model.Module, error)
 	GetProfile(ctx context.Context, profileID string) (*ent.Profile, error)
 	GetProfileGroup(ctx context.Context, profileGroupID string) (*ent.ProfileGroup, error)
 	GetProfileGroups(ctx context.Context) ([]*ent.ProfileGroup, error)
@@ -417,6 +421,9 @@ type StatisticResolver interface {
 }
 type StripeResolver interface {
 	ID(ctx context.Context, obj *ent.Stripe) (string, error)
+}
+type SubscriptionResolver interface {
+	ModuleInformation(ctx context.Context) (<-chan []*model.Module, error)
 }
 type TaskResolver interface {
 	ID(ctx context.Context, obj *ent.Task) (string, error)
@@ -1299,13 +1306,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetApp(childComplexity), true
 
-	case "Query.getModules":
-		if e.complexity.Query.GetModules == nil {
-			break
-		}
-
-		return e.complexity.Query.GetModules(childComplexity), true
-
 	case "Query.getProduct":
 		if e.complexity.Query.GetProduct == nil {
 			break
@@ -1635,6 +1635,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Stripe.SubscriptionID(childComplexity), true
 
+	case "Subscription.moduleInformation":
+		if e.complexity.Subscription.ModuleInformation == nil {
+			break
+		}
+
+		return e.complexity.Subscription.ModuleInformation(childComplexity), true
+
 	case "Task.ID":
 		if e.complexity.Task.ID == nil {
 			break
@@ -1778,6 +1785,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -1843,7 +1867,7 @@ extend type Query {
 	{Name: "schemas/general.graphqls", Input: `type Module{
     Name: String!
     Status: Status!
-    Fields: [ModuleField!]!
+    Fields: [ModuleField!]
 }
 
 enum Status{
@@ -1865,8 +1889,8 @@ type ModuleField{
     FieldKey: String
 }
 
-extend type Query {
-    getModules: [Module!]!
+type Subscription{
+    moduleInformation: [Module!]!
 }`, BuiltIn: false},
 	{Name: "schemas/license.graphqls", Input: `enum LicenseType{
     Lifetime
@@ -4228,14 +4252,11 @@ func (ec *executionContext) _Module_Fields(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]*sonic.ModuleField)
 	fc.Result = res
-	return ec.marshalNModuleField2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚐModuleFieldᚄ(ctx, field.Selections, res)
+	return ec.marshalOModuleField2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚐModuleFieldᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ModuleField_Type(ctx context.Context, field graphql.CollectedField, obj *sonic.ModuleField) (ret graphql.Marshaler) {
@@ -6601,41 +6622,6 @@ func (ec *executionContext) _Query_getApp(ctx context.Context, field graphql.Col
 	return ec.marshalNApp2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐApp(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getModules(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetModules(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Module)
-	fc.Result = res
-	return ec.marshalNModule2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐModuleᚄ(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -8207,6 +8193,51 @@ func (ec *executionContext) _Stripe_RenewalDate(ctx context.Context, field graph
 	res := resTmp.(time.Time)
 	fc.Result = res
 	return ec.marshalOTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Subscription_moduleInformation(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().ModuleInformation(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan []*model.Module)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNModule2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐModuleᚄ(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
 }
 
 func (ec *executionContext) _Task_ID(ctx context.Context, field graphql.CollectedField, obj *ent.Task) (ret graphql.Marshaler) {
@@ -10857,9 +10888,6 @@ func (ec *executionContext) _Module(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "Fields":
 			out.Values[i] = ec._Module_Fields(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11485,20 +11513,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "getModules":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getModules(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "getProfile":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -12006,6 +12020,26 @@ func (ec *executionContext) _Stripe(ctx context.Context, sel ast.SelectionSet, o
 		return graphql.Null
 	}
 	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "moduleInformation":
+		return ec._Subscription_moduleInformation(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
 }
 
 var taskImplementors = []string{"Task"}
@@ -12703,43 +12737,6 @@ func (ec *executionContext) marshalNModule2ᚖgithubᚗcomᚋProjectAthenaaᚋso
 		return graphql.Null
 	}
 	return ec._Module(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNModuleField2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚐModuleFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*sonic.ModuleField) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNModuleField2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚐModuleField(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalNModuleField2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚐModuleField(ctx context.Context, sel ast.SelectionSet, v *sonic.ModuleField) graphql.Marshaler {
@@ -13572,6 +13569,46 @@ func (ec *executionContext) marshalOMap2map(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 	return graphql.MarshalMap(v)
+}
+
+func (ec *executionContext) marshalOModuleField2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚐModuleFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*sonic.ModuleField) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNModuleField2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚐModuleField(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) unmarshalONewAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewAddress(ctx context.Context, v interface{}) (*model.NewAddress, error) {

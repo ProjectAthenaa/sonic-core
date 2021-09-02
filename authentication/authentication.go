@@ -99,6 +99,7 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 
 				ctx = context.WithValue(ctx, "userID", user.UserID)
 				ctx = context.WithValue(ctx, "discordID", user.DiscordID)
+				ctx = context.WithValue(ctx, "headers", c.Request.Header)
 				goto setRequestContext
 			}
 

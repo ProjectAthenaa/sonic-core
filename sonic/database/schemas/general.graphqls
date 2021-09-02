@@ -1,7 +1,7 @@
 type Module{
     Name: String!
     Status: Status!
-    Fields: [ModuleField!]!
+    Fields: [ModuleField!]
 }
 
 enum Status{
@@ -23,6 +23,6 @@ type ModuleField{
     FieldKey: String
 }
 
-extend type Query {
-    getModules: [Module!]!
+type Subscription{
+    moduleInformation: [Module!]!
 }

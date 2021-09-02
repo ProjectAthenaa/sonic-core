@@ -1,9 +1,10 @@
 package cookiejar
 
 import (
-	"bytes"
+	tld "github.com/jpillora/go-tld"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 	"time"
 	"unsafe"
@@ -164,14 +165,29 @@ func (cj *CookieJar) FillRequest(r *fasthttp.Request) {
 			}
 		}
 
-		cookieDomain := c.Domain()
-		requestDomain := r.Host()
-		fmt.Println(string(cookieDomain), " ", string(requestDomain))
-		if !bytes.Equal(cookieDomain, requestDomain) {
-			continue
+		cookieDomain := string(c.Domain())
+		fullHost := string(r.Host())
+		u, err := tld.Parse(string(r.URI().FullURI()))
+		parentHost := ""
+		if err == nil {
+			parentHost = fmt.Sprintf("%s.%s", u.Domain, u.TLD)
+			fullHost = parentHost
+			if u.Subdomain != "" {
+				fullHost = fmt.Sprintf("%s.%s.%s", u.Subdomain, u.Domain, u.TLD)
+			}
 		}
 
-		r.Header.SetCookieBytesKV(c.Key(), c.Value())
+		allowedCookie := false
+		if fullHost == cookieDomain {
+			allowedCookie = true
+		} else if parentHost != "" {
+			if strings.HasSuffix(parentHost, cookieDomain) || strings.HasSuffix("."+parentHost, cookieDomain) {
+				allowedCookie = true
+			}
+		}
+		if allowedCookie {
+			r.Header.SetCookieBytesKV(c.Key(), c.Value())
+		}
 	}
 }
 
