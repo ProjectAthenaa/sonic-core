@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 )
@@ -16,6 +17,12 @@ type AccountGroupInput struct {
 	Name     string                 `json:"Name"`
 	Site     product.Site           `json:"Site"`
 	Accounts map[string]interface{} `json:"Accounts"`
+}
+
+type Module struct {
+	Name   string               `json:"Name"`
+	Status Status               `json:"Status"`
+	Fields []*sonic.ModuleField `json:"Fields"`
 }
 
 type NewAddress struct {
@@ -112,6 +119,49 @@ type UpdatedTask struct {
 	TaskGroupID    *string    `json:"TaskGroupID"`
 }
 
+type FieldType string
+
+const (
+	FieldTypeKeywords FieldType = "KEYWORDS"
+	FieldTypeText     FieldType = "TEXT"
+	FieldTypeNumber   FieldType = "NUMBER"
+)
+
+var AllFieldType = []FieldType{
+	FieldTypeKeywords,
+	FieldTypeText,
+	FieldTypeNumber,
+}
+
+func (e FieldType) IsValid() bool {
+	switch e {
+	case FieldTypeKeywords, FieldTypeText, FieldTypeNumber:
+		return true
+	}
+	return false
+}
+
+func (e FieldType) String() string {
+	return string(e)
+}
+
+func (e *FieldType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FieldType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FieldType", str)
+	}
+	return nil
+}
+
+func (e FieldType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type ProxyTestStatus string
 
 const (
@@ -150,5 +200,48 @@ func (e *ProxyTestStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ProxyTestStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type Status string
+
+const (
+	StatusFunctional Status = "FUNCTIONAL"
+	StatusDegraded   Status = "DEGRADED"
+	StatusDown       Status = "DOWN"
+)
+
+var AllStatus = []Status{
+	StatusFunctional,
+	StatusDegraded,
+	StatusDown,
+}
+
+func (e Status) IsValid() bool {
+	switch e {
+	case StatusFunctional, StatusDegraded, StatusDown:
+		return true
+	}
+	return false
+}
+
+func (e Status) String() string {
+	return string(e)
+}
+
+func (e *Status) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Status(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Status", str)
+	}
+	return nil
+}
+
+func (e Status) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -75,3 +75,6 @@ models:
   LookupType:
     model:
       - github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product.LookupType
+  ModuleField:
+    model:
+      - github.com/ProjectAthenaa/sonic-core/sonic.ModuleField

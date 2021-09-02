@@ -12,16 +12,23 @@ import (
 )
 
 type Module struct {
-	Name   string
-	Fields []InputField
+	Name   string         `json:"Name"`
+	Fields []*ModuleField `json:"Fields"`
 }
 
-type InputField struct {
-	Validation  string `json:"validation"`
-	Label       string `json:"label"`
-	Property    string `json:"property"`
-	FormElement string `json:"formElement"`
+type ModuleField struct {
+	Validation string    `json:"Validation"`
+	Type       FieldType `json:"Type"`
+	FieldKey   *string   `json:"FieldKey"`
 }
+
+type FieldType string
+
+const (
+	FieldTypeKeywords FieldType = "KEYWORDS"
+	FieldTypeText     FieldType = "TEXT"
+	FieldTypeNumber   FieldType = "NUMBER"
+)
 
 func RegisterModule(module *Module) error {
 	opts, err := redis.ParseURL(os.Getenv("REDIS_URL"))
