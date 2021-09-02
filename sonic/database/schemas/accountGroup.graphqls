@@ -15,10 +15,10 @@ input AccountGroupInput{
 extend type Query {
     getAllAccountGroups: [AccountGroup!]
     getAccountGroup(accountGroupID: UUID!): AccountGroup!
-    deleteAccountGroup(accountGroupID: UUID!): Boolean!
 }
 
 extend type Mutation {
     createAccountGroup(newAccountGroup: AccountGroupInput!): AccountGroup!
     updateAccountGroup(accountGroupID: UUID!, updatedAccountGroup: AccountGroupInput!): AccountGroup!
+    deleteAccountGroup(accountGroupID: UUID!): Boolean!
 }
