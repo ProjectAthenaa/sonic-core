@@ -300,7 +300,7 @@ func (tk *BTask) GetStatus() *module.Status {
 	return data
 }
 
-func (tk *BTask) SetStatus(s module.STATUS, msg interface{}) {
+func (tk *BTask) SetStatus(s module.STATUS, msg ...interface{}) {
 	go func() {
 		tk._statusLocker.Lock()
 		defer tk._statusLocker.Unlock()
@@ -308,8 +308,13 @@ func (tk *BTask) SetStatus(s module.STATUS, msg interface{}) {
 			tk.state = s
 		}
 
-		data, _ := json.Marshal(&msg)
-		tk.message = string(data)
+		if len(msg) == 1 {
+			data, _ := json.Marshal(&msg[0])
+			tk.message = string(data)
+		} else {
+			data, _ := json.Marshal(&msg)
+			tk.message = string(data)
+		}
 
 		tk.Process()
 	}()

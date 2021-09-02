@@ -23,7 +23,7 @@ type ITask interface {
 	Restart()
 
 	GetStatus() *module.Status
-	SetStatus(s module.STATUS, msg interface{})
+	SetStatus(s module.STATUS, msg ...interface{})
 	Process()
 	QuitChan() chan int32
 	FormatProxy() *string
