@@ -200,6 +200,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		DeleteAccountGroup  func(childComplexity int, accountGroupID string) int
+		GetAccountGroup     func(childComplexity int, accountGroupID string) int
 		GetAllAccountGroups func(childComplexity int) int
 		GetAllProxyLists    func(childComplexity int) int
 		GetAllTaskGroups    func(childComplexity int) int
@@ -359,6 +361,8 @@ type QueryResolver interface {
 	TestSuccessWebhook(ctx context.Context) (bool, error)
 	TestDeclineWebhook(ctx context.Context) (bool, error)
 	GetAllAccountGroups(ctx context.Context) ([]*ent.AccountGroup, error)
+	GetAccountGroup(ctx context.Context, accountGroupID string) (*ent.AccountGroup, error)
+	DeleteAccountGroup(ctx context.Context, accountGroupID string) (bool, error)
 	GetApp(ctx context.Context) (*ent.App, error)
 	GetProfile(ctx context.Context, profileID string) (*ent.Profile, error)
 	GetProfileGroup(ctx context.Context, profileGroupID string) (*ent.ProfileGroup, error)
@@ -1162,6 +1166,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ProxyTest.Status(childComplexity), true
 
+	case "Query.deleteAccountGroup":
+		if e.complexity.Query.DeleteAccountGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Query_deleteAccountGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DeleteAccountGroup(childComplexity, args["accountGroupID"].(string)), true
+
+	case "Query.getAccountGroup":
+		if e.complexity.Query.GetAccountGroup == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getAccountGroup_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAccountGroup(childComplexity, args["accountGroupID"].(string)), true
+
 	case "Query.getAllAccountGroups":
 		if e.complexity.Query.GetAllAccountGroups == nil {
 			break
@@ -1716,6 +1744,8 @@ input AccountGroupInput{
 
 extend type Query {
     getAllAccountGroups: [AccountGroup!]
+    getAccountGroup(accountGroupID: UUID!): AccountGroup!
+    deleteAccountGroup(accountGroupID: UUID!): Boolean!
 }
 
 extend type Mutation {
@@ -2537,6 +2567,36 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_deleteAccountGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["accountGroupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountGroupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accountGroupID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getAccountGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["accountGroupID"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountGroupID"))
+		arg0, err = ec.unmarshalNUUID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accountGroupID"] = arg0
 	return args, nil
 }
 
@@ -6077,6 +6137,90 @@ func (ec *executionContext) _Query_getAllAccountGroups(ctx context.Context, fiel
 	res := resTmp.([]*ent.AccountGroup)
 	fc.Result = res
 	return ec.marshalOAccountGroup2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAccountGroupᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getAccountGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getAccountGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAccountGroup(rctx, args["accountGroupID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.AccountGroup)
+	fc.Result = res
+	return ec.marshalNAccountGroup2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAccountGroup(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_deleteAccountGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_deleteAccountGroup_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DeleteAccountGroup(rctx, args["accountGroupID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getApp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -10846,6 +10990,34 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getAllAccountGroups(ctx, field)
+				return res
+			})
+		case "getAccountGroup":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAccountGroup(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "deleteAccountGroup":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_deleteAccountGroup(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "getApp":
