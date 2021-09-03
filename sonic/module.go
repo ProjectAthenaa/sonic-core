@@ -29,6 +29,9 @@ const (
 	FieldTypeKeywords FieldType = "KEYWORDS"
 	FieldTypeText     FieldType = "TEXT"
 	FieldTypeNumber   FieldType = "NUMBER"
+	FieldTypeGender   FieldType = "GENDER"
+	FieldTypeWidth    FieldType = "WIDTH"
+	FieldTypeShoeSize FieldType = "SHOE_SIZE"
 )
 
 func RegisterModule(module *Module) error {
