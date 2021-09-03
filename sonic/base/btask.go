@@ -250,6 +250,7 @@ func (tk *BTask) UpdateData(data *module.Data) {
 }
 
 func (tk *BTask) Process() {
+	defer tk._statusLocker.Unlock()
 	var payload *module.Status
 
 	if tk.state == module.STATUS_CHECKED_OUT {
