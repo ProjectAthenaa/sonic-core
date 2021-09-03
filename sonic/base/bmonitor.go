@@ -182,11 +182,5 @@ func (tk *BMonitor) NewRequest(method, url string, body []byte) (*fasttls.Reques
 }
 
 func (tk *BMonitor) Do(req *fasttls.Request) (*fasttls.Response, error) {
-	if _, ok := req.Headers["Proxy-Authorization"]; !ok && tk.proxy.authHeader != "" {
-		if tk._proxyLocker.TryLockWithContext(tk.Ctx) {
-			req.Headers["Proxy-Authorization"] = []string{fmt.Sprintf("Basic %s", tk.proxy.authHeader)}
-		}
-	}
-
 	return tk.Client.DoCtx(tk.Ctx, req)
 }
