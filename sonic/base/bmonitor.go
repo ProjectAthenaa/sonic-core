@@ -7,6 +7,7 @@ import (
 	monitor "github.com/ProjectAthenaa/sonic-core/protos/monitorController"
 	proxy_rater "github.com/ProjectAthenaa/sonic-core/protos/proxy-rater"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/go-redis/redis/v8"
 	"github.com/json-iterator/go"
@@ -76,7 +77,7 @@ func (tk *BMonitor) Listen() {
 	}
 }
 
-func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
+func (tk *BMonitor) Start(site product.Site, client proxy_rater.ProxyRaterClient) error {
 	tk.Ctx, tk.cancel = context.WithCancel(context.Background())
 
 	if tk.Data == nil {
@@ -98,8 +99,8 @@ func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
 	tk.proxyRedisKey = fmt.Sprintf("proxies:monitors:%s", tk.Data.Site)
 	tk._proxyLocker = lock.NewCASMutex()
 	tk.proxyClient = client
+	tk.site = string(site)
 	tk.Monitor.Channel = make(chan map[string]interface{})
-
 
 	var proxyWait sync.WaitGroup
 	proxyWait.Add(1)
