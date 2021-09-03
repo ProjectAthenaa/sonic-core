@@ -1880,6 +1880,9 @@ enum FieldType{
     KEYWORDS
     TEXT
     NUMBER
+    GENDER
+    WIDTH
+    SHOE_SIZE
 }
 
 type ModuleField{
