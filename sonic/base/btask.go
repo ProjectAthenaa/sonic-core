@@ -162,6 +162,9 @@ func (tk *BTask) Stop() error {
 		return face.ErrTaskIsNotRunning
 	}
 
+	tk._statusLocker.Lock()
+	defer tk._statusLocker.Unlock()
+
 	defer tk._cancelFunc()
 
 	close(tk._runningChan) //stop
