@@ -162,15 +162,13 @@ func (tk *BTask) Stop() error {
 		return face.ErrTaskIsNotRunning
 	}
 
-	tk.SetStatus(module.STATUS_STOPPED, "")
+	tk.SetStatus(module.STATUS_STOPPED)
 
 	tk._statusLocker.Lock()
 	defer tk._statusLocker.Unlock()
 
-	defer tk._cancelFunc()
 
 	close(tk._runningChan) //stop
-
 	close(tk.quitChan) //close quit chan
 	tk.running = false
 
@@ -307,8 +305,8 @@ func (tk *BTask) GetStatus() *module.Status {
 }
 
 func (tk *BTask) SetStatus(s module.STATUS, msg ...interface{}) {
+	tk._statusLocker.Lock()
 	go func() {
-		tk._statusLocker.Lock()
 		if s != tk.state {
 			tk.state = s
 		}
