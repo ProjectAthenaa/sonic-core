@@ -162,6 +162,8 @@ func (tk *BTask) Stop() error {
 		return face.ErrTaskIsNotRunning
 	}
 
+	tk.SetStatus(module.STATUS_STOPPED, "")
+
 	tk._statusLocker.Lock()
 	defer tk._statusLocker.Unlock()
 
@@ -173,9 +175,9 @@ func (tk *BTask) Stop() error {
 	tk.running = false
 
 	tk.Callback.OnStopping()
-	tk.SetStatus(module.STATUS_STOPPED, "")
 
 	atomic.AddInt32(&frame.Statistics.Running, -1)
+	tk._cancelFunc()
 	return nil
 }
 
