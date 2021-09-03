@@ -307,8 +307,8 @@ func (tk *BTask) GetStatus() *module.Status {
 }
 
 func (tk *BTask) SetStatus(s module.STATUS, msg ...interface{}) {
-	tk._statusLocker.Lock()
 	go func() {
+		tk._statusLocker.Lock()
 		if s != tk.state {
 			tk.state = s
 		}
