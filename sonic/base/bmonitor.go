@@ -26,6 +26,7 @@ var (
 	monitorCount = os.Getenv("MONITOR_TASK_COUNT")
 )
 
+
 type BMonitor struct {
 	Data     *monitor.Task
 	Ctx      context.Context
