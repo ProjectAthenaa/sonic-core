@@ -26,7 +26,6 @@ var (
 	monitorCount = os.Getenv("MONITOR_TASK_COUNT")
 )
 
-
 type BMonitor struct {
 	Data     *monitor.Task
 	Ctx      context.Context
@@ -78,6 +77,8 @@ func (tk *BMonitor) Listen() {
 }
 
 func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
+	tk.Ctx, tk.cancel = context.WithCancel(context.Background())
+
 	if tk.Data == nil {
 		return face.ErrTaskHasNoData
 	}
@@ -99,15 +100,11 @@ func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
 	tk.proxyClient = client
 	tk.Monitor.Channel = make(chan map[string]interface{})
 
-	if tk.cancel == nil {
-		tk.Ctx, tk.cancel = context.WithCancel(tk.Ctx)
-	}
 
 	var proxyWait sync.WaitGroup
 	proxyWait.Add(1)
 	go tk.proxyRefresher(&proxyWait)
 	proxyWait.Wait()
-
 
 	for i := 0; i < taskCount; i++ {
 		go tk.Callback.TaskLoop()
