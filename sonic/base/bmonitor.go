@@ -87,6 +87,7 @@ func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
 		return err
 	}
 
+	tk.Callback.OnStarting()
 
 	if tk.Client == nil {
 		tk.Client = fasttls.DefaultClient
@@ -107,7 +108,6 @@ func (tk *BMonitor) Start(client proxy_rater.ProxyRaterClient) error {
 	go tk.proxyRefresher(&proxyWait)
 	proxyWait.Wait()
 
-	tk.Callback.OnStarting()
 
 	for i := 0; i < taskCount; i++ {
 		go tk.Callback.TaskLoop()
