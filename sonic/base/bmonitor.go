@@ -41,7 +41,7 @@ type BMonitor struct {
 	redisKey      string
 	proxyRedisKey string
 	site          string
-	rdb           *redis.Client
+	rdb           redis.UniversalClient
 	proxy         proxy
 	proxyClient   proxy_rater.ProxyRaterClient
 
@@ -95,6 +95,7 @@ func (tk *BMonitor) Start(site product.Site, client proxy_rater.ProxyRaterClient
 		tk.Client = fasttls.DefaultClient
 	}
 
+	tk.rdb = core.Base.GetRedis("cache")
 	tk.redisKey = fmt.Sprintf(tk.Data.RedisChannel)
 	tk.proxyRedisKey = fmt.Sprintf("proxies:monitors:%s", tk.Data.Site)
 	tk._proxyLocker = lock.NewCASMutex()
@@ -131,6 +132,7 @@ func (tk *BMonitor) submit() {
 				continue
 			}
 
+			log.Info(string(payload))
 			tk.rdb.Publish(tk.Ctx, tk.redisKey, string(payload))
 		case <-tk.Ctx.Done():
 			return
@@ -144,6 +146,12 @@ func (tk *BMonitor) proxyRefresher(wg *sync.WaitGroup) {
 	var firstCalculated bool
 
 	for range time.Tick(time.Second) {
+		select {
+		case <-tk.Ctx.Done():
+			return
+		default:
+			break
+		}
 		tk._proxyLocker.Lock()
 		proxyResp, err := tk.proxyClient.GetProxy(tk.Ctx, &proxy_rater.Site{Value: tk.site})
 		if err != nil {
