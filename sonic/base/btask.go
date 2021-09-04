@@ -375,7 +375,7 @@ func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
 }
 
 
-func (tk *BTask) DoClientRequest(req *fasttls.Request) (*fasttls.Response, error) {
+func (tk *BTask) DoLocalhost(req *fasttls.Request) (*fasttls.Response, error) {
 	return tk.FastClient.ClientDo(tk.Ctx, req, tk.userID)
 }
 

@@ -2,6 +2,7 @@ package fasttls
 
 import (
 	"context"
+	"fmt"
 	client_proxy "github.com/ProjectAthenaa/sonic-core/protos/clientProxy"
 	http "github.com/useflyent/fhttp"
 	"google.golang.org/grpc"
@@ -31,6 +32,10 @@ func init() {
 }
 
 func (r *Request) convertToClient() *client_proxy.Request {
+	for _, cookie := range *r.Jar {
+		r.Headers["Cookie"][0] += fmt.Sprintf("%s=%s; ", cookie.Key(), cookie.Value())
+	}
+
 	return &client_proxy.Request{
 		URL:             r.URL,
 		Method:          string(r.Method),
