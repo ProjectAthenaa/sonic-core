@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
-	client_proxy "github.com/ProjectAthenaa/sonic-core/protos/clientProxy"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
@@ -375,15 +374,8 @@ func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
 	return tk.FastClient.DoCtx(tk.Ctx, req)
 }
 
-func (tk *BTask) NewClientRequest(method, url string, body []byte, useHttp2 ...bool) (*client_proxy.Request, error) {
-	if len(useHttp2) > 0 {
-		return tk.FastClient.NewClientRequest(fasttls.Method(method), url, body, useHttp2...)
-	}
 
-	return tk.FastClient.NewClientRequest(fasttls.Method(method), url, body, true)
-}
-
-func (tk *BTask) DoClientRequest(req *client_proxy.Request) (*fasttls.Response, error) {
+func (tk *BTask) DoClientRequest(req *fasttls.Request) (*fasttls.Response, error) {
 	return tk.FastClient.ClientDo(tk.Ctx, req, tk.userID)
 }
 
