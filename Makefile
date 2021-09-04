@@ -25,6 +25,9 @@ captchaCompile:
 proxyRaterCompile:
 		cd ./protos && protoc --go_out=./proxy-rater --go_opt=paths=source_relative --go-grpc_out=./proxy-rater --go-grpc_opt=paths=source_relative ./ProxyRater.proto
 
+clientProxyCompile:
+		cd ./protos && protoc --go_out=./clientProxy --go_opt=paths=source_relative --go-grpc_out=./clientProxy --go-grpc_opt=paths=source_relative ./ClientProxy.proto
+
 gqlCompile:
 	go get github.com/99designs/gqlgen/cmd@v0.13.0
 	cd ./sonic/database && go run github.com/99designs/gqlgen gen

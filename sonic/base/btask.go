@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
+	client_proxy "github.com/ProjectAthenaa/sonic-core/protos/clientProxy"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
+	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/prometheus/common/log"
@@ -42,6 +45,7 @@ type BTask struct {
 	state     module.STATUS //tag state
 	message   string        //tag more message
 	startTime time.Time
+	userID    string
 
 	//returnFields
 	ReturningFields *returningFields
@@ -146,6 +150,8 @@ func (tk *BTask) Start(data *module.Data) error {
 	}
 	tk.startTime = time.Now()
 	tk.FastClient = fasttls.NewClient(tls.HelloChrome_91, tk.FormatProxy())
+	u, _ := core.Base.GetPg("cache").Task.Query().Where(task.ID(sonic.UUIDParser(tk.ID))).FirstX(tk.Ctx).QueryTaskGroup().QueryApp().QueryUser().First(tk.Ctx)
+	tk.userID = u.ID.String()
 
 	go tk.Listen()
 	go tk.Callback.OnStarting()
@@ -167,9 +173,8 @@ func (tk *BTask) Stop() error {
 	tk._statusLocker.Lock()
 	defer tk._statusLocker.Unlock()
 
-
 	close(tk._runningChan) //stop
-	close(tk.quitChan) //close quit chan
+	close(tk.quitChan)     //close quit chan
 	tk.running = false
 
 	tk.Callback.OnStopping()
@@ -359,7 +364,7 @@ func (tk *BTask) Restart() {
 }
 
 func (tk *BTask) NewRequest(method, url string, body []byte, useHttp2 ...bool) (*fasttls.Request, error) {
-	if len(useHttp2) > 0{
+	if len(useHttp2) > 0 {
 		return tk.FastClient.NewRequest(fasttls.Method(method), url, body, useHttp2...)
 	}
 
@@ -368,6 +373,18 @@ func (tk *BTask) NewRequest(method, url string, body []byte, useHttp2 ...bool) (
 
 func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
 	return tk.FastClient.DoCtx(tk.Ctx, req)
+}
+
+func (tk *BTask) NewClientRequest(method, url string, body []byte, useHttp2 ...bool) (*client_proxy.Request, error) {
+	if len(useHttp2) > 0 {
+		return tk.FastClient.NewClientRequest(fasttls.Method(method), url, body, useHttp2...)
+	}
+
+	return tk.FastClient.NewClientRequest(fasttls.Method(method), url, body, true)
+}
+
+func (tk *BTask) DoClientRequest(req *client_proxy.Request) (*fasttls.Response, error) {
+	return tk.FastClient.ClientDo(tk.Ctx, req, tk.userID)
 }
 
 //#region need override methods by callback

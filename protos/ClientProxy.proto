@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "./client_proxy";
+
+
+service Proxy{
+  rpc Do(Request) returns (Response){};
+}
+
+message Request{
+  string URL = 1;
+  string Method = 2;
+  optional string Proxy = 3;
+  map<string, string> Headers = 4;
+  bytes Data = 5;
+  bool FollowRedirects = 6;
+  optional int64 Timeout = 7;
+  bool UseHttp2 = 8;
+  string ServerName = 9;
+  bool UseMobile = 10;
+}
+
+message Response{
+  int32 StatusCode = 1;
+  bytes Body = 2;
+  map<string, string> Headers = 3;
+  int64 TimeTaken = 4;
+  bool IsHttp2 = 5;
+  int64 ContentLength = 6;
+}

@@ -57,3 +57,13 @@ func (r *Request) SetHeaders(headers Headers) {
 func (r *Request) SetProxy(proxy *string) {
 	r.Proxy = proxy
 }
+
+func (h Headers) convertToSingleMap() map[string]string {
+	var headers = map[string]string{}
+
+	for k, v := range h {
+		headers[k] = v[0]
+	}
+
+	return headers
+}
