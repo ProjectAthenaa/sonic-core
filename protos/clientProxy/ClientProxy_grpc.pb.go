@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProxyClient interface {
 	Do(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	Register(ctx context.Context, opts ...grpc.CallOption) (Proxy_RegisterClient, error)
 }
 
 type proxyClient struct {
@@ -38,11 +39,43 @@ func (c *proxyClient) Do(ctx context.Context, in *Request, opts ...grpc.CallOpti
 	return out, nil
 }
 
+func (c *proxyClient) Register(ctx context.Context, opts ...grpc.CallOption) (Proxy_RegisterClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Proxy_ServiceDesc.Streams[0], "/Proxy/Register", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &proxyRegisterClient{stream}
+	return x, nil
+}
+
+type Proxy_RegisterClient interface {
+	Send(*Request) error
+	Recv() (*Response, error)
+	grpc.ClientStream
+}
+
+type proxyRegisterClient struct {
+	grpc.ClientStream
+}
+
+func (x *proxyRegisterClient) Send(m *Request) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *proxyRegisterClient) Recv() (*Response, error) {
+	m := new(Response)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ProxyServer is the server API for Proxy service.
 // All implementations must embed UnimplementedProxyServer
 // for forward compatibility
 type ProxyServer interface {
 	Do(context.Context, *Request) (*Response, error)
+	Register(Proxy_RegisterServer) error
 	mustEmbedUnimplementedProxyServer()
 }
 
@@ -52,6 +85,9 @@ type UnimplementedProxyServer struct {
 
 func (UnimplementedProxyServer) Do(context.Context, *Request) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Do not implemented")
+}
+func (UnimplementedProxyServer) Register(Proxy_RegisterServer) error {
+	return status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 func (UnimplementedProxyServer) mustEmbedUnimplementedProxyServer() {}
 
@@ -84,6 +120,32 @@ func _Proxy_Do_Handler(srv interface{}, ctx context.Context, dec func(interface{
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Proxy_Register_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ProxyServer).Register(&proxyRegisterServer{stream})
+}
+
+type Proxy_RegisterServer interface {
+	Send(*Response) error
+	Recv() (*Request, error)
+	grpc.ServerStream
+}
+
+type proxyRegisterServer struct {
+	grpc.ServerStream
+}
+
+func (x *proxyRegisterServer) Send(m *Response) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *proxyRegisterServer) Recv() (*Request, error) {
+	m := new(Request)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // Proxy_ServiceDesc is the grpc.ServiceDesc for Proxy service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,6 +158,13 @@ var Proxy_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Proxy_Do_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Register",
+			Handler:       _Proxy_Register_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "ClientProxy.proto",
 }

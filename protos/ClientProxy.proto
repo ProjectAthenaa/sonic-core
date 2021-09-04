@@ -5,6 +5,7 @@ option go_package = "./client_proxy";
 
 service Proxy{
   rpc Do(Request) returns (Response){};
+  rpc Register(stream Request) returns (stream Response){};
 }
 
 message Request{
@@ -18,6 +19,7 @@ message Request{
   bool UseHttp2 = 8;
   string ServerName = 9;
   bool UseMobile = 10;
+  string TaskID = 11;
 }
 
 message Response{
@@ -27,4 +29,5 @@ message Response{
   int64 TimeTaken = 4;
   bool IsHttp2 = 5;
   int64 ContentLength = 6;
+  string TaskID = 12;
 }
