@@ -49,8 +49,8 @@ func (c *proxyClient) Register(ctx context.Context, opts ...grpc.CallOption) (Pr
 }
 
 type Proxy_RegisterClient interface {
-	Send(*Request) error
-	Recv() (*Response, error)
+	Send(*Response) error
+	Recv() (*Request, error)
 	grpc.ClientStream
 }
 
@@ -58,12 +58,12 @@ type proxyRegisterClient struct {
 	grpc.ClientStream
 }
 
-func (x *proxyRegisterClient) Send(m *Request) error {
+func (x *proxyRegisterClient) Send(m *Response) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *proxyRegisterClient) Recv() (*Response, error) {
-	m := new(Response)
+func (x *proxyRegisterClient) Recv() (*Request, error) {
+	m := new(Request)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -125,8 +125,8 @@ func _Proxy_Register_Handler(srv interface{}, stream grpc.ServerStream) error {
 }
 
 type Proxy_RegisterServer interface {
-	Send(*Response) error
-	Recv() (*Request, error)
+	Send(*Request) error
+	Recv() (*Response, error)
 	grpc.ServerStream
 }
 
@@ -134,12 +134,12 @@ type proxyRegisterServer struct {
 	grpc.ServerStream
 }
 
-func (x *proxyRegisterServer) Send(m *Response) error {
+func (x *proxyRegisterServer) Send(m *Request) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *proxyRegisterServer) Recv() (*Request, error) {
-	m := new(Request)
+func (x *proxyRegisterServer) Recv() (*Response, error) {
+	m := new(Response)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
