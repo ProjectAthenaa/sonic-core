@@ -5,7 +5,7 @@ option go_package = "./client_proxy";
 
 service Proxy{
   rpc Do(Request) returns (Response){};
-  rpc Register(stream Request) returns (stream Response){};
+  rpc Register(stream Response) returns (stream Request){};
 }
 
 message Request{
