@@ -62,19 +62,10 @@ func convertFromClient(r *client_proxy.Response) *Response {
 	}
 }
 
-func (c *Client) NewClientRequest(method Method, url string, body []byte, useHttp2 ...bool) (*client_proxy.Request, error) {
-	req, err := c.NewRequest(method, url, body, useHttp2...)
-	if err != nil {
-		return nil, err
-	}
-
-	return req.convertToClient(), nil
-}
-
-func (c *Client) ClientDo(ctx context.Context, req *client_proxy.Request, userID string) (*Response, error) {
+func (c *Client) ClientDo(ctx context.Context, req *Request, userID string) (*Response, error) {
 	ctx = metadata.AppendToOutgoingContext(ctx, "UserID", userID)
 
-	resp, err := proxyClient.Do(ctx, req)
+	resp, err := proxyClient.Do(ctx, req.convertToClient())
 	if err != nil {
 		return nil, err
 	}
