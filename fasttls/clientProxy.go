@@ -2,6 +2,7 @@ package fasttls
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	certificate_module "github.com/ProjectAthenaa/sonic-core/certificate"
 	client_proxy "github.com/ProjectAthenaa/sonic-core/protos/clientProxy"
@@ -9,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -84,7 +86,8 @@ func (c *Client) ClientDo(ctx context.Context, req *Request, userID string) (*Re
 
 	resp, err := proxyClient.Do(ctx, req.convertToClient())
 	if err != nil {
-		return nil, err
+		realErr := strings.Split(err.Error(), "Unknown desc =")[1]
+		return nil, errors.New(realErr)
 	}
 
 	var convertedResp *Response
