@@ -9,6 +9,8 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/fasttls/fasthttp"
 )
 
+var jarMutexes = sync.Map{}
+
 var cookiePool = sync.Pool{
 	New: func() interface{} {
 		return &CookieJar{}
@@ -17,11 +19,16 @@ var cookiePool = sync.Pool{
 
 // AcquireCookieJar returns an empty CookieJar object from pool
 func AcquireCookieJar() *CookieJar {
-	return cookiePool.Get().(*CookieJar)
+	cj := cookiePool.Get().(*CookieJar)
+	jarMutexes.Store(cj, &sync.Mutex{})
+	return cj
 }
 
 // ReleaseCookieJar returns CookieJar to the pool
 func ReleaseCookieJar(c *CookieJar) {
+	mu, _ := jarMutexes.LoadAndDelete(c)
+	mu.(*sync.Mutex).Lock()
+	defer mu.(*sync.Mutex).Unlock()
 	c.Release()
 	cookiePool.Put(c)
 }
@@ -35,11 +42,15 @@ type CookieJar map[string]*fasthttp.Cookie
 //
 // This function can replace an existent cookie
 func (cj *CookieJar) Set(key, value string) {
+	cj.lock()
+	defer cj.unlock()
 	setCookie(cj, key, value)
 }
 
 // Get returns and delete a value from cookiejar.
 func (cj *CookieJar) Get() *fasthttp.Cookie {
+	cj.lock()
+	defer cj.unlock()
 	for k, v := range *cj {
 		delete(*cj, k)
 		return v
@@ -51,6 +62,8 @@ func (cj *CookieJar) Get() *fasthttp.Cookie {
 //
 // This function can replace an existent cookie.
 func (cj *CookieJar) SetBytesK(key []byte, value string) {
+	cj.lock()
+	defer cj.unlock()
 	setCookie(cj, b2s(key), value)
 }
 
@@ -58,6 +71,8 @@ func (cj *CookieJar) SetBytesK(key []byte, value string) {
 //
 // This function can replace an existent cookie.
 func (cj *CookieJar) SetBytesV(key string, value []byte) {
+	cj.lock()
+	defer cj.unlock()
 	setCookie(cj, key, b2s(value))
 }
 
@@ -65,10 +80,14 @@ func (cj *CookieJar) SetBytesV(key string, value []byte) {
 //
 // This function can replace an existent cookie.
 func (cj *CookieJar) SetBytesKV(key, value []byte) {
+	cj.lock()
+	defer cj.unlock()
 	setCookie(cj, b2s(key), b2s(value))
 }
 
 func setCookie(cj *CookieJar, key, value string) {
+	cj.lock()
+	defer cj.unlock()
 	c, ok := (*cj)[key]
 	if !ok {
 		c = fasthttp.AcquireCookie()
@@ -82,6 +101,8 @@ func setCookie(cj *CookieJar, key, value string) {
 //
 // After that you can use Peek or Get function to get cookie value.
 func (cj *CookieJar) Put(cookie *fasthttp.Cookie) {
+	cj.lock()
+	defer cj.unlock()
 	c, ok := (*cj)[b2s(cookie.Key())]
 	if ok {
 		fasthttp.ReleaseCookie(c)
@@ -93,11 +114,15 @@ func (cj *CookieJar) Put(cookie *fasthttp.Cookie) {
 //
 // This function does not delete cookie
 func (cj *CookieJar) Peek(key string) *fasthttp.Cookie {
+	cj.lock()
+	defer cj.unlock()
 	return (*cj)[key]
 }
 
 // Release releases all cookie values.
 func (cj *CookieJar) Release() {
+	cj.lock()
+	defer cj.unlock()
 	for k := range *cj {
 		cj.ReleaseCookie(k)
 	}
@@ -105,6 +130,8 @@ func (cj *CookieJar) Release() {
 
 // ReleaseCookie releases a cookie specified by parsed key.
 func (cj *CookieJar) ReleaseCookie(key string) {
+	cj.lock()
+	defer cj.unlock()
 	c, ok := (*cj)[key]
 	if ok {
 		fasthttp.ReleaseCookie(c)
@@ -114,6 +141,8 @@ func (cj *CookieJar) ReleaseCookie(key string) {
 
 // PeekValue returns value of specified cookie-key.
 func (cj *CookieJar) PeekValue(key string) []byte {
+	cj.lock()
+	defer cj.unlock()
 	c, ok := (*cj)[key]
 	if ok {
 		return c.Value()
@@ -123,6 +152,8 @@ func (cj *CookieJar) PeekValue(key string) []byte {
 
 // ReadResponse gets all Response cookies reading Set-Cookie header.
 func (cj *CookieJar) ReadResponse(r *fasthttp.Response, domain string) {
+	cj.lock()
+	defer cj.unlock()
 	r.Header.VisitAllCookie(func(key, value []byte) {
 		cookie := fasthttp.AcquireCookie()
 		cookie.ParseBytes(value)
@@ -133,6 +164,8 @@ func (cj *CookieJar) ReadResponse(r *fasthttp.Response, domain string) {
 
 // ReadRequest gets all cookies from a Request reading Set-Cookie header.
 func (cj *CookieJar) ReadRequest(r *fasthttp.Request) {
+	cj.lock()
+	defer cj.unlock()
 	r.Header.VisitAllCookie(func(key, value []byte) {
 		cookie := fasthttp.AcquireCookie()
 		cookie.ParseBytes(value)
@@ -142,6 +175,8 @@ func (cj *CookieJar) ReadRequest(r *fasthttp.Request) {
 
 // WriteTo writes all cookies representation to w.
 func (cj *CookieJar) WriteTo(w io.Writer) (n int64, err error) {
+	cj.lock()
+	defer cj.unlock()
 	for _, c := range *cj {
 		nn, err := c.WriteTo(w)
 		n += nn
@@ -154,6 +189,8 @@ func (cj *CookieJar) WriteTo(w io.Writer) (n int64, err error) {
 
 // FillRequest dumps all cookies stored in cj into Request adding this values to Cookie header.
 func (cj *CookieJar) FillRequest(r *fasthttp.Request) {
+	cj.lock()
+	defer cj.unlock()
 	for _, c := range *cj {
 		expires := c.Expire()
 		if !expires.IsZero() {
@@ -190,6 +227,8 @@ func (cj *CookieJar) FillRequest(r *fasthttp.Request) {
 
 // FillResponse dumps all cookies stored in cj into Response adding this values to Cookie header.
 func (cj *CookieJar) FillResponse(r *fasthttp.Response) {
+	cj.lock()
+	defer cj.unlock()
 	for _, c := range *cj {
 		r.Header.SetCookie(c)
 	}
@@ -197,4 +236,14 @@ func (cj *CookieJar) FillResponse(r *fasthttp.Response) {
 
 func b2s(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+func (cj *CookieJar) lock()  {
+	mu, _ := jarMutexes.Load(cj)
+	mu.(*sync.Mutex).Lock()
+}
+
+func (cj *CookieJar) unlock()  {
+	mu, _ := jarMutexes.Load(cj)
+	mu.(*sync.Mutex).Unlock()
 }
