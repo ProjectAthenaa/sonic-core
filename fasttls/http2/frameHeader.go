@@ -6,7 +6,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/ProjectAthenaa/sonic-core/fasttls/http2/http2utils"
+	"github.com/kiwiedcase/http2/http2utils"
 )
 
 const (

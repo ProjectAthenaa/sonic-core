@@ -1,6 +1,6 @@
 // +build gofuzz
 
-package url
+package fuzz
 
 import (
 	"bytes"

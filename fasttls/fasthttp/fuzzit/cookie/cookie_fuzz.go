@@ -1,6 +1,6 @@
 // +build gofuzz
 
-package cookie
+package fuzz
 
 import (
 	"bytes"

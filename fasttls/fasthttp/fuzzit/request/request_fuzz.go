@@ -1,6 +1,6 @@
 // +build gofuzz
 
-package request
+package fuzz
 
 import (
 	"bufio"

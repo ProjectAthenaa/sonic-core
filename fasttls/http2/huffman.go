@@ -112,7 +112,7 @@ func (node *huffmanNode) add(sym byte, code uint32, length uint8) {
 	}
 }
 
-// huffmanCodes have been copied from https://github.com/golang/net/blob/master/fasttls/http2hpack/tables.go#L203
+// huffmanCodes have been copied from https://github.com/golang/net/blob/master/http2/hpack/tables.go#L203
 var huffmanCodes = [256]uint32{
 	0x1ff8, 0x7fffd8, 0xfffffe2, 0xfffffe3,
 	0xfffffe4, 0xfffffe5, 0xfffffe6, 0xfffffe7,
