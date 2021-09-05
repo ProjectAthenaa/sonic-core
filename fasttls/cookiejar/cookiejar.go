@@ -86,8 +86,8 @@ func (cj *CookieJar) SetBytesKV(key, value []byte) {
 }
 
 func setCookie(cj *CookieJar, key, value string) {
-	cj.lock()
-	defer cj.unlock()
+	//cj.lock()
+	//defer cj.unlock()
 	c, ok := (*cj)[key]
 	if !ok {
 		c = fasthttp.AcquireCookie()
