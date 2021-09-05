@@ -21,7 +21,7 @@ func AuthenticateUser(user *ent.User) string {
 		LicenseID: user.QueryLicense().FirstX(ctx).ID,
 		AppID:     user.QueryApp().FirstX(ctx).ID,
 		SessionID: uuid.New(),
-		LoginTime: time.Now().Add(time.Hour * 50000).Unix(),
+		LoginTime: time.Now().Add(time.Hour * 50000),
 	}
 
 	rdb := core.Base.GetRedis("cache")
