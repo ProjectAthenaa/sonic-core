@@ -86,7 +86,7 @@ func (c *Client) ClientDo(ctx context.Context, req *Request, userID string) (*Re
 
 	resp, err := proxyClient.Do(ctx, req.convertToClient())
 	if err != nil {
-		realErr := strings.Split(err.Error(), "Unknown desc =")[1]
+		realErr := strings.Split(err.Error(), "Unknown desc = ")[1]
 		return nil, errors.New(realErr)
 	}
 
