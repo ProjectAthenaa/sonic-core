@@ -17,6 +17,7 @@ enum SITE{
 
 message Site{
   SITE Value = 1;
+  optional string ResString = 2;
 }
 
 message Headers{

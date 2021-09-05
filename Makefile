@@ -14,7 +14,7 @@ monitorControllerCompile:
 	cd ./protos && protoc --go_out=./monitorController --go_opt=paths=source_relative --go-grpc_out=./monitorController --go-grpc_opt=paths=source_relative ./MonitorController.proto
 
 shapeCompile:
-	cd sonic/antibots/shape && protoc --go_out=./ --go_opt=paths=source_relative --go-grpc_out=./ --go-grpc_opt=paths=source_relative ./Shape.proto
+	cd sonic/antibots/shape && protoc --go_out=./ --go_opt=paths=source_relative --go-grpc_out=./ --go-grpc_opt=paths=source_relative ./Shape.proto --experimental_allow_proto3_optional
 
 taskControllerCompile:
 	cd ./protos && protoc --go_out=./taskController --go_opt=paths=source_relative --go-grpc_out=./taskController --go-grpc_opt=paths=source_relative ./Module.proto ./TasksController.proto
