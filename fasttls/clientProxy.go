@@ -3,6 +3,7 @@ package fasttls
 import (
 	"context"
 	"fmt"
+	certificate_module "github.com/ProjectAthenaa/sonic-core/certificate"
 	client_proxy "github.com/ProjectAthenaa/sonic-core/protos/clientProxy"
 	http "github.com/useflyent/fhttp"
 	"google.golang.org/grpc"
@@ -14,8 +15,9 @@ import (
 var proxyClient client_proxy.ProxyClient
 
 func init() {
-	if os.Getenv("DEBUG") == "1" {
-		conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure())
+	if os.Getenv("POD_NAME") == "" {
+		certs, _ := certificate_module.LoadClientTestCertificate()
+		conn, err := grpc.Dial("secure.athenabot.com:443", grpc.WithTransportCredentials(certs))
 		if err != nil {
 			panic(err)
 		}
@@ -23,7 +25,7 @@ func init() {
 		return
 	}
 
-	conn, err := grpc.Dial("client-proxy.general.svc.cluster.local:3000", grpc.WithInsecure())
+	conn, err := grpc.Dial("proxy-client-service.general.svc.cluster.local:3000", grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
