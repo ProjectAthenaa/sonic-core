@@ -50,7 +50,7 @@ func Connect(pgURL string) *ent.Client {
 
 					site, _ := m.Site()
 
-					setKey := fmt.Sprintf("accounts:%s:%s", strings.ToLower(string(site))
+					setKey := fmt.Sprintf("accounts:%s:%s", strings.ToLower(string(site)))
 
 					for username, password := range accounts {
 						rdb.SAdd(ctx, setKey, user.ID.String(), fmt.Sprintf("%s:%s", username, password))
