@@ -35,6 +35,9 @@ func init() {
 
 func (r *Request) convertToClient() *client_proxy.Request {
 	if r.Jar != nil {
+		if r.Headers == nil{
+			r.Headers = Headers{}
+		}
 		if _, ok := r.Headers["Cookie"]; !ok{
 			r.Headers["Cookie"] = []string{""}
 		}
