@@ -6,9 +6,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
-	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/prometheus/common/log"
@@ -149,8 +147,7 @@ func (tk *BTask) Start(data *module.Data) error {
 	}
 	tk.startTime = time.Now()
 	tk.FastClient = fasttls.NewClient(tls.HelloChrome_91, tk.FormatProxy())
-	u, _ := core.Base.GetPg("cache").Task.Query().Where(task.ID(sonic.UUIDParser(tk.ID))).FirstX(tk.Ctx).QueryTaskGroup().QueryApp().QueryUser().First(tk.Ctx)
-	tk.userID = u.ID.String()
+	tk.userID = tk.Data.Metadata["UserID"]
 
 	go tk.Listen()
 	go tk.Callback.OnStarting()
@@ -373,7 +370,6 @@ func (tk *BTask) NewRequest(method, url string, body []byte, useHttp2 ...bool) (
 func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
 	return tk.FastClient.DoCtx(tk.Ctx, req)
 }
-
 
 func (tk *BTask) DoLocalhost(req *fasttls.Request) (*fasttls.Response, error) {
 	return tk.FastClient.ClientDo(tk.Ctx, req, tk.userID)
