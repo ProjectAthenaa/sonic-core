@@ -51,6 +51,7 @@ func Connect(pgURL string) *ent.Client {
 					site, _ := m.Site()
 
 					setKey := fmt.Sprintf("accounts:%s:%s", strings.ToLower(string(site)))
+					fmt.Println("creating account group: ", setKey)
 
 					for username, password := range accounts {
 						rdb.SAdd(ctx, setKey, user.ID.String(), fmt.Sprintf("%s:%s", username, password))
