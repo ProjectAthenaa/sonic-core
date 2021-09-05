@@ -34,8 +34,10 @@ func init() {
 }
 
 func (r *Request) convertToClient() *client_proxy.Request {
-	for _, cookie := range *r.Jar {
-		r.Headers["Cookie"][0] += fmt.Sprintf("%s=%s; ", cookie.Key(), cookie.Value())
+	if r.Jar != nil {
+		for _, cookie := range *r.Jar {
+			r.Headers["Cookie"][0] += fmt.Sprintf("%s=%s; ", cookie.Key(), cookie.Value())
+		}
 	}
 
 	return &client_proxy.Request{
