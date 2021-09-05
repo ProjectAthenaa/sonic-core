@@ -84,3 +84,7 @@ func (c *Client) DoCtx(ctx context.Context, request *Request) (*Response, error)
 		}
 	}
 }
+
+func (c *Client) ResetH2() {
+	c.client = nil
+}
