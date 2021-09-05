@@ -35,6 +35,11 @@ func init() {
 
 func (r *Request) convertToClient() *client_proxy.Request {
 	if r.Jar != nil {
+		if _, ok := r.Headers["Cookie"]; !ok{
+			r.Headers["Cookie"] = []string{}
+		}
+
+
 		for _, cookie := range *r.Jar {
 			r.Headers["Cookie"][0] += fmt.Sprintf("%s=%s; ", cookie.Key(), cookie.Value())
 		}
