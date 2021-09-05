@@ -1,11 +1,10 @@
 package fasttls
 
 import (
-	"net"
-
 	"github.com/ProjectAthenaa/sonic-core/fasttls/fasthttp"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/http2"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
+	"net"
 )
 
 func CustomDialHttp2(clientHello tls.ClientHelloID, serverName string, sslCertificateVerifyCallback SslCertificateVerifyCallback) func(addr string) (net.Conn, error) {

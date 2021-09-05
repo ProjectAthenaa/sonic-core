@@ -18,7 +18,7 @@ import (
 var defaultHttpPort = 80
 var defaultHttpsPort = 443
 var http2NotSupported sync.Map
-var connections sync.Map
+var dialFuncs sync.Map
 
 func NewJar() *cookiejar.CookieJar {
 	return cookiejar.AcquireCookieJar()
@@ -56,36 +56,38 @@ func applyDefaults(requestObj *Request) {
 		requestObj.Headers = Headers{}
 	}
 
-	if _, ok := requestObj.Headers[PseudoHeaderOrderKey]; !ok {
-		requestObj.Headers[PseudoHeaderOrderKey] = []string{
-			PseudoMethod,
-			PseudoAuthority,
-			PseudoScheme,
-			PseudoPath,
-		}
-	}
-
-	contains := func(key string, src []string) bool {
-		for _, str := range src {
-			if strings.ToLower(str) == strings.ToLower(key) {
-				return true
+	if requestObj.UseHttp2 {
+		if _, ok := requestObj.Headers[PseudoHeaderOrderKey]; !ok {
+			requestObj.Headers[PseudoHeaderOrderKey] = []string{
+				PseudoMethod,
+				PseudoAuthority,
+				PseudoScheme,
+				PseudoPath,
 			}
 		}
-		return false
-	}
 
-	if pseudoHeaders, ok := requestObj.Headers[PseudoHeaderOrderKey]; ok {
-		if !contains(PseudoMethod, pseudoHeaders) {
-			pseudoHeaders = append(pseudoHeaders, PseudoMethod)
+		contains := func(key string, src []string) bool {
+			for _, str := range src {
+				if strings.ToLower(str) == strings.ToLower(key) {
+					return true
+				}
+			}
+			return false
 		}
-		if !contains(PseudoAuthority, pseudoHeaders) {
-			pseudoHeaders = append(pseudoHeaders, PseudoAuthority)
-		}
-		if !contains(PseudoScheme, pseudoHeaders) {
-			pseudoHeaders = append(pseudoHeaders, PseudoScheme)
-		}
-		if !contains(PseudoPath, pseudoHeaders) {
-			pseudoHeaders = append(pseudoHeaders, PseudoPath)
+
+		if pseudoHeaders, ok := requestObj.Headers[PseudoHeaderOrderKey]; ok {
+			if !contains(PseudoMethod, pseudoHeaders) {
+				pseudoHeaders = append(pseudoHeaders, PseudoMethod)
+			}
+			if !contains(PseudoAuthority, pseudoHeaders) {
+				pseudoHeaders = append(pseudoHeaders, PseudoAuthority)
+			}
+			if !contains(PseudoScheme, pseudoHeaders) {
+				pseudoHeaders = append(pseudoHeaders, PseudoScheme)
+			}
+			if !contains(PseudoPath, pseudoHeaders) {
+				pseudoHeaders = append(pseudoHeaders, PseudoPath)
+			}
 		}
 	}
 }
@@ -111,29 +113,51 @@ func (c *Client) setupDialer(requestObj *Request, hc *fasthttp.HostClient) {
 	}
 	if requestObj.UseHttp2 {
 		if requestObj.Proxy != nil {
-			if v, ok := connections.Load(cacheKey); ok {
+			if v, ok := dialFuncs.Load(cacheKey); ok {
 				hc.Dial = v.(fasthttp.DialFunc)
 				return
 			}
 			hc.Dial = CustomDialHttp2WithProxy(c.helloID, *requestObj.Proxy, requestObj.ServerName, requestObj.SSLCertVerifyCallback, 30*time.Second)
-			connections.Store(cacheKey, hc.Dial)
+			dialFuncs.Store(cacheKey, hc.Dial)
 		} else {
-			if v, ok := connections.Load(cacheKey); ok {
+			if v, ok := dialFuncs.Load(cacheKey); ok {
 				hc.Dial = v.(fasthttp.DialFunc)
 				return
 			}
 			hc.Dial = CustomDialHttp2(c.helloID, requestObj.ServerName, requestObj.SSLCertVerifyCallback)
-			connections.Store(cacheKey, hc.Dial)
+			dialFuncs.Store(cacheKey, hc.Dial)
 		}
 	} else {
 		if requestObj.Proxy != nil {
-			if v, ok := connections.Load(*requestObj.Proxy); ok {
+			if v, ok := dialFuncs.Load(*requestObj.Proxy); ok {
 				hc.Dial = v.(fasthttp.DialFunc)
 				return
 			}
 			hc.Dial = fasthttpproxy.FasthttpHTTPDialer(*requestObj.Proxy)
-			connections.Store(cacheKey, hc.Dial)
+			dialFuncs.Store(cacheKey, hc.Dial)
 		}
+	}
+}
+
+func setupRequest(req *fasthttp.Request, requestObj *Request) {
+	req.SetRequestURI(requestObj.URL)
+	req.URI() // fasthttp bug? force parse
+	req.Header.SetMethod(string(requestObj.Method))
+	if requestObj.ServerName != "" {
+		req.SetHost(requestObj.ServerName)
+	}
+	if requestObj.UseHttp2 {
+		setRequestPseudoHeaders(req, requestObj.Headers)
+	}
+
+	if requestObj.Headers != nil {
+		setRequestHeaders(req, requestObj.Headers)
+	}
+	if requestObj.Jar != nil {
+		requestObj.Jar.FillRequest(req)
+	}
+	if requestObj.Data != nil {
+		req.SetBodyRaw(requestObj.Data)
 	}
 }
 
@@ -159,50 +183,7 @@ func setRequestPseudoHeaders(req *fasthttp.Request, headers Headers) {
 	}
 }
 
-func setupRequest(req *fasthttp.Request, requestObj *Request) {
-	req.SetRequestURI(requestObj.URL)
-	req.URI() // fasthttp bug? force parse
-	req.Header.SetMethod(string(requestObj.Method))
-	if requestObj.ServerName != "" {
-		req.SetHost(requestObj.ServerName)
-	}
-
-	if requestObj.UseHttp2 {
-		setRequestPseudoHeaders(req, requestObj.Headers)
-	}
-
-	if requestObj.Headers != nil {
-		setRequestHeaders(req, requestObj.Headers)
-	}
-	if requestObj.Jar != nil {
-		requestObj.Jar.FillRequest(req)
-	}
-	if requestObj.Data != nil {
-		req.SetBodyRaw(requestObj.Data)
-	}
-}
-
 func setRequestHeaders(req *fasthttp.Request, headers Headers) {
-	if pKeyOrder, ok := headers[PseudoHeaderOrderKey]; ok {
-		for _, key := range pKeyOrder {
-			switch key {
-			case PseudoAuthority:
-				req.Header.Set(key, string(req.URI().Host()))
-			case PseudoMethod:
-				req.Header.Set(key, string(req.Header.Method()))
-			case PseudoPath:
-				req.Header.Set(key, string(req.URI().RequestURI()))
-			case PseudoScheme:
-				req.Header.Set(key, string(req.URI().Scheme()))
-			}
-		}
-	} else {
-		req.Header.Set(PseudoAuthority, string(req.URI().Host()))
-		req.Header.Set(PseudoMethod, string(req.Header.Method()))
-		req.Header.Set(PseudoPath, string(req.URI().RequestURI()))
-		req.Header.Set(PseudoScheme, string(req.URI().Scheme()))
-	}
-
 	if keyOrder, ok := headers[HeaderOrderKey]; ok {
 		for _, key := range keyOrder {
 			if valArr, ok := headers[key]; ok {
@@ -320,7 +301,6 @@ func (c *Client) doRequest(requestObj *Request) (*Response, error) {
 		IsHttp2:         requestObj.UseHttp2,
 		Http2Connection: persistedConnection,
 		ContentLength:   int64(len(responseBytes)),
-		Original:        resp,
 	}, nil
 }
 

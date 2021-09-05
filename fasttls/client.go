@@ -46,6 +46,7 @@ func (c *Client) NewRequest(method Method, url string, body []byte, useHttp2 ...
 		Proxy:           c.proxy,
 		Data:            body,
 		Http2Connection: c.client,
+		UseHttp2:        true,
 	}
 	if len(useHttp2) > 0 {
 		req.UseHttp2 = useHttp2[0]

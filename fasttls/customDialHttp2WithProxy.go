@@ -4,13 +4,12 @@ import (
 	"bufio"
 	"encoding/base64"
 	"fmt"
-	"net"
-	"strings"
-	"time"
-
 	"github.com/ProjectAthenaa/sonic-core/fasttls/fasthttp"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/http2"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
+	"net"
+	"strings"
+	"time"
 )
 
 func CustomDialHttp2WithProxy(clientHello tls.ClientHelloID, proxy, serverName string, sslCertificateVerifyCallback SslCertificateVerifyCallback, timeout time.Duration) fasthttp.DialFunc {
