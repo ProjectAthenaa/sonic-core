@@ -98,7 +98,8 @@ func Connect(pgURL string) *ent.Client {
 					}
 
 					for _, deletion := range toDelete {
-						rdb.Set(ctx, deletion, "1", time.Hour*168)
+						rdb.Set(ctx, fmt.Sprintf("accounts:delete:%s", deletion), "1", time.Hour*168)
+						rdb.SRem(ctx, setKey, deletion)
 					}
 
 					for _, account := range toSet {
