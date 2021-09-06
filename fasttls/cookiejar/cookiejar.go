@@ -91,6 +91,8 @@ func setCookie(cj *CookieJar, key, value string) {
 //
 // After that you can use Peek or Get function to get cookie value.
 func (cj *CookieJar) Put(cookie *fasthttp.Cookie) {
+	cj.lock()
+	defer cj.unlock()
 	c, ok := (*cj)[b2s(cookie.Key())]
 	if ok {
 		fasthttp.ReleaseCookie(c)
