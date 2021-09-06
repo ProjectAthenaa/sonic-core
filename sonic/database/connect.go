@@ -7,6 +7,8 @@ import (
 	"entgo.io/ent/dialect"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
+	app2 "github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/hook"
 	_ "github.com/ProjectAthenaa/sonic-core/sonic/database/ent/runtime"
 	"github.com/go-redis/redis/v8"
@@ -34,6 +36,9 @@ func Connect(pgURL string) *ent.Client {
 			},
 			ent.OpDeleteOne|ent.OpDelete,
 		),
+	)
+
+	client.AccountGroup.Use(
 		hook.On(
 			func(next ent.Mutator) ent.Mutator {
 				return hook.AccountGroupFunc(func(ctx context.Context, m *ent.AccountGroupMutation) (ent.Value, error) {
@@ -43,18 +48,15 @@ func Connect(pgURL string) *ent.Client {
 					}
 
 					appID, _ := m.AppID()
-
 					app := m.Client().App.GetX(ctx, appID)
-
 					user, _ := app.User(ctx)
-
 					site, _ := m.Site()
 
-					setKey := fmt.Sprintf("accounts:%s:%s", strings.ToLower(string(site)))
+					setKey := fmt.Sprintf("accounts:%s:%s", strings.ToLower(string(site)), user.ID.String())
 					fmt.Println("creating account group: ", setKey)
 
 					for username, password := range accounts {
-						rdb.SAdd(ctx, setKey, user.ID.String(), fmt.Sprintf("%s:%s", username, password))
+						rdb.SAdd(ctx, setKey, fmt.Sprintf("%s:%s", username, password)).Err()
 					}
 
 					return next.Mutate(ctx, m)
@@ -72,13 +74,13 @@ func Connect(pgURL string) *ent.Client {
 
 					newAccounts, _ := m.Accounts()
 
-					appID, _ := m.AppID()
-					app := m.Client().App.GetX(ctx, appID)
+					id, _ := m.ID()
+
+					app := m.Client().App.Query().Where(app2.HasAccountGroupsWith(accountgroup.ID(id))).FirstX(ctx)
 					user, _ := app.User(ctx)
-					userID := user.ID.String()
 					site, _ := m.Site()
 
-					setKey := fmt.Sprintf("accounts:%s:%s", site, userID)
+					setKey := fmt.Sprintf("accounts:%s:%s", site, user.ID.String())
 
 					var toDelete []string
 					var toSet []string
@@ -107,8 +109,7 @@ func Connect(pgURL string) *ent.Client {
 				})
 			},
 			ent.OpUpdateOne|ent.OpUpdate,
-		),
-	)
+		))
 
 	//err = client.Schema.Create(context.Background())
 	//if err != nil {
