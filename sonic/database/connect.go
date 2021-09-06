@@ -80,7 +80,7 @@ func Connect(pgURL string) *ent.Client {
 					user, _ := app.User(ctx)
 					site, _ := m.Site()
 
-					setKey := fmt.Sprintf("accounts:%s:%s", site, user.ID.String())
+					setKey := fmt.Sprintf("accounts:%s:%s", strings.ToLower(string(site)), user.ID.String())
 
 					var toDelete []string
 					var toSet []string
@@ -88,17 +88,18 @@ func Connect(pgURL string) *ent.Client {
 					for newUsername, newPassword := range newAccounts {
 						for oldUsername, oldPassword := range oldAccounts {
 							if newUsername == oldUsername && newPassword != oldPassword {
-								toDelete = append(toDelete, hash(fmt.Sprintf("%s:%s", newUsername, oldPassword)))
+								toDelete = append(toDelete, fmt.Sprintf("%s:%s", newUsername, oldPassword))
 								toSet = append(toSet, fmt.Sprintf("%s:%s", newUsername, newPassword))
 							} else if newUsername != oldUsername && newPassword == oldPassword {
-								toDelete = append(toDelete, hash(fmt.Sprintf("%s:%s", oldUsername, oldPassword)))
+								toDelete = append(toDelete, fmt.Sprintf("%s:%s", oldUsername, oldPassword))
 								toSet = append(toSet, fmt.Sprintf("%s:%s", newUsername, newPassword))
 							}
 						}
 					}
 
+
 					for _, deletion := range toDelete {
-						rdb.Set(ctx, fmt.Sprintf("accounts:delete:%s", deletion), "1", time.Hour*168)
+						rdb.Set(ctx, fmt.Sprintf("accounts:delete:%s", hash(deletion)), "1", time.Hour*168)
 						rdb.SRem(ctx, setKey, deletion)
 					}
 
