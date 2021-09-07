@@ -28,6 +28,9 @@ proxyRaterCompile:
 clientProxyCompile:
 		cd ./protos && protoc --go_out=./clientProxy --go_opt=paths=source_relative --go-grpc_out=./clientProxy --go-grpc_opt=paths=source_relative ./ClientProxy.proto
 
+ticketCompile:
+	cd sonic/antibots/ticket && protoc --go_out=./protos --go_opt=paths=source_relative --go-grpc_out=./protos --go-grpc_opt=paths=source_relative ./Ticket.proto
+
 gqlCompile:
 	go get github.com/99designs/gqlgen/cmd@v0.13.0
 	cd ./sonic/database && go run github.com/99designs/gqlgen gen

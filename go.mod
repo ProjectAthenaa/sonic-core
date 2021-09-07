@@ -18,7 +18,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/jpillora/go-tld v1.1.1
 	github.com/json-iterator/go v1.1.11
 	github.com/klauspost/compress v1.13.4
 	github.com/lib/pq v1.10.2

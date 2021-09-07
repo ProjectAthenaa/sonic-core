@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package ticket;
+
+option go_package = "github.com/ProjectAthenaa/sonic-core/sonic/antibots/ticket";
+
+service Ticket{
+  rpc Deobfuscate(DeobfuscateRequest) returns (Hash);
+  rpc GenerateCookie(GenerateCookieRequest) returns (Cookie);
+}
+
+message Hash{
+  string Value = 1;
+}
+
+message Cookie{
+  string Value = 1;
+}
+
+message DeobfuscateRequest{
+  string Proxy = 1;
+}
+
+message GenerateCookieRequest{
+  string Proxy = 1;
+  string Hash = 2;
+}
