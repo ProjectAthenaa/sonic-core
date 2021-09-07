@@ -21,7 +21,7 @@ type ModuleField struct {
 	Type           FieldType `json:"Type"`
 	Label          string    `json:"Label"`
 	FieldKey       *string   `json:"FieldKey"`
-	DropdownValues []string
+	DropdownValues []string `json:"dropdown_values"`
 }
 
 type FieldType string
