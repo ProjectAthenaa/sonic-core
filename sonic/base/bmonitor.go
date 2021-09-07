@@ -126,14 +126,15 @@ func (tk *BMonitor) submit() {
 	for {
 		select {
 		case msg := <-tk.Monitor.Channel:
-			payload, err := json.Marshal(&msg)
-			if err != nil {
-				log.Error("error serialising data", err)
-				continue
-			}
+			go func() {
+				payload, err := json.Marshal(&msg)
+				if err != nil {
+					log.Error("error serialising data", err)
+				}
 
-			log.Info(string(payload))
-			tk.rdb.Publish(tk.Ctx, tk.redisKey, string(payload))
+				log.Info(string(payload))
+				tk.rdb.Publish(tk.Ctx, tk.redisKey, string(payload))
+			}()
 		case <-tk.Ctx.Done():
 			return
 		default:
