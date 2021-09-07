@@ -17,10 +17,11 @@ type Module struct {
 }
 
 type ModuleField struct {
-	Validation string    `json:"Validation"`
-	Type       FieldType `json:"Type"`
-	Label      string    `json:"Label"`
-	FieldKey   *string   `json:"FieldKey"`
+	Validation     string    `json:"Validation"`
+	Type           FieldType `json:"Type"`
+	Label          string    `json:"Label"`
+	FieldKey       *string   `json:"FieldKey"`
+	DropdownValues []string
 }
 
 type FieldType string
@@ -32,6 +33,7 @@ const (
 	FieldTypeGender   FieldType = "GENDER"
 	FieldTypeWidth    FieldType = "WIDTH"
 	FieldTypeShoeSize FieldType = "SHOE_SIZE"
+	FieldTypeDropDown FieldType = "DROPDOWN"
 )
 
 func RegisterModule(module *Module) error {
