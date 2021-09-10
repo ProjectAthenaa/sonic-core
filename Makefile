@@ -31,5 +31,8 @@ clientProxyCompile:
 ticketCompile:
 	cd sonic/antibots/ticket && protoc --go_out=./ --go_opt=paths=source_relative --go-grpc_out=./ --go-grpc_opt=paths=source_relative ./Ticket.proto
 
+pxCompile:
+	cd sonic/antibots/perimeterx && protoc --go_out=./ --go_opt=paths=source_relative --go-grpc_out=./ --go-grpc_opt=paths=source_relative ./PerimeterX.proto --experimental_allow_proto3_optional
+
 gqlCompile:
 	cd ./sonic/database && go run github.com/99designs/gqlgen gen

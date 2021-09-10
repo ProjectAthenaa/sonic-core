@@ -1,13 +1,26 @@
-syntax="proto3";
+syntax = "proto3";
 
 package perimeterx;
 
-option go_package="main/perimeterx";
+option go_package = "main/perimeterx";
 
 service PerimeterX{
   rpc PX2(PX2Request) returns (Payload);
   rpc PX3(PXRequest) returns (Payload);
+  rpc GetCookie(CookieRequest) returns (Cookies);
 }
+
+
+message CookieRequest{
+  SITE Site = 1;
+  string UserAgent = 2;
+  string Proxy = 3;
+}
+
+message Cookies{
+  map<string, string> Cookie = 1;
+}
+
 
 enum SITE{
   WALMART = 0;
@@ -45,14 +58,14 @@ message Payload{
   optional string CS = 9;
   optional string SID = 10;
   optional string VID = 11;
-  optional int32 RSC = 12;
+  int32 RSC = 12;
   optional string PXHD = 13;
   string Ua = 14;
 }
 
 message PX2Request{
-  SITE Site = 1;
-  optional string UserAgent = 2;
+  SITE Site = 3;
+  string UserAgent = 4;
 }
 
 message PXRequest{
@@ -67,6 +80,6 @@ message PXRequest{
   optional string SID = 9;
   string VID = 10;
   string CS = 11;
-  optional string PXHD  = 12;
+  optional string PXHD = 12;
   optional string RecaptchaToken = 13;
 }

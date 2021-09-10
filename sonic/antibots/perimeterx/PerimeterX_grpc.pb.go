@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type PerimeterXClient interface {
 	PX2(ctx context.Context, in *PX2Request, opts ...grpc.CallOption) (*Payload, error)
 	PX3(ctx context.Context, in *PXRequest, opts ...grpc.CallOption) (*Payload, error)
+	GetCookie(ctx context.Context, in *CookieRequest, opts ...grpc.CallOption) (*Cookies, error)
 }
 
 type perimeterXClient struct {
@@ -48,12 +49,22 @@ func (c *perimeterXClient) PX3(ctx context.Context, in *PXRequest, opts ...grpc.
 	return out, nil
 }
 
+func (c *perimeterXClient) GetCookie(ctx context.Context, in *CookieRequest, opts ...grpc.CallOption) (*Cookies, error) {
+	out := new(Cookies)
+	err := c.cc.Invoke(ctx, "/perimeterx.PerimeterX/GetCookie", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PerimeterXServer is the server API for PerimeterX service.
 // All implementations must embed UnimplementedPerimeterXServer
 // for forward compatibility
 type PerimeterXServer interface {
 	PX2(context.Context, *PX2Request) (*Payload, error)
 	PX3(context.Context, *PXRequest) (*Payload, error)
+	GetCookie(context.Context, *CookieRequest) (*Cookies, error)
 	mustEmbedUnimplementedPerimeterXServer()
 }
 
@@ -66,6 +77,9 @@ func (UnimplementedPerimeterXServer) PX2(context.Context, *PX2Request) (*Payload
 }
 func (UnimplementedPerimeterXServer) PX3(context.Context, *PXRequest) (*Payload, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PX3 not implemented")
+}
+func (UnimplementedPerimeterXServer) GetCookie(context.Context, *CookieRequest) (*Cookies, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCookie not implemented")
 }
 func (UnimplementedPerimeterXServer) mustEmbedUnimplementedPerimeterXServer() {}
 
@@ -116,6 +130,24 @@ func _PerimeterX_PX3_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PerimeterX_GetCookie_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CookieRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PerimeterXServer).GetCookie(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/perimeterx.PerimeterX/GetCookie",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PerimeterXServer).GetCookie(ctx, req.(*CookieRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PerimeterX_ServiceDesc is the grpc.ServiceDesc for PerimeterX service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -130,6 +162,10 @@ var PerimeterX_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PX3",
 			Handler:    _PerimeterX_PX3_Handler,
+		},
+		{
+			MethodName: "GetCookie",
+			Handler:    _PerimeterX_GetCookie_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
