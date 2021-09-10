@@ -8884,6 +8884,41 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Directive",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsRepeatable, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -9836,7 +9871,10 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 func (ec *executionContext) unmarshalInputAccountGroupInput(ctx context.Context, obj interface{}) (model.AccountGroupInput, error) {
 	var it model.AccountGroupInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -9872,7 +9910,10 @@ func (ec *executionContext) unmarshalInputAccountGroupInput(ctx context.Context,
 
 func (ec *executionContext) unmarshalInputNewAddress(ctx context.Context, obj interface{}) (model.NewAddress, error) {
 	var it model.NewAddress
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -9940,7 +9981,10 @@ func (ec *executionContext) unmarshalInputNewAddress(ctx context.Context, obj in
 
 func (ec *executionContext) unmarshalInputNewBilling(ctx context.Context, obj interface{}) (model.NewBilling, error) {
 	var it model.NewBilling
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -9992,7 +10036,10 @@ func (ec *executionContext) unmarshalInputNewBilling(ctx context.Context, obj in
 
 func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj interface{}) (model.NewProfile, error) {
 	var it model.NewProfile
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10044,7 +10091,10 @@ func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj in
 
 func (ec *executionContext) unmarshalInputNewProfileGroup(ctx context.Context, obj interface{}) (model.NewProfileGroup, error) {
 	var it model.NewProfileGroup
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10072,7 +10122,10 @@ func (ec *executionContext) unmarshalInputNewProfileGroup(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputNewProxy(ctx context.Context, obj interface{}) (model.NewProxy, error) {
 	var it model.NewProxy
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10116,7 +10169,10 @@ func (ec *executionContext) unmarshalInputNewProxy(ctx context.Context, obj inte
 
 func (ec *executionContext) unmarshalInputNewProxyList(ctx context.Context, obj interface{}) (model.NewProxyList, error) {
 	var it model.NewProxyList
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10152,7 +10208,10 @@ func (ec *executionContext) unmarshalInputNewProxyList(ctx context.Context, obj 
 
 func (ec *executionContext) unmarshalInputNewShipping(ctx context.Context, obj interface{}) (model.NewShipping, error) {
 	var it model.NewShipping
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10212,7 +10271,10 @@ func (ec *executionContext) unmarshalInputNewShipping(ctx context.Context, obj i
 
 func (ec *executionContext) unmarshalInputNewTask(ctx context.Context, obj interface{}) (model.NewTask, error) {
 	var it model.NewTask
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	if _, present := asMap["TaskGroupID"]; !present {
 		asMap["TaskGroupID"] = "DEF_GROUP"
@@ -10268,7 +10330,10 @@ func (ec *executionContext) unmarshalInputNewTask(ctx context.Context, obj inter
 
 func (ec *executionContext) unmarshalInputNewTaskGroup(ctx context.Context, obj interface{}) (model.NewTaskGroup, error) {
 	var it model.NewTaskGroup
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	if _, present := asMap["Name"]; !present {
 		asMap["Name"] = "DEF_GROUP"
@@ -10300,7 +10365,10 @@ func (ec *executionContext) unmarshalInputNewTaskGroup(ctx context.Context, obj 
 
 func (ec *executionContext) unmarshalInputProductIn(ctx context.Context, obj interface{}) (model.ProductIn, error) {
 	var it model.ProductIn
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -10400,7 +10468,10 @@ func (ec *executionContext) unmarshalInputProductIn(ctx context.Context, obj int
 
 func (ec *executionContext) unmarshalInputUpdatedTask(ctx context.Context, obj interface{}) (model.UpdatedTask, error) {
 	var it model.UpdatedTask
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -12301,6 +12372,11 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "isRepeatable":
+			out.Values[i] = ec.___Directive_isRepeatable(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12840,6 +12916,13 @@ func (ec *executionContext) marshalNProfileGroup2ᚕᚖgithubᚗcomᚋProjectAth
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -12921,6 +13004,13 @@ func (ec *executionContext) marshalNProxyTest2ᚕᚖgithubᚗcomᚋProjectAthena
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13036,6 +13126,13 @@ func (ec *executionContext) marshalNStatistic2ᚕᚖgithubᚗcomᚋProjectAthena
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13112,6 +13209,13 @@ func (ec *executionContext) marshalNTask2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋs
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13222,6 +13326,13 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13295,6 +13406,13 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13344,6 +13462,13 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13385,6 +13510,13 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13450,6 +13582,13 @@ func (ec *executionContext) marshalOAccountGroup2ᚕᚖgithubᚗcomᚋProjectAth
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13578,6 +13717,13 @@ func (ec *executionContext) marshalOModuleField2ᚕᚖgithubᚗcomᚋProjectAthe
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13657,6 +13803,13 @@ func (ec *executionContext) marshalOProfile2ᚕᚖgithubᚗcomᚋProjectAthenaa�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13697,6 +13850,13 @@ func (ec *executionContext) marshalOProfileGroup2ᚕᚖgithubᚗcomᚋProjectAth
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13744,6 +13904,13 @@ func (ec *executionContext) marshalOProxy2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋ
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13784,6 +13951,13 @@ func (ec *executionContext) marshalOProxyList2ᚕᚖgithubᚗcomᚋProjectAthena
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13831,6 +14005,13 @@ func (ec *executionContext) marshalOSession2ᚕᚖgithubᚗcomᚋProjectAthenaa�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13871,6 +14052,13 @@ func (ec *executionContext) marshalOStatistic2ᚕᚖgithubᚗcomᚋProjectAthena
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -13914,6 +14102,12 @@ func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
 	}
 
 	return ret
@@ -13971,6 +14165,13 @@ func (ec *executionContext) marshalOTask2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋs
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14011,6 +14212,13 @@ func (ec *executionContext) marshalOTaskGroup2ᚕᚖgithubᚗcomᚋProjectAthena
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14071,6 +14279,12 @@ func (ec *executionContext) marshalOUUID2ᚕstringᚄ(ctx context.Context, sel a
 		ret[i] = ec.marshalNUUID2string(ctx, sel, v[i])
 	}
 
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14126,6 +14340,13 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14166,6 +14387,13 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14206,6 +14434,13 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -14253,6 +14488,13 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 

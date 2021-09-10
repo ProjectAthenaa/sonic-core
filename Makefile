@@ -32,5 +32,4 @@ ticketCompile:
 	cd sonic/antibots/ticket && protoc --go_out=./ --go_opt=paths=source_relative --go-grpc_out=./ --go-grpc_opt=paths=source_relative ./Ticket.proto
 
 gqlCompile:
-	go get github.com/99designs/gqlgen/cmd@v0.13.0
 	cd ./sonic/database && go run github.com/99designs/gqlgen gen
