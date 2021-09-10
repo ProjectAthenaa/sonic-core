@@ -36,6 +36,17 @@ func Connect(pgURL string) *ent.Client {
 			},
 			ent.OpDeleteOne|ent.OpDelete,
 		),
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.TaskFunc(func(ctx context.Context, mutation *ent.TaskMutation) (ent.Value, error) {
+					if id, ok := mutation.ID(); ok {
+						rdb.Publish(ctx, "scheduler:tasks-updated", id.String())
+					}
+					return next.Mutate(ctx, mutation)
+				})
+			},
+			ent.OpUpdate|ent.OpUpdateOne,
+		),
 	)
 
 	client.AccountGroup.Use(
@@ -96,7 +107,6 @@ func Connect(pgURL string) *ent.Client {
 							}
 						}
 					}
-
 
 					for _, deletion := range toDelete {
 						rdb.Set(ctx, fmt.Sprintf("accounts:delete:%s", hash(deletion)), "1", time.Hour*168)

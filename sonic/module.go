@@ -38,6 +38,7 @@ const (
 
 func RegisterModule(module *Module) error {
 	opts, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+
 	if err != nil {
 		return err
 	}
