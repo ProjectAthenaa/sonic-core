@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
+	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
 	monitor "github.com/ProjectAthenaa/sonic-core/protos/monitorController"
 	proxy_rater "github.com/ProjectAthenaa/sonic-core/protos/proxy-rater"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
@@ -89,11 +90,9 @@ func (tk *BMonitor) Start(site product.Site, client proxy_rater.ProxyRaterClient
 		return err
 	}
 
-	tk.Callback.OnStarting()
+	tk.Client = fasttls.NewClient(tls.HelloChrome_91, nil)
 
-	if tk.Client == nil {
-		tk.Client = fasttls.DefaultClient
-	}
+	tk.Callback.OnStarting()
 
 	tk.rdb = core.Base.GetRedis("cache")
 	tk.redisKey = fmt.Sprintf(tk.Data.RedisChannel)
@@ -182,5 +181,6 @@ func (tk *BMonitor) NewRequest(method, url string, body []byte) (*fasttls.Reques
 }
 
 func (tk *BMonitor) Do(req *fasttls.Request) (*fasttls.Response, error) {
+	req.Proxy = &tk.proxy.address
 	return tk.Client.DoCtx(tk.Ctx, req)
 }
