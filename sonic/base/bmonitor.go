@@ -92,8 +92,6 @@ func (tk *BMonitor) Start(site product.Site, client proxy_rater.ProxyRaterClient
 
 	tk.Client = fasttls.NewClient(tls.HelloChrome_91, nil)
 
-	tk.Callback.OnStarting()
-
 	tk.rdb = core.Base.GetRedis("cache")
 	tk.redisKey = fmt.Sprintf(tk.Data.RedisChannel)
 	tk.proxyRedisKey = fmt.Sprintf("proxies:monitors:%s", tk.Data.Site)
@@ -106,6 +104,8 @@ func (tk *BMonitor) Start(site product.Site, client proxy_rater.ProxyRaterClient
 	proxyWait.Add(1)
 	go tk.proxyRefresher(&proxyWait)
 	proxyWait.Wait()
+
+	tk.Callback.OnStarting()
 
 	for i := 0; i < taskCount; i++ {
 		go tk.Callback.TaskLoop()
