@@ -15,6 +15,7 @@ message CookieRequest{
   SITE Site = 1;
   string UserAgent = 2;
   string Proxy = 3;
+  string Cookies = 4;
 }
 
 message Cookies{
