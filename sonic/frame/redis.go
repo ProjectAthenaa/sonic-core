@@ -46,6 +46,9 @@ func (p *PubSub) Chan(ctx context.Context) <-chan map[string]interface{} {
 		for {
 			select {
 			case msg := <-p.redisPS.Channel():
+				if msg == nil{
+					continue
+				}
 				var dt map[string]interface{}
 				if err := json.Unmarshal([]byte(msg.Payload), &dt); err != nil {
 					continue
