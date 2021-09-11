@@ -86,9 +86,14 @@ func (tk *BMonitor) Start(site product.Site, client proxy_rater.ProxyRaterClient
 		return face.ErrTaskHasNoData
 	}
 
-	taskCount, err := strconv.Atoi(monitorCount)
-	if err != nil {
-		return err
+	var taskCount = 1
+
+	if monitorCount != "" {
+		var err error
+		taskCount, err = strconv.Atoi(monitorCount)
+		if err != nil {
+			return err
+		}
 	}
 
 	tk.Client = fasttls.NewClient(tls.HelloChrome_91, nil)
