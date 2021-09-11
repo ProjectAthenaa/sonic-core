@@ -6,6 +6,15 @@ option go_package = "github.com/ProjectAthenaa/sonic-core/sonic/antibots/perimet
 
 service PerimeterX{
   rpc ConstructPayload(Payload) returns (ConstructPayloadResponse);
+  rpc GetCookie(GetCookieRequest) returns (Cookie);
+}
+
+message GetCookieRequest{
+  bytes PXResponse = 1;
+}
+
+message Cookie{
+  string Value = 1;
 }
 
 message Payload{
