@@ -45,6 +45,7 @@ type BMonitor struct {
 	rdb           redis.UniversalClient
 	proxy         proxy
 	proxyClient   proxy_rater.ProxyRaterClient
+	startTime     time.Time
 
 	//prv
 	_proxyLocker lock.Mutex //mutex lock to avoid mismatches between authorization proxy and transport proxy
@@ -70,7 +71,7 @@ func (tk *BMonitor) Listen() {
 			return
 		default:
 			count := core.Base.GetRedis("cache").PubSubNumSub(tk.Ctx, tk.Data.RedisChannel).Val()
-			if v, ok := count[tk.Data.RedisChannel]; v == 0 || !ok {
+			if v, ok := count[tk.Data.RedisChannel]; (v == 0 || !ok) && time.Since(tk.startTime) >= time.Minute*5 {
 				tk.Stop()
 			}
 			time.Sleep(time.Second)
@@ -99,6 +100,7 @@ func (tk *BMonitor) Start(site product.Site, client proxy_rater.ProxyRaterClient
 	tk.proxyClient = client
 	tk.site = string(site)
 	tk.Monitor.Channel = make(chan map[string]interface{})
+	tk.startTime = time.Now()
 
 	var proxyWait sync.WaitGroup
 	proxyWait.Add(1)
