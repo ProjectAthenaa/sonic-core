@@ -18,9 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PerimeterXClient interface {
-	PX2(ctx context.Context, in *PX2Request, opts ...grpc.CallOption) (*Payload, error)
-	PX3(ctx context.Context, in *PXRequest, opts ...grpc.CallOption) (*Payload, error)
-	GetCookie(ctx context.Context, in *CookieRequest, opts ...grpc.CallOption) (*Cookies, error)
+	ConstructPayload(ctx context.Context, in *Payload, opts ...grpc.CallOption) (*ConstructPayloadResponse, error)
 }
 
 type perimeterXClient struct {
@@ -31,27 +29,9 @@ func NewPerimeterXClient(cc grpc.ClientConnInterface) PerimeterXClient {
 	return &perimeterXClient{cc}
 }
 
-func (c *perimeterXClient) PX2(ctx context.Context, in *PX2Request, opts ...grpc.CallOption) (*Payload, error) {
-	out := new(Payload)
-	err := c.cc.Invoke(ctx, "/perimeterx.PerimeterX/PX2", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *perimeterXClient) PX3(ctx context.Context, in *PXRequest, opts ...grpc.CallOption) (*Payload, error) {
-	out := new(Payload)
-	err := c.cc.Invoke(ctx, "/perimeterx.PerimeterX/PX3", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *perimeterXClient) GetCookie(ctx context.Context, in *CookieRequest, opts ...grpc.CallOption) (*Cookies, error) {
-	out := new(Cookies)
-	err := c.cc.Invoke(ctx, "/perimeterx.PerimeterX/GetCookie", in, out, opts...)
+func (c *perimeterXClient) ConstructPayload(ctx context.Context, in *Payload, opts ...grpc.CallOption) (*ConstructPayloadResponse, error) {
+	out := new(ConstructPayloadResponse)
+	err := c.cc.Invoke(ctx, "/perimeterx.PerimeterX/ConstructPayload", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,9 +42,7 @@ func (c *perimeterXClient) GetCookie(ctx context.Context, in *CookieRequest, opt
 // All implementations must embed UnimplementedPerimeterXServer
 // for forward compatibility
 type PerimeterXServer interface {
-	PX2(context.Context, *PX2Request) (*Payload, error)
-	PX3(context.Context, *PXRequest) (*Payload, error)
-	GetCookie(context.Context, *CookieRequest) (*Cookies, error)
+	ConstructPayload(context.Context, *Payload) (*ConstructPayloadResponse, error)
 	mustEmbedUnimplementedPerimeterXServer()
 }
 
@@ -72,14 +50,8 @@ type PerimeterXServer interface {
 type UnimplementedPerimeterXServer struct {
 }
 
-func (UnimplementedPerimeterXServer) PX2(context.Context, *PX2Request) (*Payload, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PX2 not implemented")
-}
-func (UnimplementedPerimeterXServer) PX3(context.Context, *PXRequest) (*Payload, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PX3 not implemented")
-}
-func (UnimplementedPerimeterXServer) GetCookie(context.Context, *CookieRequest) (*Cookies, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCookie not implemented")
+func (UnimplementedPerimeterXServer) ConstructPayload(context.Context, *Payload) (*ConstructPayloadResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConstructPayload not implemented")
 }
 func (UnimplementedPerimeterXServer) mustEmbedUnimplementedPerimeterXServer() {}
 
@@ -94,56 +66,20 @@ func RegisterPerimeterXServer(s grpc.ServiceRegistrar, srv PerimeterXServer) {
 	s.RegisterService(&PerimeterX_ServiceDesc, srv)
 }
 
-func _PerimeterX_PX2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PX2Request)
+func _PerimeterX_ConstructPayload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Payload)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PerimeterXServer).PX2(ctx, in)
+		return srv.(PerimeterXServer).ConstructPayload(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/perimeterx.PerimeterX/PX2",
+		FullMethod: "/perimeterx.PerimeterX/ConstructPayload",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PerimeterXServer).PX2(ctx, req.(*PX2Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PerimeterX_PX3_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PXRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PerimeterXServer).PX3(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/perimeterx.PerimeterX/PX3",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PerimeterXServer).PX3(ctx, req.(*PXRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PerimeterX_GetCookie_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CookieRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PerimeterXServer).GetCookie(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/perimeterx.PerimeterX/GetCookie",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PerimeterXServer).GetCookie(ctx, req.(*CookieRequest))
+		return srv.(PerimeterXServer).ConstructPayload(ctx, req.(*Payload))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -156,16 +92,8 @@ var PerimeterX_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PerimeterXServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "PX2",
-			Handler:    _PerimeterX_PX2_Handler,
-		},
-		{
-			MethodName: "PX3",
-			Handler:    _PerimeterX_PX3_Handler,
-		},
-		{
-			MethodName: "GetCookie",
-			Handler:    _PerimeterX_GetCookie_Handler,
+			MethodName: "ConstructPayload",
+			Handler:    _PerimeterX_ConstructPayload_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,26 +2,25 @@ syntax = "proto3";
 
 package perimeterx;
 
-option go_package = "main/perimeterx";
+option go_package = "github.com/ProjectAthenaa/sonic-core/sonic/antibots/perimeterx";
 
 service PerimeterX{
-  rpc PX2(PX2Request) returns (Payload);
-  rpc PX3(PXRequest) returns (Payload);
-  rpc GetCookie(CookieRequest) returns (Cookies);
+  rpc ConstructPayload(Payload) returns (ConstructPayloadResponse);
 }
 
-
-message CookieRequest{
+message Payload{
   SITE Site = 1;
-  string UserAgent = 2;
-  string Proxy = 3;
-  string Cookies = 4;
+  PXType Type = 2;
+  string Cookie = 3;
+  bytes ResponseObject = 4;
+  string Token = 5;
+  int32 BSC = 6;
 }
 
-message Cookies{
-  map<string, string> Cookie = 1;
+message ConstructPayloadResponse{
+  string Cookie = 1;
+  bytes Payload = 2;
 }
-
 
 enum SITE{
   WALMART = 0;
@@ -45,42 +44,4 @@ enum PXType{
   HCAPHIGH = 9;
   RECAP = 10;
   PX34 = 11;
-}
-
-message Payload{
-  string Value = 1;
-  string AppID = 2;
-  string Tag = 3;
-  string UUID = 4;
-  string FT = 5;
-  string SEQ = 6;
-  string EN = 7;
-  string PC = 8;
-  optional string CS = 9;
-  optional string SID = 10;
-  optional string VID = 11;
-  int32 RSC = 12;
-  optional string PXHD = 13;
-  string Ua = 14;
-}
-
-message PX2Request{
-  SITE Site = 3;
-  string UserAgent = 4;
-}
-
-message PXRequest{
-  SITE Site = 1;
-  PXType Type = 2;
-  string VarObject = 3;
-  string Version = 4;
-  string Tag = 5;
-  string UA = 6;
-  string Count = 7;
-  string UUID = 8;
-  optional string SID = 9;
-  string VID = 10;
-  string CS = 11;
-  optional string PXHD = 12;
-  optional string RecaptchaToken = 13;
 }
