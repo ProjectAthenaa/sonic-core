@@ -14,7 +14,7 @@ message Payload{
   string Cookie = 3;
   bytes ResponseObject = 4;
   string Token = 5;
-  int32 BSC = 6;
+  int32 RSC = 6;
 }
 
 message ConstructPayloadResponse{
