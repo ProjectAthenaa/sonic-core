@@ -36,3 +36,6 @@ pxCompile:
 
 gqlCompile:
 	cd ./sonic/database && go run github.com/99designs/gqlgen gen
+
+createKey:
+	set REDIS_URL="rediss://default:kulqkv6en3um9u09@athena-redis-do-user-9223163-0.b.db.ondigitalocean.com:25061" && go run github.com/ProjectAthenaa/sonic-core discord_id=$(discord_id)

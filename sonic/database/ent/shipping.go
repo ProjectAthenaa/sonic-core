@@ -44,7 +44,7 @@ type ShippingEdges struct {
 	// ShippingAddress holds the value of the ShippingAddress edge.
 	ShippingAddress *Address `json:"ShippingAddress,omitempty"`
 	// BillingAddress holds the value of the BillingAddress edge.
-	BillingAddress []*Address `json:"BillingAddress,omitempty"`
+	BillingAddress *Address `json:"BillingAddress,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -79,9 +79,14 @@ func (e ShippingEdges) ShippingAddressOrErr() (*Address, error) {
 }
 
 // BillingAddressOrErr returns the BillingAddress value or an error if the edge
-// was not loaded in eager-loading.
-func (e ShippingEdges) BillingAddressOrErr() ([]*Address, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ShippingEdges) BillingAddressOrErr() (*Address, error) {
 	if e.loadedTypes[2] {
+		if e.BillingAddress == nil {
+			// The edge BillingAddress was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: address.Label}
+		}
 		return e.BillingAddress, nil
 	}
 	return nil, &NotLoadedError{edge: "BillingAddress"}

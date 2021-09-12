@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/google/uuid"
 )
 
@@ -95,8 +94,6 @@ var (
 	DefaultCheckoutDelay int32
 	// DefaultATCDelay holds the default value on creation for the "ATCDelay" field.
 	DefaultATCDelay int32
-	// DefaultCaptchaDetails holds the default value on creation for the "CaptchaDetails" field.
-	DefaultCaptchaDetails sonic.Map
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

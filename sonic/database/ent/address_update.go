@@ -131,19 +131,23 @@ func (au *AddressUpdate) SetShippingAddress(s *Shipping) *AddressUpdate {
 	return au.SetShippingAddressID(s.ID)
 }
 
-// AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
-func (au *AddressUpdate) AddBillingAddresIDs(ids ...uuid.UUID) *AddressUpdate {
-	au.mutation.AddBillingAddresIDs(ids...)
+// SetBillingAddressID sets the "BillingAddress" edge to the Shipping entity by ID.
+func (au *AddressUpdate) SetBillingAddressID(id uuid.UUID) *AddressUpdate {
+	au.mutation.SetBillingAddressID(id)
 	return au
 }
 
-// AddBillingAddress adds the "BillingAddress" edges to the Shipping entity.
-func (au *AddressUpdate) AddBillingAddress(s ...*Shipping) *AddressUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableBillingAddressID sets the "BillingAddress" edge to the Shipping entity by ID if the given value is not nil.
+func (au *AddressUpdate) SetNillableBillingAddressID(id *uuid.UUID) *AddressUpdate {
+	if id != nil {
+		au = au.SetBillingAddressID(*id)
 	}
-	return au.AddBillingAddresIDs(ids...)
+	return au
+}
+
+// SetBillingAddress sets the "BillingAddress" edge to the Shipping entity.
+func (au *AddressUpdate) SetBillingAddress(s *Shipping) *AddressUpdate {
+	return au.SetBillingAddressID(s.ID)
 }
 
 // Mutation returns the AddressMutation object of the builder.
@@ -157,25 +161,10 @@ func (au *AddressUpdate) ClearShippingAddress() *AddressUpdate {
 	return au
 }
 
-// ClearBillingAddress clears all "BillingAddress" edges to the Shipping entity.
+// ClearBillingAddress clears the "BillingAddress" edge to the Shipping entity.
 func (au *AddressUpdate) ClearBillingAddress() *AddressUpdate {
 	au.mutation.ClearBillingAddress()
 	return au
-}
-
-// RemoveBillingAddresIDs removes the "BillingAddress" edge to Shipping entities by IDs.
-func (au *AddressUpdate) RemoveBillingAddresIDs(ids ...uuid.UUID) *AddressUpdate {
-	au.mutation.RemoveBillingAddresIDs(ids...)
-	return au
-}
-
-// RemoveBillingAddress removes "BillingAddress" edges to Shipping entities.
-func (au *AddressUpdate) RemoveBillingAddress(s ...*Shipping) *AddressUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return au.RemoveBillingAddresIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -385,10 +374,10 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if au.mutation.BillingAddressCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.BillingAddressTable,
-			Columns: address.BillingAddressPrimaryKey,
+			Columns: []string{address.BillingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -396,34 +385,15 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 					Column: shipping.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.RemovedBillingAddressIDs(); len(nodes) > 0 && !au.mutation.BillingAddressCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   address.BillingAddressTable,
-			Columns: address.BillingAddressPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: shipping.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := au.mutation.BillingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.BillingAddressTable,
-			Columns: address.BillingAddressPrimaryKey,
+			Columns: []string{address.BillingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -557,19 +527,23 @@ func (auo *AddressUpdateOne) SetShippingAddress(s *Shipping) *AddressUpdateOne {
 	return auo.SetShippingAddressID(s.ID)
 }
 
-// AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
-func (auo *AddressUpdateOne) AddBillingAddresIDs(ids ...uuid.UUID) *AddressUpdateOne {
-	auo.mutation.AddBillingAddresIDs(ids...)
+// SetBillingAddressID sets the "BillingAddress" edge to the Shipping entity by ID.
+func (auo *AddressUpdateOne) SetBillingAddressID(id uuid.UUID) *AddressUpdateOne {
+	auo.mutation.SetBillingAddressID(id)
 	return auo
 }
 
-// AddBillingAddress adds the "BillingAddress" edges to the Shipping entity.
-func (auo *AddressUpdateOne) AddBillingAddress(s ...*Shipping) *AddressUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableBillingAddressID sets the "BillingAddress" edge to the Shipping entity by ID if the given value is not nil.
+func (auo *AddressUpdateOne) SetNillableBillingAddressID(id *uuid.UUID) *AddressUpdateOne {
+	if id != nil {
+		auo = auo.SetBillingAddressID(*id)
 	}
-	return auo.AddBillingAddresIDs(ids...)
+	return auo
+}
+
+// SetBillingAddress sets the "BillingAddress" edge to the Shipping entity.
+func (auo *AddressUpdateOne) SetBillingAddress(s *Shipping) *AddressUpdateOne {
+	return auo.SetBillingAddressID(s.ID)
 }
 
 // Mutation returns the AddressMutation object of the builder.
@@ -583,25 +557,10 @@ func (auo *AddressUpdateOne) ClearShippingAddress() *AddressUpdateOne {
 	return auo
 }
 
-// ClearBillingAddress clears all "BillingAddress" edges to the Shipping entity.
+// ClearBillingAddress clears the "BillingAddress" edge to the Shipping entity.
 func (auo *AddressUpdateOne) ClearBillingAddress() *AddressUpdateOne {
 	auo.mutation.ClearBillingAddress()
 	return auo
-}
-
-// RemoveBillingAddresIDs removes the "BillingAddress" edge to Shipping entities by IDs.
-func (auo *AddressUpdateOne) RemoveBillingAddresIDs(ids ...uuid.UUID) *AddressUpdateOne {
-	auo.mutation.RemoveBillingAddresIDs(ids...)
-	return auo
-}
-
-// RemoveBillingAddress removes "BillingAddress" edges to Shipping entities.
-func (auo *AddressUpdateOne) RemoveBillingAddress(s ...*Shipping) *AddressUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return auo.RemoveBillingAddresIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -835,10 +794,10 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 	}
 	if auo.mutation.BillingAddressCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.BillingAddressTable,
-			Columns: address.BillingAddressPrimaryKey,
+			Columns: []string{address.BillingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -846,34 +805,15 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 					Column: shipping.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.RemovedBillingAddressIDs(); len(nodes) > 0 && !auo.mutation.BillingAddressCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   address.BillingAddressTable,
-			Columns: address.BillingAddressPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: shipping.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := auo.mutation.BillingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.BillingAddressTable,
-			Columns: address.BillingAddressPrimaryKey,
+			Columns: []string{address.BillingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

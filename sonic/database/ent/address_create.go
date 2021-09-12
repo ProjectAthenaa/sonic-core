@@ -125,19 +125,23 @@ func (ac *AddressCreate) SetShippingAddress(s *Shipping) *AddressCreate {
 	return ac.SetShippingAddressID(s.ID)
 }
 
-// AddBillingAddresIDs adds the "BillingAddress" edge to the Shipping entity by IDs.
-func (ac *AddressCreate) AddBillingAddresIDs(ids ...uuid.UUID) *AddressCreate {
-	ac.mutation.AddBillingAddresIDs(ids...)
+// SetBillingAddressID sets the "BillingAddress" edge to the Shipping entity by ID.
+func (ac *AddressCreate) SetBillingAddressID(id uuid.UUID) *AddressCreate {
+	ac.mutation.SetBillingAddressID(id)
 	return ac
 }
 
-// AddBillingAddress adds the "BillingAddress" edges to the Shipping entity.
-func (ac *AddressCreate) AddBillingAddress(s ...*Shipping) *AddressCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableBillingAddressID sets the "BillingAddress" edge to the Shipping entity by ID if the given value is not nil.
+func (ac *AddressCreate) SetNillableBillingAddressID(id *uuid.UUID) *AddressCreate {
+	if id != nil {
+		ac = ac.SetBillingAddressID(*id)
 	}
-	return ac.AddBillingAddresIDs(ids...)
+	return ac
+}
+
+// SetBillingAddress sets the "BillingAddress" edge to the Shipping entity.
+func (ac *AddressCreate) SetBillingAddress(s *Shipping) *AddressCreate {
+	return ac.SetBillingAddressID(s.ID)
 }
 
 // Mutation returns the AddressMutation object of the builder.
@@ -377,10 +381,10 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 	}
 	if nodes := ac.mutation.BillingAddressIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   address.BillingAddressTable,
-			Columns: address.BillingAddressPrimaryKey,
+			Columns: []string{address.BillingAddressColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -392,6 +396,7 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.shipping_billing_address = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

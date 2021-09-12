@@ -47,11 +47,13 @@ const (
 	ShippingAddressInverseTable = "addresses"
 	// ShippingAddressColumn is the table column denoting the ShippingAddress relation/edge.
 	ShippingAddressColumn = "shipping_shipping_address"
-	// BillingAddressTable is the table that holds the BillingAddress relation/edge. The primary key declared below.
-	BillingAddressTable = "shipping_BillingAddress"
+	// BillingAddressTable is the table that holds the BillingAddress relation/edge.
+	BillingAddressTable = "addresses"
 	// BillingAddressInverseTable is the table name for the Address entity.
 	// It exists in this package in order to avoid circular dependency with the "address" package.
 	BillingAddressInverseTable = "addresses"
+	// BillingAddressColumn is the table column denoting the BillingAddress relation/edge.
+	BillingAddressColumn = "shipping_billing_address"
 )
 
 // Columns holds all SQL columns for shipping fields.
@@ -70,12 +72,6 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"profile_shipping",
 }
-
-var (
-	// BillingAddressPrimaryKey and BillingAddressColumn2 are the table columns denoting the
-	// primary key for the BillingAddress relation (M2M).
-	BillingAddressPrimaryKey = []string{"shipping_id", "address_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

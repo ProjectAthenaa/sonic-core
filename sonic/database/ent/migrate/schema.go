@@ -46,6 +46,7 @@ var (
 		{Name: "zip", Type: field.TypeString},
 		{Name: "state_code", Type: field.TypeString, Nullable: true},
 		{Name: "shipping_shipping_address", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "shipping_billing_address", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// AddressesTable holds the schema information for the "addresses" table.
 	AddressesTable = &schema.Table{
@@ -56,6 +57,12 @@ var (
 			{
 				Symbol:     "addresses_shippings_ShippingAddress",
 				Columns:    []*schema.Column{AddressesColumns[10]},
+				RefColumns: []*schema.Column{ShippingsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "addresses_shippings_BillingAddress",
+				Columns:    []*schema.Column{AddressesColumns[11]},
 				RefColumns: []*schema.Column{ShippingsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -593,31 +600,6 @@ var (
 			},
 		},
 	}
-	// ShippingBillingAddressColumns holds the columns for the "shipping_BillingAddress" table.
-	ShippingBillingAddressColumns = []*schema.Column{
-		{Name: "shipping_id", Type: field.TypeUUID},
-		{Name: "address_id", Type: field.TypeUUID},
-	}
-	// ShippingBillingAddressTable holds the schema information for the "shipping_BillingAddress" table.
-	ShippingBillingAddressTable = &schema.Table{
-		Name:       "shipping_BillingAddress",
-		Columns:    ShippingBillingAddressColumns,
-		PrimaryKey: []*schema.Column{ShippingBillingAddressColumns[0], ShippingBillingAddressColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "shipping_BillingAddress_shipping_id",
-				Columns:    []*schema.Column{ShippingBillingAddressColumns[0]},
-				RefColumns: []*schema.Column{ShippingsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "shipping_BillingAddress_address_id",
-				Columns:    []*schema.Column{ShippingBillingAddressColumns[1]},
-				RefColumns: []*schema.Column{AddressesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// StatisticProductColumns holds the columns for the "statistic_Product" table.
 	StatisticProductColumns = []*schema.Column{
 		{Name: "statistic_id", Type: field.TypeUUID},
@@ -746,7 +728,6 @@ var (
 		AppProfileGroupsTable,
 		AppTaskGroupsTable,
 		ProfileBillingTable,
-		ShippingBillingAddressTable,
 		StatisticProductTable,
 		TaskProductTable,
 		TaskProxyListTable,
@@ -760,6 +741,7 @@ func init() {
 		Table: "account_group",
 	}
 	AddressesTable.ForeignKeys[0].RefTable = ShippingsTable
+	AddressesTable.ForeignKeys[1].RefTable = ShippingsTable
 	AppsTable.ForeignKeys[0].RefTable = UsersTable
 	LicensesTable.ForeignKeys[0].RefTable = UsersTable
 	MetadataTable.ForeignKeys[0].RefTable = UsersTable
@@ -781,8 +763,6 @@ func init() {
 	AppTaskGroupsTable.ForeignKeys[1].RefTable = TaskGroupsTable
 	ProfileBillingTable.ForeignKeys[0].RefTable = ProfilesTable
 	ProfileBillingTable.ForeignKeys[1].RefTable = BillingsTable
-	ShippingBillingAddressTable.ForeignKeys[0].RefTable = ShippingsTable
-	ShippingBillingAddressTable.ForeignKeys[1].RefTable = AddressesTable
 	StatisticProductTable.ForeignKeys[0].RefTable = StatisticsTable
 	StatisticProductTable.ForeignKeys[1].RefTable = ProductsTable
 	TaskProductTable.ForeignKeys[0].RefTable = TasksTable

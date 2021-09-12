@@ -1148,7 +1148,7 @@ func HasBillingAddress() predicate.Address {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(BillingAddressTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, BillingAddressTable, BillingAddressPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, BillingAddressTable, BillingAddressColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -1160,7 +1160,7 @@ func HasBillingAddressWith(preds ...predicate.Shipping) predicate.Address {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(BillingAddressInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, BillingAddressTable, BillingAddressPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, BillingAddressTable, BillingAddressColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

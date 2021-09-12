@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -103,7 +102,7 @@ func (aq *AddressQuery) QueryBillingAddress() *ShippingQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(address.Table, address.FieldID, selector),
 			sqlgraph.To(shipping.Table, shipping.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, address.BillingAddressTable, address.BillingAddressPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, address.BillingAddressTable, address.BillingAddressColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -393,7 +392,7 @@ func (aq *AddressQuery) sqlAll(ctx context.Context) ([]*Address, error) {
 			aq.withBillingAddress != nil,
 		}
 	)
-	if aq.withShippingAddress != nil {
+	if aq.withShippingAddress != nil || aq.withBillingAddress != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -449,66 +448,30 @@ func (aq *AddressQuery) sqlAll(ctx context.Context) ([]*Address, error) {
 	}
 
 	if query := aq.withBillingAddress; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*Address, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-			node.Edges.BillingAddress = []*Shipping{}
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Address)
+		for i := range nodes {
+			if nodes[i].shipping_billing_address == nil {
+				continue
+			}
+			fk := *nodes[i].shipping_billing_address
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*Address)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   address.BillingAddressTable,
-				Columns: address.BillingAddressPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(address.BillingAddressPrimaryKey[1], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*uuid.UUID)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := *eout
-				inValue := *ein
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, aq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "BillingAddress": %w`, err)
-		}
-		query.Where(shipping.IDIn(edgeids...))
+		query.Where(shipping.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "BillingAddress" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "shipping_billing_address" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.BillingAddress = append(nodes[i].Edges.BillingAddress, n)
+				nodes[i].Edges.BillingAddress = n
 			}
 		}
 	}

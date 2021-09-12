@@ -40,6 +40,7 @@ type Address struct {
 	// The values are being populated by the AddressQuery when eager-loading is set.
 	Edges                     AddressEdges `json:"edges"`
 	shipping_shipping_address *uuid.UUID
+	shipping_billing_address  *uuid.UUID
 }
 
 // AddressEdges holds the relations/edges for other nodes in the graph.
@@ -47,7 +48,7 @@ type AddressEdges struct {
 	// ShippingAddress holds the value of the ShippingAddress edge.
 	ShippingAddress *Shipping `json:"ShippingAddress,omitempty"`
 	// BillingAddress holds the value of the BillingAddress edge.
-	BillingAddress []*Shipping `json:"BillingAddress,omitempty"`
+	BillingAddress *Shipping `json:"BillingAddress,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -68,9 +69,14 @@ func (e AddressEdges) ShippingAddressOrErr() (*Shipping, error) {
 }
 
 // BillingAddressOrErr returns the BillingAddress value or an error if the edge
-// was not loaded in eager-loading.
-func (e AddressEdges) BillingAddressOrErr() ([]*Shipping, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AddressEdges) BillingAddressOrErr() (*Shipping, error) {
 	if e.loadedTypes[1] {
+		if e.BillingAddress == nil {
+			// The edge BillingAddress was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: shipping.Label}
+		}
 		return e.BillingAddress, nil
 	}
 	return nil, &NotLoadedError{edge: "BillingAddress"}
@@ -88,6 +94,8 @@ func (*Address) scanValues(columns []string) ([]interface{}, error) {
 		case address.FieldID:
 			values[i] = new(uuid.UUID)
 		case address.ForeignKeys[0]: // shipping_shipping_address
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case address.ForeignKeys[1]: // shipping_billing_address
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Address", columns[i])
@@ -170,6 +178,13 @@ func (a *Address) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				a.shipping_shipping_address = new(uuid.UUID)
 				*a.shipping_shipping_address = *value.S.(*uuid.UUID)
+			}
+		case address.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field shipping_billing_address", values[i])
+			} else if value.Valid {
+				a.shipping_billing_address = new(uuid.UUID)
+				*a.shipping_billing_address = *value.S.(*uuid.UUID)
 			}
 		}
 	}

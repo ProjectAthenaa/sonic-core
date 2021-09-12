@@ -20,12 +20,12 @@ func (a *Address) ShippingAddress(ctx context.Context) (*Shipping, error) {
 	return result, err
 }
 
-func (a *Address) BillingAddress(ctx context.Context) ([]*Shipping, error) {
+func (a *Address) BillingAddress(ctx context.Context) (*Shipping, error) {
 	result, err := a.Edges.BillingAddressOrErr()
 	if IsNotLoaded(err) {
-		result, err = a.QueryBillingAddress().All(ctx)
+		result, err = a.QueryBillingAddress().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
 }
 
 func (a *App) User(ctx context.Context) (*User, error) {
@@ -260,12 +260,12 @@ func (s *Shipping) ShippingAddress(ctx context.Context) (*Address, error) {
 	return result, MaskNotFound(err)
 }
 
-func (s *Shipping) BillingAddress(ctx context.Context) ([]*Address, error) {
+func (s *Shipping) BillingAddress(ctx context.Context) (*Address, error) {
 	result, err := s.Edges.BillingAddressOrErr()
 	if IsNotLoaded(err) {
-		result, err = s.QueryBillingAddress().All(ctx)
+		result, err = s.QueryBillingAddress().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
 }
 
 func (s *Statistic) User(ctx context.Context) ([]*User, error) {
