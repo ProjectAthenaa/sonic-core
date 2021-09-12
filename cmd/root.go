@@ -10,7 +10,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/google/uuid"
 	"github.com/prometheus/common/log"
-	"os"
 	"strings"
 )
 
@@ -31,7 +30,7 @@ func colorize(color Color, message string) {
 
 func Execute() {
 
-	client := database.Connect(os.Getenv("PG_URL"))
+	client := database.Connect("postgresql://doadmin:rh3rc0vgg1f706kz@athenadb-do-user-9223163-0.b.db.ondigitalocean.com:25060/defaultdb")
 
 	//client.Schema.Create(context.Background())
 
