@@ -26,6 +26,6 @@ type ModuleField{
     FieldKey: String
 }
 
-type Subscription{
-    moduleInformation: Module!
+extend type Query{
+    moduleInformation: [Module!]
 }
