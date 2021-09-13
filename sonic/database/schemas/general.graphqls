@@ -17,6 +17,7 @@ enum FieldType{
     GENDER
     WIDTH
     SHOE_SIZE
+    DROPDOWN
 }
 
 type ModuleField{
