@@ -120,6 +120,14 @@ func (ac *AddressCreate) SetShippingAddressID(id uuid.UUID) *AddressCreate {
 	return ac
 }
 
+// SetNillableShippingAddressID sets the "ShippingAddress" edge to the Shipping entity by ID if the given value is not nil.
+func (ac *AddressCreate) SetNillableShippingAddressID(id *uuid.UUID) *AddressCreate {
+	if id != nil {
+		ac = ac.SetShippingAddressID(*id)
+	}
+	return ac
+}
+
 // SetShippingAddress sets the "ShippingAddress" edge to the Shipping entity.
 func (ac *AddressCreate) SetShippingAddress(s *Shipping) *AddressCreate {
 	return ac.SetShippingAddressID(s.ID)
@@ -251,9 +259,6 @@ func (ac *AddressCreate) check() error {
 	}
 	if _, ok := ac.mutation.ZIP(); !ok {
 		return &ValidationError{Name: "ZIP", err: errors.New(`ent: missing required field "ZIP"`)}
-	}
-	if _, ok := ac.mutation.ShippingAddressID(); !ok {
-		return &ValidationError{Name: "ShippingAddress", err: errors.New("ent: missing required edge \"ShippingAddress\"")}
 	}
 	return nil
 }

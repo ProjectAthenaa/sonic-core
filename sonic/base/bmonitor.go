@@ -68,7 +68,6 @@ func (tk *BMonitor) Listen() {
 			tk.Stop()
 			return
 		case <-tk.Ctx.Done():
-			tk.Stop()
 			return
 		default:
 			count := core.Base.GetRedis("cache").PubSubNumSub(tk.Ctx, tk.Data.RedisChannel).Val()

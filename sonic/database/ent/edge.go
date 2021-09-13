@@ -17,7 +17,7 @@ func (a *Address) ShippingAddress(ctx context.Context) (*Shipping, error) {
 	if IsNotLoaded(err) {
 		result, err = a.QueryShippingAddress().Only(ctx)
 	}
-	return result, err
+	return result, MaskNotFound(err)
 }
 
 func (a *Address) BillingAddress(ctx context.Context) (*Shipping, error) {
@@ -257,7 +257,7 @@ func (s *Shipping) ShippingAddress(ctx context.Context) (*Address, error) {
 	if IsNotLoaded(err) {
 		result, err = s.QueryShippingAddress().Only(ctx)
 	}
-	return result, MaskNotFound(err)
+	return result, err
 }
 
 func (s *Shipping) BillingAddress(ctx context.Context) (*Address, error) {
