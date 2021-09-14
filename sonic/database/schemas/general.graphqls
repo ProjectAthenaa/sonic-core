@@ -1,6 +1,7 @@
 type Module{
     Name: String!
     Status: Status!
+    Accounts: Boolean!
     Fields: [ModuleField!]
 }
 

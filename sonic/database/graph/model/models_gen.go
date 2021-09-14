@@ -20,9 +20,10 @@ type AccountGroupInput struct {
 }
 
 type Module struct {
-	Name   string               `json:"Name"`
-	Status Status               `json:"Status"`
-	Fields []*sonic.ModuleField `json:"Fields"`
+	Name     string               `json:"Name"`
+	Status   Status               `json:"Status"`
+	Accounts bool                 `json:"Accounts"`
+	Fields   []*sonic.ModuleField `json:"Fields"`
 }
 
 type NewAddress struct {

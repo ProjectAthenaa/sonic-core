@@ -128,9 +128,10 @@ type ComplexityRoot struct {
 	}
 
 	Module struct {
-		Fields func(childComplexity int) int
-		Name   func(childComplexity int) int
-		Status func(childComplexity int) int
+		Accounts func(childComplexity int) int
+		Fields   func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Status   func(childComplexity int) int
 	}
 
 	ModuleField struct {
@@ -703,6 +704,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Metadata.Theme(childComplexity), true
+
+	case "Module.Accounts":
+		if e.complexity.Module.Accounts == nil {
+			break
+		}
+
+		return e.complexity.Module.Accounts(childComplexity), true
 
 	case "Module.Fields":
 		if e.complexity.Module.Fields == nil {
@@ -1849,6 +1857,7 @@ extend type Query {
 	{Name: "schemas/general.graphqls", Input: `type Module{
     Name: String!
     Status: Status!
+    Accounts: Boolean!
     Fields: [ModuleField!]
 }
 
@@ -4209,6 +4218,41 @@ func (ec *executionContext) _Module_Status(ctx context.Context, field graphql.Co
 	res := resTmp.(model.Status)
 	fc.Result = res
 	return ec.marshalNStatus2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Module_Accounts(ctx context.Context, field graphql.CollectedField, obj *model.Module) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Module",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Accounts, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Module_Fields(ctx context.Context, field graphql.CollectedField, obj *model.Module) (ret graphql.Marshaler) {
@@ -10957,6 +11001,11 @@ func (ec *executionContext) _Module(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "Status":
 			out.Values[i] = ec._Module_Status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Accounts":
+			out.Values[i] = ec._Module_Accounts(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
