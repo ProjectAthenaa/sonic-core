@@ -7,6 +7,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -37,6 +38,8 @@ const (
 func RegisterModule(module *Module) error {
 	opts, err := redis.ParseURL(os.Getenv("REDIS_URL"))
 
+	name := strings.ToLower(module.Name)
+
 	if err != nil {
 		return err
 	}
@@ -51,9 +54,9 @@ func RegisterModule(module *Module) error {
 	var ctx, cancel = context.WithCancel(context.Background())
 
 	go func() {
-		rdb.Set(ctx, fmt.Sprintf("modules:%s", module.Name), string(val), redis.KeepTTL)
+		rdb.Set(ctx, fmt.Sprintf("modules:%s", name), string(val), redis.KeepTTL)
 		for range time.Tick(time.Second * 5) {
-			rdb.SetNX(ctx, fmt.Sprintf("modules:%s", module.Name), string(val), redis.KeepTTL)
+			rdb.SetNX(ctx, fmt.Sprintf("modules:%s", name), string(val), redis.KeepTTL)
 		}
 	}()
 
@@ -63,7 +66,7 @@ func RegisterModule(module *Module) error {
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
 		cancel()
-		rdb.Del(ctx, fmt.Sprintf("modules:%s", module.Name))
+		rdb.Del(ctx, fmt.Sprintf("modules:%s", name))
 	}()
 
 	return nil
