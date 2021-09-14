@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -13,7 +14,7 @@ import (
 )
 
 type Module struct {
-	Name     string   `json:"Name"`
+	Name     string         `json:"Name"`
 	Accounts bool           `json:"Accounts"`
 	Fields   []*ModuleField `json:"Fields"`
 }
@@ -45,6 +46,12 @@ func RegisterModule(module *Module) error {
 	}
 
 	rdb := redis.NewClient(opts)
+
+	for i, field := range module.Fields {
+		if field.Validation != "" {
+			module.Fields[i].Validation = url.QueryEscape(field.Validation)
+		}
+	}
 
 	val, err := json.Marshal(&module)
 	if err != nil {
