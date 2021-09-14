@@ -20,7 +20,7 @@ type AccountGroupInput struct {
 }
 
 type Module struct {
-	Name     string               `json:"Name"`
+	Name     product.Site         `json:"Name"`
 	Status   Status               `json:"Status"`
 	Accounts bool                 `json:"Accounts"`
 	Fields   []*sonic.ModuleField `json:"Fields"`

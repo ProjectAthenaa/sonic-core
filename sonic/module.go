@@ -13,7 +13,7 @@ import (
 )
 
 type Module struct {
-	Name     string         `json:"Name"`
+	Name     string   `json:"Name"`
 	Accounts bool           `json:"Accounts"`
 	Fields   []*ModuleField `json:"Fields"`
 }

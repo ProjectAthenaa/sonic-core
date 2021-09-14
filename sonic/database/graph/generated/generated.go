@@ -1855,7 +1855,7 @@ extend type Query {
     getApp: App!
 }`, BuiltIn: false},
 	{Name: "schemas/general.graphqls", Input: `type Module{
-    Name: String!
+    Name: Site!
     Status: Status!
     Accounts: Boolean!
     Fields: [ModuleField!]
@@ -4180,9 +4180,9 @@ func (ec *executionContext) _Module_Name(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(product.Site)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNSite2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋproductᚐSite(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Module_Status(ctx context.Context, field graphql.CollectedField, obj *model.Module) (ret graphql.Marshaler) {

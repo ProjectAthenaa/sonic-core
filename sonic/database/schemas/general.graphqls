@@ -1,5 +1,5 @@
 type Module{
-    Name: String!
+    Name: Site!
     Status: Status!
     Accounts: Boolean!
     Fields: [ModuleField!]
