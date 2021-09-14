@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -100,6 +99,14 @@ func (su *ShippingUpdate) SetShippingAddressID(id uuid.UUID) *ShippingUpdate {
 	return su
 }
 
+// SetNillableShippingAddressID sets the "ShippingAddress" edge to the Address entity by ID if the given value is not nil.
+func (su *ShippingUpdate) SetNillableShippingAddressID(id *uuid.UUID) *ShippingUpdate {
+	if id != nil {
+		su = su.SetShippingAddressID(*id)
+	}
+	return su
+}
+
 // SetShippingAddress sets the "ShippingAddress" edge to the Address entity.
 func (su *ShippingUpdate) SetShippingAddress(a *Address) *ShippingUpdate {
 	return su.SetShippingAddressID(a.ID)
@@ -155,18 +162,12 @@ func (su *ShippingUpdate) Save(ctx context.Context) (int, error) {
 	)
 	su.defaults()
 	if len(su.hooks) == 0 {
-		if err = su.check(); err != nil {
-			return 0, err
-		}
 		affected, err = su.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ShippingMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = su.check(); err != nil {
-				return 0, err
 			}
 			su.mutation = mutation
 			affected, err = su.sqlSave(ctx)
@@ -214,14 +215,6 @@ func (su *ShippingUpdate) defaults() {
 		v := shipping.UpdateDefaultUpdatedAt()
 		su.mutation.SetUpdatedAt(v)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (su *ShippingUpdate) check() error {
-	if _, ok := su.mutation.ShippingAddressID(); su.mutation.ShippingAddressCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"ShippingAddress\"")
-	}
-	return nil
 }
 
 func (su *ShippingUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -477,6 +470,14 @@ func (suo *ShippingUpdateOne) SetShippingAddressID(id uuid.UUID) *ShippingUpdate
 	return suo
 }
 
+// SetNillableShippingAddressID sets the "ShippingAddress" edge to the Address entity by ID if the given value is not nil.
+func (suo *ShippingUpdateOne) SetNillableShippingAddressID(id *uuid.UUID) *ShippingUpdateOne {
+	if id != nil {
+		suo = suo.SetShippingAddressID(*id)
+	}
+	return suo
+}
+
 // SetShippingAddress sets the "ShippingAddress" edge to the Address entity.
 func (suo *ShippingUpdateOne) SetShippingAddress(a *Address) *ShippingUpdateOne {
 	return suo.SetShippingAddressID(a.ID)
@@ -539,18 +540,12 @@ func (suo *ShippingUpdateOne) Save(ctx context.Context) (*Shipping, error) {
 	)
 	suo.defaults()
 	if len(suo.hooks) == 0 {
-		if err = suo.check(); err != nil {
-			return nil, err
-		}
 		node, err = suo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ShippingMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = suo.check(); err != nil {
-				return nil, err
 			}
 			suo.mutation = mutation
 			node, err = suo.sqlSave(ctx)
@@ -598,14 +593,6 @@ func (suo *ShippingUpdateOne) defaults() {
 		v := shipping.UpdateDefaultUpdatedAt()
 		suo.mutation.SetUpdatedAt(v)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (suo *ShippingUpdateOne) check() error {
-	if _, ok := suo.mutation.ShippingAddressID(); suo.mutation.ShippingAddressCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"ShippingAddress\"")
-	}
-	return nil
 }
 
 func (suo *ShippingUpdateOne) sqlSave(ctx context.Context) (_node *Shipping, err error) {
