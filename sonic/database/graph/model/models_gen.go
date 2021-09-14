@@ -125,23 +125,19 @@ const (
 	FieldTypeKeywords FieldType = "KEYWORDS"
 	FieldTypeText     FieldType = "TEXT"
 	FieldTypeNumber   FieldType = "NUMBER"
-	FieldTypeGender   FieldType = "GENDER"
-	FieldTypeWidth    FieldType = "WIDTH"
-	FieldTypeShoeSize FieldType = "SHOE_SIZE"
+	FieldTypeDropdown FieldType = "DROPDOWN"
 )
 
 var AllFieldType = []FieldType{
 	FieldTypeKeywords,
 	FieldTypeText,
 	FieldTypeNumber,
-	FieldTypeGender,
-	FieldTypeWidth,
-	FieldTypeShoeSize,
+	FieldTypeDropdown,
 }
 
 func (e FieldType) IsValid() bool {
 	switch e {
-	case FieldTypeKeywords, FieldTypeText, FieldTypeNumber, FieldTypeGender, FieldTypeWidth, FieldTypeShoeSize:
+	case FieldTypeKeywords, FieldTypeText, FieldTypeNumber, FieldTypeDropdown:
 		return true
 	}
 	return false

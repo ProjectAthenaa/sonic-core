@@ -134,10 +134,11 @@ type ComplexityRoot struct {
 	}
 
 	ModuleField struct {
-		FieldKey   func(childComplexity int) int
-		Label      func(childComplexity int) int
-		Type       func(childComplexity int) int
-		Validation func(childComplexity int) int
+		DropdownValues func(childComplexity int) int
+		FieldKey       func(childComplexity int) int
+		Label          func(childComplexity int) int
+		Type           func(childComplexity int) int
+		Validation     func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -723,6 +724,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Module.Status(childComplexity), true
+
+	case "ModuleField.DropdownValues":
+		if e.complexity.ModuleField.DropdownValues == nil {
+			break
+		}
+
+		return e.complexity.ModuleField.DropdownValues(childComplexity), true
 
 	case "ModuleField.FieldKey":
 		if e.complexity.ModuleField.FieldKey == nil {
@@ -1854,9 +1862,7 @@ enum FieldType{
     KEYWORDS
     TEXT
     NUMBER
-    GENDER
-    WIDTH
-    SHOE_SIZE
+    DROPDOWN
 }
 
 type ModuleField{
@@ -1864,6 +1870,7 @@ type ModuleField{
     Label: String!
     Validation: String
     FieldKey: String
+    DropdownValues: [String!]
 }
 
 extend type Query{
@@ -4368,6 +4375,38 @@ func (ec *executionContext) _ModuleField_FieldKey(ctx context.Context, field gra
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ModuleField_DropdownValues(ctx context.Context, field graphql.CollectedField, obj *sonic.ModuleField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ModuleField",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DropdownValues, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_setSuccessWebhook(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -10968,6 +11007,8 @@ func (ec *executionContext) _ModuleField(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._ModuleField_Validation(ctx, field, obj)
 		case "FieldKey":
 			out.Values[i] = ec._ModuleField_FieldKey(ctx, field, obj)
+		case "DropdownValues":
+			out.Values[i] = ec._ModuleField_DropdownValues(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

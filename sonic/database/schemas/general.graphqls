@@ -14,9 +14,6 @@ enum FieldType{
     KEYWORDS
     TEXT
     NUMBER
-    GENDER
-    WIDTH
-    SHOE_SIZE
     DROPDOWN
 }
 
@@ -25,6 +22,7 @@ type ModuleField{
     Label: String!
     Validation: String
     FieldKey: String
+    DropdownValues: [String!]
 }
 
 extend type Query{
