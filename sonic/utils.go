@@ -108,5 +108,5 @@ func MapConverter(m map[string]interface{}) map[string]string {
 }
 
 func EntErr(err error) error {
-	return errors.New(strings.ReplaceAll(fmt.Sprint(err)[5:], " ", "_"))
+	return errors.New(strings.ReplaceAll(fmt.Sprint(err)[4:], " ", "_"))
 }
