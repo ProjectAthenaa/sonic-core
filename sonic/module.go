@@ -12,8 +12,9 @@ import (
 )
 
 type Module struct {
-	Name   string         `json:"Name"`
-	Fields []*ModuleField `json:"Fields"`
+	Name     string         `json:"Name"`
+	Accounts bool           `json:"Accounts"`
+	Fields   []*ModuleField `json:"Fields"`
 }
 
 type ModuleField struct {
@@ -21,7 +22,7 @@ type ModuleField struct {
 	Type           FieldType `json:"Type"`
 	Label          string    `json:"Label"`
 	FieldKey       *string   `json:"FieldKey"`
-	DropdownValues []string `json:"dropdown_values"`
+	DropdownValues []string  `json:"dropdown_values"`
 }
 
 type FieldType string
@@ -30,9 +31,6 @@ const (
 	FieldTypeKeywords FieldType = "KEYWORDS"
 	FieldTypeText     FieldType = "TEXT"
 	FieldTypeNumber   FieldType = "NUMBER"
-	FieldTypeGender   FieldType = "GENDER"
-	FieldTypeWidth    FieldType = "WIDTH"
-	FieldTypeShoeSize FieldType = "SHOE_SIZE"
 	FieldTypeDropDown FieldType = "DROPDOWN"
 )
 

@@ -8,7 +8,6 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	"github.com/prometheus/common/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"net/http"
@@ -87,8 +86,6 @@ func GenGraphQLAuthenticationFunc(base face.ICoreContext, graphEndpoint string, 
 
 				user, err := extractTokensGin(base, c, sessionID)
 				if err != nil {
-					log.Error("SessionID: ", sessionID)
-					log.Error(err)
 					ctx = context.WithValue(ctx, "error", unauthorizedError)
 					goto setRequestContext
 				}
