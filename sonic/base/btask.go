@@ -269,7 +269,7 @@ func (tk *BTask) Process() {
 		}
 	} else if tk.state == module.STATUS_CHECKOUT_DECLINE {
 		payload = &module.Status{
-			Status: module.STATUS_CHECKED_OUT,
+			Status: module.STATUS_CHECKOUT_DECLINE,
 			Information: map[string]string{
 				"size":         tk.ReturningFields.Size,
 				"price":        tk.ReturningFields.Price,

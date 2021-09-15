@@ -12,7 +12,10 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/hook"
 	_ "github.com/ProjectAthenaa/sonic-core/sonic/database/ent/runtime"
 	"github.com/go-redis/redis/v8"
+	"github.com/go-redsync/redsync/v4"
+	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/common/log"
 	"os"
 	"strings"
 	"time"
@@ -23,6 +26,8 @@ func Connect(pgURL string) *ent.Client {
 	if err != nil {
 		panic(err)
 	}
+
+	redisSync := redsync.New(goredis.NewPool(rdb))
 
 	client.Task.Use(
 		hook.On(
@@ -122,6 +127,46 @@ func Connect(pgURL string) *ent.Client {
 			},
 			ent.OpUpdateOne|ent.OpUpdate,
 		))
+
+	client.Proxy.Use(
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.ProxyFunc(func(ctx context.Context, m *ent.ProxyMutation) (ent.Value, error) {
+					plID, exists := m.ProxyListID()
+					if !exists {
+						log.Error("proxy list id not found")
+						return next.Mutate(ctx, m)
+					}
+
+					key := fmt.Sprintf("tasks:proxies:%s", plID.String())
+
+					locker := redisSync.NewMutex(key + ":locker")
+
+					if err = locker.LockContext(ctx); err != nil {
+						log.Error("error acquiring proxy mutex: ", err)
+						return nil, err
+					}
+
+					defer func() {
+						if ok, err := locker.UnlockContext(ctx); !ok || err != nil {
+							log.Error("error unlocking proxy mutex: ", err)
+						}
+					}()
+
+					//payload, err := json.Marshal(&module.Proxy{
+					//	Username: m.,
+					//	Password: nil,
+					//	IP:       "",
+					//	Port:     "",
+					//})
+
+					return next.Mutate(ctx, m)
+				})
+
+			},
+			ent.OpCreate,
+		),
+	)
 
 	//err = client.Schema.Create(context.Background())
 	//if err != nil {
