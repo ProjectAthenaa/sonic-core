@@ -291,7 +291,7 @@ func (tk *BTask) Process() {
 
 	data, _ := json.Marshal(&payload)
 
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Millisecond * 500)
 
 	log.Info("Update ID: ", payload.Information["id"])
 
