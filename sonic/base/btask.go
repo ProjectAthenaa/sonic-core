@@ -291,8 +291,10 @@ func (tk *BTask) Process() {
 
 	queueUpdate(update{
 		channel: tk.Data.Channels.UpdatesChannel,
-		payload:  string(data),
+		payload: string(data),
 	})
+
+	time.Sleep(time.Second * 2)
 
 	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
