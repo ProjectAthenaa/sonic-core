@@ -291,9 +291,6 @@ func (tk *BTask) Process() {
 
 	data, _ := json.Marshal(&payload)
 
-	time.Sleep(time.Millisecond * 500)
-
-	log.Info("Update ID: ", payload.Information["id"])
 
 	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
