@@ -291,9 +291,7 @@ func (tk *BTask) Process() {
 
 	data, _ := json.Marshal(&payload)
 
-	if tk.state == module.STATUS_STOPPED {
-		return
-	}
+
 
 	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
