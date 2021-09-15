@@ -6,6 +6,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
+	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/prometheus/common/log"
@@ -290,8 +291,10 @@ func (tk *BTask) Process() {
 
 	queueUpdate(update{
 		channel: tk.Data.Channels.UpdatesChannel,
-		payload: string(data),
+		payload:  string(data),
 	})
+
+	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
 
 func (tk *BTask) GetStatus() *module.Status {
