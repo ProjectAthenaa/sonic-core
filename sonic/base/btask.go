@@ -291,12 +291,9 @@ func (tk *BTask) Process() {
 
 	data, _ := json.Marshal(&payload)
 
-	queueUpdate(update{
-		channel: tk.Data.Channels.UpdatesChannel,
-		payload: string(data),
-	})
-
 	time.Sleep(time.Second * 2)
+
+	log.Info("Update ID: ", payload.Information["id"])
 
 	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
@@ -317,9 +314,7 @@ func (tk *BTask) GetStatus() *module.Status {
 func (tk *BTask) SetStatus(s module.STATUS, msg ...interface{}) {
 	tk._statusLocker.Lock()
 	go func() {
-		if s != tk.state {
-			tk.state = s
-		}
+		tk.state = s
 
 		if len(msg) == 1 {
 			data, _ := json.Marshal(&msg[0])
