@@ -9,6 +9,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
+	"github.com/google/uuid"
 	"github.com/prometheus/common/log"
 	http "github.com/useflyent/fhttp"
 	"os"
@@ -286,6 +287,7 @@ func (tk *BTask) Process() {
 	payload.Information["timestamp"] = strconv.Itoa(int(time.Now().Unix()))
 	payload.Information["taskID"] = tk.ID
 	payload.Information["startedAt"] = strconv.Itoa(int(tk.startTime.Unix()))
+	payload.Information["id"] = uuid.NewString()
 
 	data, _ := json.Marshal(&payload)
 
