@@ -50,15 +50,13 @@ func Connect(pgURL string) *ent.Client {
 					id, _ := mutation.ID()
 					oldST, _ := mutation.OldStartTime(ctx)
 					newST, ok := mutation.StartTime()
-					if !ok || oldST == nil{
+					if !ok || oldST == nil {
 						rdb.SRem(ctx, "scheduler:processing", id.String())
 						return next.Mutate(ctx, mutation)
 					}
 
-
-
 					if oldST.Unix() != newST.Unix() {
-						newCtx, _ := context.WithTimeout(ctx, time.Second*5)
+						newCtx, _ := context.WithTimeout(ctx, time.Second*3)
 
 						if rdb.SIsMember(newCtx, "scheduler:processing", id.String()).Val() {
 							updates := rdb.Subscribe(newCtx, fmt.Sprintf("tasks:updates:%s", id.String()))
@@ -66,10 +64,18 @@ func Connect(pgURL string) *ent.Client {
 
 							rdb.Publish(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())), "STOP")
 
-							for msg := range updates.Channel() {
-								if statusRe.MatchString(msg.Payload) {
-									break
+						outer:
+							for {
+								select {
+								case <-newCtx.Done():
+									break outer
+								case msg := <-updates.Channel():
+
+									if statusRe.MatchString(msg.Payload) {
+										break
+									}
 								}
+
 							}
 						}
 
