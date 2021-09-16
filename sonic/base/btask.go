@@ -35,14 +35,15 @@ type BTask struct {
 	_cancelFunc        context.CancelFunc
 
 	//props
-	quitChan  chan int32
-	running   bool
-	paused    bool
-	stopping  bool
-	state     module.STATUS //tag state
-	message   string        //tag more message
-	startTime time.Time
-	userID    string
+	quitChan    chan int32
+	running     bool
+	paused      bool
+	stopping    bool
+	state       module.STATUS //tag state
+	message     string        //tag more message
+	startTime   time.Time
+	userID      string
+	stopFromCMD bool
 
 	//returnFields
 	ReturningFields *returningFields
@@ -93,6 +94,7 @@ outer:
 		case cmd := <-pubSub.Channel:
 			switch cmd.Payload {
 			case "STOP":
+				tk.stopFromCMD = true
 				return tk.Stop()
 			case "PAUSE":
 				if err = tk.Pause(); err != nil {
@@ -111,6 +113,7 @@ outer:
 		case <-tk._runningChan:
 			break outer
 		case <-processExit:
+			tk.stopFromCMD = true
 			return tk.Stop()
 		default:
 			continue
@@ -292,9 +295,11 @@ func (tk *BTask) Process(status module.STATUS) {
 
 	data, _ := json.Marshal(&payload)
 
-
-
 	//time.Sleep(time.Millisecond * 200)
+
+	if status == module.STATUS_STOPPED && tk.stopFromCMD {
+		payload.Information["stoppedFromCMD"] = "1"
+	}
 
 	updateBuffer.Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
