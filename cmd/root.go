@@ -34,7 +34,7 @@ func Execute() {
 
 	//client.Schema.Create(context.Background())
 
-	discordId := flag.String("discord_id", "366619227563491329", "Discord ID of the user to bind")
+	discordId := flag.String("discord_id", "171442868190314497", "Discord ID of the user to bind")
 	licenseType := flag.String("type", "lifetime", "License type")
 
 	flag.Parse()

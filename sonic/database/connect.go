@@ -17,9 +17,12 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/prometheus/common/log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
+
+var statusRe = regexp.MustCompile(`Status:(?:27|8|13|19)`)
 
 func Connect(pgURL string) *ent.Client {
 	client, err := ent.Open(dialect.Postgres, pgURL)
@@ -44,9 +47,27 @@ func Connect(pgURL string) *ent.Client {
 		hook.On(
 			func(next ent.Mutator) ent.Mutator {
 				return hook.TaskFunc(func(ctx context.Context, mutation *ent.TaskMutation) (ent.Value, error) {
-					if id, ok := mutation.ID(); ok {
-						rdb.Publish(ctx, "scheduler:tasks-updated", id.String())
+					oldST, _ := mutation.OldStartTime(ctx)
+					newST, _ := mutation.StartTime()
+
+					id, _ := mutation.ID()
+
+					if oldST.Unix() != newST.Unix() {
+						newCtx, _ := context.WithCancel(ctx)
+						updates := rdb.Subscribe(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())))
+						defer updates.Close()
+
+						rdb.Publish(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())), "STOP")
+
+						for msg := range updates.Channel() {
+							if statusRe.MatchString(msg.Payload) {
+								break
+							}
+						}
+
+						rdb.Publish(newCtx, "scheduler:task-reschedule", id)
 					}
+
 					return next.Mutate(ctx, mutation)
 				})
 			},
