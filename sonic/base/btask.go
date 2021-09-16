@@ -55,6 +55,7 @@ type returningFields struct {
 	OrderNumber  string
 	Color        string
 	ProductImage string
+	ProductName  string
 }
 
 func (tk *BTask) Init() {
@@ -291,7 +292,7 @@ func (tk *BTask) Process() {
 
 	data, _ := json.Marshal(&payload)
 
-
+	time.Sleep(time.Millisecond * 200)
 
 	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
