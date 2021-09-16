@@ -9,6 +9,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
+	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/prometheus/common/log"
 	http "github.com/useflyent/fhttp"
@@ -276,7 +277,7 @@ func (tk *BTask) Process() {
 				"size":         tk.ReturningFields.Size,
 				"price":        tk.ReturningFields.Price,
 				"color":        tk.ReturningFields.Color,
-				"productImage": tk.ReturningFields.ProductImage,	
+				"productImage": tk.ReturningFields.ProductImage,
 				"productName":  tk.ReturningFields.ProductName,
 				"message":      tk.message,
 				"running":      fmt.Sprintf("%v", tk.running),
@@ -294,6 +295,14 @@ func (tk *BTask) Process() {
 	data, _ := json.Marshal(&payload)
 
 	time.Sleep(time.Millisecond * 200)
+
+	core.Base.GetRedis("cache").XAdd(tk.Ctx, &redis.XAddArgs{
+		Stream: fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel),
+		Approx: false,
+		Limit:  0,
+		ID:     payload.Information["id"],
+		Values: string(data),
+	})
 
 	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
