@@ -70,16 +70,15 @@ func Connect(pgURL string) *ent.Client {
 								case <-newCtx.Done():
 									break outer
 								case msg := <-updates.Channel():
-
 									if statusRe.MatchString(msg.Payload) {
-										break
+										break outer
 									}
 								}
 
 							}
 						}
 
-						rdb.SRem(newCtx, "scheduler:processing", id.String())
+						rdb.SRem(context.Background(), "scheduler:processing", id.String())
 					}
 
 					return next.Mutate(ctx, mutation)
