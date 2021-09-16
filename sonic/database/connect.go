@@ -47,10 +47,13 @@ func Connect(pgURL string) *ent.Client {
 		hook.On(
 			func(next ent.Mutator) ent.Mutator {
 				return hook.TaskFunc(func(ctx context.Context, mutation *ent.TaskMutation) (ent.Value, error) {
-					oldST, _ := mutation.OldStartTime(ctx)
-					newST, _ := mutation.StartTime()
-
 					id, _ := mutation.ID()
+					oldST, _ := mutation.OldStartTime(ctx)
+					newST, ok := mutation.StartTime()
+					if !ok{
+						rdb.SRem(ctx, "scheduler:processing", id.String())
+						return next.Mutate(ctx, mutation)
+					}
 
 					if oldST.Unix() != newST.Unix() {
 						newCtx, _ := context.WithTimeout(ctx, time.Second*5)
