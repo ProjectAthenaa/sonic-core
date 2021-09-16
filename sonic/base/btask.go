@@ -373,7 +373,7 @@ func (tk *BTask) NewRequest(method, url string, body []byte, useHttp2 ...bool) (
 }
 
 func (tk *BTask) Do(req *fasttls.Request) (*fasttls.Response, error) {
-	return tk.FastClient.Do(req)
+	return tk.FastClient.DoCtx(tk.Ctx, req)
 }
 
 func (tk *BTask) DoLocalhost(req *fasttls.Request) (*fasttls.Response, error) {
