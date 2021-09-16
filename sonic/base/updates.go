@@ -3,41 +3,21 @@ package base
 import (
 	"context"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
-	"sync"
+	"github.com/go-redis/redis/v8"
 	"time"
 )
 
-type update struct {
-	id      string
-	payload string
-	channel string
-}
-
-type buffer map[string]update
 
 var (
-	updateLocker = &sync.Mutex{}
-	updateBuffer = buffer{}
+	updateBuffer redis.Pipeliner
 )
-
-func (b buffer) queue(u update) {
-	updateLocker.Lock()
-	defer updateLocker.Unlock()
-	b[u.id] = u
-}
 
 func init() {
 	rdb := core.Base.GetRedis("cache")
+	updateBuffer = rdb.Pipeline()
 	go func() {
 		for range time.Tick(time.Millisecond * 200) {
-			pipe := rdb.Pipeline()
-			updateLocker.Lock()
-			for k, v := range updateBuffer {
-				pipe.Publish(context.Background(), v.channel, v.payload)
-				delete(updateBuffer, k)
-			}
-			pipe.Exec(context.Background())
-			updateLocker.Unlock()
+			updateBuffer.Exec(context.Background())
 		}
 	}()
 }

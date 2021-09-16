@@ -293,15 +293,10 @@ func (tk *BTask) Process(status module.STATUS) {
 	data, _ := json.Marshal(&payload)
 
 
-	updateBuffer.queue(update{
-		id:      payload.Information["id"],
-		payload: string(data),
-		channel: fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel),
-	})
 
 	//time.Sleep(time.Millisecond * 200)
 
-	//core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
+	updateBuffer.Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
 
 func (tk *BTask) GetStatus(status module.STATUS) *module.Status {
