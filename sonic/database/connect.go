@@ -68,7 +68,7 @@ func Connect(pgURL string) *ent.Client {
 							}
 						}
 
-						rdb.Publish(newCtx, "scheduler:task-reschedule", id)
+						rdb.SRem(newCtx, "scheduler:processing", id.String())
 					}
 
 					return next.Mutate(ctx, mutation)
