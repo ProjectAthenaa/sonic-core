@@ -53,15 +53,18 @@ func Connect(pgURL string) *ent.Client {
 					id, _ := mutation.ID()
 
 					if oldST.Unix() != newST.Unix() {
-						newCtx, _ := context.WithCancel(ctx)
-						updates := rdb.Subscribe(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())))
-						defer updates.Close()
+						newCtx, _ := context.WithTimeout(ctx, time.Second*5)
 
-						rdb.Publish(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())), "STOP")
+						if rdb.SIsMember(newCtx, "scheduler:processing", id.String()).Val() {
+							updates := rdb.Subscribe(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())))
+							defer updates.Close()
 
-						for msg := range updates.Channel() {
-							if statusRe.MatchString(msg.Payload) {
-								break
+							rdb.Publish(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())), "STOP")
+
+							for msg := range updates.Channel() {
+								if statusRe.MatchString(msg.Payload) {
+									break
+								}
 							}
 						}
 
