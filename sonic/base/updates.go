@@ -32,8 +32,9 @@ func init() {
 		for range time.Tick(time.Millisecond * 200) {
 			pipe := rdb.Pipeline()
 			updateLocker.Lock()
-			for _, v := range updateBuffer {
+			for k, v := range updateBuffer {
 				pipe.Publish(context.Background(), v.channel, v.payload)
+				delete(updateBuffer, k)
 			}
 			pipe.Exec(context.Background())
 			updateLocker.Unlock()
