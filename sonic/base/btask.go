@@ -6,7 +6,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
-	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/google/uuid"
@@ -293,9 +292,16 @@ func (tk *BTask) Process(status module.STATUS) {
 
 	data, _ := json.Marshal(&payload)
 
-	time.Sleep(time.Millisecond * 200)
 
-	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
+	updateBuffer.queue(update{
+		id:      payload.Information["id"],
+		payload: string(data),
+		channel: fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel),
+	})
+
+	//time.Sleep(time.Millisecond * 200)
+
+	//core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
 
 func (tk *BTask) GetStatus(status module.STATUS) *module.Status {
