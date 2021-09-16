@@ -59,7 +59,7 @@ func Connect(pgURL string) *ent.Client {
 						newCtx, _ := context.WithTimeout(ctx, time.Second*5)
 
 						if rdb.SIsMember(newCtx, "scheduler:processing", id.String()).Val() {
-							updates := rdb.Subscribe(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())))
+							updates := rdb.Subscribe(newCtx, fmt.Sprintf("tasks:uopdates:%s", id.String()))
 							defer updates.Close()
 
 							rdb.Publish(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())), "STOP")
