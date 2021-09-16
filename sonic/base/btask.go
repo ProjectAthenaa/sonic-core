@@ -9,7 +9,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
-	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/prometheus/common/log"
 	http "github.com/useflyent/fhttp"
@@ -253,11 +252,11 @@ func (tk *BTask) UpdateData(data *module.Data) {
 	tk.Data = data
 }
 
-func (tk *BTask) Process() {
+func (tk *BTask) Process(status module.STATUS) {
 	defer tk._statusLocker.Unlock()
 	var payload *module.Status
 
-	if tk.state == module.STATUS_CHECKED_OUT {
+	if status == module.STATUS_CHECKED_OUT {
 		payload = &module.Status{
 			Status: module.STATUS_CHECKED_OUT,
 			Information: map[string]string{
@@ -270,7 +269,7 @@ func (tk *BTask) Process() {
 				"running":      fmt.Sprintf("%v", tk.running),
 			},
 		}
-	} else if tk.state == module.STATUS_CHECKOUT_DECLINE {
+	} else if status == module.STATUS_CHECKOUT_DECLINE {
 		payload = &module.Status{
 			Status: module.STATUS_CHECKOUT_DECLINE,
 			Information: map[string]string{
@@ -284,7 +283,7 @@ func (tk *BTask) Process() {
 			},
 		}
 	} else {
-		payload = tk.GetStatus()
+		payload = tk.GetStatus(status)
 	}
 
 	payload.Information["timestamp"] = strconv.Itoa(int(time.Now().Unix()))
@@ -296,20 +295,12 @@ func (tk *BTask) Process() {
 
 	time.Sleep(time.Millisecond * 200)
 
-	core.Base.GetRedis("cache").XAdd(tk.Ctx, &redis.XAddArgs{
-		Stream: fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel),
-		Approx: false,
-		Limit:  0,
-		ID:     payload.Information["id"],
-		Values: string(data),
-	})
-
 	core.Base.GetRedis("cache").Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
 
-func (tk *BTask) GetStatus() *module.Status {
+func (tk *BTask) GetStatus(status module.STATUS) *module.Status {
 	data := &module.Status{
-		Status: tk.state,
+		Status: status,
 		Information: map[string]string{
 			"running": fmt.Sprintf("%v", tk.running),
 		},
@@ -323,7 +314,6 @@ func (tk *BTask) GetStatus() *module.Status {
 func (tk *BTask) SetStatus(s module.STATUS, msg ...interface{}) {
 	tk._statusLocker.Lock()
 	go func() {
-		tk.state = s
 
 		if len(msg) == 1 {
 			data, _ := json.Marshal(&msg[0])
@@ -333,7 +323,7 @@ func (tk *BTask) SetStatus(s module.STATUS, msg ...interface{}) {
 			tk.message = string(data)
 		}
 
-		tk.Process()
+		tk.Process(s)
 	}()
 }
 
