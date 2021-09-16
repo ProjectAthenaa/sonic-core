@@ -211,11 +211,20 @@ func b2s(b []byte) string {
 }
 
 func (cj *CookieJar) lock() {
-	mu, _ := jarMutexes.Load(cj)
+	mu, ok := jarMutexes.Load(cj)
+	if !ok {
+		mu = &sync.Mutex{}
+		jarMutexes.Store(cj, mu)
+	}
 	mu.(*sync.Mutex).Lock()
 }
 
 func (cj *CookieJar) unlock() {
-	mu, _ := jarMutexes.Load(cj)
+	mu, ok := jarMutexes.Load(cj)
+	if !ok {
+		mu = &sync.Mutex{}
+		jarMutexes.Store(cj, mu)
+		return
+	}
 	mu.(*sync.Mutex).Unlock()
 }
