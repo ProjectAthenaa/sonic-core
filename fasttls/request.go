@@ -216,7 +216,7 @@ func (c *Client) doRequest(requestObj *Request) (*Response, error) {
 		Addr:  requestObj.getHostAddr(),
 		IsTLS: requestObj.isHttps,
 	}
-	hc.ReadBufferSize = 4192
+	hc.ReadBufferSize = 8192
 
 	if requestObj.UseHttp2 {
 		checkIfHttp2IsSupported(requestObj)
