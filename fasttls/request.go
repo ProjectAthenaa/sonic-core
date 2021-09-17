@@ -216,6 +216,7 @@ func (c *Client) doRequest(requestObj *Request) (*Response, error) {
 		Addr:  requestObj.getHostAddr(),
 		IsTLS: requestObj.isHttps,
 	}
+	hc.ReadBufferSize = 4192
 
 	if requestObj.UseHttp2 {
 		checkIfHttp2IsSupported(requestObj)
@@ -244,7 +245,6 @@ func (c *Client) doRequest(requestObj *Request) (*Response, error) {
 				MaxHeaderListSize:    262144,
 			}
 		}
-
 		conn, err := http2.ConfigureClient(hc, http2.ClientOpts{}, &clientSettings, c.client)
 		c.client = conn
 		persistedConnection = conn
