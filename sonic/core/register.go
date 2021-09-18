@@ -61,7 +61,7 @@ func RegisterModuleServer(module string, server module.ModuleServer) {
 }
 
 func getItemFromQueueBlocking(ctx context.Context, key string) []string {
-	return rdb.BLPop(ctx, time.Millisecond*200, fmt.Sprintf("queue:%s", key)).Val()
+	return rdb.BLPop(ctx, time.Second, fmt.Sprintf("queue:%s", key)).Val()
 }
 
 func processTask(ctx context.Context, taskID string, server module.ModuleServer) {
