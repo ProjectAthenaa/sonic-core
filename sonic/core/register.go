@@ -41,7 +41,7 @@ func RegisterModuleServer(module string, server module.ModuleServer) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	defer cancel()
-
+	log.Infof("%s Module Initialized", module)
 	for {
 		select {
 		case <-c:
@@ -52,7 +52,7 @@ func RegisterModuleServer(module string, server module.ModuleServer) {
 			taskArray := getItemFromQueueBlocking(ctx, module)
 			if len(taskArray) > 1 {
 				taskID := taskArray[1]
-				//log.Info("New Task Received: ", taskID)
+				log.Info("New Task Received: ", taskID)
 				go processTask(ctx, taskID, server)
 			}
 
