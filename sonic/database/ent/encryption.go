@@ -5,26 +5,40 @@ import (
 	"crypto/rsa"
 	"crypto/sha512"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"strings"
 )
 
 func (b *Billing) Decrypt() *Billing {
 	decrypted := &Billing{}
-	decrypted.CVV = string(decryptWithPrivateKey([]byte(b.CVV)))
-	decrypted.CardNumber = string(decryptWithPrivateKey([]byte(b.CardNumber)))
-	decrypted.ExpiryMonth = string(decryptWithPrivateKey([]byte(b.ExpiryMonth)))
-	decrypted.ExpiryYear = string(decryptWithPrivateKey([]byte(b.ExpiryYear)))
+	cvv, _ := base64.StdEncoding.DecodeString(b.CVV)
+	cardNumber, _ := base64.StdEncoding.DecodeString(b.CardNumber)
+	expiryMonth, _ := base64.StdEncoding.DecodeString(b.CVV)
+	expiryYear, _ := base64.StdEncoding.DecodeString(b.ExpiryYear)
+
+	decrypted.CVV = string(decryptWithPrivateKey(cvv))
+	decrypted.CardNumber = string(decryptWithPrivateKey(cardNumber))
+	decrypted.ExpiryMonth = string(decryptWithPrivateKey(expiryMonth))
+	decrypted.ExpiryYear = string(decryptWithPrivateKey(expiryYear))
+	decrypted.CardholderName = b.CardholderName
 
 	return decrypted
 }
 
 func (b *Billing) Export() *Billing {
 	decrypted := &Billing{}
-	decrypted.CVV = string(decryptWithPrivateKey([]byte(b.CVV)))
-	decrypted.CardNumber = string(decryptWithPrivateKey([]byte(b.CardNumber)))
-	decrypted.ExpiryMonth = string(decryptWithPrivateKey([]byte(b.ExpiryMonth)))
-	decrypted.ExpiryYear = string(decryptWithPrivateKey([]byte(b.ExpiryYear)))
+
+	cvv, _ := base64.StdEncoding.DecodeString(b.CVV)
+	cardNumber, _ := base64.StdEncoding.DecodeString(b.CardNumber)
+	expiryMonth, _ := base64.StdEncoding.DecodeString(b.CVV)
+	expiryYear, _ := base64.StdEncoding.DecodeString(b.ExpiryYear)
+
+	decrypted.CVV = string(decryptWithPrivateKey(cvv))
+	decrypted.CardNumber = string(decryptWithPrivateKey(cardNumber))
+	decrypted.ExpiryMonth = string(decryptWithPrivateKey(expiryMonth))
+	decrypted.ExpiryYear = string(decryptWithPrivateKey(expiryYear))
+	decrypted.CardholderName = b.CardholderName
 
 	var newNumber string
 
