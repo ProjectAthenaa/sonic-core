@@ -303,7 +303,7 @@ func (tk *BTask) Process(status module.STATUS) {
 	if status == module.STATUS_STOPPED && tk.stopFromCMD {
 		payload.Information["stoppedFromCMD"] = "1"
 	}
-
+	updateBuffer.Set(tk.Ctx, fmt.Sprintf("tasks:updates:last-update:%s", tk.ID), status.String(), time.Hour*24)
 	updateBuffer.Publish(tk.Ctx, fmt.Sprintf("tasks:updates:%s", tk.Data.Channels.UpdatesChannel), string(data))
 }
 
