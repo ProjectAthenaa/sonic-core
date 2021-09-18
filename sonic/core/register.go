@@ -318,6 +318,13 @@ func (j *scratchTask) getProfile() (retProf *module.Profile, err error) {
 				return nil, sonic.EntErr(err)
 			}
 
+			if os.Getenv("DEBUG") == "1"{
+				log.Info("Debug enabled, accessing profiles without encryption")
+			}else{
+				billing = billing.Decrypt()
+			}
+
+
 			toAppend = &module.Profile{
 				Email: prof.Email,
 				Shipping: &module.Shipping{
