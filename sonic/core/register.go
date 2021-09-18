@@ -34,7 +34,7 @@ func init() {
 	redisSync = redsync.New(pool)
 }
 
-func RegisterModuleServer(module product.Site, server module.ModuleServer) {
+func RegisterModuleServer(module string, server module.ModuleServer) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
@@ -60,7 +60,7 @@ func RegisterModuleServer(module product.Site, server module.ModuleServer) {
 	}
 }
 
-func getItemFromQueueBlocking(ctx context.Context, key product.Site) []string {
+func getItemFromQueueBlocking(ctx context.Context, key string) []string {
 	return rdb.BLPop(ctx, time.Millisecond*200, fmt.Sprintf("queue:%s", key)).Val()
 }
 
