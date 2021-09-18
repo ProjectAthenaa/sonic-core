@@ -53,4 +53,5 @@ enum PXType{
   HCAPHIGH = 9;
   RECAP = 10;
   PX34 = 11;
+  PX2 = 12;
 }
