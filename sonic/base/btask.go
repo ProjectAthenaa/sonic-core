@@ -85,6 +85,7 @@ func (tk *BTask) Listen() error {
 
 	defer pubSub.Close()
 	defer core.Base.GetRedis("cache").SRem(context.Background(), "tasks:processing", tk.ID)
+	defer core.Base.GetRedis("cache").Del(context.Background(), fmt.Sprintf("tasks:updates:last-update:%s", tk.ID), tk.ID)
 
 	processExit := make(chan os.Signal, 1)
 	defer close(processExit)
