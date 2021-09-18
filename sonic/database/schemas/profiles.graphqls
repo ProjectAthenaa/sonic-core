@@ -9,6 +9,7 @@ type Profile{
     Name: String!
     Email: String!
     Shipping: Shipping!
+    Billing: Billing!
 }
 
 type Shipping{

@@ -184,6 +184,7 @@ type ComplexityRoot struct {
 	}
 
 	Profile struct {
+		Billing  func(childComplexity int) int
 		Email    func(childComplexity int) int
 		ID       func(childComplexity int) int
 		Name     func(childComplexity int) int
@@ -368,6 +369,7 @@ type ProfileResolver interface {
 	ID(ctx context.Context, obj *ent.Profile) (string, error)
 
 	Shipping(ctx context.Context, obj *ent.Profile) (*ent.Shipping, error)
+	Billing(ctx context.Context, obj *ent.Profile) (*ent.Billing, error)
 }
 type ProfileGroupResolver interface {
 	ID(ctx context.Context, obj *ent.ProfileGroup) (string, error)
@@ -1127,6 +1129,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Product.Sizes(childComplexity), true
+
+	case "Profile.Billing":
+		if e.complexity.Profile.Billing == nil {
+			break
+		}
+
+		return e.complexity.Profile.Billing(childComplexity), true
 
 	case "Profile.Email":
 		if e.complexity.Profile.Email == nil {
@@ -1935,6 +1944,7 @@ type Profile{
     Name: String!
     Email: String!
     Shipping: Shipping!
+    Billing: Billing!
 }
 
 type Shipping{
@@ -5953,6 +5963,41 @@ func (ec *executionContext) _Profile_Shipping(ctx context.Context, field graphql
 	res := resTmp.(*ent.Shipping)
 	fc.Result = res
 	return ec.marshalNShipping2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐShipping(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Profile_Billing(ctx context.Context, field graphql.CollectedField, obj *ent.Profile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Profile().Billing(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Billing)
+	fc.Result = res
+	return ec.marshalNBilling2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐBilling(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ProfileGroup_ID(ctx context.Context, field graphql.CollectedField, obj *ent.ProfileGroup) (ret graphql.Marshaler) {
@@ -11335,6 +11380,20 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 				}
 				return res
 			})
+		case "Billing":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Profile_Billing(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12677,6 +12736,20 @@ func (ec *executionContext) marshalNApp2ᚖgithubᚗcomᚋProjectAthenaaᚋsonic
 		return graphql.Null
 	}
 	return ec._App(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNBilling2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐBilling(ctx context.Context, sel ast.SelectionSet, v ent.Billing) graphql.Marshaler {
+	return ec._Billing(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBilling2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐBilling(ctx context.Context, sel ast.SelectionSet, v *ent.Billing) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Billing(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
