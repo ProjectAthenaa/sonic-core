@@ -24,6 +24,7 @@ message Payload{
   bytes ResponseObject = 4;
   string Token = 5;
   int32 RSC = 6;
+  string Uuid = 7;
 }
 
 message ConstructPayloadResponse{
