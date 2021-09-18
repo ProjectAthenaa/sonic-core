@@ -49,36 +49,23 @@ func Connect(pgURL string) *ent.Client {
 				return hook.TaskFunc(func(ctx context.Context, mutation *ent.TaskMutation) (ent.Value, error) {
 					id, _ := mutation.ID()
 					oldST, _ := mutation.OldStartTime(ctx)
-					newST, ok := mutation.StartTime()
-					if !ok || oldST == nil {
-						rdb.SRem(ctx, "scheduler:processing", id.String())
+					product, err := mutation.Client().Product.Get(ctx, mutation.ProductIDs()[0])
+					if err != nil {
+						log.Error("error retrieving product: ", err)
 						return next.Mutate(ctx, mutation)
 					}
 
-					if oldST.Unix() != newST.Unix() {
-						newCtx, _ := context.WithTimeout(ctx, time.Second*3)
+					newST, ok := mutation.StartTime()
+					if !ok {
+						rdb.ZRem(ctx, "zset:scheduled:items", fmt.Sprintf("%s:%s:%s", product.Site, id.String(), oldST))
+						return next.Mutate(ctx, mutation)
+					}
 
-						if rdb.SIsMember(newCtx, "scheduler:processing", id.String()).Val() {
-							updates := rdb.Subscribe(newCtx, fmt.Sprintf("tasks:updates:%s", id.String()))
-							defer updates.Close()
-
-							rdb.Publish(newCtx, fmt.Sprintf("tasks:commands:%s", hash(id.String())), "STOP")
-
-						outer:
-							for {
-								select {
-								case <-newCtx.Done():
-									break outer
-								case msg := <-updates.Channel():
-									if statusRe.MatchString(msg.Payload) {
-										break outer
-									}
-								}
-
-							}
-						}
-
-						rdb.SRem(context.Background(), "scheduler:processing", id.String())
+					if newST.Unix() != oldST.Unix() && newST.Sub(time.Now()) > 0 {
+						rdb.ZAdd(ctx, "zset:scheduled:items", &redis.Z{
+							Score:  float64(newST.Unix()),
+							Member: fmt.Sprintf("%s:%s:%s", product.Site, id.String(), oldST),
+						})
 					}
 
 					return next.Mutate(ctx, mutation)
