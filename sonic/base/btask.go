@@ -6,6 +6,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
+	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/google/uuid"
@@ -83,6 +84,7 @@ func (tk *BTask) Listen() error {
 	}
 
 	defer pubSub.Close()
+	defer core.Base.GetRedis("cache").SRem(context.Background(), "tasks:processing", tk.ID)
 
 	processExit := make(chan os.Signal, 1)
 	defer close(processExit)
@@ -152,6 +154,7 @@ func (tk *BTask) Start(data *module.Data) error {
 	tk.startTime = time.Now()
 	tk.FastClient = fasttls.NewClient(tls.HelloChrome_91, tk.FormatProxy())
 	tk.userID = tk.Data.Metadata["UserID"]
+	core.Base.GetRedis("cache").SAdd(tk.Ctx, "tasks:processing", tk.ID)
 
 	go tk.Listen()
 	go tk.Callback.OnStarting()
