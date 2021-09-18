@@ -14,7 +14,11 @@ import (
 	"time"
 )
 
-var json = jsoniter.ConfigFastest
+var (
+	json  = jsoniter.ConfigFastest
+)
+
+
 
 type RuntimeStats struct {
 	Pod              string

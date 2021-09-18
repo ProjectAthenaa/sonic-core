@@ -427,3 +427,9 @@ func hash(text string) string {
 	algorithm.Write([]byte(text))
 	return hex.EncodeToString(algorithm.Sum(nil))
 }
+
+func taskReleaser(ctx context.Context)  {
+	for range ctx.Done(){
+
+	}
+}

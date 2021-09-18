@@ -117,8 +117,6 @@ outer:
 		case <-processExit:
 			tk.stopFromCMD = true
 			return tk.Stop()
-		default:
-			continue
 		}
 	}
 
@@ -298,7 +296,7 @@ func (tk *BTask) Process(status module.STATUS) {
 
 	data, _ := json.Marshal(&payload)
 
-	//time.Sleep(time.Millisecond * 200)
+	time.Sleep(time.Millisecond * 200)
 
 	if status == module.STATUS_STOPPED && tk.stopFromCMD {
 		payload.Information["stoppedFromCMD"] = "1"
