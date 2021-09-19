@@ -6,12 +6,10 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"fmt"
 	"strings"
 )
 
 func (b *Billing) Decrypt() *Billing {
-	fmt.Println("Original Card Number: ", b.CardNumber)
 	decrypted := &Billing{}
 	cvv, _ := base64.StdEncoding.DecodeString(b.CVV)
 	cardNumber, _ := base64.StdEncoding.DecodeString(b.CardNumber)
@@ -20,7 +18,6 @@ func (b *Billing) Decrypt() *Billing {
 
 	decrypted.CVV = string(decryptWithPrivateKey(cvv))
 	decrypted.CardNumber = string(decryptWithPrivateKey(cardNumber))
-	fmt.Println("Decrypted Card Number: ", decrypted.CardNumber)
 	decrypted.ExpiryMonth = string(decryptWithPrivateKey(expiryMonth))
 	decrypted.ExpiryYear = string(decryptWithPrivateKey(expiryYear))
 	decrypted.CardholderName = b.CardholderName
