@@ -1,9 +1,8 @@
 package ent
 
 import (
-	"crypto/rand"
+	"crypto"
 	"crypto/rsa"
-	"crypto/sha512"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -71,8 +70,7 @@ func (b *Billing) Export() *Billing {
 var privateKey = parseRsaPrivateKeyFromPemStr()
 
 func decryptWithPrivateKey(ciphertext []byte) []byte {
-	hash := sha512.New()
-	plaintext, err := rsa.DecryptOAEP(hash, rand.Reader, privateKey, ciphertext, nil)
+	plaintext, err := privateKey.Decrypt(nil, ciphertext, &rsa.OAEPOptions{Hash: crypto.SHA256})
 	if err != nil {
 		return nil
 	}
@@ -93,32 +91,30 @@ func parseRsaPrivateKeyFromPemStr() *rsa.PrivateKey {
 	return priv
 }
 
-const privateKeyText = `
------BEGIN RSA PRIVATE KEY-----
-MIIEowIBAAKCAQEAuqpXATYUag2NS/M3y4qnv7NQ7jIL+ga0iGAFHO/roJigz2z2
-FaEQyyF0e/jfTbWlExeZI5hJ3wwnr1ujbVctRYZBQrnQHGNDeBlzfuBEDQ1ss8lf
-xhVW96OzkpSSklQdbpQQrZShy7yYgxZSzZi+GHOvhSaAZsPUwJT1M+2Vi4uMPrqh
-0Nx0qqdItAfk3KhRPD1HR9gmyBwkoHjNj+VEmPm/qwvuGrfcsoCIAx7FsZZOH9ym
-ZvII8jAOA69dLyBdjn9X1HVXDdrifS8KUpMj/NnM22CUTOA72fS/SepRHsqtO0uk
-CiPO1SNjDJRNfeiO+T+Q+oRYV6XYtNznCGmL6wIDAQABAoIBAEJpmnz21bqJyczM
-4vwK//XngZLNwY8aVZ7zsr4B6m5//y7tkHxPit8KrxvwhtpqFyo8yiJs61NtSq1M
-SE/9pUDILG3mGFIRSw7u1zW76tpN/W/V5LpgG0oONzSeoatoO/R8v5ZSfGI1Xnm9
-NoaponCmsDsKYMKvSAGgvcDU9dDooJ6dw4GzLCYTRpkGUS2iYTsNcmjEm8ti0F9f
-RzW81uUlv0lel90koMx4p/5k4vO64HrxFducQVuZwQfIr2EGA0mLVnCGL2yxPKGQ
-QwoXQqWxeku0E+9TRX3RZriG6mYBWomD5w6ks3q9o9PIzEOCvadyC7gyok1ratX7
-RhBHDskCgYEAz0csGeaKKWqhiJ+atCSlfLKmwspGvbDxtRN+5OcrUht7dEdSJtfq
-gd7jcuJtviF+I2lJD04leQIA6c5W8rr0GipwXaUelcQxENKVt5QCwXjzbSD0CRDt
-4odel5fc2psBeD9yRy3FKhy2E39Ol2HmmVmxW7vWEhI9VD1cRwB7Ld0CgYEA5orQ
-vp6A0zlEAWb364/X5HPR5gP+/3MTg5XlJBPv1jVJokboJs3Y5PyX+N3tyL6dYpaA
-FSEkVzMiMKy8QhNo4CIwHMgYbVqQXanMckL1NXq7IJiovEBhRd3bl4//1rQkBS6i
-NVdLZUzaMgNsNB/RPkq+wX1HoBGXBaz1YzNc+GcCgYEAot9xJvUBcaPpRDrtzEnT
-g5W59ewOBDZK55dnKaUAZGdV7buxMPaOvfgPT5He2/zjah3sG8uzJE/Puei6Z8dB
-0mGwo9UAoHxmdaqTnIoAVFifJwwy1gDofA0U5hedomUUlZF9UbMEb5/Z7p4lekyi
-b7OL6uJBRzfv2wbQQLZ/FD0CgYA/X0M4Utu4tFIkTIiz4QuIienV351V3O0tS6P8
-Qdq4uFcwW2tvV0Ba2bBwwZieiP88XYCBzmVt7ulkFed+BlXa3qr5Dmvgi3eJt6Yy
-doNvGvibYjtn3A6hJPY6+GNsQoJwRjxii0d3ZiPIgbZZsbFT/TnoeCabMpqf/cZK
-aZER2wKBgHIwE5B89uZ6vQHAE2fl3nP92cOaVbmcMu9vDw/iGG5y3XRLcFZqlAD/
-sML3dGR7Go2iBqM501YgD3Zlx+hPditP1YJtBd+g35QZ1UDiCTmCNSjQBSxrufgQ
-zfcWwXnb1TZ6/7bSXpXC+cG9kmfAGT/ftQtQxBDaG6jo0v36VAcG
------END RSA PRIVATE KEY-----
-`
+const privateKeyText = `-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA3TWy7I3iHUTxMWi4ux+eHqAxfkQCNKbEFwubkk9+z3xFmIAk
+oAlFUFvQiSoOJxUD1vvtheWRiikuKrnPpD9pU7h0rnVRniOLvRtmETwv1u6OiptS
+S1ylfxgDtetY30lT2Zs8pUED5fH8ZtgRLuvuq4lAPX2M01LqdeFCwzonoct5KPog
+pK3tAxU8q+QLG2AFIT5jMaCbtr4fAn/CU0qtuoBM9ln777R66DR8LBy7nu0MxN3O
+fBry6tJy6w7BYwRut0esIV11DAGI5UerHZElMZ7BlCBGqs0JearUOl4mMhTZx86y
+iI1b9KN/VtwLJFNV1HN/ADfrk8l1Icu3gysG8wIDAQABAoIBAQCwxfzZ9PhBE5r7
+NQiK4NVm+/URRh/NG4eQMwJ7hXN9M34aRC0AhugRM44OTsFIkg6jemdxnOcVVZtD
+IYHBa7sr4De+QpqamSVOVdrW4xYH2FOoiD7XYo4OZo5wjkZTCTIsr1VjafVHiH1/
+YiM5L+lmwyPG/9HN/nDHCuBjStHpBEgxOfUw36FUgD+iqbImd6nr3Oe/VCnVoChf
+CX9wvR2yFxvMaahxW602Neciwm8PEh02yKb8+nOiIBRz0njDHya9QIwpcvTN1ly2
+Ynk9hEaFSt4kXxGuLzJnGSXKVLqjo7xIGGb//+9ZdTHb0sDS8JrCDLeCQKeC89ww
+CoQSAYHBAoGBAPwcwilaRXaTWV1BsL52uefbhU8lngO9dCcLD+sQgh5iaNQ+gLMa
+FjxJnY+GztkTi4n0rVExWrcMbWZunCvZcTU2ruLkN/w+v5HjhFG5KAvU70tFkm4M
+LRFd6OE/f1J0CLXqVZ+K/8Wii1uaqu/Ba+RzpF4tBrphH+YgdenIjzBLAoGBAOCe
+8vkiYVW0ffgTZo/YFRySHru6OQWddgKvaoew62j3cKkX3RfSQSmXZglnc8THPqXJ
+xGAXnUBm7kZSnFNiPGwaIEILJ7WbIRq0uwCLyB+reZQRwnimcQpb81CPeeSJPobw
+KWcGW1w0PC2VpqctjtywQNFodGKg3OhSOtwd8mr5AoGAVnBtycvfoSYoL6dEOClw
+2CQV8usM4G9mkbRjQs8oLc7D7nF3ovDAyu7ajMlFxnvDDgvMGNh5J+Wk5Mfr18T3
+4azcDYL+BwhkmlqNlY+MQXJCkWZLLFwUX635GLGyr8yE6ApuTQNVaqeubDv9e7Kv
+kWZs5rU9Z03BqB9dDkjrfz0CgYABJs94F4UIO3Sp4O+VrTXuf5FIxRulu7jvKpcR
+Owb58srREx4/EQTkgbI0OiONzrezgeVP2M8llWGDWskSZF6K71da/1OkyrbQvDx5
+ND5Ca06kQ7MLi07pDq+gqhul4E5BwtlzfcTaJCpq0WmZUdJ5ry2l5TMzjj+TsVg7
+6KtlgQKBgQC4M39M9C38gqClEwQCbaSoGoXQRzKTk0g2rvr3yidORbo+EdU6RYAz
+vZDBbfRYm9YWry826iGZ+1pYtuyB7PK6TqRTT1cSyHOfG0a5BvPxvg0xC30vmW5H
+7aEKuG3Tlteu+jZ+Ebdb/vvP1Gsn/fHq+cJMRNz7LFbNsnqqROGggQ==
+-----END RSA PRIVATE KEY-----`
