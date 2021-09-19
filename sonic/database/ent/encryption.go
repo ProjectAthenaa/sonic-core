@@ -13,7 +13,7 @@ func (b *Billing) Decrypt() *Billing {
 	decrypted := &Billing{}
 	cvv, _ := base64.StdEncoding.DecodeString(b.CVV)
 	cardNumber, _ := base64.StdEncoding.DecodeString(b.CardNumber)
-	expiryMonth, _ := base64.StdEncoding.DecodeString(b.CVV)
+	expiryMonth, _ := base64.StdEncoding.DecodeString(b.ExpiryMonth)
 	expiryYear, _ := base64.StdEncoding.DecodeString(b.ExpiryYear)
 
 	decrypted.CVV = string(decryptWithPrivateKey(cvv))
