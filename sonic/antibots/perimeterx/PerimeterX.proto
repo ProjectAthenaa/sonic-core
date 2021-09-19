@@ -14,7 +14,8 @@ message GetCookieRequest{
 }
 
 message Cookie{
-  string Value = 1;
+  string Name = 1;
+  string Value = 2;
 }
 
 message Payload{
