@@ -1982,7 +1982,7 @@ input NewProfile{
     Name: String!
     Email: String!
     Shipping: NewShipping!
-    Billing: NewBilling!
+    Billing: NewBilling
 }
 
 input NewBilling{
@@ -10168,7 +10168,7 @@ func (ec *executionContext) unmarshalInputNewProfile(ctx context.Context, obj in
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Billing"))
-			it.Billing, err = ec.unmarshalNNewBilling2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewBilling(ctx, v)
+			it.Billing, err = ec.unmarshalONewBilling2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewBilling(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -12911,11 +12911,6 @@ func (ec *executionContext) unmarshalNNewAddress2ᚖgithubᚗcomᚋProjectAthena
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNNewBilling2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewBilling(ctx context.Context, v interface{}) (*model.NewBilling, error) {
-	res, err := ec.unmarshalInputNewBilling(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNNewProfile2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewProfile(ctx context.Context, v interface{}) (model.NewProfile, error) {
 	res, err := ec.unmarshalInputNewProfile(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -13890,6 +13885,14 @@ func (ec *executionContext) unmarshalONewAddress2ᚖgithubᚗcomᚋProjectAthena
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputNewAddress(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalONewBilling2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐNewBilling(ctx context.Context, v interface{}) (*model.NewBilling, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputNewBilling(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

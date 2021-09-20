@@ -47,7 +47,7 @@ input NewProfile{
     Name: String!
     Email: String!
     Shipping: NewShipping!
-    Billing: NewBilling!
+    Billing: NewBilling
 }
 
 input NewBilling{
