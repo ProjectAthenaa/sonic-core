@@ -111,9 +111,9 @@ type ComplexityRoot struct {
 		CurrentProductPrice func(childComplexity int) int
 		Date                func(childComplexity int) int
 		ID                  func(childComplexity int) int
+		ProductImage        func(childComplexity int) int
 		ProductName         func(childComplexity int) int
 		ProductPrice        func(childComplexity int) int
-		ProductSize         func(childComplexity int) int
 	}
 
 	License struct {
@@ -337,9 +337,6 @@ type BillingResolver interface {
 type CheckoutResolver interface {
 	ID(ctx context.Context, obj *ent.Checkout) (string, error)
 
-	ProductPrice(ctx context.Context, obj *ent.Checkout) (string, error)
-
-	ProductSize(ctx context.Context, obj *ent.Checkout) (string, error)
 	CurrentProductPrice(ctx context.Context, obj *ent.Checkout) (*string, error)
 }
 type LicenseResolver interface {
@@ -651,6 +648,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Checkout.ID(childComplexity), true
 
+	case "Checkout.ProductImage":
+		if e.complexity.Checkout.ProductImage == nil {
+			break
+		}
+
+		return e.complexity.Checkout.ProductImage(childComplexity), true
+
 	case "Checkout.ProductName":
 		if e.complexity.Checkout.ProductName == nil {
 			break
@@ -664,13 +668,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Checkout.ProductPrice(childComplexity), true
-
-	case "Checkout.ProductSize":
-		if e.complexity.Checkout.ProductSize == nil {
-			break
-		}
-
-		return e.complexity.Checkout.ProductSize(childComplexity), true
 
 	case "License.CreatedAt":
 		if e.complexity.License.CreatedAt == nil {
@@ -2188,9 +2185,9 @@ type Mutation{
 	{Name: "schemas/statistics.graphqls", Input: `type Checkout{
     ID: String!
     Date: Time!
-    ProductPrice: String!
+    ProductPrice: Float!
     ProductName: String!
-    ProductSize: String!
+    ProductImage: String!
     CurrentProductPrice: String
 }
 `, BuiltIn: false},
@@ -3866,14 +3863,14 @@ func (ec *executionContext) _Checkout_ProductPrice(ctx context.Context, field gr
 		Object:     "Checkout",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Checkout().ProductPrice(rctx, obj)
+		return obj.ProductPrice, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3885,9 +3882,9 @@ func (ec *executionContext) _Checkout_ProductPrice(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Checkout_ProductName(ctx context.Context, field graphql.CollectedField, obj *ent.Checkout) (ret graphql.Marshaler) {
@@ -3925,7 +3922,7 @@ func (ec *executionContext) _Checkout_ProductName(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Checkout_ProductSize(ctx context.Context, field graphql.CollectedField, obj *ent.Checkout) (ret graphql.Marshaler) {
+func (ec *executionContext) _Checkout_ProductImage(ctx context.Context, field graphql.CollectedField, obj *ent.Checkout) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -3936,14 +3933,14 @@ func (ec *executionContext) _Checkout_ProductSize(ctx context.Context, field gra
 		Object:     "Checkout",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Checkout().ProductSize(rctx, obj)
+		return obj.ProductImage, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -11235,38 +11232,20 @@ func (ec *executionContext) _Checkout(ctx context.Context, sel ast.SelectionSet,
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "ProductPrice":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Checkout_ProductPrice(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+			out.Values[i] = ec._Checkout_ProductPrice(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "ProductName":
 			out.Values[i] = ec._Checkout_ProductName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "ProductSize":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Checkout_ProductSize(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "ProductImage":
+			out.Values[i] = ec._Checkout_ProductImage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "CurrentProductPrice":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {

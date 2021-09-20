@@ -1,8 +1,8 @@
 type Checkout{
     ID: String!
     Date: Time!
-    ProductPrice: String!
+    ProductPrice: Float!
     ProductName: String!
-    ProductSize: String!
-    CurrentProductPrice: String
+    ProductImage: String!
+    CurrentProductPrice: Float
 }
