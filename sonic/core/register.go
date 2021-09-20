@@ -3,12 +3,12 @@ package core
 import (
 	"context"
 	"fmt"
+	"github.com/ProjectAthenaa/sonic-core/logs"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	monitorController "github.com/ProjectAthenaa/sonic-core/protos/monitorController"
 	"github.com/go-redis/redis/v8"
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
-	"github.com/ProjectAthenaa/sonic-core/logs"
 	"google.golang.org/grpc"
 	"os"
 	"os/signal"
@@ -44,6 +44,7 @@ func ListenAndServe(module string, server module.ModuleServer) {
 		case <-c:
 			log.Info("[server] [SIGTERM invoked]")
 			cancel()
+			return
 		case <-ctx.Done():
 			log.Info("[server] [ctx deadline exceeded]")
 			return
