@@ -56,13 +56,11 @@ type Product struct {
 type ProductEdges struct {
 	// Task holds the value of the Task edge.
 	Task []*Task `json:"Task,omitempty"`
-	// Statistic holds the value of the Statistic edge.
-	Statistic []*Statistic `json:"Statistic,omitempty"`
 	// Calendar holds the value of the Calendar edge.
 	Calendar *Calendar `json:"Calendar,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // TaskOrErr returns the Task value or an error if the edge
@@ -74,19 +72,10 @@ func (e ProductEdges) TaskOrErr() ([]*Task, error) {
 	return nil, &NotLoadedError{edge: "Task"}
 }
 
-// StatisticOrErr returns the Statistic value or an error if the edge
-// was not loaded in eager-loading.
-func (e ProductEdges) StatisticOrErr() ([]*Statistic, error) {
-	if e.loadedTypes[1] {
-		return e.Statistic, nil
-	}
-	return nil, &NotLoadedError{edge: "Statistic"}
-}
-
 // CalendarOrErr returns the Calendar value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e ProductEdges) CalendarOrErr() (*Calendar, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		if e.Calendar == nil {
 			// The edge Calendar was loaded in eager-loading,
 			// but was not found.
@@ -238,11 +227,6 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 // QueryTask queries the "Task" edge of the Product entity.
 func (pr *Product) QueryTask() *TaskQuery {
 	return (&ProductClient{config: pr.config}).QueryTask(pr)
-}
-
-// QueryStatistic queries the "Statistic" edge of the Product entity.
-func (pr *Product) QueryStatistic() *StatisticQuery {
-	return (&ProductClient{config: pr.config}).QueryStatistic(pr)
 }
 
 // QueryCalendar queries the "Calendar" edge of the Product entity.

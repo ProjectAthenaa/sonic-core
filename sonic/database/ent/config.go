@@ -29,6 +29,7 @@ type hooks struct {
 	App          []ent.Hook
 	Billing      []ent.Hook
 	Calendar     []ent.Hook
+	Checkout     []ent.Hook
 	Device       []ent.Hook
 	License      []ent.Hook
 	Metadata     []ent.Hook
@@ -41,7 +42,6 @@ type hooks struct {
 	Session      []ent.Hook
 	Settings     []ent.Hook
 	Shipping     []ent.Hook
-	Statistic    []ent.Hook
 	Stripe       []ent.Hook
 	Task         []ent.Hook
 	TaskGroup    []ent.Hook

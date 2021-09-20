@@ -22,6 +22,8 @@ type Tx struct {
 	Billing *BillingClient
 	// Calendar is the client for interacting with the Calendar builders.
 	Calendar *CalendarClient
+	// Checkout is the client for interacting with the Checkout builders.
+	Checkout *CheckoutClient
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
 	// License is the client for interacting with the License builders.
@@ -46,8 +48,6 @@ type Tx struct {
 	Settings *SettingsClient
 	// Shipping is the client for interacting with the Shipping builders.
 	Shipping *ShippingClient
-	// Statistic is the client for interacting with the Statistic builders.
-	Statistic *StatisticClient
 	// Stripe is the client for interacting with the Stripe builders.
 	Stripe *StripeClient
 	// Task is the client for interacting with the Task builders.
@@ -196,6 +196,7 @@ func (tx *Tx) init() {
 	tx.App = NewAppClient(tx.config)
 	tx.Billing = NewBillingClient(tx.config)
 	tx.Calendar = NewCalendarClient(tx.config)
+	tx.Checkout = NewCheckoutClient(tx.config)
 	tx.Device = NewDeviceClient(tx.config)
 	tx.License = NewLicenseClient(tx.config)
 	tx.Metadata = NewMetadataClient(tx.config)
@@ -208,7 +209,6 @@ func (tx *Tx) init() {
 	tx.Session = NewSessionClient(tx.config)
 	tx.Settings = NewSettingsClient(tx.config)
 	tx.Shipping = NewShippingClient(tx.config)
-	tx.Statistic = NewStatisticClient(tx.config)
 	tx.Stripe = NewStripeClient(tx.config)
 	tx.Task = NewTaskClient(tx.config)
 	tx.TaskGroup = NewTaskGroupClient(tx.config)

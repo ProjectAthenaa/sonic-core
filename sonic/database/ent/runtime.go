@@ -10,6 +10,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/checkout"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/device"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
@@ -23,7 +24,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
@@ -119,6 +119,28 @@ func init() {
 	calendarDescID := calendarFields[0].Descriptor()
 	// calendar.DefaultID holds the default value on creation for the id field.
 	calendar.DefaultID = calendarDescID.Default.(func() uuid.UUID)
+	checkoutFields := schema.Checkout{}.Fields()
+	_ = checkoutFields
+	// checkoutDescDate is the schema descriptor for Date field.
+	checkoutDescDate := checkoutFields[1].Descriptor()
+	// checkout.DefaultDate holds the default value on creation for the Date field.
+	checkout.DefaultDate = checkoutDescDate.Default.(func() time.Time)
+	// checkoutDescProductName is the schema descriptor for ProductName field.
+	checkoutDescProductName := checkoutFields[2].Descriptor()
+	// checkout.DefaultProductName holds the default value on creation for the ProductName field.
+	checkout.DefaultProductName = checkoutDescProductName.Default.(string)
+	// checkoutDescProductPrice is the schema descriptor for ProductPrice field.
+	checkoutDescProductPrice := checkoutFields[3].Descriptor()
+	// checkout.DefaultProductPrice holds the default value on creation for the ProductPrice field.
+	checkout.DefaultProductPrice = checkoutDescProductPrice.Default.(float64)
+	// checkoutDescProductImage is the schema descriptor for ProductImage field.
+	checkoutDescProductImage := checkoutFields[4].Descriptor()
+	// checkout.DefaultProductImage holds the default value on creation for the ProductImage field.
+	checkout.DefaultProductImage = checkoutDescProductImage.Default.(string)
+	// checkoutDescID is the schema descriptor for id field.
+	checkoutDescID := checkoutFields[0].Descriptor()
+	// checkout.DefaultID holds the default value on creation for the id field.
+	checkout.DefaultID = checkoutDescID.Default.(func() uuid.UUID)
 	deviceFields := schema.Device{}.Fields()
 	_ = deviceFields
 	// deviceDescID is the schema descriptor for id field.
@@ -385,26 +407,6 @@ func init() {
 	shippingDescID := shippingFields[0].Descriptor()
 	// shipping.DefaultID holds the default value on creation for the id field.
 	shipping.DefaultID = shippingDescID.Default.(func() uuid.UUID)
-	statisticFields := schema.Statistic{}.Fields()
-	_ = statisticFields
-	// statisticDescCreatedAt is the schema descriptor for created_at field.
-	statisticDescCreatedAt := statisticFields[1].Descriptor()
-	// statistic.DefaultCreatedAt holds the default value on creation for the created_at field.
-	statistic.DefaultCreatedAt = statisticDescCreatedAt.Default.(func() time.Time)
-	// statisticDescUpdatedAt is the schema descriptor for updated_at field.
-	statisticDescUpdatedAt := statisticFields[2].Descriptor()
-	// statistic.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	statistic.DefaultUpdatedAt = statisticDescUpdatedAt.Default.(func() time.Time)
-	// statistic.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	statistic.UpdateDefaultUpdatedAt = statisticDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// statisticDescSpent is the schema descriptor for Spent field.
-	statisticDescSpent := statisticFields[7].Descriptor()
-	// statistic.DefaultSpent holds the default value on creation for the Spent field.
-	statistic.DefaultSpent = statisticDescSpent.Default.(float64)
-	// statisticDescID is the schema descriptor for id field.
-	statisticDescID := statisticFields[0].Descriptor()
-	// statistic.DefaultID holds the default value on creation for the id field.
-	statistic.DefaultID = statisticDescID.Default.(func() uuid.UUID)
 	stripeFields := schema.Stripe{}.Fields()
 	_ = stripeFields
 	// stripeDescCreatedAt is the schema descriptor for created_at field.
@@ -473,6 +475,22 @@ func init() {
 	userDescDisabled := userFields[3].Descriptor()
 	// user.DefaultDisabled holds the default value on creation for the Disabled field.
 	user.DefaultDisabled = userDescDisabled.Default.(bool)
+	// userDescTasksRan is the schema descriptor for TasksRan field.
+	userDescTasksRan := userFields[4].Descriptor()
+	// user.DefaultTasksRan holds the default value on creation for the TasksRan field.
+	user.DefaultTasksRan = userDescTasksRan.Default.(int)
+	// userDescTotalDeclines is the schema descriptor for TotalDeclines field.
+	userDescTotalDeclines := userFields[5].Descriptor()
+	// user.DefaultTotalDeclines holds the default value on creation for the TotalDeclines field.
+	user.DefaultTotalDeclines = userDescTotalDeclines.Default.(int)
+	// userDescMoneySpent is the schema descriptor for MoneySpent field.
+	userDescMoneySpent := userFields[6].Descriptor()
+	// user.DefaultMoneySpent holds the default value on creation for the MoneySpent field.
+	user.DefaultMoneySpent = userDescMoneySpent.Default.(float64)
+	// userDescTotalCheckouts is the schema descriptor for TotalCheckouts field.
+	userDescTotalCheckouts := userFields[7].Descriptor()
+	// user.DefaultTotalCheckouts holds the default value on creation for the TotalCheckouts field.
+	user.DefaultTotalCheckouts = userDescTotalCheckouts.Default.(int)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.

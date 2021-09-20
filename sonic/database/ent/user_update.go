@@ -11,12 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/checkout"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
 )
@@ -68,6 +68,90 @@ func (uu *UserUpdate) SetNillableDisabled(b *bool) *UserUpdate {
 	return uu
 }
 
+// SetTasksRan sets the "TasksRan" field.
+func (uu *UserUpdate) SetTasksRan(i int) *UserUpdate {
+	uu.mutation.ResetTasksRan()
+	uu.mutation.SetTasksRan(i)
+	return uu
+}
+
+// SetNillableTasksRan sets the "TasksRan" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableTasksRan(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetTasksRan(*i)
+	}
+	return uu
+}
+
+// AddTasksRan adds i to the "TasksRan" field.
+func (uu *UserUpdate) AddTasksRan(i int) *UserUpdate {
+	uu.mutation.AddTasksRan(i)
+	return uu
+}
+
+// SetTotalDeclines sets the "TotalDeclines" field.
+func (uu *UserUpdate) SetTotalDeclines(i int) *UserUpdate {
+	uu.mutation.ResetTotalDeclines()
+	uu.mutation.SetTotalDeclines(i)
+	return uu
+}
+
+// SetNillableTotalDeclines sets the "TotalDeclines" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableTotalDeclines(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetTotalDeclines(*i)
+	}
+	return uu
+}
+
+// AddTotalDeclines adds i to the "TotalDeclines" field.
+func (uu *UserUpdate) AddTotalDeclines(i int) *UserUpdate {
+	uu.mutation.AddTotalDeclines(i)
+	return uu
+}
+
+// SetMoneySpent sets the "MoneySpent" field.
+func (uu *UserUpdate) SetMoneySpent(f float64) *UserUpdate {
+	uu.mutation.ResetMoneySpent()
+	uu.mutation.SetMoneySpent(f)
+	return uu
+}
+
+// SetNillableMoneySpent sets the "MoneySpent" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableMoneySpent(f *float64) *UserUpdate {
+	if f != nil {
+		uu.SetMoneySpent(*f)
+	}
+	return uu
+}
+
+// AddMoneySpent adds f to the "MoneySpent" field.
+func (uu *UserUpdate) AddMoneySpent(f float64) *UserUpdate {
+	uu.mutation.AddMoneySpent(f)
+	return uu
+}
+
+// SetTotalCheckouts sets the "TotalCheckouts" field.
+func (uu *UserUpdate) SetTotalCheckouts(i int) *UserUpdate {
+	uu.mutation.ResetTotalCheckouts()
+	uu.mutation.SetTotalCheckouts(i)
+	return uu
+}
+
+// SetNillableTotalCheckouts sets the "TotalCheckouts" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableTotalCheckouts(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetTotalCheckouts(*i)
+	}
+	return uu
+}
+
+// AddTotalCheckouts adds i to the "TotalCheckouts" field.
+func (uu *UserUpdate) AddTotalCheckouts(i int) *UserUpdate {
+	uu.mutation.AddTotalCheckouts(i)
+	return uu
+}
+
 // SetLicenseID sets the "License" edge to the License entity by ID.
 func (uu *UserUpdate) SetLicenseID(id uuid.UUID) *UserUpdate {
 	uu.mutation.SetLicenseID(id)
@@ -87,19 +171,19 @@ func (uu *UserUpdate) SetLicense(l *License) *UserUpdate {
 	return uu.SetLicenseID(l.ID)
 }
 
-// AddStatisticIDs adds the "Statistics" edge to the Statistic entity by IDs.
-func (uu *UserUpdate) AddStatisticIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddStatisticIDs(ids...)
+// AddCheckoutIDs adds the "Checkouts" edge to the Checkout entity by IDs.
+func (uu *UserUpdate) AddCheckoutIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddCheckoutIDs(ids...)
 	return uu
 }
 
-// AddStatistics adds the "Statistics" edges to the Statistic entity.
-func (uu *UserUpdate) AddStatistics(s ...*Statistic) *UserUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddCheckouts adds the "Checkouts" edges to the Checkout entity.
+func (uu *UserUpdate) AddCheckouts(c ...*Checkout) *UserUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return uu.AddStatisticIDs(ids...)
+	return uu.AddCheckoutIDs(ids...)
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
@@ -185,25 +269,25 @@ func (uu *UserUpdate) ClearLicense() *UserUpdate {
 	return uu
 }
 
-// ClearStatistics clears all "Statistics" edges to the Statistic entity.
-func (uu *UserUpdate) ClearStatistics() *UserUpdate {
-	uu.mutation.ClearStatistics()
+// ClearCheckouts clears all "Checkouts" edges to the Checkout entity.
+func (uu *UserUpdate) ClearCheckouts() *UserUpdate {
+	uu.mutation.ClearCheckouts()
 	return uu
 }
 
-// RemoveStatisticIDs removes the "Statistics" edge to Statistic entities by IDs.
-func (uu *UserUpdate) RemoveStatisticIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveStatisticIDs(ids...)
+// RemoveCheckoutIDs removes the "Checkouts" edge to Checkout entities by IDs.
+func (uu *UserUpdate) RemoveCheckoutIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveCheckoutIDs(ids...)
 	return uu
 }
 
-// RemoveStatistics removes "Statistics" edges to Statistic entities.
-func (uu *UserUpdate) RemoveStatistics(s ...*Statistic) *UserUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveCheckouts removes "Checkouts" edges to Checkout entities.
+func (uu *UserUpdate) RemoveCheckouts(c ...*Checkout) *UserUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return uu.RemoveStatisticIDs(ids...)
+	return uu.RemoveCheckoutIDs(ids...)
 }
 
 // ClearApp clears the "App" edge to the App entity.
@@ -347,6 +431,62 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldDisabled,
 		})
 	}
+	if value, ok := uu.mutation.TasksRan(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTasksRan,
+		})
+	}
+	if value, ok := uu.mutation.AddedTasksRan(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTasksRan,
+		})
+	}
+	if value, ok := uu.mutation.TotalDeclines(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalDeclines,
+		})
+	}
+	if value, ok := uu.mutation.AddedTotalDeclines(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalDeclines,
+		})
+	}
+	if value, ok := uu.mutation.MoneySpent(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: user.FieldMoneySpent,
+		})
+	}
+	if value, ok := uu.mutation.AddedMoneySpent(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: user.FieldMoneySpent,
+		})
+	}
+	if value, ok := uu.mutation.TotalCheckouts(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalCheckouts,
+		})
+	}
+	if value, ok := uu.mutation.AddedTotalCheckouts(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalCheckouts,
+		})
+	}
 	if uu.mutation.LicenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -382,33 +522,33 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.StatisticsCleared() {
+	if uu.mutation.CheckoutsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StatisticsTable,
-			Columns: user.StatisticsPrimaryKey,
+			Table:   user.CheckoutsTable,
+			Columns: []string{user.CheckoutsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
+					Column: checkout.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedStatisticsIDs(); len(nodes) > 0 && !uu.mutation.StatisticsCleared() {
+	if nodes := uu.mutation.RemovedCheckoutsIDs(); len(nodes) > 0 && !uu.mutation.CheckoutsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StatisticsTable,
-			Columns: user.StatisticsPrimaryKey,
+			Table:   user.CheckoutsTable,
+			Columns: []string{user.CheckoutsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
+					Column: checkout.FieldID,
 				},
 			},
 		}
@@ -417,17 +557,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.StatisticsIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.CheckoutsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StatisticsTable,
-			Columns: user.StatisticsPrimaryKey,
+			Table:   user.CheckoutsTable,
+			Columns: []string{user.CheckoutsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
+					Column: checkout.FieldID,
 				},
 			},
 		}
@@ -648,6 +788,90 @@ func (uuo *UserUpdateOne) SetNillableDisabled(b *bool) *UserUpdateOne {
 	return uuo
 }
 
+// SetTasksRan sets the "TasksRan" field.
+func (uuo *UserUpdateOne) SetTasksRan(i int) *UserUpdateOne {
+	uuo.mutation.ResetTasksRan()
+	uuo.mutation.SetTasksRan(i)
+	return uuo
+}
+
+// SetNillableTasksRan sets the "TasksRan" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableTasksRan(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetTasksRan(*i)
+	}
+	return uuo
+}
+
+// AddTasksRan adds i to the "TasksRan" field.
+func (uuo *UserUpdateOne) AddTasksRan(i int) *UserUpdateOne {
+	uuo.mutation.AddTasksRan(i)
+	return uuo
+}
+
+// SetTotalDeclines sets the "TotalDeclines" field.
+func (uuo *UserUpdateOne) SetTotalDeclines(i int) *UserUpdateOne {
+	uuo.mutation.ResetTotalDeclines()
+	uuo.mutation.SetTotalDeclines(i)
+	return uuo
+}
+
+// SetNillableTotalDeclines sets the "TotalDeclines" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableTotalDeclines(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetTotalDeclines(*i)
+	}
+	return uuo
+}
+
+// AddTotalDeclines adds i to the "TotalDeclines" field.
+func (uuo *UserUpdateOne) AddTotalDeclines(i int) *UserUpdateOne {
+	uuo.mutation.AddTotalDeclines(i)
+	return uuo
+}
+
+// SetMoneySpent sets the "MoneySpent" field.
+func (uuo *UserUpdateOne) SetMoneySpent(f float64) *UserUpdateOne {
+	uuo.mutation.ResetMoneySpent()
+	uuo.mutation.SetMoneySpent(f)
+	return uuo
+}
+
+// SetNillableMoneySpent sets the "MoneySpent" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableMoneySpent(f *float64) *UserUpdateOne {
+	if f != nil {
+		uuo.SetMoneySpent(*f)
+	}
+	return uuo
+}
+
+// AddMoneySpent adds f to the "MoneySpent" field.
+func (uuo *UserUpdateOne) AddMoneySpent(f float64) *UserUpdateOne {
+	uuo.mutation.AddMoneySpent(f)
+	return uuo
+}
+
+// SetTotalCheckouts sets the "TotalCheckouts" field.
+func (uuo *UserUpdateOne) SetTotalCheckouts(i int) *UserUpdateOne {
+	uuo.mutation.ResetTotalCheckouts()
+	uuo.mutation.SetTotalCheckouts(i)
+	return uuo
+}
+
+// SetNillableTotalCheckouts sets the "TotalCheckouts" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableTotalCheckouts(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetTotalCheckouts(*i)
+	}
+	return uuo
+}
+
+// AddTotalCheckouts adds i to the "TotalCheckouts" field.
+func (uuo *UserUpdateOne) AddTotalCheckouts(i int) *UserUpdateOne {
+	uuo.mutation.AddTotalCheckouts(i)
+	return uuo
+}
+
 // SetLicenseID sets the "License" edge to the License entity by ID.
 func (uuo *UserUpdateOne) SetLicenseID(id uuid.UUID) *UserUpdateOne {
 	uuo.mutation.SetLicenseID(id)
@@ -667,19 +891,19 @@ func (uuo *UserUpdateOne) SetLicense(l *License) *UserUpdateOne {
 	return uuo.SetLicenseID(l.ID)
 }
 
-// AddStatisticIDs adds the "Statistics" edge to the Statistic entity by IDs.
-func (uuo *UserUpdateOne) AddStatisticIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddStatisticIDs(ids...)
+// AddCheckoutIDs adds the "Checkouts" edge to the Checkout entity by IDs.
+func (uuo *UserUpdateOne) AddCheckoutIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddCheckoutIDs(ids...)
 	return uuo
 }
 
-// AddStatistics adds the "Statistics" edges to the Statistic entity.
-func (uuo *UserUpdateOne) AddStatistics(s ...*Statistic) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddCheckouts adds the "Checkouts" edges to the Checkout entity.
+func (uuo *UserUpdateOne) AddCheckouts(c ...*Checkout) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return uuo.AddStatisticIDs(ids...)
+	return uuo.AddCheckoutIDs(ids...)
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
@@ -765,25 +989,25 @@ func (uuo *UserUpdateOne) ClearLicense() *UserUpdateOne {
 	return uuo
 }
 
-// ClearStatistics clears all "Statistics" edges to the Statistic entity.
-func (uuo *UserUpdateOne) ClearStatistics() *UserUpdateOne {
-	uuo.mutation.ClearStatistics()
+// ClearCheckouts clears all "Checkouts" edges to the Checkout entity.
+func (uuo *UserUpdateOne) ClearCheckouts() *UserUpdateOne {
+	uuo.mutation.ClearCheckouts()
 	return uuo
 }
 
-// RemoveStatisticIDs removes the "Statistics" edge to Statistic entities by IDs.
-func (uuo *UserUpdateOne) RemoveStatisticIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveStatisticIDs(ids...)
+// RemoveCheckoutIDs removes the "Checkouts" edge to Checkout entities by IDs.
+func (uuo *UserUpdateOne) RemoveCheckoutIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveCheckoutIDs(ids...)
 	return uuo
 }
 
-// RemoveStatistics removes "Statistics" edges to Statistic entities.
-func (uuo *UserUpdateOne) RemoveStatistics(s ...*Statistic) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// RemoveCheckouts removes "Checkouts" edges to Checkout entities.
+func (uuo *UserUpdateOne) RemoveCheckouts(c ...*Checkout) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return uuo.RemoveStatisticIDs(ids...)
+	return uuo.RemoveCheckoutIDs(ids...)
 }
 
 // ClearApp clears the "App" edge to the App entity.
@@ -951,6 +1175,62 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldDisabled,
 		})
 	}
+	if value, ok := uuo.mutation.TasksRan(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTasksRan,
+		})
+	}
+	if value, ok := uuo.mutation.AddedTasksRan(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTasksRan,
+		})
+	}
+	if value, ok := uuo.mutation.TotalDeclines(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalDeclines,
+		})
+	}
+	if value, ok := uuo.mutation.AddedTotalDeclines(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalDeclines,
+		})
+	}
+	if value, ok := uuo.mutation.MoneySpent(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: user.FieldMoneySpent,
+		})
+	}
+	if value, ok := uuo.mutation.AddedMoneySpent(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: user.FieldMoneySpent,
+		})
+	}
+	if value, ok := uuo.mutation.TotalCheckouts(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalCheckouts,
+		})
+	}
+	if value, ok := uuo.mutation.AddedTotalCheckouts(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalCheckouts,
+		})
+	}
 	if uuo.mutation.LicenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -986,33 +1266,33 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.StatisticsCleared() {
+	if uuo.mutation.CheckoutsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StatisticsTable,
-			Columns: user.StatisticsPrimaryKey,
+			Table:   user.CheckoutsTable,
+			Columns: []string{user.CheckoutsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
+					Column: checkout.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedStatisticsIDs(); len(nodes) > 0 && !uuo.mutation.StatisticsCleared() {
+	if nodes := uuo.mutation.RemovedCheckoutsIDs(); len(nodes) > 0 && !uuo.mutation.CheckoutsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StatisticsTable,
-			Columns: user.StatisticsPrimaryKey,
+			Table:   user.CheckoutsTable,
+			Columns: []string{user.CheckoutsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
+					Column: checkout.FieldID,
 				},
 			},
 		}
@@ -1021,17 +1301,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.StatisticsIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.CheckoutsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StatisticsTable,
-			Columns: user.StatisticsPrimaryKey,
+			Table:   user.CheckoutsTable,
+			Columns: []string{user.CheckoutsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
+					Column: checkout.FieldID,
 				},
 			},
 		}

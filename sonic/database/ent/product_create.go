@@ -13,7 +13,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/google/uuid"
 )
@@ -162,21 +161,6 @@ func (pc *ProductCreate) AddTask(t ...*Task) *ProductCreate {
 		ids[i] = t[i].ID
 	}
 	return pc.AddTaskIDs(ids...)
-}
-
-// AddStatisticIDs adds the "Statistic" edge to the Statistic entity by IDs.
-func (pc *ProductCreate) AddStatisticIDs(ids ...uuid.UUID) *ProductCreate {
-	pc.mutation.AddStatisticIDs(ids...)
-	return pc
-}
-
-// AddStatistic adds the "Statistic" edges to the Statistic entity.
-func (pc *ProductCreate) AddStatistic(s ...*Statistic) *ProductCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return pc.AddStatisticIDs(ids...)
 }
 
 // SetCalendarID sets the "Calendar" edge to the Calendar entity by ID.
@@ -467,25 +451,6 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: task.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := pc.mutation.StatisticIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   product.StatisticTable,
-			Columns: product.StatisticPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
 				},
 			},
 		}

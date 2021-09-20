@@ -13,12 +13,12 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/checkout"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
 )
@@ -33,13 +33,13 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withLicense    *LicenseQuery
-	withStatistics *StatisticQuery
-	withApp        *AppQuery
-	withMetadata   *MetadataQuery
-	withSessions   *SessionQuery
-	withRelease    *ReleaseQuery
-	withFKs        bool
+	withLicense   *LicenseQuery
+	withCheckouts *CheckoutQuery
+	withApp       *AppQuery
+	withMetadata  *MetadataQuery
+	withSessions  *SessionQuery
+	withRelease   *ReleaseQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -98,9 +98,9 @@ func (uq *UserQuery) QueryLicense() *LicenseQuery {
 	return query
 }
 
-// QueryStatistics chains the current query on the "Statistics" edge.
-func (uq *UserQuery) QueryStatistics() *StatisticQuery {
-	query := &StatisticQuery{config: uq.config}
+// QueryCheckouts chains the current query on the "Checkouts" edge.
+func (uq *UserQuery) QueryCheckouts() *CheckoutQuery {
+	query := &CheckoutQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -111,8 +111,8 @@ func (uq *UserQuery) QueryStatistics() *StatisticQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(statistic.Table, statistic.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.StatisticsTable, user.StatisticsPrimaryKey...),
+			sqlgraph.To(checkout.Table, checkout.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CheckoutsTable, user.CheckoutsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -384,17 +384,17 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:         uq.config,
-		limit:          uq.limit,
-		offset:         uq.offset,
-		order:          append([]OrderFunc{}, uq.order...),
-		predicates:     append([]predicate.User{}, uq.predicates...),
-		withLicense:    uq.withLicense.Clone(),
-		withStatistics: uq.withStatistics.Clone(),
-		withApp:        uq.withApp.Clone(),
-		withMetadata:   uq.withMetadata.Clone(),
-		withSessions:   uq.withSessions.Clone(),
-		withRelease:    uq.withRelease.Clone(),
+		config:        uq.config,
+		limit:         uq.limit,
+		offset:        uq.offset,
+		order:         append([]OrderFunc{}, uq.order...),
+		predicates:    append([]predicate.User{}, uq.predicates...),
+		withLicense:   uq.withLicense.Clone(),
+		withCheckouts: uq.withCheckouts.Clone(),
+		withApp:       uq.withApp.Clone(),
+		withMetadata:  uq.withMetadata.Clone(),
+		withSessions:  uq.withSessions.Clone(),
+		withRelease:   uq.withRelease.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -412,14 +412,14 @@ func (uq *UserQuery) WithLicense(opts ...func(*LicenseQuery)) *UserQuery {
 	return uq
 }
 
-// WithStatistics tells the query-builder to eager-load the nodes that are connected to
-// the "Statistics" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithStatistics(opts ...func(*StatisticQuery)) *UserQuery {
-	query := &StatisticQuery{config: uq.config}
+// WithCheckouts tells the query-builder to eager-load the nodes that are connected to
+// the "Checkouts" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCheckouts(opts ...func(*CheckoutQuery)) *UserQuery {
+	query := &CheckoutQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withStatistics = query
+	uq.withCheckouts = query
 	return uq
 }
 
@@ -535,7 +535,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		_spec       = uq.querySpec()
 		loadedTypes = [6]bool{
 			uq.withLicense != nil,
-			uq.withStatistics != nil,
+			uq.withCheckouts != nil,
 			uq.withApp != nil,
 			uq.withMetadata != nil,
 			uq.withSessions != nil,
@@ -596,68 +596,32 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		}
 	}
 
-	if query := uq.withStatistics; query != nil {
+	if query := uq.withCheckouts; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*User, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-			node.Edges.Statistics = []*Statistic{}
+		nodeids := make(map[uuid.UUID]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Checkouts = []*Checkout{}
 		}
-		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*User)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: false,
-				Table:   user.StatisticsTable,
-				Columns: user.StatisticsPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.StatisticsPrimaryKey[0], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*uuid.UUID)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := *eout
-				inValue := *ein
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "Statistics": %w`, err)
-		}
-		query.Where(statistic.IDIn(edgeids...))
+		query.withFKs = true
+		query.Where(predicate.Checkout(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CheckoutsColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			fk := n.user_checkouts
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_checkouts" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "Statistics" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_checkouts" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Statistics = append(nodes[i].Edges.Statistics, n)
-			}
+			node.Edges.Checkouts = append(node.Edges.Checkouts, n)
 		}
 	}
 

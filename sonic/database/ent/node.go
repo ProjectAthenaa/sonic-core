@@ -14,6 +14,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/checkout"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/device"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
@@ -26,7 +27,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
@@ -467,6 +467,59 @@ func (c *Calendar) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
+func (c *Checkout) Node(ctx context.Context) (node *Node, err error) {
+	node = &Node{
+		ID:     c.ID,
+		Type:   "Checkout",
+		Fields: make([]*Field, 4),
+		Edges:  make([]*Edge, 1),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(c.Date); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "time.Time",
+		Name:  "Date",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.ProductName); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "string",
+		Name:  "ProductName",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.ProductPrice); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "float64",
+		Name:  "ProductPrice",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.ProductImage); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "string",
+		Name:  "ProductImage",
+		Value: string(buf),
+	}
+	node.Edges[0] = &Edge{
+		Type: "User",
+		Name: "User",
+	}
+	err = c.QueryUser().
+		Select(user.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
+	return node, nil
+}
+
 func (d *Device) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     d.ID,
@@ -703,7 +756,7 @@ func (pr *Product) Node(ctx context.Context) (node *Node, err error) {
 		ID:     pr.ID,
 		Type:   "Product",
 		Fields: make([]*Field, 13),
-		Edges:  make([]*Edge, 3),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(pr.CreatedAt); err != nil {
@@ -821,22 +874,12 @@ func (pr *Product) Node(ctx context.Context) (node *Node, err error) {
 		return nil, err
 	}
 	node.Edges[1] = &Edge{
-		Type: "Statistic",
-		Name: "Statistic",
-	}
-	err = pr.QueryStatistic().
-		Select(statistic.FieldID).
-		Scan(ctx, &node.Edges[1].IDs)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[2] = &Edge{
 		Type: "Calendar",
 		Name: "Calendar",
 	}
 	err = pr.QueryCalendar().
 		Select(calendar.FieldID).
-		Scan(ctx, &node.Edges[2].IDs)
+		Scan(ctx, &node.Edges[1].IDs)
 	if err != nil {
 		return nil, err
 	}
@@ -1459,93 +1502,6 @@ func (s *Shipping) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
-func (s *Statistic) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     s.ID,
-		Type:   "Statistic",
-		Fields: make([]*Field, 7),
-		Edges:  make([]*Edge, 2),
-	}
-	var buf []byte
-	if buf, err = json.Marshal(s.CreatedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "time.Time",
-		Name:  "created_at",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.UpdatedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[1] = &Field{
-		Type:  "time.Time",
-		Name:  "updated_at",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.Type); err != nil {
-		return nil, err
-	}
-	node.Fields[2] = &Field{
-		Type:  "statistic.Type",
-		Name:  "Type",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.PotentialProfit); err != nil {
-		return nil, err
-	}
-	node.Fields[3] = &Field{
-		Type:  "int",
-		Name:  "PotentialProfit",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.Axis); err != nil {
-		return nil, err
-	}
-	node.Fields[4] = &Field{
-		Type:  "map[schema.Axis]string",
-		Name:  "Axis",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.Value); err != nil {
-		return nil, err
-	}
-	node.Fields[5] = &Field{
-		Type:  "int",
-		Name:  "Value",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.Spent); err != nil {
-		return nil, err
-	}
-	node.Fields[6] = &Field{
-		Type:  "float64",
-		Name:  "Spent",
-		Value: string(buf),
-	}
-	node.Edges[0] = &Edge{
-		Type: "User",
-		Name: "User",
-	}
-	err = s.QueryUser().
-		Select(user.FieldID).
-		Scan(ctx, &node.Edges[0].IDs)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[1] = &Edge{
-		Type: "Product",
-		Name: "Product",
-	}
-	err = s.QueryProduct().
-		Select(product.FieldID).
-		Scan(ctx, &node.Edges[1].IDs)
-	if err != nil {
-		return nil, err
-	}
-	return node, nil
-}
-
 func (s *Stripe) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     s.ID,
@@ -1741,7 +1697,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     u.ID,
 		Type:   "User",
-		Fields: make([]*Field, 3),
+		Fields: make([]*Field, 7),
 		Edges:  make([]*Edge, 6),
 	}
 	var buf []byte
@@ -1769,6 +1725,38 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "Disabled",
 		Value: string(buf),
 	}
+	if buf, err = json.Marshal(u.TasksRan); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "int",
+		Name:  "TasksRan",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.TotalDeclines); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "int",
+		Name:  "TotalDeclines",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.MoneySpent); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "float64",
+		Name:  "MoneySpent",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(u.TotalCheckouts); err != nil {
+		return nil, err
+	}
+	node.Fields[6] = &Field{
+		Type:  "int",
+		Name:  "TotalCheckouts",
+		Value: string(buf),
+	}
 	node.Edges[0] = &Edge{
 		Type: "License",
 		Name: "License",
@@ -1780,11 +1768,11 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 		return nil, err
 	}
 	node.Edges[1] = &Edge{
-		Type: "Statistic",
-		Name: "Statistics",
+		Type: "Checkout",
+		Name: "Checkouts",
 	}
-	err = u.QueryStatistics().
-		Select(statistic.FieldID).
+	err = u.QueryCheckouts().
+		Select(checkout.FieldID).
 		Scan(ctx, &node.Edges[1].IDs)
 	if err != nil {
 		return nil, err
@@ -1944,6 +1932,15 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 			return nil, err
 		}
 		return n, nil
+	case checkout.Table:
+		n, err := c.Checkout.Query().
+			Where(checkout.ID(id)).
+			CollectFields(ctx, "Checkout").
+			Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	case device.Table:
 		n, err := c.Device.Query().
 			Where(device.ID(id)).
@@ -2047,15 +2044,6 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 		n, err := c.Shipping.Query().
 			Where(shipping.ID(id)).
 			CollectFields(ctx, "Shipping").
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case statistic.Table:
-		n, err := c.Statistic.Query().
-			Where(statistic.ID(id)).
-			CollectFields(ctx, "Statistic").
 			Only(ctx)
 		if err != nil {
 			return nil, err
@@ -2235,6 +2223,19 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 				*noder = node
 			}
 		}
+	case checkout.Table:
+		nodes, err := c.Checkout.Query().
+			Where(checkout.IDIn(ids...)).
+			CollectFields(ctx, "Checkout").
+			All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case device.Table:
 		nodes, err := c.Device.Query().
 			Where(device.IDIn(ids...)).
@@ -2382,19 +2383,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		nodes, err := c.Shipping.Query().
 			Where(shipping.IDIn(ids...)).
 			CollectFields(ctx, "Shipping").
-			All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
-	case statistic.Table:
-		nodes, err := c.Statistic.Query().
-			Where(statistic.IDIn(ids...)).
-			CollectFields(ctx, "Statistic").
 			All(ctx)
 		if err != nil {
 			return nil, err

@@ -14,7 +14,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/google/uuid"
 )
@@ -206,21 +205,6 @@ func (pu *ProductUpdate) AddTask(t ...*Task) *ProductUpdate {
 	return pu.AddTaskIDs(ids...)
 }
 
-// AddStatisticIDs adds the "Statistic" edge to the Statistic entity by IDs.
-func (pu *ProductUpdate) AddStatisticIDs(ids ...uuid.UUID) *ProductUpdate {
-	pu.mutation.AddStatisticIDs(ids...)
-	return pu
-}
-
-// AddStatistic adds the "Statistic" edges to the Statistic entity.
-func (pu *ProductUpdate) AddStatistic(s ...*Statistic) *ProductUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return pu.AddStatisticIDs(ids...)
-}
-
 // SetCalendarID sets the "Calendar" edge to the Calendar entity by ID.
 func (pu *ProductUpdate) SetCalendarID(id uuid.UUID) *ProductUpdate {
 	pu.mutation.SetCalendarID(id)
@@ -264,27 +248,6 @@ func (pu *ProductUpdate) RemoveTask(t ...*Task) *ProductUpdate {
 		ids[i] = t[i].ID
 	}
 	return pu.RemoveTaskIDs(ids...)
-}
-
-// ClearStatistic clears all "Statistic" edges to the Statistic entity.
-func (pu *ProductUpdate) ClearStatistic() *ProductUpdate {
-	pu.mutation.ClearStatistic()
-	return pu
-}
-
-// RemoveStatisticIDs removes the "Statistic" edge to Statistic entities by IDs.
-func (pu *ProductUpdate) RemoveStatisticIDs(ids ...uuid.UUID) *ProductUpdate {
-	pu.mutation.RemoveStatisticIDs(ids...)
-	return pu
-}
-
-// RemoveStatistic removes "Statistic" edges to Statistic entities.
-func (pu *ProductUpdate) RemoveStatistic(s ...*Statistic) *ProductUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return pu.RemoveStatisticIDs(ids...)
 }
 
 // ClearCalendar clears the "Calendar" edge to the Calendar entity.
@@ -589,60 +552,6 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pu.mutation.StatisticCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   product.StatisticTable,
-			Columns: product.StatisticPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pu.mutation.RemovedStatisticIDs(); len(nodes) > 0 && !pu.mutation.StatisticCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   product.StatisticTable,
-			Columns: product.StatisticPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pu.mutation.StatisticIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   product.StatisticTable,
-			Columns: product.StatisticPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if pu.mutation.CalendarCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -871,21 +780,6 @@ func (puo *ProductUpdateOne) AddTask(t ...*Task) *ProductUpdateOne {
 	return puo.AddTaskIDs(ids...)
 }
 
-// AddStatisticIDs adds the "Statistic" edge to the Statistic entity by IDs.
-func (puo *ProductUpdateOne) AddStatisticIDs(ids ...uuid.UUID) *ProductUpdateOne {
-	puo.mutation.AddStatisticIDs(ids...)
-	return puo
-}
-
-// AddStatistic adds the "Statistic" edges to the Statistic entity.
-func (puo *ProductUpdateOne) AddStatistic(s ...*Statistic) *ProductUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return puo.AddStatisticIDs(ids...)
-}
-
 // SetCalendarID sets the "Calendar" edge to the Calendar entity by ID.
 func (puo *ProductUpdateOne) SetCalendarID(id uuid.UUID) *ProductUpdateOne {
 	puo.mutation.SetCalendarID(id)
@@ -929,27 +823,6 @@ func (puo *ProductUpdateOne) RemoveTask(t ...*Task) *ProductUpdateOne {
 		ids[i] = t[i].ID
 	}
 	return puo.RemoveTaskIDs(ids...)
-}
-
-// ClearStatistic clears all "Statistic" edges to the Statistic entity.
-func (puo *ProductUpdateOne) ClearStatistic() *ProductUpdateOne {
-	puo.mutation.ClearStatistic()
-	return puo
-}
-
-// RemoveStatisticIDs removes the "Statistic" edge to Statistic entities by IDs.
-func (puo *ProductUpdateOne) RemoveStatisticIDs(ids ...uuid.UUID) *ProductUpdateOne {
-	puo.mutation.RemoveStatisticIDs(ids...)
-	return puo
-}
-
-// RemoveStatistic removes "Statistic" edges to Statistic entities.
-func (puo *ProductUpdateOne) RemoveStatistic(s ...*Statistic) *ProductUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return puo.RemoveStatisticIDs(ids...)
 }
 
 // ClearCalendar clears the "Calendar" edge to the Calendar entity.
@@ -1270,60 +1143,6 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: task.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if puo.mutation.StatisticCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   product.StatisticTable,
-			Columns: product.StatisticPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := puo.mutation.RemovedStatisticIDs(); len(nodes) > 0 && !puo.mutation.StatisticCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   product.StatisticTable,
-			Columns: product.StatisticPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := puo.mutation.StatisticIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   product.StatisticTable,
-			Columns: product.StatisticPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
 				},
 			},
 		}

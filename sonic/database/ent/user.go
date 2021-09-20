@@ -27,6 +27,14 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Disabled holds the value of the "Disabled" field.
 	Disabled bool `json:"Disabled,omitempty"`
+	// TasksRan holds the value of the "TasksRan" field.
+	TasksRan int `json:"TasksRan,omitempty"`
+	// TotalDeclines holds the value of the "TotalDeclines" field.
+	TotalDeclines int `json:"TotalDeclines,omitempty"`
+	// MoneySpent holds the value of the "MoneySpent" field.
+	MoneySpent float64 `json:"MoneySpent,omitempty"`
+	// TotalCheckouts holds the value of the "TotalCheckouts" field.
+	TotalCheckouts int `json:"TotalCheckouts,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges             UserEdges `json:"edges"`
@@ -37,8 +45,8 @@ type User struct {
 type UserEdges struct {
 	// License holds the value of the License edge.
 	License *License `json:"License,omitempty"`
-	// Statistics holds the value of the Statistics edge.
-	Statistics []*Statistic `json:"Statistics,omitempty"`
+	// Checkouts holds the value of the Checkouts edge.
+	Checkouts []*Checkout `json:"Checkouts,omitempty"`
 	// App holds the value of the App edge.
 	App *App `json:"App,omitempty"`
 	// Metadata holds the value of the Metadata edge.
@@ -66,13 +74,13 @@ func (e UserEdges) LicenseOrErr() (*License, error) {
 	return nil, &NotLoadedError{edge: "License"}
 }
 
-// StatisticsOrErr returns the Statistics value or an error if the edge
+// CheckoutsOrErr returns the Checkouts value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) StatisticsOrErr() ([]*Statistic, error) {
+func (e UserEdges) CheckoutsOrErr() ([]*Checkout, error) {
 	if e.loadedTypes[1] {
-		return e.Statistics, nil
+		return e.Checkouts, nil
 	}
-	return nil, &NotLoadedError{edge: "Statistics"}
+	return nil, &NotLoadedError{edge: "Checkouts"}
 }
 
 // AppOrErr returns the App value or an error if the edge
@@ -133,6 +141,10 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldDisabled:
 			values[i] = new(sql.NullBool)
+		case user.FieldMoneySpent:
+			values[i] = new(sql.NullFloat64)
+		case user.FieldTasksRan, user.FieldTotalDeclines, user.FieldTotalCheckouts:
+			values[i] = new(sql.NullInt64)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
@@ -178,6 +190,30 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Disabled = value.Bool
 			}
+		case user.FieldTasksRan:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field TasksRan", values[i])
+			} else if value.Valid {
+				u.TasksRan = int(value.Int64)
+			}
+		case user.FieldTotalDeclines:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field TotalDeclines", values[i])
+			} else if value.Valid {
+				u.TotalDeclines = int(value.Int64)
+			}
+		case user.FieldMoneySpent:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field MoneySpent", values[i])
+			} else if value.Valid {
+				u.MoneySpent = value.Float64
+			}
+		case user.FieldTotalCheckouts:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field TotalCheckouts", values[i])
+			} else if value.Valid {
+				u.TotalCheckouts = int(value.Int64)
+			}
 		case user.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field release_customers", values[i])
@@ -195,9 +231,9 @@ func (u *User) QueryLicense() *LicenseQuery {
 	return (&UserClient{config: u.config}).QueryLicense(u)
 }
 
-// QueryStatistics queries the "Statistics" edge of the User entity.
-func (u *User) QueryStatistics() *StatisticQuery {
-	return (&UserClient{config: u.config}).QueryStatistics(u)
+// QueryCheckouts queries the "Checkouts" edge of the User entity.
+func (u *User) QueryCheckouts() *CheckoutQuery {
+	return (&UserClient{config: u.config}).QueryCheckouts(u)
 }
 
 // QueryApp queries the "App" edge of the User entity.
@@ -249,6 +285,14 @@ func (u *User) String() string {
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", Disabled=")
 	builder.WriteString(fmt.Sprintf("%v", u.Disabled))
+	builder.WriteString(", TasksRan=")
+	builder.WriteString(fmt.Sprintf("%v", u.TasksRan))
+	builder.WriteString(", TotalDeclines=")
+	builder.WriteString(fmt.Sprintf("%v", u.TotalDeclines))
+	builder.WriteString(", MoneySpent=")
+	builder.WriteString(fmt.Sprintf("%v", u.MoneySpent))
+	builder.WriteString(", TotalCheckouts=")
+	builder.WriteString(fmt.Sprintf("%v", u.TotalCheckouts))
 	builder.WriteByte(')')
 	return builder.String()
 }

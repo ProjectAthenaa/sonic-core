@@ -44,8 +44,6 @@ const (
 	FieldMetadata = "metadata"
 	// EdgeTask holds the string denoting the task edge name in mutations.
 	EdgeTask = "Task"
-	// EdgeStatistic holds the string denoting the statistic edge name in mutations.
-	EdgeStatistic = "Statistic"
 	// EdgeCalendar holds the string denoting the calendar edge name in mutations.
 	EdgeCalendar = "Calendar"
 	// Table holds the table name of the product in the database.
@@ -55,11 +53,6 @@ const (
 	// TaskInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
 	TaskInverseTable = "tasks"
-	// StatisticTable is the table that holds the Statistic relation/edge. The primary key declared below.
-	StatisticTable = "statistic_Product"
-	// StatisticInverseTable is the table name for the Statistic entity.
-	// It exists in this package in order to avoid circular dependency with the "statistic" package.
-	StatisticInverseTable = "statistics"
 	// CalendarTable is the table that holds the Calendar relation/edge.
 	CalendarTable = "products"
 	// CalendarInverseTable is the table name for the Calendar entity.
@@ -97,9 +90,6 @@ var (
 	// TaskPrimaryKey and TaskColumn2 are the table columns denoting the
 	// primary key for the Task relation (M2M).
 	TaskPrimaryKey = []string{"task_id", "product_id"}
-	// StatisticPrimaryKey and StatisticColumn2 are the table columns denoting the
-	// primary key for the Statistic relation (M2M).
-	StatisticPrimaryKey = []string{"statistic_id", "product_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

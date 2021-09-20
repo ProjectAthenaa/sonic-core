@@ -13,6 +13,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/checkout"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/device"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
@@ -25,7 +26,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
@@ -55,6 +55,7 @@ func columnChecker(table string) func(string) error {
 		app.Table:          app.ValidColumn,
 		billing.Table:      billing.ValidColumn,
 		calendar.Table:     calendar.ValidColumn,
+		checkout.Table:     checkout.ValidColumn,
 		device.Table:       device.ValidColumn,
 		license.Table:      license.ValidColumn,
 		metadata.Table:     metadata.ValidColumn,
@@ -67,7 +68,6 @@ func columnChecker(table string) func(string) error {
 		session.Table:      session.ValidColumn,
 		settings.Table:     settings.ValidColumn,
 		shipping.Table:     shipping.ValidColumn,
-		statistic.Table:    statistic.ValidColumn,
 		stripe.Table:       stripe.ValidColumn,
 		task.Table:         task.ValidColumn,
 		taskgroup.Table:    taskgroup.ValidColumn,

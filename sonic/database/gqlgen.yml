@@ -78,3 +78,7 @@ models:
   ModuleField:
     model:
       - github.com/ProjectAthenaa/sonic-core/sonic.ModuleField
+      -
+  Checkout:
+    model:
+      - github.com/ProjectAthenaa/sonic-core/sonic/database/ent.Checkout

@@ -24,7 +24,16 @@ func (User) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
-		field.Bool("Disabled").Default(false),
+		field.Bool("Disabled").
+			Default(false),
+		field.Int("TasksRan").
+			Default(0),
+		field.Int("TotalDeclines").
+			Default(0),
+		field.Float("MoneySpent").
+			Default(0.0),
+		field.Int("TotalCheckouts").
+			Default(0),
 	}
 }
 
@@ -37,7 +46,7 @@ func (User) Edges() []ent.Edge {
 				entsql.Annotation{
 					OnDelete: entsql.Cascade,
 				}),
-		edge.To("Statistics", Statistic.Type).
+		edge.To("Checkouts", Checkout.Type).
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.NoAction,
 			}),

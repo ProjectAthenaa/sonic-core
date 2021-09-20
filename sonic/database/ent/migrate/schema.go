@@ -123,6 +123,28 @@ var (
 		Columns:    CalendarsColumns,
 		PrimaryKey: []*schema.Column{CalendarsColumns[0]},
 	}
+	// CheckoutsColumns holds the columns for the "checkouts" table.
+	CheckoutsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "product_name", Type: field.TypeString, Default: "Unknown"},
+		{Name: "product_price", Type: field.TypeFloat64, Default: 0},
+		{Name: "product_image", Type: field.TypeString, Default: "https://cdn.athenabot.com/default_product.svg"},
+		{Name: "user_checkouts", Type: field.TypeUUID, Nullable: true},
+	}
+	// CheckoutsTable holds the schema information for the "checkouts" table.
+	CheckoutsTable = &schema.Table{
+		Name:       "checkouts",
+		Columns:    CheckoutsColumns,
+		PrimaryKey: []*schema.Column{CheckoutsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "checkouts_users_Checkouts",
+				Columns:    []*schema.Column{CheckoutsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+			},
+		},
+	}
 	// DevicesColumns holds the columns for the "devices" table.
 	DevicesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -395,23 +417,6 @@ var (
 			},
 		},
 	}
-	// StatisticsColumns holds the columns for the "statistics" table.
-	StatisticsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"CHECKOUTS", "DECLINES", "ERRORS", "FAILED", "COOKIE_GENS", "RECAPTCHA_USAGE", "TASKS_RUNNING", "MONEY_SPENT"}},
-		{Name: "potential_profit", Type: field.TypeInt, Nullable: true},
-		{Name: "axis", Type: field.TypeJSON},
-		{Name: "value", Type: field.TypeInt, Nullable: true},
-		{Name: "spent", Type: field.TypeFloat64, Nullable: true, Default: 0},
-	}
-	// StatisticsTable holds the schema information for the "statistics" table.
-	StatisticsTable = &schema.Table{
-		Name:       "statistics",
-		Columns:    StatisticsColumns,
-		PrimaryKey: []*schema.Column{StatisticsColumns[0]},
-	}
 	// StripesColumns holds the columns for the "stripes" table.
 	StripesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -484,6 +489,10 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
+		{Name: "tasks_ran", Type: field.TypeInt, Default: 0},
+		{Name: "total_declines", Type: field.TypeInt, Default: 0},
+		{Name: "money_spent", Type: field.TypeFloat64, Default: 0},
+		{Name: "total_checkouts", Type: field.TypeInt, Default: 0},
 		{Name: "release_customers", Type: field.TypeUUID, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -494,7 +503,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_releases_Customers",
-				Columns:    []*schema.Column{UsersColumns[4]},
+				Columns:    []*schema.Column{UsersColumns[8]},
 				RefColumns: []*schema.Column{ReleasesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -600,31 +609,6 @@ var (
 			},
 		},
 	}
-	// StatisticProductColumns holds the columns for the "statistic_Product" table.
-	StatisticProductColumns = []*schema.Column{
-		{Name: "statistic_id", Type: field.TypeUUID},
-		{Name: "product_id", Type: field.TypeUUID},
-	}
-	// StatisticProductTable holds the schema information for the "statistic_Product" table.
-	StatisticProductTable = &schema.Table{
-		Name:       "statistic_Product",
-		Columns:    StatisticProductColumns,
-		PrimaryKey: []*schema.Column{StatisticProductColumns[0], StatisticProductColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "statistic_Product_statistic_id",
-				Columns:    []*schema.Column{StatisticProductColumns[0]},
-				RefColumns: []*schema.Column{StatisticsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "statistic_Product_product_id",
-				Columns:    []*schema.Column{StatisticProductColumns[1]},
-				RefColumns: []*schema.Column{ProductsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// TaskProductColumns holds the columns for the "task_Product" table.
 	TaskProductColumns = []*schema.Column{
 		{Name: "task_id", Type: field.TypeUUID},
@@ -675,31 +659,6 @@ var (
 			},
 		},
 	}
-	// UserStatisticsColumns holds the columns for the "user_Statistics" table.
-	UserStatisticsColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeUUID},
-		{Name: "statistic_id", Type: field.TypeUUID},
-	}
-	// UserStatisticsTable holds the schema information for the "user_Statistics" table.
-	UserStatisticsTable = &schema.Table{
-		Name:       "user_Statistics",
-		Columns:    UserStatisticsColumns,
-		PrimaryKey: []*schema.Column{UserStatisticsColumns[0], UserStatisticsColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "user_Statistics_user_id",
-				Columns:    []*schema.Column{UserStatisticsColumns[0]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "user_Statistics_statistic_id",
-				Columns:    []*schema.Column{UserStatisticsColumns[1]},
-				RefColumns: []*schema.Column{StatisticsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountGroupTable,
@@ -707,6 +666,7 @@ var (
 		AppsTable,
 		BillingsTable,
 		CalendarsTable,
+		CheckoutsTable,
 		DevicesTable,
 		LicensesTable,
 		MetadataTable,
@@ -719,7 +679,6 @@ var (
 		SessionsTable,
 		SettingsTable,
 		ShippingsTable,
-		StatisticsTable,
 		StripesTable,
 		TasksTable,
 		TaskGroupsTable,
@@ -728,10 +687,8 @@ var (
 		AppProfileGroupsTable,
 		AppTaskGroupsTable,
 		ProfileBillingTable,
-		StatisticProductTable,
 		TaskProductTable,
 		TaskProxyListTable,
-		UserStatisticsTable,
 	}
 )
 
@@ -743,6 +700,7 @@ func init() {
 	AddressesTable.ForeignKeys[0].RefTable = ShippingsTable
 	AddressesTable.ForeignKeys[1].RefTable = ShippingsTable
 	AppsTable.ForeignKeys[0].RefTable = UsersTable
+	CheckoutsTable.ForeignKeys[0].RefTable = UsersTable
 	LicensesTable.ForeignKeys[0].RefTable = UsersTable
 	MetadataTable.ForeignKeys[0].RefTable = UsersTable
 	ProductsTable.ForeignKeys[0].RefTable = CalendarsTable
@@ -763,12 +721,8 @@ func init() {
 	AppTaskGroupsTable.ForeignKeys[1].RefTable = TaskGroupsTable
 	ProfileBillingTable.ForeignKeys[0].RefTable = ProfilesTable
 	ProfileBillingTable.ForeignKeys[1].RefTable = BillingsTable
-	StatisticProductTable.ForeignKeys[0].RefTable = StatisticsTable
-	StatisticProductTable.ForeignKeys[1].RefTable = ProductsTable
 	TaskProductTable.ForeignKeys[0].RefTable = TasksTable
 	TaskProductTable.ForeignKeys[1].RefTable = ProductsTable
 	TaskProxyListTable.ForeignKeys[0].RefTable = TasksTable
 	TaskProxyListTable.ForeignKeys[1].RefTable = ProxyListsTable
-	UserStatisticsTable.ForeignKeys[0].RefTable = UsersTable
-	UserStatisticsTable.ForeignKeys[1].RefTable = StatisticsTable
 }

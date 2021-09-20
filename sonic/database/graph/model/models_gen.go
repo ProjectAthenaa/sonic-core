@@ -19,15 +19,6 @@ type AccountGroupInput struct {
 	Accounts map[string]interface{} `json:"Accounts"`
 }
 
-type Checkout struct {
-	ID                  string    `json:"ID"`
-	Date                time.Time `json:"Date"`
-	ProductPrice        string    `json:"ProductPrice"`
-	ProductName         string    `json:"ProductName"`
-	ProductSize         string    `json:"ProductSize"`
-	CurrentProductPrice *string   `json:"CurrentProductPrice"`
-}
-
 type Module struct {
 	Name     product.Site         `json:"Name"`
 	Status   Status               `json:"Status"`
@@ -119,6 +110,13 @@ type ProxyTest struct {
 	Latency int             `json:"Latency"`
 	Status  ProxyTestStatus `json:"Status"`
 	ProxyID string          `json:"ProxyID"`
+}
+
+type Statistics struct {
+	Checkouts int     `json:"Checkouts"`
+	Declines  int     `json:"Declines"`
+	Spent     float64 `json:"Spent"`
+	TasksRan  int     `json:"TasksRan"`
 }
 
 type UpdatedTask struct {

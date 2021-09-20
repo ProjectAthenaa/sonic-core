@@ -18,6 +18,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/checkout"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/device"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
@@ -30,7 +31,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
@@ -1384,6 +1384,233 @@ func (c *Calendar) ToEdge(order *CalendarOrder) *CalendarEdge {
 		order = DefaultCalendarOrder
 	}
 	return &CalendarEdge{
+		Node:   c,
+		Cursor: order.Field.toCursor(c),
+	}
+}
+
+// CheckoutEdge is the edge representation of Checkout.
+type CheckoutEdge struct {
+	Node   *Checkout `json:"node"`
+	Cursor Cursor    `json:"cursor"`
+}
+
+// CheckoutConnection is the connection containing edges to Checkout.
+type CheckoutConnection struct {
+	Edges      []*CheckoutEdge `json:"edges"`
+	PageInfo   PageInfo        `json:"pageInfo"`
+	TotalCount int             `json:"totalCount"`
+}
+
+// CheckoutPaginateOption enables pagination customization.
+type CheckoutPaginateOption func(*checkoutPager) error
+
+// WithCheckoutOrder configures pagination ordering.
+func WithCheckoutOrder(order *CheckoutOrder) CheckoutPaginateOption {
+	if order == nil {
+		order = DefaultCheckoutOrder
+	}
+	o := *order
+	return func(pager *checkoutPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultCheckoutOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithCheckoutFilter configures pagination filter.
+func WithCheckoutFilter(filter func(*CheckoutQuery) (*CheckoutQuery, error)) CheckoutPaginateOption {
+	return func(pager *checkoutPager) error {
+		if filter == nil {
+			return errors.New("CheckoutQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type checkoutPager struct {
+	order  *CheckoutOrder
+	filter func(*CheckoutQuery) (*CheckoutQuery, error)
+}
+
+func newCheckoutPager(opts []CheckoutPaginateOption) (*checkoutPager, error) {
+	pager := &checkoutPager{}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultCheckoutOrder
+	}
+	return pager, nil
+}
+
+func (p *checkoutPager) applyFilter(query *CheckoutQuery) (*CheckoutQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *checkoutPager) toCursor(c *Checkout) Cursor {
+	return p.order.Field.toCursor(c)
+}
+
+func (p *checkoutPager) applyCursors(query *CheckoutQuery, after, before *Cursor) *CheckoutQuery {
+	for _, predicate := range cursorsToPredicates(
+		p.order.Direction, after, before,
+		p.order.Field.field, DefaultCheckoutOrder.Field.field,
+	) {
+		query = query.Where(predicate)
+	}
+	return query
+}
+
+func (p *checkoutPager) applyOrder(query *CheckoutQuery, reverse bool) *CheckoutQuery {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	query = query.Order(direction.orderFunc(p.order.Field.field))
+	if p.order.Field != DefaultCheckoutOrder.Field {
+		query = query.Order(direction.orderFunc(DefaultCheckoutOrder.Field.field))
+	}
+	return query
+}
+
+// Paginate executes the query and returns a relay based cursor connection to Checkout.
+func (c *CheckoutQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...CheckoutPaginateOption,
+) (*CheckoutConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newCheckoutPager(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	if c, err = pager.applyFilter(c); err != nil {
+		return nil, err
+	}
+
+	conn := &CheckoutConnection{Edges: []*CheckoutEdge{}}
+	if !hasCollectedField(ctx, edgesField) || first != nil && *first == 0 || last != nil && *last == 0 {
+		if hasCollectedField(ctx, totalCountField) ||
+			hasCollectedField(ctx, pageInfoField) {
+			count, err := c.Count(ctx)
+			if err != nil {
+				return nil, err
+			}
+			conn.TotalCount = count
+			conn.PageInfo.HasNextPage = first != nil && count > 0
+			conn.PageInfo.HasPreviousPage = last != nil && count > 0
+		}
+		return conn, nil
+	}
+
+	if (after != nil || first != nil || before != nil || last != nil) && hasCollectedField(ctx, totalCountField) {
+		count, err := c.Clone().Count(ctx)
+		if err != nil {
+			return nil, err
+		}
+		conn.TotalCount = count
+	}
+
+	c = pager.applyCursors(c, after, before)
+	c = pager.applyOrder(c, last != nil)
+	var limit int
+	if first != nil {
+		limit = *first + 1
+	} else if last != nil {
+		limit = *last + 1
+	}
+	if limit > 0 {
+		c = c.Limit(limit)
+	}
+
+	if field := getCollectedField(ctx, edgesField, nodeField); field != nil {
+		c = c.collectField(graphql.GetOperationContext(ctx), *field)
+	}
+
+	nodes, err := c.All(ctx)
+	if err != nil || len(nodes) == 0 {
+		return conn, err
+	}
+
+	if len(nodes) == limit {
+		conn.PageInfo.HasNextPage = first != nil
+		conn.PageInfo.HasPreviousPage = last != nil
+		nodes = nodes[:len(nodes)-1]
+	}
+
+	var nodeAt func(int) *Checkout
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *Checkout {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *Checkout {
+			return nodes[i]
+		}
+	}
+
+	conn.Edges = make([]*CheckoutEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		conn.Edges[i] = &CheckoutEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+
+	conn.PageInfo.StartCursor = &conn.Edges[0].Cursor
+	conn.PageInfo.EndCursor = &conn.Edges[len(conn.Edges)-1].Cursor
+	if conn.TotalCount == 0 {
+		conn.TotalCount = len(nodes)
+	}
+
+	return conn, nil
+}
+
+// CheckoutOrderField defines the ordering field of Checkout.
+type CheckoutOrderField struct {
+	field    string
+	toCursor func(*Checkout) Cursor
+}
+
+// CheckoutOrder defines the ordering of Checkout.
+type CheckoutOrder struct {
+	Direction OrderDirection      `json:"direction"`
+	Field     *CheckoutOrderField `json:"field"`
+}
+
+// DefaultCheckoutOrder is the default ordering of Checkout.
+var DefaultCheckoutOrder = &CheckoutOrder{
+	Direction: OrderDirectionAsc,
+	Field: &CheckoutOrderField{
+		field: checkout.FieldID,
+		toCursor: func(c *Checkout) Cursor {
+			return Cursor{ID: c.ID}
+		},
+	},
+}
+
+// ToEdge converts Checkout into CheckoutEdge.
+func (c *Checkout) ToEdge(order *CheckoutOrder) *CheckoutEdge {
+	if order == nil {
+		order = DefaultCheckoutOrder
+	}
+	return &CheckoutEdge{
 		Node:   c,
 		Cursor: order.Field.toCursor(c),
 	}
@@ -4108,233 +4335,6 @@ func (s *Shipping) ToEdge(order *ShippingOrder) *ShippingEdge {
 		order = DefaultShippingOrder
 	}
 	return &ShippingEdge{
-		Node:   s,
-		Cursor: order.Field.toCursor(s),
-	}
-}
-
-// StatisticEdge is the edge representation of Statistic.
-type StatisticEdge struct {
-	Node   *Statistic `json:"node"`
-	Cursor Cursor     `json:"cursor"`
-}
-
-// StatisticConnection is the connection containing edges to Statistic.
-type StatisticConnection struct {
-	Edges      []*StatisticEdge `json:"edges"`
-	PageInfo   PageInfo         `json:"pageInfo"`
-	TotalCount int              `json:"totalCount"`
-}
-
-// StatisticPaginateOption enables pagination customization.
-type StatisticPaginateOption func(*statisticPager) error
-
-// WithStatisticOrder configures pagination ordering.
-func WithStatisticOrder(order *StatisticOrder) StatisticPaginateOption {
-	if order == nil {
-		order = DefaultStatisticOrder
-	}
-	o := *order
-	return func(pager *statisticPager) error {
-		if err := o.Direction.Validate(); err != nil {
-			return err
-		}
-		if o.Field == nil {
-			o.Field = DefaultStatisticOrder.Field
-		}
-		pager.order = &o
-		return nil
-	}
-}
-
-// WithStatisticFilter configures pagination filter.
-func WithStatisticFilter(filter func(*StatisticQuery) (*StatisticQuery, error)) StatisticPaginateOption {
-	return func(pager *statisticPager) error {
-		if filter == nil {
-			return errors.New("StatisticQuery filter cannot be nil")
-		}
-		pager.filter = filter
-		return nil
-	}
-}
-
-type statisticPager struct {
-	order  *StatisticOrder
-	filter func(*StatisticQuery) (*StatisticQuery, error)
-}
-
-func newStatisticPager(opts []StatisticPaginateOption) (*statisticPager, error) {
-	pager := &statisticPager{}
-	for _, opt := range opts {
-		if err := opt(pager); err != nil {
-			return nil, err
-		}
-	}
-	if pager.order == nil {
-		pager.order = DefaultStatisticOrder
-	}
-	return pager, nil
-}
-
-func (p *statisticPager) applyFilter(query *StatisticQuery) (*StatisticQuery, error) {
-	if p.filter != nil {
-		return p.filter(query)
-	}
-	return query, nil
-}
-
-func (p *statisticPager) toCursor(s *Statistic) Cursor {
-	return p.order.Field.toCursor(s)
-}
-
-func (p *statisticPager) applyCursors(query *StatisticQuery, after, before *Cursor) *StatisticQuery {
-	for _, predicate := range cursorsToPredicates(
-		p.order.Direction, after, before,
-		p.order.Field.field, DefaultStatisticOrder.Field.field,
-	) {
-		query = query.Where(predicate)
-	}
-	return query
-}
-
-func (p *statisticPager) applyOrder(query *StatisticQuery, reverse bool) *StatisticQuery {
-	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
-	}
-	query = query.Order(direction.orderFunc(p.order.Field.field))
-	if p.order.Field != DefaultStatisticOrder.Field {
-		query = query.Order(direction.orderFunc(DefaultStatisticOrder.Field.field))
-	}
-	return query
-}
-
-// Paginate executes the query and returns a relay based cursor connection to Statistic.
-func (s *StatisticQuery) Paginate(
-	ctx context.Context, after *Cursor, first *int,
-	before *Cursor, last *int, opts ...StatisticPaginateOption,
-) (*StatisticConnection, error) {
-	if err := validateFirstLast(first, last); err != nil {
-		return nil, err
-	}
-	pager, err := newStatisticPager(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	if s, err = pager.applyFilter(s); err != nil {
-		return nil, err
-	}
-
-	conn := &StatisticConnection{Edges: []*StatisticEdge{}}
-	if !hasCollectedField(ctx, edgesField) || first != nil && *first == 0 || last != nil && *last == 0 {
-		if hasCollectedField(ctx, totalCountField) ||
-			hasCollectedField(ctx, pageInfoField) {
-			count, err := s.Count(ctx)
-			if err != nil {
-				return nil, err
-			}
-			conn.TotalCount = count
-			conn.PageInfo.HasNextPage = first != nil && count > 0
-			conn.PageInfo.HasPreviousPage = last != nil && count > 0
-		}
-		return conn, nil
-	}
-
-	if (after != nil || first != nil || before != nil || last != nil) && hasCollectedField(ctx, totalCountField) {
-		count, err := s.Clone().Count(ctx)
-		if err != nil {
-			return nil, err
-		}
-		conn.TotalCount = count
-	}
-
-	s = pager.applyCursors(s, after, before)
-	s = pager.applyOrder(s, last != nil)
-	var limit int
-	if first != nil {
-		limit = *first + 1
-	} else if last != nil {
-		limit = *last + 1
-	}
-	if limit > 0 {
-		s = s.Limit(limit)
-	}
-
-	if field := getCollectedField(ctx, edgesField, nodeField); field != nil {
-		s = s.collectField(graphql.GetOperationContext(ctx), *field)
-	}
-
-	nodes, err := s.All(ctx)
-	if err != nil || len(nodes) == 0 {
-		return conn, err
-	}
-
-	if len(nodes) == limit {
-		conn.PageInfo.HasNextPage = first != nil
-		conn.PageInfo.HasPreviousPage = last != nil
-		nodes = nodes[:len(nodes)-1]
-	}
-
-	var nodeAt func(int) *Statistic
-	if last != nil {
-		n := len(nodes) - 1
-		nodeAt = func(i int) *Statistic {
-			return nodes[n-i]
-		}
-	} else {
-		nodeAt = func(i int) *Statistic {
-			return nodes[i]
-		}
-	}
-
-	conn.Edges = make([]*StatisticEdge, len(nodes))
-	for i := range nodes {
-		node := nodeAt(i)
-		conn.Edges[i] = &StatisticEdge{
-			Node:   node,
-			Cursor: pager.toCursor(node),
-		}
-	}
-
-	conn.PageInfo.StartCursor = &conn.Edges[0].Cursor
-	conn.PageInfo.EndCursor = &conn.Edges[len(conn.Edges)-1].Cursor
-	if conn.TotalCount == 0 {
-		conn.TotalCount = len(nodes)
-	}
-
-	return conn, nil
-}
-
-// StatisticOrderField defines the ordering field of Statistic.
-type StatisticOrderField struct {
-	field    string
-	toCursor func(*Statistic) Cursor
-}
-
-// StatisticOrder defines the ordering of Statistic.
-type StatisticOrder struct {
-	Direction OrderDirection       `json:"direction"`
-	Field     *StatisticOrderField `json:"field"`
-}
-
-// DefaultStatisticOrder is the default ordering of Statistic.
-var DefaultStatisticOrder = &StatisticOrder{
-	Direction: OrderDirectionAsc,
-	Field: &StatisticOrderField{
-		field: statistic.FieldID,
-		toCursor: func(s *Statistic) Cursor {
-			return Cursor{ID: s.ID}
-		},
-	},
-}
-
-// ToEdge converts Statistic into StatisticEdge.
-func (s *Statistic) ToEdge(order *StatisticOrder) *StatisticEdge {
-	if order == nil {
-		order = DefaultStatisticOrder
-	}
-	return &StatisticEdge{
 		Node:   s,
 		Cursor: order.Field.toCursor(s),
 	}

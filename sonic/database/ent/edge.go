@@ -92,6 +92,14 @@ func (c *Calendar) QuickTask(ctx context.Context) (*Product, error) {
 	return result, MaskNotFound(err)
 }
 
+func (c *Checkout) User(ctx context.Context) (*User, error) {
+	result, err := c.Edges.UserOrErr()
+	if IsNotLoaded(err) {
+		result, err = c.QueryUser().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
 func (l *License) User(ctx context.Context) (*User, error) {
 	result, err := l.Edges.UserOrErr()
 	if IsNotLoaded(err) {
@@ -120,14 +128,6 @@ func (pr *Product) Task(ctx context.Context) ([]*Task, error) {
 	result, err := pr.Edges.TaskOrErr()
 	if IsNotLoaded(err) {
 		result, err = pr.QueryTask().All(ctx)
-	}
-	return result, err
-}
-
-func (pr *Product) Statistic(ctx context.Context) ([]*Statistic, error) {
-	result, err := pr.Edges.StatisticOrErr()
-	if IsNotLoaded(err) {
-		result, err = pr.QueryStatistic().All(ctx)
 	}
 	return result, err
 }
@@ -268,22 +268,6 @@ func (s *Shipping) BillingAddress(ctx context.Context) (*Address, error) {
 	return result, MaskNotFound(err)
 }
 
-func (s *Statistic) User(ctx context.Context) ([]*User, error) {
-	result, err := s.Edges.UserOrErr()
-	if IsNotLoaded(err) {
-		result, err = s.QueryUser().All(ctx)
-	}
-	return result, err
-}
-
-func (s *Statistic) Product(ctx context.Context) ([]*Product, error) {
-	result, err := s.Edges.ProductOrErr()
-	if IsNotLoaded(err) {
-		result, err = s.QueryProduct().All(ctx)
-	}
-	return result, err
-}
-
 func (s *Stripe) License(ctx context.Context) (*License, error) {
 	result, err := s.Edges.LicenseOrErr()
 	if IsNotLoaded(err) {
@@ -348,10 +332,10 @@ func (u *User) License(ctx context.Context) (*License, error) {
 	return result, MaskNotFound(err)
 }
 
-func (u *User) Statistics(ctx context.Context) ([]*Statistic, error) {
-	result, err := u.Edges.StatisticsOrErr()
+func (u *User) Checkouts(ctx context.Context) ([]*Checkout, error) {
+	result, err := u.Edges.CheckoutsOrErr()
 	if IsNotLoaded(err) {
-		result, err = u.QueryStatistics().All(ctx)
+		result, err = u.QueryCheckouts().All(ctx)
 	}
 	return result, err
 }

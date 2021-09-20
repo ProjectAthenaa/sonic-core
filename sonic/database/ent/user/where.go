@@ -115,6 +115,34 @@ func Disabled(v bool) predicate.User {
 	})
 }
 
+// TasksRan applies equality check predicate on the "TasksRan" field. It's identical to TasksRanEQ.
+func TasksRan(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTasksRan), v))
+	})
+}
+
+// TotalDeclines applies equality check predicate on the "TotalDeclines" field. It's identical to TotalDeclinesEQ.
+func TotalDeclines(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTotalDeclines), v))
+	})
+}
+
+// MoneySpent applies equality check predicate on the "MoneySpent" field. It's identical to MoneySpentEQ.
+func MoneySpent(v float64) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMoneySpent), v))
+	})
+}
+
+// TotalCheckouts applies equality check predicate on the "TotalCheckouts" field. It's identical to TotalCheckoutsEQ.
+func TotalCheckouts(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTotalCheckouts), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -281,6 +309,310 @@ func DisabledNEQ(v bool) predicate.User {
 	})
 }
 
+// TasksRanEQ applies the EQ predicate on the "TasksRan" field.
+func TasksRanEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTasksRan), v))
+	})
+}
+
+// TasksRanNEQ applies the NEQ predicate on the "TasksRan" field.
+func TasksRanNEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTasksRan), v))
+	})
+}
+
+// TasksRanIn applies the In predicate on the "TasksRan" field.
+func TasksRanIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTasksRan), v...))
+	})
+}
+
+// TasksRanNotIn applies the NotIn predicate on the "TasksRan" field.
+func TasksRanNotIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTasksRan), v...))
+	})
+}
+
+// TasksRanGT applies the GT predicate on the "TasksRan" field.
+func TasksRanGT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTasksRan), v))
+	})
+}
+
+// TasksRanGTE applies the GTE predicate on the "TasksRan" field.
+func TasksRanGTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTasksRan), v))
+	})
+}
+
+// TasksRanLT applies the LT predicate on the "TasksRan" field.
+func TasksRanLT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTasksRan), v))
+	})
+}
+
+// TasksRanLTE applies the LTE predicate on the "TasksRan" field.
+func TasksRanLTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTasksRan), v))
+	})
+}
+
+// TotalDeclinesEQ applies the EQ predicate on the "TotalDeclines" field.
+func TotalDeclinesEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTotalDeclines), v))
+	})
+}
+
+// TotalDeclinesNEQ applies the NEQ predicate on the "TotalDeclines" field.
+func TotalDeclinesNEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTotalDeclines), v))
+	})
+}
+
+// TotalDeclinesIn applies the In predicate on the "TotalDeclines" field.
+func TotalDeclinesIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTotalDeclines), v...))
+	})
+}
+
+// TotalDeclinesNotIn applies the NotIn predicate on the "TotalDeclines" field.
+func TotalDeclinesNotIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTotalDeclines), v...))
+	})
+}
+
+// TotalDeclinesGT applies the GT predicate on the "TotalDeclines" field.
+func TotalDeclinesGT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTotalDeclines), v))
+	})
+}
+
+// TotalDeclinesGTE applies the GTE predicate on the "TotalDeclines" field.
+func TotalDeclinesGTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTotalDeclines), v))
+	})
+}
+
+// TotalDeclinesLT applies the LT predicate on the "TotalDeclines" field.
+func TotalDeclinesLT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTotalDeclines), v))
+	})
+}
+
+// TotalDeclinesLTE applies the LTE predicate on the "TotalDeclines" field.
+func TotalDeclinesLTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTotalDeclines), v))
+	})
+}
+
+// MoneySpentEQ applies the EQ predicate on the "MoneySpent" field.
+func MoneySpentEQ(v float64) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMoneySpent), v))
+	})
+}
+
+// MoneySpentNEQ applies the NEQ predicate on the "MoneySpent" field.
+func MoneySpentNEQ(v float64) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldMoneySpent), v))
+	})
+}
+
+// MoneySpentIn applies the In predicate on the "MoneySpent" field.
+func MoneySpentIn(vs ...float64) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldMoneySpent), v...))
+	})
+}
+
+// MoneySpentNotIn applies the NotIn predicate on the "MoneySpent" field.
+func MoneySpentNotIn(vs ...float64) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldMoneySpent), v...))
+	})
+}
+
+// MoneySpentGT applies the GT predicate on the "MoneySpent" field.
+func MoneySpentGT(v float64) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldMoneySpent), v))
+	})
+}
+
+// MoneySpentGTE applies the GTE predicate on the "MoneySpent" field.
+func MoneySpentGTE(v float64) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldMoneySpent), v))
+	})
+}
+
+// MoneySpentLT applies the LT predicate on the "MoneySpent" field.
+func MoneySpentLT(v float64) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldMoneySpent), v))
+	})
+}
+
+// MoneySpentLTE applies the LTE predicate on the "MoneySpent" field.
+func MoneySpentLTE(v float64) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldMoneySpent), v))
+	})
+}
+
+// TotalCheckoutsEQ applies the EQ predicate on the "TotalCheckouts" field.
+func TotalCheckoutsEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTotalCheckouts), v))
+	})
+}
+
+// TotalCheckoutsNEQ applies the NEQ predicate on the "TotalCheckouts" field.
+func TotalCheckoutsNEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTotalCheckouts), v))
+	})
+}
+
+// TotalCheckoutsIn applies the In predicate on the "TotalCheckouts" field.
+func TotalCheckoutsIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTotalCheckouts), v...))
+	})
+}
+
+// TotalCheckoutsNotIn applies the NotIn predicate on the "TotalCheckouts" field.
+func TotalCheckoutsNotIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTotalCheckouts), v...))
+	})
+}
+
+// TotalCheckoutsGT applies the GT predicate on the "TotalCheckouts" field.
+func TotalCheckoutsGT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTotalCheckouts), v))
+	})
+}
+
+// TotalCheckoutsGTE applies the GTE predicate on the "TotalCheckouts" field.
+func TotalCheckoutsGTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTotalCheckouts), v))
+	})
+}
+
+// TotalCheckoutsLT applies the LT predicate on the "TotalCheckouts" field.
+func TotalCheckoutsLT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTotalCheckouts), v))
+	})
+}
+
+// TotalCheckoutsLTE applies the LTE predicate on the "TotalCheckouts" field.
+func TotalCheckoutsLTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTotalCheckouts), v))
+	})
+}
+
 // HasLicense applies the HasEdge predicate on the "License" edge.
 func HasLicense() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -309,25 +641,25 @@ func HasLicenseWith(preds ...predicate.License) predicate.User {
 	})
 }
 
-// HasStatistics applies the HasEdge predicate on the "Statistics" edge.
-func HasStatistics() predicate.User {
+// HasCheckouts applies the HasEdge predicate on the "Checkouts" edge.
+func HasCheckouts() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StatisticsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, StatisticsTable, StatisticsPrimaryKey...),
+			sqlgraph.To(CheckoutsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CheckoutsTable, CheckoutsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasStatisticsWith applies the HasEdge predicate on the "Statistics" edge with a given conditions (other predicates).
-func HasStatisticsWith(preds ...predicate.Statistic) predicate.User {
+// HasCheckoutsWith applies the HasEdge predicate on the "Checkouts" edge with a given conditions (other predicates).
+func HasCheckoutsWith(preds ...predicate.Checkout) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StatisticsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, StatisticsTable, StatisticsPrimaryKey...),
+			sqlgraph.To(CheckoutsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CheckoutsTable, CheckoutsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

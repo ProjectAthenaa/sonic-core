@@ -11,11 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/checkout"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/release"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/user"
 	"github.com/google/uuid"
 )
@@ -69,6 +69,62 @@ func (uc *UserCreate) SetNillableDisabled(b *bool) *UserCreate {
 	return uc
 }
 
+// SetTasksRan sets the "TasksRan" field.
+func (uc *UserCreate) SetTasksRan(i int) *UserCreate {
+	uc.mutation.SetTasksRan(i)
+	return uc
+}
+
+// SetNillableTasksRan sets the "TasksRan" field if the given value is not nil.
+func (uc *UserCreate) SetNillableTasksRan(i *int) *UserCreate {
+	if i != nil {
+		uc.SetTasksRan(*i)
+	}
+	return uc
+}
+
+// SetTotalDeclines sets the "TotalDeclines" field.
+func (uc *UserCreate) SetTotalDeclines(i int) *UserCreate {
+	uc.mutation.SetTotalDeclines(i)
+	return uc
+}
+
+// SetNillableTotalDeclines sets the "TotalDeclines" field if the given value is not nil.
+func (uc *UserCreate) SetNillableTotalDeclines(i *int) *UserCreate {
+	if i != nil {
+		uc.SetTotalDeclines(*i)
+	}
+	return uc
+}
+
+// SetMoneySpent sets the "MoneySpent" field.
+func (uc *UserCreate) SetMoneySpent(f float64) *UserCreate {
+	uc.mutation.SetMoneySpent(f)
+	return uc
+}
+
+// SetNillableMoneySpent sets the "MoneySpent" field if the given value is not nil.
+func (uc *UserCreate) SetNillableMoneySpent(f *float64) *UserCreate {
+	if f != nil {
+		uc.SetMoneySpent(*f)
+	}
+	return uc
+}
+
+// SetTotalCheckouts sets the "TotalCheckouts" field.
+func (uc *UserCreate) SetTotalCheckouts(i int) *UserCreate {
+	uc.mutation.SetTotalCheckouts(i)
+	return uc
+}
+
+// SetNillableTotalCheckouts sets the "TotalCheckouts" field if the given value is not nil.
+func (uc *UserCreate) SetNillableTotalCheckouts(i *int) *UserCreate {
+	if i != nil {
+		uc.SetTotalCheckouts(*i)
+	}
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
 	uc.mutation.SetID(u)
@@ -94,19 +150,19 @@ func (uc *UserCreate) SetLicense(l *License) *UserCreate {
 	return uc.SetLicenseID(l.ID)
 }
 
-// AddStatisticIDs adds the "Statistics" edge to the Statistic entity by IDs.
-func (uc *UserCreate) AddStatisticIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddStatisticIDs(ids...)
+// AddCheckoutIDs adds the "Checkouts" edge to the Checkout entity by IDs.
+func (uc *UserCreate) AddCheckoutIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddCheckoutIDs(ids...)
 	return uc
 }
 
-// AddStatistics adds the "Statistics" edges to the Statistic entity.
-func (uc *UserCreate) AddStatistics(s ...*Statistic) *UserCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// AddCheckouts adds the "Checkouts" edges to the Checkout entity.
+func (uc *UserCreate) AddCheckouts(c ...*Checkout) *UserCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return uc.AddStatisticIDs(ids...)
+	return uc.AddCheckoutIDs(ids...)
 }
 
 // SetAppID sets the "App" edge to the App entity by ID.
@@ -264,6 +320,22 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultDisabled
 		uc.mutation.SetDisabled(v)
 	}
+	if _, ok := uc.mutation.TasksRan(); !ok {
+		v := user.DefaultTasksRan
+		uc.mutation.SetTasksRan(v)
+	}
+	if _, ok := uc.mutation.TotalDeclines(); !ok {
+		v := user.DefaultTotalDeclines
+		uc.mutation.SetTotalDeclines(v)
+	}
+	if _, ok := uc.mutation.MoneySpent(); !ok {
+		v := user.DefaultMoneySpent
+		uc.mutation.SetMoneySpent(v)
+	}
+	if _, ok := uc.mutation.TotalCheckouts(); !ok {
+		v := user.DefaultTotalCheckouts
+		uc.mutation.SetTotalCheckouts(v)
+	}
 	if _, ok := uc.mutation.ID(); !ok {
 		v := user.DefaultID()
 		uc.mutation.SetID(v)
@@ -280,6 +352,18 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "Disabled", err: errors.New(`ent: missing required field "Disabled"`)}
+	}
+	if _, ok := uc.mutation.TasksRan(); !ok {
+		return &ValidationError{Name: "TasksRan", err: errors.New(`ent: missing required field "TasksRan"`)}
+	}
+	if _, ok := uc.mutation.TotalDeclines(); !ok {
+		return &ValidationError{Name: "TotalDeclines", err: errors.New(`ent: missing required field "TotalDeclines"`)}
+	}
+	if _, ok := uc.mutation.MoneySpent(); !ok {
+		return &ValidationError{Name: "MoneySpent", err: errors.New(`ent: missing required field "MoneySpent"`)}
+	}
+	if _, ok := uc.mutation.TotalCheckouts(); !ok {
+		return &ValidationError{Name: "TotalCheckouts", err: errors.New(`ent: missing required field "TotalCheckouts"`)}
 	}
 	return nil
 }
@@ -337,6 +421,38 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.Disabled = value
 	}
+	if value, ok := uc.mutation.TasksRan(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTasksRan,
+		})
+		_node.TasksRan = value
+	}
+	if value, ok := uc.mutation.TotalDeclines(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalDeclines,
+		})
+		_node.TotalDeclines = value
+	}
+	if value, ok := uc.mutation.MoneySpent(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: user.FieldMoneySpent,
+		})
+		_node.MoneySpent = value
+	}
+	if value, ok := uc.mutation.TotalCheckouts(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldTotalCheckouts,
+		})
+		_node.TotalCheckouts = value
+	}
 	if nodes := uc.mutation.LicenseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -356,17 +472,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.StatisticsIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.CheckoutsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.StatisticsTable,
-			Columns: user.StatisticsPrimaryKey,
+			Table:   user.CheckoutsTable,
+			Columns: []string{user.CheckoutsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: statistic.FieldID,
+					Column: checkout.FieldID,
 				},
 			},
 		}

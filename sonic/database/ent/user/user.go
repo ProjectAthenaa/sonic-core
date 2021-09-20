@@ -19,10 +19,18 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
+	// FieldTasksRan holds the string denoting the tasksran field in the database.
+	FieldTasksRan = "tasks_ran"
+	// FieldTotalDeclines holds the string denoting the totaldeclines field in the database.
+	FieldTotalDeclines = "total_declines"
+	// FieldMoneySpent holds the string denoting the moneyspent field in the database.
+	FieldMoneySpent = "money_spent"
+	// FieldTotalCheckouts holds the string denoting the totalcheckouts field in the database.
+	FieldTotalCheckouts = "total_checkouts"
 	// EdgeLicense holds the string denoting the license edge name in mutations.
 	EdgeLicense = "License"
-	// EdgeStatistics holds the string denoting the statistics edge name in mutations.
-	EdgeStatistics = "Statistics"
+	// EdgeCheckouts holds the string denoting the checkouts edge name in mutations.
+	EdgeCheckouts = "Checkouts"
 	// EdgeApp holds the string denoting the app edge name in mutations.
 	EdgeApp = "App"
 	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
@@ -40,11 +48,13 @@ const (
 	LicenseInverseTable = "licenses"
 	// LicenseColumn is the table column denoting the License relation/edge.
 	LicenseColumn = "user_license"
-	// StatisticsTable is the table that holds the Statistics relation/edge. The primary key declared below.
-	StatisticsTable = "user_Statistics"
-	// StatisticsInverseTable is the table name for the Statistic entity.
-	// It exists in this package in order to avoid circular dependency with the "statistic" package.
-	StatisticsInverseTable = "statistics"
+	// CheckoutsTable is the table that holds the Checkouts relation/edge.
+	CheckoutsTable = "checkouts"
+	// CheckoutsInverseTable is the table name for the Checkout entity.
+	// It exists in this package in order to avoid circular dependency with the "checkout" package.
+	CheckoutsInverseTable = "checkouts"
+	// CheckoutsColumn is the table column denoting the Checkouts relation/edge.
+	CheckoutsColumn = "user_checkouts"
 	// AppTable is the table that holds the App relation/edge.
 	AppTable = "apps"
 	// AppInverseTable is the table name for the App entity.
@@ -81,6 +91,10 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDisabled,
+	FieldTasksRan,
+	FieldTotalDeclines,
+	FieldMoneySpent,
+	FieldTotalCheckouts,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"
@@ -88,12 +102,6 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"release_customers",
 }
-
-var (
-	// StatisticsPrimaryKey and StatisticsColumn2 are the table columns denoting the
-	// primary key for the Statistics relation (M2M).
-	StatisticsPrimaryKey = []string{"user_id", "statistic_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -119,6 +127,14 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultDisabled holds the default value on creation for the "Disabled" field.
 	DefaultDisabled bool
+	// DefaultTasksRan holds the default value on creation for the "TasksRan" field.
+	DefaultTasksRan int
+	// DefaultTotalDeclines holds the default value on creation for the "TotalDeclines" field.
+	DefaultTotalDeclines int
+	// DefaultMoneySpent holds the default value on creation for the "MoneySpent" field.
+	DefaultMoneySpent float64
+	// DefaultTotalCheckouts holds the default value on creation for the "TotalCheckouts" field.
+	DefaultTotalCheckouts int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

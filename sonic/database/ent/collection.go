@@ -69,6 +69,18 @@ func (c *CalendarQuery) collectField(ctx *graphql.OperationContext, field graphq
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (c *CheckoutQuery) CollectFields(ctx context.Context, satisfies ...string) *CheckoutQuery {
+	if fc := graphql.GetFieldContext(ctx); fc != nil {
+		c = c.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
+	}
+	return c
+}
+
+func (c *CheckoutQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *CheckoutQuery {
+	return c
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (d *DeviceQuery) CollectFields(ctx context.Context, satisfies ...string) *DeviceQuery {
 	if fc := graphql.GetFieldContext(ctx); fc != nil {
 		d = d.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
@@ -209,18 +221,6 @@ func (s *ShippingQuery) CollectFields(ctx context.Context, satisfies ...string) 
 }
 
 func (s *ShippingQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *ShippingQuery {
-	return s
-}
-
-// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (s *StatisticQuery) CollectFields(ctx context.Context, satisfies ...string) *StatisticQuery {
-	if fc := graphql.GetFieldContext(ctx); fc != nil {
-		s = s.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
-	}
-	return s
-}
-
-func (s *StatisticQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *StatisticQuery {
 	return s
 }
 

@@ -15,7 +15,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/predicate"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/google/uuid"
 )
@@ -30,10 +29,9 @@ type ProductQuery struct {
 	fields     []string
 	predicates []predicate.Product
 	// eager-loading edges.
-	withTask      *TaskQuery
-	withStatistic *StatisticQuery
-	withCalendar  *CalendarQuery
-	withFKs       bool
+	withTask     *TaskQuery
+	withCalendar *CalendarQuery
+	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -85,28 +83,6 @@ func (pq *ProductQuery) QueryTask() *TaskQuery {
 			sqlgraph.From(product.Table, product.FieldID, selector),
 			sqlgraph.To(task.Table, task.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, product.TaskTable, product.TaskPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryStatistic chains the current query on the "Statistic" edge.
-func (pq *ProductQuery) QueryStatistic() *StatisticQuery {
-	query := &StatisticQuery{config: pq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(product.Table, product.FieldID, selector),
-			sqlgraph.To(statistic.Table, statistic.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, product.StatisticTable, product.StatisticPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -312,14 +288,13 @@ func (pq *ProductQuery) Clone() *ProductQuery {
 		return nil
 	}
 	return &ProductQuery{
-		config:        pq.config,
-		limit:         pq.limit,
-		offset:        pq.offset,
-		order:         append([]OrderFunc{}, pq.order...),
-		predicates:    append([]predicate.Product{}, pq.predicates...),
-		withTask:      pq.withTask.Clone(),
-		withStatistic: pq.withStatistic.Clone(),
-		withCalendar:  pq.withCalendar.Clone(),
+		config:       pq.config,
+		limit:        pq.limit,
+		offset:       pq.offset,
+		order:        append([]OrderFunc{}, pq.order...),
+		predicates:   append([]predicate.Product{}, pq.predicates...),
+		withTask:     pq.withTask.Clone(),
+		withCalendar: pq.withCalendar.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -334,17 +309,6 @@ func (pq *ProductQuery) WithTask(opts ...func(*TaskQuery)) *ProductQuery {
 		opt(query)
 	}
 	pq.withTask = query
-	return pq
-}
-
-// WithStatistic tells the query-builder to eager-load the nodes that are connected to
-// the "Statistic" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *ProductQuery) WithStatistic(opts ...func(*StatisticQuery)) *ProductQuery {
-	query := &StatisticQuery{config: pq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	pq.withStatistic = query
 	return pq
 }
 
@@ -425,9 +389,8 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 		nodes       = []*Product{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			pq.withTask != nil,
-			pq.withStatistic != nil,
 			pq.withCalendar != nil,
 		}
 	)
@@ -518,71 +481,6 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Task = append(nodes[i].Edges.Task, n)
-			}
-		}
-	}
-
-	if query := pq.withStatistic; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*Product, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-			node.Edges.Statistic = []*Statistic{}
-		}
-		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*Product)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   product.StatisticTable,
-				Columns: product.StatisticPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(product.StatisticPrimaryKey[1], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*uuid.UUID)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := *eout
-				inValue := *ein
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, pq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "Statistic": %w`, err)
-		}
-		query.Where(statistic.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "Statistic" node returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Statistic = append(nodes[i].Edges.Statistic, n)
 			}
 		}
 	}

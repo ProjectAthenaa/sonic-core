@@ -15,6 +15,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/app"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/billing"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/calendar"
+	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/checkout"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/device"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
@@ -27,7 +28,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/settings"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/shipping"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/stripe"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/taskgroup"
@@ -53,6 +53,8 @@ type Client struct {
 	Billing *BillingClient
 	// Calendar is the client for interacting with the Calendar builders.
 	Calendar *CalendarClient
+	// Checkout is the client for interacting with the Checkout builders.
+	Checkout *CheckoutClient
 	// Device is the client for interacting with the Device builders.
 	Device *DeviceClient
 	// License is the client for interacting with the License builders.
@@ -77,8 +79,6 @@ type Client struct {
 	Settings *SettingsClient
 	// Shipping is the client for interacting with the Shipping builders.
 	Shipping *ShippingClient
-	// Statistic is the client for interacting with the Statistic builders.
-	Statistic *StatisticClient
 	// Stripe is the client for interacting with the Stripe builders.
 	Stripe *StripeClient
 	// Task is the client for interacting with the Task builders.
@@ -105,6 +105,7 @@ func (c *Client) init() {
 	c.App = NewAppClient(c.config)
 	c.Billing = NewBillingClient(c.config)
 	c.Calendar = NewCalendarClient(c.config)
+	c.Checkout = NewCheckoutClient(c.config)
 	c.Device = NewDeviceClient(c.config)
 	c.License = NewLicenseClient(c.config)
 	c.Metadata = NewMetadataClient(c.config)
@@ -117,7 +118,6 @@ func (c *Client) init() {
 	c.Session = NewSessionClient(c.config)
 	c.Settings = NewSettingsClient(c.config)
 	c.Shipping = NewShippingClient(c.config)
-	c.Statistic = NewStatisticClient(c.config)
 	c.Stripe = NewStripeClient(c.config)
 	c.Task = NewTaskClient(c.config)
 	c.TaskGroup = NewTaskGroupClient(c.config)
@@ -160,6 +160,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		App:          NewAppClient(cfg),
 		Billing:      NewBillingClient(cfg),
 		Calendar:     NewCalendarClient(cfg),
+		Checkout:     NewCheckoutClient(cfg),
 		Device:       NewDeviceClient(cfg),
 		License:      NewLicenseClient(cfg),
 		Metadata:     NewMetadataClient(cfg),
@@ -172,7 +173,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Session:      NewSessionClient(cfg),
 		Settings:     NewSettingsClient(cfg),
 		Shipping:     NewShippingClient(cfg),
-		Statistic:    NewStatisticClient(cfg),
 		Stripe:       NewStripeClient(cfg),
 		Task:         NewTaskClient(cfg),
 		TaskGroup:    NewTaskGroupClient(cfg),
@@ -200,6 +200,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		App:          NewAppClient(cfg),
 		Billing:      NewBillingClient(cfg),
 		Calendar:     NewCalendarClient(cfg),
+		Checkout:     NewCheckoutClient(cfg),
 		Device:       NewDeviceClient(cfg),
 		License:      NewLicenseClient(cfg),
 		Metadata:     NewMetadataClient(cfg),
@@ -212,7 +213,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Session:      NewSessionClient(cfg),
 		Settings:     NewSettingsClient(cfg),
 		Shipping:     NewShippingClient(cfg),
-		Statistic:    NewStatisticClient(cfg),
 		Stripe:       NewStripeClient(cfg),
 		Task:         NewTaskClient(cfg),
 		TaskGroup:    NewTaskGroupClient(cfg),
@@ -251,6 +251,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.App.Use(hooks...)
 	c.Billing.Use(hooks...)
 	c.Calendar.Use(hooks...)
+	c.Checkout.Use(hooks...)
 	c.Device.Use(hooks...)
 	c.License.Use(hooks...)
 	c.Metadata.Use(hooks...)
@@ -263,7 +264,6 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Session.Use(hooks...)
 	c.Settings.Use(hooks...)
 	c.Shipping.Use(hooks...)
-	c.Statistic.Use(hooks...)
 	c.Stripe.Use(hooks...)
 	c.Task.Use(hooks...)
 	c.TaskGroup.Use(hooks...)
@@ -896,6 +896,112 @@ func (c *CalendarClient) Hooks() []Hook {
 	return c.hooks.Calendar
 }
 
+// CheckoutClient is a client for the Checkout schema.
+type CheckoutClient struct {
+	config
+}
+
+// NewCheckoutClient returns a client for the Checkout from the given config.
+func NewCheckoutClient(c config) *CheckoutClient {
+	return &CheckoutClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `checkout.Hooks(f(g(h())))`.
+func (c *CheckoutClient) Use(hooks ...Hook) {
+	c.hooks.Checkout = append(c.hooks.Checkout, hooks...)
+}
+
+// Create returns a create builder for Checkout.
+func (c *CheckoutClient) Create() *CheckoutCreate {
+	mutation := newCheckoutMutation(c.config, OpCreate)
+	return &CheckoutCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Checkout entities.
+func (c *CheckoutClient) CreateBulk(builders ...*CheckoutCreate) *CheckoutCreateBulk {
+	return &CheckoutCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Checkout.
+func (c *CheckoutClient) Update() *CheckoutUpdate {
+	mutation := newCheckoutMutation(c.config, OpUpdate)
+	return &CheckoutUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CheckoutClient) UpdateOne(ch *Checkout) *CheckoutUpdateOne {
+	mutation := newCheckoutMutation(c.config, OpUpdateOne, withCheckout(ch))
+	return &CheckoutUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CheckoutClient) UpdateOneID(id uuid.UUID) *CheckoutUpdateOne {
+	mutation := newCheckoutMutation(c.config, OpUpdateOne, withCheckoutID(id))
+	return &CheckoutUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Checkout.
+func (c *CheckoutClient) Delete() *CheckoutDelete {
+	mutation := newCheckoutMutation(c.config, OpDelete)
+	return &CheckoutDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *CheckoutClient) DeleteOne(ch *Checkout) *CheckoutDeleteOne {
+	return c.DeleteOneID(ch.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *CheckoutClient) DeleteOneID(id uuid.UUID) *CheckoutDeleteOne {
+	builder := c.Delete().Where(checkout.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CheckoutDeleteOne{builder}
+}
+
+// Query returns a query builder for Checkout.
+func (c *CheckoutClient) Query() *CheckoutQuery {
+	return &CheckoutQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Checkout entity by its id.
+func (c *CheckoutClient) Get(ctx context.Context, id uuid.UUID) (*Checkout, error) {
+	return c.Query().Where(checkout.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CheckoutClient) GetX(ctx context.Context, id uuid.UUID) *Checkout {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the User edge of a Checkout.
+func (c *CheckoutClient) QueryUser(ch *Checkout) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(checkout.Table, checkout.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, checkout.UserTable, checkout.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CheckoutClient) Hooks() []Hook {
+	return c.hooks.Checkout
+}
+
 // DeviceClient is a client for the Device schema.
 type DeviceClient struct {
 	config
@@ -1308,22 +1414,6 @@ func (c *ProductClient) QueryTask(pr *Product) *TaskQuery {
 			sqlgraph.From(product.Table, product.FieldID, id),
 			sqlgraph.To(task.Table, task.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, product.TaskTable, product.TaskPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryStatistic queries the Statistic edge of a Product.
-func (c *ProductClient) QueryStatistic(pr *Product) *StatisticQuery {
-	query := &StatisticQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pr.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(product.Table, product.FieldID, id),
-			sqlgraph.To(statistic.Table, statistic.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, product.StatisticTable, product.StatisticPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -2328,128 +2418,6 @@ func (c *ShippingClient) Hooks() []Hook {
 	return c.hooks.Shipping
 }
 
-// StatisticClient is a client for the Statistic schema.
-type StatisticClient struct {
-	config
-}
-
-// NewStatisticClient returns a client for the Statistic from the given config.
-func NewStatisticClient(c config) *StatisticClient {
-	return &StatisticClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `statistic.Hooks(f(g(h())))`.
-func (c *StatisticClient) Use(hooks ...Hook) {
-	c.hooks.Statistic = append(c.hooks.Statistic, hooks...)
-}
-
-// Create returns a create builder for Statistic.
-func (c *StatisticClient) Create() *StatisticCreate {
-	mutation := newStatisticMutation(c.config, OpCreate)
-	return &StatisticCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Statistic entities.
-func (c *StatisticClient) CreateBulk(builders ...*StatisticCreate) *StatisticCreateBulk {
-	return &StatisticCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Statistic.
-func (c *StatisticClient) Update() *StatisticUpdate {
-	mutation := newStatisticMutation(c.config, OpUpdate)
-	return &StatisticUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *StatisticClient) UpdateOne(s *Statistic) *StatisticUpdateOne {
-	mutation := newStatisticMutation(c.config, OpUpdateOne, withStatistic(s))
-	return &StatisticUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *StatisticClient) UpdateOneID(id uuid.UUID) *StatisticUpdateOne {
-	mutation := newStatisticMutation(c.config, OpUpdateOne, withStatisticID(id))
-	return &StatisticUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Statistic.
-func (c *StatisticClient) Delete() *StatisticDelete {
-	mutation := newStatisticMutation(c.config, OpDelete)
-	return &StatisticDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *StatisticClient) DeleteOne(s *Statistic) *StatisticDeleteOne {
-	return c.DeleteOneID(s.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *StatisticClient) DeleteOneID(id uuid.UUID) *StatisticDeleteOne {
-	builder := c.Delete().Where(statistic.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &StatisticDeleteOne{builder}
-}
-
-// Query returns a query builder for Statistic.
-func (c *StatisticClient) Query() *StatisticQuery {
-	return &StatisticQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a Statistic entity by its id.
-func (c *StatisticClient) Get(ctx context.Context, id uuid.UUID) (*Statistic, error) {
-	return c.Query().Where(statistic.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *StatisticClient) GetX(ctx context.Context, id uuid.UUID) *Statistic {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryUser queries the User edge of a Statistic.
-func (c *StatisticClient) QueryUser(s *Statistic) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(statistic.Table, statistic.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, statistic.UserTable, statistic.UserPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryProduct queries the Product edge of a Statistic.
-func (c *StatisticClient) QueryProduct(s *Statistic) *ProductQuery {
-	query := &ProductQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(statistic.Table, statistic.FieldID, id),
-			sqlgraph.To(product.Table, product.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, statistic.ProductTable, statistic.ProductPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *StatisticClient) Hooks() []Hook {
-	return c.hooks.Statistic
-}
-
 // StripeClient is a client for the Stripe schema.
 type StripeClient struct {
 	config
@@ -2933,15 +2901,15 @@ func (c *UserClient) QueryLicense(u *User) *LicenseQuery {
 	return query
 }
 
-// QueryStatistics queries the Statistics edge of a User.
-func (c *UserClient) QueryStatistics(u *User) *StatisticQuery {
-	query := &StatisticQuery{config: c.config}
+// QueryCheckouts queries the Checkouts edge of a User.
+func (c *UserClient) QueryCheckouts(u *User) *CheckoutQuery {
+	query := &CheckoutQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(statistic.Table, statistic.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.StatisticsTable, user.StatisticsPrimaryKey...),
+			sqlgraph.To(checkout.Table, checkout.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CheckoutsTable, user.CheckoutsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

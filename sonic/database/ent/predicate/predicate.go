@@ -21,6 +21,9 @@ type Billing func(*sql.Selector)
 // Calendar is the predicate function for calendar builders.
 type Calendar func(*sql.Selector)
 
+// Checkout is the predicate function for checkout builders.
+type Checkout func(*sql.Selector)
+
 // Device is the predicate function for device builders.
 type Device func(*sql.Selector)
 
@@ -56,9 +59,6 @@ type Settings func(*sql.Selector)
 
 // Shipping is the predicate function for shipping builders.
 type Shipping func(*sql.Selector)
-
-// Statistic is the predicate function for statistic builders.
-type Statistic func(*sql.Selector)
 
 // Stripe is the predicate function for stripe builders.
 type Stripe func(*sql.Selector)

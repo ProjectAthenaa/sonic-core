@@ -74,6 +74,19 @@ func (f CalendarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return f(ctx, mv)
 }
 
+// The CheckoutFunc type is an adapter to allow the use of ordinary
+// function as Checkout mutator.
+type CheckoutFunc func(context.Context, *ent.CheckoutMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CheckoutFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CheckoutMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CheckoutMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The DeviceFunc type is an adapter to allow the use of ordinary
 // function as Device mutator.
 type DeviceFunc func(context.Context, *ent.DeviceMutation) (ent.Value, error)
@@ -226,19 +239,6 @@ func (f ShippingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	mv, ok := m.(*ent.ShippingMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ShippingMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The StatisticFunc type is an adapter to allow the use of ordinary
-// function as Statistic mutator.
-type StatisticFunc func(context.Context, *ent.StatisticMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f StatisticFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.StatisticMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StatisticMutation", m)
 	}
 	return f(ctx, mv)
 }

@@ -73,8 +73,6 @@ func (Product) Edges() []ent.Edge {
 		edge.From("Task", Task.Type).
 			Ref("Product").
 			Required(),
-		edge.From("Statistic", Statistic.Type).
-			Ref("Product"),
 		edge.From("Calendar", Calendar.Type).
 			Ref("QuickTask").
 			Unique(),
