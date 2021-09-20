@@ -5,14 +5,23 @@ type User{
     ID: UUID!
     Disabled: Boolean!
     License: License!
-    Statistics: [Statistic!]
+    Checkouts: [Checkout!]
+    Stats: Statistics!
     App: App!
     Metadata: Metadata!
     Sessions: [Session!]
 }
 
+type Statistics{
+    Checkouts: Int!
+    Declines: Int!
+    Spent: Float!
+    TasksRan: Int!
+}
+
 extend type Query {
     getUserData: Metadata!
-    getUserStatistics: [Statistic!]!
+    getUserCheckouts(limit: Int = 100): [Checkout!]!
+    getUserStats: Statistics!
     getUserLicense: License!
 }

@@ -19,6 +19,15 @@ type AccountGroupInput struct {
 	Accounts map[string]interface{} `json:"Accounts"`
 }
 
+type Checkout struct {
+	ID                  string    `json:"ID"`
+	Date                time.Time `json:"Date"`
+	ProductPrice        string    `json:"ProductPrice"`
+	ProductName         string    `json:"ProductName"`
+	ProductSize         string    `json:"ProductSize"`
+	CurrentProductPrice *string   `json:"CurrentProductPrice"`
+}
+
 type Module struct {
 	Name     product.Site         `json:"Name"`
 	Status   Status               `json:"Status"`

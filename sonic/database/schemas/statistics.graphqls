@@ -1,20 +1,8 @@
-enum StatType{
-    CHECKOUTS
-    DECLINES
-    ERRORS
-    FAILED
-    COOKIE_GENS
-    RECAPTCHA_USAGE
-    TASKS_RUNNING
-    MONEY_SPENT
-}
-
-
-type Statistic{
-    ID: UUID!
-    Type:StatType!
-    PotentialProfit: Int
-    Axis: Map!
-    Value: Int
-    Spent: Float
+type Checkout{
+    ID: String!
+    Date: Time!
+    ProductPrice: String!
+    ProductName: String!
+    ProductSize: String!
+    CurrentProductPrice: String
 }

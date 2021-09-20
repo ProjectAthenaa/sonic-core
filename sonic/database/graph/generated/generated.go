@@ -20,7 +20,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/proxylist"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/session"
-	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/statistic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -61,7 +60,7 @@ type ResolverRoot interface {
 	Session() SessionResolver
 	Settings() SettingsResolver
 	Shipping() ShippingResolver
-	Statistic() StatisticResolver
+	Statistics() StatisticsResolver
 	Stripe() StripeResolver
 	Task() TaskResolver
 	TaskGroup() TaskGroupResolver
@@ -106,6 +105,15 @@ type ComplexityRoot struct {
 		ExpiryMonth    func(childComplexity int) int
 		ExpiryYear     func(childComplexity int) int
 		ID             func(childComplexity int) int
+	}
+
+	Checkout struct {
+		CurrentProductPrice func(childComplexity int) int
+		Date                func(childComplexity int) int
+		ID                  func(childComplexity int) int
+		ProductName         func(childComplexity int) int
+		ProductPrice        func(childComplexity int) int
+		ProductSize         func(childComplexity int) int
 	}
 
 	License struct {
@@ -233,9 +241,10 @@ type ComplexityRoot struct {
 		GetSettings         func(childComplexity int) int
 		GetTask             func(childComplexity int, taskID string) int
 		GetTaskGroup        func(childComplexity int, taskGroupID string) int
+		GetUserCheckouts    func(childComplexity int, limit *int) int
 		GetUserData         func(childComplexity int) int
 		GetUserLicense      func(childComplexity int) int
-		GetUserStatistics   func(childComplexity int) int
+		GetUserStats        func(childComplexity int) int
 		ModuleInformation   func(childComplexity int) int
 		TestDeclineWebhook  func(childComplexity int) int
 		TestProxyList       func(childComplexity int, proxyListID string) int
@@ -269,13 +278,11 @@ type ComplexityRoot struct {
 		ShippingAddress   func(childComplexity int) int
 	}
 
-	Statistic struct {
-		Axis            func(childComplexity int) int
-		ID              func(childComplexity int) int
-		PotentialProfit func(childComplexity int) int
-		Spent           func(childComplexity int) int
-		Type            func(childComplexity int) int
-		Value           func(childComplexity int) int
+	Statistics struct {
+		Checkouts func(childComplexity int) int
+		Declines  func(childComplexity int) int
+		Spent     func(childComplexity int) int
+		TasksRan  func(childComplexity int) int
 	}
 
 	Stripe struct {
@@ -300,13 +307,14 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		App        func(childComplexity int) int
-		Disabled   func(childComplexity int) int
-		ID         func(childComplexity int) int
-		License    func(childComplexity int) int
-		Metadata   func(childComplexity int) int
-		Sessions   func(childComplexity int) int
-		Statistics func(childComplexity int) int
+		App       func(childComplexity int) int
+		Checkouts func(childComplexity int) int
+		Disabled  func(childComplexity int) int
+		ID        func(childComplexity int) int
+		License   func(childComplexity int) int
+		Metadata  func(childComplexity int) int
+		Sessions  func(childComplexity int) int
+		Stats     func(childComplexity int) int
 	}
 }
 
@@ -400,7 +408,8 @@ type QueryResolver interface {
 	GetAllTaskGroups(ctx context.Context) ([]*ent.TaskGroup, error)
 	GetAllTasks(ctx context.Context, taskGroupID string) ([]*ent.Task, error)
 	GetUserData(ctx context.Context) (*ent.Metadata, error)
-	GetUserStatistics(ctx context.Context) ([]*ent.Statistic, error)
+	GetUserCheckouts(ctx context.Context, limit *int) ([]*model.Checkout, error)
+	GetUserStats(ctx context.Context) (ent.Statistics, error)
 	GetUserLicense(ctx context.Context) (*ent.License, error)
 }
 type SessionResolver interface {
@@ -412,10 +421,11 @@ type SettingsResolver interface {
 type ShippingResolver interface {
 	ID(ctx context.Context, obj *ent.Shipping) (string, error)
 }
-type StatisticResolver interface {
-	ID(ctx context.Context, obj *ent.Statistic) (string, error)
-
-	Axis(ctx context.Context, obj *ent.Statistic) (map[string]interface{}, error)
+type StatisticsResolver interface {
+	Checkouts(ctx context.Context, obj ent.Statistics) (int, error)
+	Declines(ctx context.Context, obj ent.Statistics) (int, error)
+	Spent(ctx context.Context, obj ent.Statistics) (float64, error)
+	TasksRan(ctx context.Context, obj ent.Statistics) (int, error)
 }
 type StripeResolver interface {
 	ID(ctx context.Context, obj *ent.Stripe) (string, error)
@@ -431,6 +441,9 @@ type TaskGroupResolver interface {
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *ent.User) (string, error)
+
+	Checkouts(ctx context.Context, obj *ent.User) ([]*model.Checkout, error)
+	Stats(ctx context.Context, obj *ent.User) (ent.Statistics, error)
 }
 
 type executableSchema struct {
@@ -615,6 +628,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Billing.ID(childComplexity), true
+
+	case "Checkout.CurrentProductPrice":
+		if e.complexity.Checkout.CurrentProductPrice == nil {
+			break
+		}
+
+		return e.complexity.Checkout.CurrentProductPrice(childComplexity), true
+
+	case "Checkout.Date":
+		if e.complexity.Checkout.Date == nil {
+			break
+		}
+
+		return e.complexity.Checkout.Date(childComplexity), true
+
+	case "Checkout.ID":
+		if e.complexity.Checkout.ID == nil {
+			break
+		}
+
+		return e.complexity.Checkout.ID(childComplexity), true
+
+	case "Checkout.ProductName":
+		if e.complexity.Checkout.ProductName == nil {
+			break
+		}
+
+		return e.complexity.Checkout.ProductName(childComplexity), true
+
+	case "Checkout.ProductPrice":
+		if e.complexity.Checkout.ProductPrice == nil {
+			break
+		}
+
+		return e.complexity.Checkout.ProductPrice(childComplexity), true
+
+	case "Checkout.ProductSize":
+		if e.complexity.Checkout.ProductSize == nil {
+			break
+		}
+
+		return e.complexity.Checkout.ProductSize(childComplexity), true
 
 	case "License.CreatedAt":
 		if e.complexity.License.CreatedAt == nil {
@@ -1408,6 +1463,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetTaskGroup(childComplexity, args["taskGroupID"].(string)), true
 
+	case "Query.getUserCheckouts":
+		if e.complexity.Query.GetUserCheckouts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getUserCheckouts_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetUserCheckouts(childComplexity, args["limit"].(*int)), true
+
 	case "Query.getUserData":
 		if e.complexity.Query.GetUserData == nil {
 			break
@@ -1422,12 +1489,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetUserLicense(childComplexity), true
 
-	case "Query.getUserStatistics":
-		if e.complexity.Query.GetUserStatistics == nil {
+	case "Query.getUserStats":
+		if e.complexity.Query.GetUserStats == nil {
 			break
 		}
 
-		return e.complexity.Query.GetUserStatistics(childComplexity), true
+		return e.complexity.Query.GetUserStats(childComplexity), true
 
 	case "Query.moduleInformation":
 		if e.complexity.Query.ModuleInformation == nil {
@@ -1588,47 +1655,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Shipping.ShippingAddress(childComplexity), true
 
-	case "Statistic.Axis":
-		if e.complexity.Statistic.Axis == nil {
+	case "Statistics.Checkouts":
+		if e.complexity.Statistics.Checkouts == nil {
 			break
 		}
 
-		return e.complexity.Statistic.Axis(childComplexity), true
+		return e.complexity.Statistics.Checkouts(childComplexity), true
 
-	case "Statistic.ID":
-		if e.complexity.Statistic.ID == nil {
+	case "Statistics.Declines":
+		if e.complexity.Statistics.Declines == nil {
 			break
 		}
 
-		return e.complexity.Statistic.ID(childComplexity), true
+		return e.complexity.Statistics.Declines(childComplexity), true
 
-	case "Statistic.PotentialProfit":
-		if e.complexity.Statistic.PotentialProfit == nil {
+	case "Statistics.Spent":
+		if e.complexity.Statistics.Spent == nil {
 			break
 		}
 
-		return e.complexity.Statistic.PotentialProfit(childComplexity), true
+		return e.complexity.Statistics.Spent(childComplexity), true
 
-	case "Statistic.Spent":
-		if e.complexity.Statistic.Spent == nil {
+	case "Statistics.TasksRan":
+		if e.complexity.Statistics.TasksRan == nil {
 			break
 		}
 
-		return e.complexity.Statistic.Spent(childComplexity), true
-
-	case "Statistic.Type":
-		if e.complexity.Statistic.Type == nil {
-			break
-		}
-
-		return e.complexity.Statistic.Type(childComplexity), true
-
-	case "Statistic.Value":
-		if e.complexity.Statistic.Value == nil {
-			break
-		}
-
-		return e.complexity.Statistic.Value(childComplexity), true
+		return e.complexity.Statistics.TasksRan(childComplexity), true
 
 	case "Stripe.CustomerID":
 		if e.complexity.Stripe.CustomerID == nil {
@@ -1721,6 +1774,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.App(childComplexity), true
 
+	case "User.Checkouts":
+		if e.complexity.User.Checkouts == nil {
+			break
+		}
+
+		return e.complexity.User.Checkouts(childComplexity), true
+
 	case "User.Disabled":
 		if e.complexity.User.Disabled == nil {
 			break
@@ -1756,12 +1816,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Sessions(childComplexity), true
 
-	case "User.Statistics":
-		if e.complexity.User.Statistics == nil {
+	case "User.Stats":
+		if e.complexity.User.Stats == nil {
 			break
 		}
 
-		return e.complexity.User.Statistics(childComplexity), true
+		return e.complexity.User.Stats(childComplexity), true
 
 	}
 	return 0, false
@@ -2124,26 +2184,15 @@ type Mutation{
     setCheckoutDelay(Delay: Int!): Boolean!
     setATCDelay(Delay: Int!): Boolean!
 }`, BuiltIn: false},
-	{Name: "schemas/statistics.graphqls", Input: `enum StatType{
-    CHECKOUTS
-    DECLINES
-    ERRORS
-    FAILED
-    COOKIE_GENS
-    RECAPTCHA_USAGE
-    TASKS_RUNNING
-    MONEY_SPENT
+	{Name: "schemas/statistics.graphqls", Input: `type Checkout{
+    ID: String!
+    Date: Time!
+    ProductPrice: String!
+    ProductName: String!
+    ProductSize: String!
+    CurrentProductPrice: String
 }
-
-
-type Statistic{
-    ID: UUID!
-    Type:StatType!
-    PotentialProfit: Int
-    Axis: Map!
-    Value: Int
-    Spent: Float
-}`, BuiltIn: false},
+`, BuiltIn: false},
 	{Name: "schemas/tasks.graphqls", Input: `scalar Map
 enum LookupType{
     Keywords
@@ -2266,15 +2315,24 @@ type User{
     ID: UUID!
     Disabled: Boolean!
     License: License!
-    Statistics: [Statistic!]
+    Checkouts: [Checkout!]
+    Stats: Statistics!
     App: App!
     Metadata: Metadata!
     Sessions: [Session!]
 }
 
+type Statistics{
+    Checkouts: Int!
+    Declines: Int!
+    Spent: Float!
+    TasksRan: Int!
+}
+
 extend type Query {
     getUserData: Metadata!
-    getUserStatistics: [Statistic!]!
+    getUserCheckouts(limit: Int = 100): [Checkout!]!
+    getUserStats: Statistics!
     getUserLicense: License!
 }`, BuiltIn: false},
 }
@@ -2833,6 +2891,21 @@ func (ec *executionContext) field_Query_getTask_args(ctx context.Context, rawArg
 		}
 	}
 	args["taskID"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getUserCheckouts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["limit"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["limit"] = arg0
 	return args, nil
 }
 
@@ -3709,6 +3782,213 @@ func (ec *executionContext) _Billing_CVV(ctx context.Context, field graphql.Coll
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Checkout_ID(ctx context.Context, field graphql.CollectedField, obj *model.Checkout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Checkout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Checkout_Date(ctx context.Context, field graphql.CollectedField, obj *model.Checkout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Checkout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Date, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Checkout_ProductPrice(ctx context.Context, field graphql.CollectedField, obj *model.Checkout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Checkout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProductPrice, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Checkout_ProductName(ctx context.Context, field graphql.CollectedField, obj *model.Checkout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Checkout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProductName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Checkout_ProductSize(ctx context.Context, field graphql.CollectedField, obj *model.Checkout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Checkout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProductSize, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Checkout_CurrentProductPrice(ctx context.Context, field graphql.CollectedField, obj *model.Checkout) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Checkout",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CurrentProductPrice, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _License_ID(ctx context.Context, field graphql.CollectedField, obj *ent.License) (ret graphql.Marshaler) {
@@ -7229,7 +7509,49 @@ func (ec *executionContext) _Query_getUserData(ctx context.Context, field graphq
 	return ec.marshalNMetadata2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐMetadata(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getUserStatistics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getUserCheckouts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getUserCheckouts_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUserCheckouts(rctx, args["limit"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Checkout)
+	fc.Result = res
+	return ec.marshalNCheckout2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐCheckoutᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getUserStats(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -7247,7 +7569,7 @@ func (ec *executionContext) _Query_getUserStatistics(ctx context.Context, field 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUserStatistics(rctx)
+		return ec.resolvers.Query().GetUserStats(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7259,9 +7581,9 @@ func (ec *executionContext) _Query_getUserStatistics(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*ent.Statistic)
+	res := resTmp.(ent.Statistics)
 	fc.Result = res
-	return ec.marshalNStatistic2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatisticᚄ(ctx, field.Selections, res)
+	return ec.marshalNStatistics2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistics(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getUserLicense(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -7997,7 +8319,7 @@ func (ec *executionContext) _Shipping_BillingAddress(ctx context.Context, field 
 	return ec.marshalOAddress2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐAddress(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Statistic_ID(ctx context.Context, field graphql.CollectedField, obj *ent.Statistic) (ret graphql.Marshaler) {
+func (ec *executionContext) _Statistics_Checkouts(ctx context.Context, field graphql.CollectedField, obj ent.Statistics) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -8005,7 +8327,7 @@ func (ec *executionContext) _Statistic_ID(ctx context.Context, field graphql.Col
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Statistic",
+		Object:     "Statistics",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
@@ -8015,7 +8337,7 @@ func (ec *executionContext) _Statistic_ID(ctx context.Context, field graphql.Col
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Statistic().ID(rctx, obj)
+		return ec.resolvers.Statistics().Checkouts(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8025,148 +8347,14 @@ func (ec *executionContext) _Statistic_ID(ctx context.Context, field graphql.Col
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
 		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNUUID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Statistic_Type(ctx context.Context, field graphql.CollectedField, obj *ent.Statistic) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Statistic",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Type, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(statistic.Type)
-	fc.Result = res
-	return ec.marshalNStatType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋstatisticᚐType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Statistic_PotentialProfit(ctx context.Context, field graphql.CollectedField, obj *ent.Statistic) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Statistic",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PotentialProfit, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Statistic_Axis(ctx context.Context, field graphql.CollectedField, obj *ent.Statistic) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Statistic",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Statistic().Axis(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(map[string]interface{})
-	fc.Result = res
-	return ec.marshalNMap2map(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Statistic_Value(ctx context.Context, field graphql.CollectedField, obj *ent.Statistic) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Statistic",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Value, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
 		return graphql.Null
 	}
 	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalOInt2int(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Statistic_Spent(ctx context.Context, field graphql.CollectedField, obj *ent.Statistic) (ret graphql.Marshaler) {
+func (ec *executionContext) _Statistics_Declines(ctx context.Context, field graphql.CollectedField, obj ent.Statistics) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -8174,28 +8362,101 @@ func (ec *executionContext) _Statistic_Spent(ctx context.Context, field graphql.
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Statistic",
+		Object:     "Statistics",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Spent, nil
+		return ec.resolvers.Statistics().Declines(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Statistics_Spent(ctx context.Context, field graphql.CollectedField, obj ent.Statistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Statistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Statistics().Spent(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Statistics_TasksRan(ctx context.Context, field graphql.CollectedField, obj ent.Statistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Statistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Statistics().TasksRan(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Stripe_ID(ctx context.Context, field graphql.CollectedField, obj *ent.Stripe) (ret graphql.Marshaler) {
@@ -8702,7 +8963,7 @@ func (ec *executionContext) _User_License(ctx context.Context, field graphql.Col
 	return ec.marshalNLicense2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐLicense(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_Statistics(ctx context.Context, field graphql.CollectedField, obj *ent.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_Checkouts(ctx context.Context, field graphql.CollectedField, obj *ent.User) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -8714,13 +8975,13 @@ func (ec *executionContext) _User_Statistics(ctx context.Context, field graphql.
 		Field:      field,
 		Args:       nil,
 		IsMethod:   true,
-		IsResolver: false,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Statistics(ctx)
+		return ec.resolvers.User().Checkouts(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8729,9 +8990,44 @@ func (ec *executionContext) _User_Statistics(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*ent.Statistic)
+	res := resTmp.([]*model.Checkout)
 	fc.Result = res
-	return ec.marshalOStatistic2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatisticᚄ(ctx, field.Selections, res)
+	return ec.marshalOCheckout2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐCheckoutᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_Stats(ctx context.Context, field graphql.CollectedField, obj *ent.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().Stats(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ent.Statistics)
+	fc.Result = res
+	return ec.marshalNStatistics2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistics(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_App(ctx context.Context, field graphql.CollectedField, obj *ent.User) (ret graphql.Marshaler) {
@@ -10907,6 +11203,55 @@ func (ec *executionContext) _Billing(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var checkoutImplementors = []string{"Checkout"}
+
+func (ec *executionContext) _Checkout(ctx context.Context, sel ast.SelectionSet, obj *model.Checkout) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, checkoutImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Checkout")
+		case "ID":
+			out.Values[i] = ec._Checkout_ID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "Date":
+			out.Values[i] = ec._Checkout_Date(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ProductPrice":
+			out.Values[i] = ec._Checkout_ProductPrice(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ProductName":
+			out.Values[i] = ec._Checkout_ProductName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "ProductSize":
+			out.Values[i] = ec._Checkout_ProductSize(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "CurrentProductPrice":
+			out.Values[i] = ec._Checkout_CurrentProductPrice(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var licenseImplementors = []string{"License"}
 
 func (ec *executionContext) _License(ctx context.Context, sel ast.SelectionSet, obj *ent.License) graphql.Marshaler {
@@ -11870,7 +12215,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "getUserStatistics":
+		case "getUserCheckouts":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -11878,7 +12223,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getUserStatistics(ctx, field)
+				res = ec._Query_getUserCheckouts(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getUserStats":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUserStats(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -12111,18 +12470,18 @@ func (ec *executionContext) _Shipping(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var statisticImplementors = []string{"Statistic"}
+var statisticsImplementors = []string{"Statistics"}
 
-func (ec *executionContext) _Statistic(ctx context.Context, sel ast.SelectionSet, obj *ent.Statistic) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, statisticImplementors)
+func (ec *executionContext) _Statistics(ctx context.Context, sel ast.SelectionSet, obj ent.Statistics) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, statisticsImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Statistic")
-		case "ID":
+			out.Values[i] = graphql.MarshalString("Statistics")
+		case "Checkouts":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -12130,20 +12489,13 @@ func (ec *executionContext) _Statistic(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Statistic_ID(ctx, field, obj)
+				res = ec._Statistics_Checkouts(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "Type":
-			out.Values[i] = ec._Statistic_Type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "PotentialProfit":
-			out.Values[i] = ec._Statistic_PotentialProfit(ctx, field, obj)
-		case "Axis":
+		case "Declines":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -12151,16 +12503,40 @@ func (ec *executionContext) _Statistic(ctx context.Context, sel ast.SelectionSet
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Statistic_Axis(ctx, field, obj)
+				res = ec._Statistics_Declines(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
 			})
-		case "Value":
-			out.Values[i] = ec._Statistic_Value(ctx, field, obj)
 		case "Spent":
-			out.Values[i] = ec._Statistic_Spent(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Statistics_Spent(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "TasksRan":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Statistics_TasksRan(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12384,7 +12760,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				return res
 			})
-		case "Statistics":
+		case "Checkouts":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -12392,7 +12768,21 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._User_Statistics(ctx, field, obj)
+				res = ec._User_Checkouts(ctx, field, obj)
+				return res
+			})
+		case "Stats":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_Stats(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "App":
@@ -12767,6 +13157,60 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNCheckout2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐCheckoutᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Checkout) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCheckout2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐCheckout(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCheckout2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐCheckout(ctx context.Context, sel ast.SelectionSet, v *model.Checkout) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Checkout(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNDeviceType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋsessionᚐDeviceType(ctx context.Context, v interface{}) (session.DeviceType, error) {
 	var res session.DeviceType
 	err := res.UnmarshalGQL(v)
@@ -12785,6 +13229,21 @@ func (ec *executionContext) unmarshalNFieldType2githubᚗcomᚋProjectAthenaaᚋ
 
 func (ec *executionContext) marshalNFieldType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐFieldType(ctx context.Context, sel ast.SelectionSet, v model.FieldType) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloat(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloat(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
@@ -13188,68 +13647,14 @@ func (ec *executionContext) marshalNSite2githubᚗcomᚋProjectAthenaaᚋsonic�
 	return v
 }
 
-func (ec *executionContext) unmarshalNStatType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋstatisticᚐType(ctx context.Context, v interface{}) (statistic.Type, error) {
-	var res statistic.Type
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNStatType2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚋstatisticᚐType(ctx context.Context, sel ast.SelectionSet, v statistic.Type) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) marshalNStatistic2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatisticᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Statistic) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNStatistic2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistic(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNStatistic2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistic(ctx context.Context, sel ast.SelectionSet, v *ent.Statistic) graphql.Marshaler {
+func (ec *executionContext) marshalNStatistics2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistics(ctx context.Context, sel ast.SelectionSet, v ent.Statistics) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._Statistic(ctx, sel, v)
+	return ec._Statistics(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNStatus2githubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐStatus(ctx context.Context, v interface{}) (model.Status, error) {
@@ -13729,22 +14134,51 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v interface{}) (float64, error) {
-	res, err := graphql.UnmarshalFloat(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
+func (ec *executionContext) marshalOCheckout2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐCheckoutᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Checkout) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCheckout2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋgraphᚋmodelᚐCheckout(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
 
-func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
-	return graphql.MarshalFloat(v)
-}
+	}
+	wg.Wait()
 
-func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
 
-func (ec *executionContext) marshalOInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	return graphql.MarshalInt(v)
+	return ret
 }
 
 func (ec *executionContext) unmarshalOInt2int32(ctx context.Context, v interface{}) (int32, error) {
@@ -14157,53 +14591,6 @@ func (ec *executionContext) marshalOSession2ᚕᚖgithubᚗcomᚋProjectAthenaa�
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNSession2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐSession(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalOStatistic2ᚕᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatisticᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Statistic) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNStatistic2ᚖgithubᚗcomᚋProjectAthenaaᚋsonicᚑcoreᚋsonicᚋdatabaseᚋentᚐStatistic(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
