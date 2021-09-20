@@ -15,7 +15,7 @@ import (
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
 	_ "github.com/lib/pq"
-	"github.com/prometheus/common/log"
+	"github.com/ProjectAthenaa/sonic-core/logs"
 	"os"
 	"regexp"
 	"strings"

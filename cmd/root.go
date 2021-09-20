@@ -9,7 +9,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/google/uuid"
-	"github.com/prometheus/common/log"
+	"github.com/ProjectAthenaa/sonic-core/logs"
 	"strings"
 )
 

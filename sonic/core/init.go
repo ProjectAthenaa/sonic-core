@@ -3,7 +3,7 @@ package core
 import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/ProjectAthenaa/sonic-core/sonic/tools"
-	"github.com/prometheus/common/log"
+	"github.com/ProjectAthenaa/sonic-core/logs"
 	"os"
 )
 

@@ -10,7 +10,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/google/uuid"
-	"github.com/prometheus/common/log"
+	"github.com/ProjectAthenaa/sonic-core/logs"
 	http "github.com/useflyent/fhttp"
 	"os"
 	"os/signal"

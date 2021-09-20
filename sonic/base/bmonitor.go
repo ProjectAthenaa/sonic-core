@@ -12,7 +12,7 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/go-redis/redis/v8"
 	"github.com/json-iterator/go"
-	"github.com/prometheus/common/log"
+	"github.com/ProjectAthenaa/sonic-core/logs"
 	"github.com/viney-shih/go-lock"
 	"os"
 	"os/signal"
