@@ -47,7 +47,7 @@ func getPayload(ctx context.Context, taskID string) (*module.Data, error) {
 		Task: dbTask,
 	}
 
-	go tsk.processMonitor(ctx)
+	//go tsk.processMonitor(ctx)
 
 	var mData *module.Data
 
