@@ -44,7 +44,6 @@ func ListenAndServe(module string, server module.ModuleServer) {
 		case <-c:
 			log.Info("[server] [SIGTERM invoked]")
 			cancel()
-			return
 		case <-ctx.Done():
 			log.Info("[server] [ctx deadline exceeded]")
 			return
