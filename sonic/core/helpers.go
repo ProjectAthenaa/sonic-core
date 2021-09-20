@@ -15,7 +15,6 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"sync"
 )
 
 type scratchTask struct {
@@ -75,31 +74,31 @@ func getPayload(ctx context.Context, taskID string) (*module.Data, error) {
 		mData.TaskData.RandomSize = true
 	}
 
-	var wg = &sync.WaitGroup{}
+	//var wg = &sync.WaitGroup{}
 
-	go func() {
-		wg.Add(1)
-		defer wg.Done()
+	//go func() {
+	//	wg.Add(1)
+	//	defer wg.Done()
 		mData.Profile, _ = tsk.getProfile()
-	}()
+	//}()
 
-	go func() {
-		wg.Add(1)
-		defer wg.Done()
+	//go func() {
+	//	wg.Add(1)
+	//	defer wg.Done()
 		mData.Proxy, _ = tsk.getProxy()
-	}()
+	//}()
 
 	mData.Metadata = prod.Metadata
 	if siteNeedsAccount[tsk.Edges.Product[0].Site] {
-		go func() {
-			wg.Add(1)
-			defer wg.Done()
+		//go func() {
+		//	wg.Add(1)
+		//	defer wg.Done()
 			mData.Metadata["username"], mData.Metadata["password"], _ = tsk.getAccount()
-		}()
+		//}()
 	}
 
 	mData.TaskID = tsk.ID.String()
-	wg.Wait()
+	//wg.Wait()
 
 	return mData, nil
 }
