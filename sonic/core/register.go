@@ -12,9 +12,7 @@ import (
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
 	"github.com/sirupsen/logrus"
-	logrus_syslog "github.com/sirupsen/logrus/hooks/syslog"
 	"google.golang.org/grpc"
-	"log/syslog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -85,7 +83,5 @@ func initializeVariables() {
 	if err == nil {
 		log.AddHook(hook)
 	}
-	sysLogHook, err := logrus_syslog.NewSyslogHook("udp", "logs4.papertrailapp.com:44377", syslog.LOG_ERR|syslog.LOG_WARNING|syslog.LOG_NOTICE|syslog.LOG_INFO|syslog.LOG_DEBUG|, "")
-	log.AddHook(sysLogHook)
 
 }
