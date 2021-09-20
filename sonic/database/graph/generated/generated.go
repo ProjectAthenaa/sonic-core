@@ -337,7 +337,7 @@ type BillingResolver interface {
 type CheckoutResolver interface {
 	ID(ctx context.Context, obj *ent.Checkout) (string, error)
 
-	CurrentProductPrice(ctx context.Context, obj *ent.Checkout) (*string, error)
+	CurrentProductPrice(ctx context.Context, obj *ent.Checkout) (*float64, error)
 }
 type LicenseResolver interface {
 	ID(ctx context.Context, obj *ent.License) (string, error)
@@ -2188,7 +2188,7 @@ type Mutation{
     ProductPrice: Float!
     ProductName: String!
     ProductImage: String!
-    CurrentProductPrice: String
+    CurrentProductPrice: Float
 }
 `, BuiltIn: false},
 	{Name: "schemas/tasks.graphqls", Input: `scalar Map
@@ -3984,9 +3984,9 @@ func (ec *executionContext) _Checkout_CurrentProductPrice(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _License_ID(ctx context.Context, field graphql.CollectedField, obj *ent.License) (ret graphql.Marshaler) {
@@ -14163,6 +14163,21 @@ func (ec *executionContext) marshalOCheckout2ᚕᚖgithubᚗcomᚋProjectAthenaa
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalFloat(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalFloat(*v)
 }
 
 func (ec *executionContext) unmarshalOInt2int32(ctx context.Context, v interface{}) (int32, error) {
