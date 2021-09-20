@@ -3,13 +3,12 @@ package core
 import (
 	"context"
 	"fmt"
-	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	"github.com/ProjectAthenaa/sonic-core/logs"
+	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	"time"
 )
 
-
-func tasksListener(ctx context.Context, key string) <- chan string {
+func tasksListener(ctx context.Context, key string) <-chan string {
 	tasks := make(chan string)
 	key = fmt.Sprintf("queue:%s", key)
 	go func() {
@@ -19,7 +18,11 @@ func tasksListener(ctx context.Context, key string) <- chan string {
 			}
 		}()
 		for {
-			tasks <- rdb.BLPop(ctx, time.Second, key).Val()[1]
+			newTask := rdb.BLPop(ctx, time.Second, key).Val()
+
+			if len(newTask) > 1 {
+				tasks <- newTask[1]
+			}
 		}
 	}()
 
