@@ -6,9 +6,12 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/logs"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	monitorController "github.com/ProjectAthenaa/sonic-core/protos/monitorController"
+	"github.com/evalphobia/logrus_sentry"
+	"github.com/getsentry/raven-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/go-redsync/redsync/v4"
 	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"os"
 	"os/signal"
@@ -21,7 +24,7 @@ var (
 )
 
 func ListenAndServe(module string, server module.ModuleServer) {
-	
+
 	defer func() {
 		if a := recover(); a != nil {
 			log.Warnf("[server] [Recovered] [%s]", fmt.Sprint(a))
@@ -65,4 +68,20 @@ func initializeVariables() {
 	}
 
 	monitorClient = monitorController.NewMonitorClient(conn)
+
+	client, err := raven.New(os.Getenv("SENTRY_DSN"))
+	if err != nil {
+		log.Errorf("[server] [error initializing sentry] [%s]", fmt.Sprint(err))
+		return
+	}
+
+	hook, err := logrus_sentry.NewWithClientSentryHook(client, []logrus.Level{
+		logrus.PanicLevel,
+		logrus.FatalLevel,
+		logrus.ErrorLevel,
+	})
+
+	if err == nil {
+		log.AddHook(hook)
+	}
 }
