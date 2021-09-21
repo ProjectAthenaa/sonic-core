@@ -55,7 +55,7 @@ func getUserLimit(ctx context.Context, user *ent.User) int {
 	}
 
 	switch license.Type {
-	case license2.TypeRenewal, license2.TypeLifetime, license2.TypeBeta:
+	case license2.TypeRenewal, license2.TypeLifetime, license2.TypeBeta, license2.TypeFNF:
 		return defaultLimit
 	default:
 		return math.MaxInt
