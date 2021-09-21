@@ -96,6 +96,7 @@ const DefaultType = TypeRenewal
 
 // Type values.
 const (
+	TypeUnlocked Type = "Unlocked"
 	TypeLifetime Type = "Lifetime"
 	TypeRenewal  Type = "Renewal"
 	TypeBeta     Type = "Beta"
@@ -110,7 +111,7 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "Type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeLifetime, TypeRenewal, TypeBeta, TypeWeekly, TypeFNF:
+	case TypeUnlocked, TypeLifetime, TypeRenewal, TypeBeta, TypeWeekly, TypeFNF:
 		return nil
 	default:
 		return fmt.Errorf("release: invalid enum value for Type field: %q", _type)

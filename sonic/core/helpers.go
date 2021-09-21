@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/logs"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
@@ -46,6 +47,24 @@ func getPayload(ctx context.Context, taskID string) (*module.Data, error) {
 		Task: dbTask,
 	}
 
+	if !taskIsEligible(ctx, dbTask){
+		errorStatus := module.Status{
+			Status:      module.STATUS_ERROR,
+			Information: map[string]string{
+				"message": "Task Limited Reached",
+			},
+		}
+
+		payload, err := json.Marshal(&errorStatus)
+		if err != nil{
+			log.Errorf("[server] [error marshalling error status] [%s] [%s]", dbTask.ID.String(), fmt.Sprint(err))
+		}
+
+		rdb.Publish(ctx, fmt.Sprintf("tasks:updates:%s", hash(dbTask.ID.String())), string(payload))
+		return nil, errors.New("task_not_eligible_to_run")
+	}
+
+	//TODO add process monitor
 	//go tsk.processMonitor(ctx)
 
 	var mData *module.Data

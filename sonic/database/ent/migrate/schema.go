@@ -166,7 +166,7 @@ var (
 		{Name: "key", Type: field.TypeString},
 		{Name: "hardware_id", Type: field.TypeString, Nullable: true},
 		{Name: "mobile_hardware_id", Type: field.TypeString, Nullable: true},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"Lifetime", "Renewal", "Beta", "Weekly", "FNF"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"Unlocked", "Lifetime", "Renewal", "Beta", "Weekly", "FNF"}},
 		{Name: "user_license", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// LicensesTable holds the schema information for the "licenses" table.
@@ -328,7 +328,7 @@ var (
 		{Name: "release_date", Type: field.TypeTime},
 		{Name: "stock_level", Type: field.TypeInt32, Default: 0},
 		{Name: "code", Type: field.TypeString, Default: "BpLnfgDsc2"},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"Lifetime", "Renewal", "Beta", "Weekly", "FNF"}, Default: "Renewal"},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"Unlocked", "Lifetime", "Renewal", "Beta", "Weekly", "FNF"}, Default: "Renewal"},
 		{Name: "one_time_fee_amount", Type: field.TypeInt64, Default: 60000},
 		{Name: "subscription_fee", Type: field.TypeInt64, Nullable: true, Default: 10000},
 		{Name: "product_price_id", Type: field.TypeString},

@@ -1953,6 +1953,7 @@ extend type Query{
     moduleInformation: [Module!]
 }`, BuiltIn: false},
 	{Name: "schemas/license.graphqls", Input: `enum LicenseType{
+    Unlocked
     Lifetime
     Renewal
     Beta

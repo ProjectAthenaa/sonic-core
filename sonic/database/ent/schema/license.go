@@ -9,6 +9,7 @@ import (
 )
 
 var LicenseTypes = []string{
+	"Unlocked",
 	"Lifetime",
 	"Renewal",
 	"Beta",

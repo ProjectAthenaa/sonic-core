@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"github.com/ProjectAthenaa/sonic-core/fasttls"
 	"github.com/ProjectAthenaa/sonic-core/fasttls/tls"
+	"github.com/ProjectAthenaa/sonic-core/logs"
 	"github.com/ProjectAthenaa/sonic-core/protos/module"
 	"github.com/ProjectAthenaa/sonic-core/sonic/core"
 	"github.com/ProjectAthenaa/sonic-core/sonic/face"
 	"github.com/ProjectAthenaa/sonic-core/sonic/frame"
 	"github.com/google/uuid"
-	"github.com/ProjectAthenaa/sonic-core/logs"
 	http "github.com/useflyent/fhttp"
 	"os"
 	"os/signal"
@@ -89,8 +89,11 @@ func (tk *BTask) Listen() error {
 
 		}
 
-		defer core.Base.GetRedis("cache").SRem(context.Background(), "tasks:processing", tk.ID)
-		defer core.Base.GetRedis("cache").Del(context.Background(), fmt.Sprintf("tasks:updates:last-update:%s", tk.ID), tk.ID)
+		rdb := core.Base.GetRedis("cache")
+
+		rdb.SRem(context.Background(), "tasks:processing", tk.ID)
+		rdb.Del(context.Background(), fmt.Sprintf("tasks:updates:last-update:%s", tk.ID), tk.ID)
+		rdb.Decr(tk.Ctx, fmt.Sprintf("tasks:users:%s", tk.ID))
 		log.Info("Terminated Task")
 
 	}(pubSub)
