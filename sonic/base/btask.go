@@ -83,6 +83,8 @@ func (tk *BTask) Listen() error {
 		return tk.Stop()
 	}
 
+	defer core.Base.GetRedis("cache").SRem(context.Background(), "tasks:processing", tk.ID)
+
 	defer func(pubSub *frame.PubSub) {
 		err := pubSub.Close()
 		if err != nil {
@@ -91,13 +93,11 @@ func (tk *BTask) Listen() error {
 
 		rdb := core.Base.GetRedis("cache")
 
-		rdb.SRem(context.Background(), "tasks:processing", tk.ID)
 		rdb.Del(context.Background(), fmt.Sprintf("tasks:updates:last-update:%s", tk.ID), tk.ID)
 		rdb.Decr(tk.Ctx, fmt.Sprintf("tasks:users:%s", tk.ID))
 		log.Info("Terminated Task")
 
 	}(pubSub)
-
 
 	processExit := make(chan os.Signal, 1)
 	defer close(processExit)
