@@ -97,7 +97,7 @@ func (tk *BTask) Listen() error {
 			log.Errorf("[server] [error] [%s] [%s]", tk.ID, fmt.Sprint(err))
 		}
 
-		if err = rdb.Decr(tk.Ctx, fmt.Sprintf("tasks:users:%s", tk.ID)).Err(); err != nil {
+		if err = rdb.Decr(context.Background(), fmt.Sprintf("tasks:users:%s", tk.ID)).Err(); err != nil {
 			log.Errorf("[server] [error] [%s] [%s]", tk.ID, fmt.Sprint(err))
 		}
 
