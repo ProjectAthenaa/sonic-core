@@ -13,7 +13,6 @@ import (
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/accountgroup"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/product"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/task"
-	"os"
 	"sort"
 	"strings"
 )
@@ -47,16 +46,16 @@ func getPayload(ctx context.Context, taskID string) (*module.Data, error) {
 		Task: dbTask,
 	}
 
-	if !taskIsEligible(ctx, dbTask){
+	if !taskIsEligible(ctx, dbTask) {
 		errorStatus := module.Status{
-			Status:      module.STATUS_ERROR,
+			Status: module.STATUS_ERROR,
 			Information: map[string]string{
 				"message": "Task Limited Reached",
 			},
 		}
 
 		payload, err := json.Marshal(&errorStatus)
-		if err != nil{
+		if err != nil {
 			log.Errorf("[server] [error marshalling error status] [%s] [%s]", dbTask.ID.String(), fmt.Sprint(err))
 		}
 
@@ -93,27 +92,14 @@ func getPayload(ctx context.Context, taskID string) (*module.Data, error) {
 		mData.TaskData.RandomSize = true
 	}
 
-	//var wg = &sync.WaitGroup{}
-
-	//go func() {
-	//	wg.Add(1)
-	//	defer wg.Done()
-		mData.Profile, _ = tsk.getProfile()
-	//}()
-
-	//go func() {
-	//	wg.Add(1)
-	//	defer wg.Done()
-		mData.Proxy, _ = tsk.getProxy()
-	//}()
-
+	mData.Profile, _ = tsk.getProfile()
+	mData.Proxy, _ = tsk.getProxy()
 	mData.Metadata = prod.Metadata
 	if siteNeedsAccount[tsk.Edges.Product[0].Site] {
-		//go func() {
-		//	wg.Add(1)
-		//	defer wg.Done()
-			mData.Metadata["username"], mData.Metadata["password"], _ = tsk.getAccount()
-		//}()
+		mData.Metadata["username"], mData.Metadata["password"], err = tsk.getAccount()
+		if err != nil {
+
+		}
 	}
 
 	mData.TaskID = tsk.ID.String()
@@ -128,6 +114,7 @@ func (j *scratchTask) getProxy() (*module.Proxy, error) {
 	dbProxies, err := dbProxyList.Proxies(j.ctx)
 	if err != nil {
 		log.Errorf("[server] [error loading proxies] [%s] [%s]", j.ID.String(), fmt.Sprint(err))
+		j.setStatus(module.STATUS_ERROR, "No Proxy Provided")
 		return nil, err
 	}
 
@@ -196,6 +183,7 @@ func (j *scratchTask) getAccount() (username, password string, err error) {
 		First(j.ctx)
 	if err != nil {
 		log.Errorf("[server] [error retrieving accounts] [%s] [%s]", j.ID.String(), fmt.Sprint(err))
+		j.setStatus(module.STATUS_ERROR, "No Account Provided")
 		return "", "", err
 	}
 
@@ -211,7 +199,6 @@ func (j *scratchTask) getAccount() (username, password string, err error) {
 	defer func() {
 		if ok, err := locker.UnlockContext(j.ctx); !ok || err != nil {
 			log.Errorf("[server] [error unlocking account group mutex] [%s] [%s]", j.ID.String(), fmt.Sprint(err))
-			log.Error("error unlocking account group mutex: ", err)
 		}
 	}()
 
@@ -256,9 +243,9 @@ func (j *scratchTask) getProfile() (retProf *module.Profile, err error) {
 		}
 	}()
 
-	accounts := rdb.SMembers(j.ctx, key).Val()
+	profs := rdb.SMembers(j.ctx, key).Val()
 
-	if len(accounts) == 0 {
+	if len(profs) == 0 {
 		var availablePool []interface{}
 		var toAppend *module.Profile
 
@@ -283,11 +270,7 @@ func (j *scratchTask) getProfile() (retProf *module.Profile, err error) {
 				return nil, sonic.EntErr(err)
 			}
 
-			if os.Getenv("DEBUG") == "1" {
-				log.Info("Debug enabled, accessing profiles without encryption")
-			} else {
-				billing = billing.Decrypt()
-			}
+			billing = billing.Decrypt()
 
 			toAppend = &module.Profile{
 				Email: prof.Email,
@@ -317,8 +300,7 @@ func (j *scratchTask) getProfile() (retProf *module.Profile, err error) {
 			if !shipping.BillingIsShipping {
 				billingAddress, err := shipping.QueryBillingAddress().First(j.ctx)
 				if err != nil {
-					log.Error("query billing address: ", err)
-					panic(err)
+					continue
 				}
 				toAppend.Shipping.BillingAddress = &module.Address{
 					AddressLine:  billingAddress.AddressLine,
@@ -391,4 +373,21 @@ func hash(text string) string {
 	algorithm := sha1.New()
 	algorithm.Write([]byte(text))
 	return hex.EncodeToString(algorithm.Sum(nil))
+}
+
+func (j *scratchTask) setStatus(status module.STATUS, msg string) {
+	errorStatus := module.Status{
+		Status: status,
+		Information: map[string]string{
+			"message": msg,
+		},
+	}
+
+	payload, err := json.Marshal(&errorStatus)
+	if err != nil {
+		log.Errorf("[server] [error marshalling error status] [%s] [%s]", j.ID.String(), fmt.Sprint(err))
+		return
+	}
+
+	rdb.Publish(context.Background(), fmt.Sprintf("tasks:updates:%s", hash(j.ID.String())), string(payload))
 }

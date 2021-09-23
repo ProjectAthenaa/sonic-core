@@ -24,7 +24,6 @@ var (
 )
 
 func ListenAndServe(module string, server module.ModuleServer) {
-
 	defer func() {
 		if a := recover(); a != nil {
 			log.Warnf("[server] [Recovered] [%s]", fmt.Sprint(a))
@@ -41,6 +40,7 @@ func ListenAndServe(module string, server module.ModuleServer) {
 
 	defer cancel()
 	log.Infof("[server] [%s] [Module Initialized]", module)
+
 
 	for {
 		select {

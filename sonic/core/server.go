@@ -30,7 +30,7 @@ func tasksListener(ctx context.Context, key string) <-chan string {
 }
 
 func processTask(ctx context.Context, taskID string, server module.ModuleServer) {
-	defer log.Infof("[server] [Task Processed] [%s]", taskID)
+	defer log.Infof("[server] [Task Started Processing] [%s]", taskID)
 	data, err := getPayload(ctx, taskID)
 	if err != nil {
 		log.Errorf("[server] [error retrieving payload] [%s]", taskID)

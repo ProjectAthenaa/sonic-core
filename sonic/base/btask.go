@@ -83,19 +83,23 @@ func (tk *BTask) Listen() error {
 		return tk.Stop()
 	}
 
-	defer core.Base.GetRedis("cache").SRem(context.Background(), "tasks:processing", tk.ID)
-
 	defer func(pubSub *frame.PubSub) {
-		err := pubSub.Close()
-		if err != nil {
-
+		if err = pubSub.Close(); err != nil {
+			log.Errorf("[server] [error] [%s] [%s]", tk.ID, fmt.Sprint(err))
 		}
 
 		rdb := core.Base.GetRedis("cache")
 
-		rdb.Del(context.Background(), fmt.Sprintf("tasks:updates:last-update:%s", tk.ID), tk.ID)
-		rdb.Decr(tk.Ctx, fmt.Sprintf("tasks:users:%s", tk.ID))
-		log.Info("Terminated Task")
+		if err = rdb.Del(context.Background(), fmt.Sprintf("tasks:updates:last-update:%s", tk.ID)).Err(); err != nil {
+			log.Errorf("[server] [error] [%s] [%s]", tk.ID, fmt.Sprint(err))
+		}
+		if err = rdb.SRem(context.Background(), "tasks:processing", tk.ID).Err(); err != nil {
+			log.Errorf("[server] [error] [%s] [%s]", tk.ID, fmt.Sprint(err))
+		}
+
+		if err = rdb.Decr(tk.Ctx, fmt.Sprintf("tasks:users:%s", tk.ID)).Err(); err != nil {
+			log.Errorf("[server] [error] [%s] [%s]", tk.ID, fmt.Sprint(err))
+		}
 
 	}(pubSub)
 
@@ -332,7 +336,6 @@ func (tk *BTask) GetStatus(status module.STATUS) *module.Status {
 func (tk *BTask) SetStatus(s module.STATUS, msg ...interface{}) {
 	tk._statusLocker.Lock()
 	go func() {
-
 		if len(msg) == 1 {
 			data, _ := json.Marshal(&msg[0])
 			tk.message = string(data)
@@ -342,6 +345,7 @@ func (tk *BTask) SetStatus(s module.STATUS, msg ...interface{}) {
 		}
 
 		tk.Process(s)
+
 	}()
 }
 
