@@ -4,12 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/ProjectAthenaa/sonic-core/logs"
 	"github.com/ProjectAthenaa/sonic-core/sonic"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/license"
 	"github.com/ProjectAthenaa/sonic-core/sonic/database/ent/metadata"
 	"github.com/google/uuid"
-	"github.com/ProjectAthenaa/sonic-core/logs"
 	"strings"
 )
 
@@ -34,7 +34,7 @@ func Execute() {
 
 	//client.Schema.Create(context.Background())
 
-	discordId := flag.String("discord_id", "171442868190314497", "Discord ID of the user to bind")
+	discordId := flag.String("discord_id", "849122477971734528", "Discord ID of the user to bind")
 	licenseType := flag.String("type", "lifetime", "License type")
 
 	flag.Parse()

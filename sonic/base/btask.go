@@ -73,10 +73,6 @@ func (tk *BTask) Init() {
 }
 
 func (tk *BTask) Listen() error {
-	defer func() {
-		log.Info("command listener stopped: ", tk.ID)
-	}()
-
 	pubSub, err := frame.SubscribeToChannel(fmt.Sprintf("tasks:commands:%s", tk.Data.Channels.CommandsChannel))
 	if err != nil {
 		tk.SetStatus(module.STATUS_ERROR, "error starting command listener")

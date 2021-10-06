@@ -1,8 +1,8 @@
 enum Theme{
-    Variation1
-    Variation2
-    Variation3
-    Variation4
+    Variation1 #White mode
+    Variation2 #Dark mode
+    Variation3 #Halloween skin
+    Variation4 #some other skin
 }
 
 type Metadata{
