@@ -11,20 +11,22 @@ import (
 func tasksListener(ctx context.Context, key string) <-chan string {
 	tasks := make(chan string)
 	key = fmt.Sprintf("queue:%s", key)
-	go func() {
-		defer func() {
-			if a := recover(); a != nil {
-				log.Warnf("[tasks listener] [recovered] [%s]", fmt.Sprint(a))
+	for i := 0; i < 15; i++ {
+		go func() {
+			defer func() {
+				if a := recover(); a != nil {
+					log.Warnf("[tasks listener] [recovered] [%s]", fmt.Sprint(a))
+				}
+			}()
+			for {
+				newTask := rdb.BLPop(ctx, time.Second * 15, key).Val()
+
+				if len(newTask) > 1 {
+					tasks <- newTask[1]
+				}
 			}
 		}()
-		for {
-			newTask := rdb.BLPop(ctx, time.Second, key).Val()
-
-			if len(newTask) > 1 {
-				tasks <- newTask[1]
-			}
-		}
-	}()
+	}
 
 	return tasks
 }
